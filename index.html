@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pro Chart Vision 3.0 - Ultimate Edition</title>
     
-    <!-- SVG Favicon Hardcoded for Stability -->
+    <!-- Favicon (Inline SVG for stability) -->
     <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%231b2609%22/><path fill=%22%23c4f033%22 d=%22M46 25 h10 v16 h14 v5 L52 75 h-7 v-16 h-15 v-6 L46 25 z%22/></svg>" type="image/svg+xml">
-    
+
     <link id="pwa-manifest" rel="manifest">
     <meta name="theme-color" content="#f8fafc">
     
@@ -17,9 +17,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     
-    <!-- Geo Chart & TopoJSON -->
+    <!-- Geo Chart & Word Cloud -->
     <script src="https://unpkg.com/topojson-client@3"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.2.8/build/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-wordcloud@4.3.1/build/index.umd.min.js"></script>
     
     <!-- HTML2Canvas for HD Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -29,68 +30,56 @@
     <style>
         :root { --lime-neon: #d4ff00; --dark-ink: #111111; --soft-bg: #f8fafc; --border-light: #e2e8f0; }
         body { font-family: 'Inter', sans-serif; background-color: var(--soft-bg); color: var(--dark-ink); }
-
         .scrollbar-hide::-webkit-scrollbar { width: 6px; height: 6px; }
         .scrollbar-hide::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-hide::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
         .scrollbar-hide::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
-
         .rubber-effect { transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         .rubber-effect:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
         .rubber-effect:active { transform: scale(0.95); }
         #sidebar { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-collapsed { width: 0 !important; padding: 0 !important; opacity: 0; overflow: hidden; border: none !important; margin: 0 !important; }
-
         .pill-input { border-radius: 9999px; background-color: #ffffff; border: 1.5px solid var(--border-light); padding: 0.6rem 1.2rem; transition: all 0.3s ease; appearance: none; cursor: pointer; }
         .pill-input:focus { outline: none; border-color: var(--dark-ink); box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.1); }
-
         .toggle-switch-container { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
         .toggle-switch-container input { opacity: 0; width: 0; height: 0; cursor: pointer; position: absolute; z-index: 2; }
         .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e2e8f0; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 30px; }
         .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .toggle-switch-container input:checked + .toggle-slider { background-color: var(--dark-ink); }
         .toggle-switch-container input:checked + .toggle-slider:before { transform: translateX(20px); background-color: var(--lime-neon); }
-        
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--dark-ink); cursor: pointer; margin-top: -7px; box-shadow: 0 2px 6px rgba(17, 17, 17, 0.4); transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); background: var(--lime-neon); }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; cursor: pointer; background: #e2e8f0; border-radius: 6px; }
-
         input[type="color"] { -webkit-appearance: none; border: none; padding: 0; overflow: hidden; border-radius: 50%; cursor: pointer; background: transparent; }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
         input[type="color"]::-webkit-color-swatch { border: 2px solid white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-
         .loading-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 50; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
         .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--dark-ink); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* General Modals */
         .modal-overlay { display: none; }
-        
         .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
         .icon-btn { font-size: 1.5rem; display: flex; justify-content: center; align-items: center; padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #f8fafc; border: 1px solid transparent; }
         .icon-btn:hover { background: #fff; border-color: var(--dark-ink); transform: scale(1.1); box-shadow: 0 4px 12px rgba(17, 17, 17, 0.1); }
-        
         #toast { position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background: var(--dark-ink); color: var(--lime-neon); padding: 12px 24px; border-radius: 99px; font-weight: bold; font-size: 14px; transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         #toast.show { bottom: 40px; }
-        
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
         .chart-container-strict { display: block; position: relative; margin: 0 auto; width: 100%; }
-
         .lang-switch { width: 34px; height: 20px; }
         .lang-switch .toggle-slider:before { height: 14px; width: 14px; left: 3px; bottom: 3px; }
         .lang-switch input:checked + .toggle-slider:before { transform: translateX(14px); }
+        
+        .stack-item { transition: all 0.2s ease; border-left: 2px solid transparent; }
+        .stack-item:hover { border-left-color: #cbd5e1; background: #f8fafc; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
-    <!-- Collapsible Sidebar -->
     <aside id="sidebar" class="w-[420px] bg-white border-r border-slate-200 flex flex-col h-full shrink-0 relative z-20 shadow-[10px_0_30px_rgba(0,0,0,0.03)] m-4 rounded-[32px] overflow-hidden">
         
         <div id="sidebarHeader" class="px-8 py-6 border-b border-slate-100 flex items-center gap-4 transition-all duration-300 ease-in-out bg-white z-10 shrink-0">
-            <!-- Inline SVG Logo -->
             <div id="sidebarLogo" class="w-12 h-12 shrink-0 transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-full h-full drop-shadow-sm">
                     <circle cx="50" cy="50" r="50" fill="#1b2609"/>
@@ -108,11 +97,11 @@
             <div class="bg-slate-50 p-6 rounded-[28px] border border-slate-100 space-y-5">
                 <div class="flex justify-between items-center">
                     <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#d4ff00]"></span> <span data-i18n="coreSettings">Pengaturan Utama</span></h2>
-                    <!-- Reset Button diatur di sini -->
+                    <!-- Tombol Reset Data -->
                     <button onclick="openResetModal()" class="text-[9px] text-red-500 hover:text-red-600 font-bold uppercase transition-colors tracking-widest border border-red-200 px-2.5 py-1 rounded-md bg-red-50 hover:bg-red-100" data-i18n="resetApp">Reset Data</button>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2" data-i18n="graphicType">Tipe Grafik</label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-2" data-i18n="graphicType">Tipe Grafik Utama</label>
                     <select id="chartType" class="w-full pill-input text-sm font-semibold text-slate-800 bg-white">
                         <optgroup label="Standard Charts" data-i18n-optgroup="stdCharts">
                             <option value="bar-vertical" selected data-i18n="optBarV">Bar Vertical</option>
@@ -123,6 +112,13 @@
                             <option value="pie" data-i18n="optPie">Pie Chart</option>
                             <option value="radar" data-i18n="optRadar">Radar Matrix</option>
                             <option value="polarArea" data-i18n="optPolar">Polar Area</option>
+                        </optgroup>
+                        <optgroup label="Advanced / Specialty" data-i18n-optgroup="optAdvanced">
+                            <option value="waterfall" data-i18n="optWaterfall">Waterfall Chart</option>
+                            <option value="scatter" data-i18n="optScatter">Scatter Plot</option>
+                            <option value="bubble" data-i18n="optBubble">Bubble Chart</option>
+                            <option value="gantt" data-i18n="optGantt">Gantt Chart (Timeline)</option>
+                            <option value="wordCloud" data-i18n="optWordCloud">Word Cloud</option>
                         </optgroup>
                         <optgroup label="Spatial Maps (Geo)" data-i18n-optgroup="geoCharts">
                             <option value="map-indonesia" data-i18n="optMapId">Geomap: Indonesia</option>
@@ -146,13 +142,13 @@
                 <div id="multiSeriesPanel" class="space-y-4 pt-4 border-t border-slate-200">
                     <div class="flex items-center justify-between mb-1">
                         <label class="text-[11px] font-bold text-slate-800 flex items-center gap-2 tracking-widest">
-                            <span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span> <span data-i18n="multiLayerEngine">MESIN MULTI-LAPIS</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span> <span data-i18n="multiLayerEngine">MESIN MULTI-LAPIS (OVERLAY)</span>
                         </label>
                         <button id="btnAddSeries" type="button" class="bg-[#111111] text-[#d4ff00] text-[10px] px-3.5 py-2 rounded-full font-bold hover:bg-[#d4ff00] hover:text-[#111111] transition-colors shadow-sm rubber-effect border border-transparent hover:border-[#111111] flex items-center gap-1">
                             <span data-i18n="btnAddSeries">+ Tambah Grafik</span>
                         </button>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium" data-i18n="multiLayerDesc">Ubah jenis chart, urutan lapis, dan warna secara independen.</p>
+                    <p class="text-[10px] text-slate-400 font-medium" data-i18n="multiLayerDesc">Tambahkan grafik pelapis (seperti Line) di atas data utama Anda.</p>
                     <div id="seriesContainer" class="space-y-3">
                         <!-- Injected via JS -->
                     </div>
@@ -170,13 +166,13 @@
                 
                 <div class="mb-4">
                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between items-center">
-                        <span data-i18n="dataRowCount">Jumlah Baris Data</span>
+                        <span data-i18n="dataRowCount">Jumlah Baris Utama</span>
                         <span id="dataCountDisplay" class="bg-[#111111] text-[#d4ff00] px-2.5 py-0.5 rounded-full text-[11px]">4</span>
                     </label>
                     <input type="range" id="dataCountSlider" min="2" max="15" value="4">
                 </div>
 
-                <div id="dynamicDataForm" class="space-y-3 pt-2 border-t border-slate-100 overflow-x-auto pb-2 scrollbar-hide">
+                <div id="dynamicDataForm" class="space-y-4 pt-2 border-t border-slate-100 overflow-x-hidden pb-2">
                     <!-- Inputs injected via JS -->
                 </div>
             </div>
@@ -228,12 +224,12 @@
                     <label class="block text-xs font-bold text-slate-800" data-i18n="dataLabelTitle">Label Data (Dalam Grafik)</label>
                     
                     <div class="mb-4 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="dataLabelPos">Posisi Label</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="dataLabelPos">Posisi Angka</label>
                         <select id="dataLabelPosition" class="w-full text-xs border border-slate-200 rounded-lg p-2 font-bold bg-slate-50 text-slate-800 outline-none focus:border-black cursor-pointer">
                             <option value="center" selected data-i18n="optPosCenter">Tengah (Center)</option>
                             <option value="inside-top" data-i18n="optPosInTop">Dalam - Atas/Kanan</option>
                             <option value="inside-bottom" data-i18n="optPosInBot">Dalam - Bawah/Kiri</option>
-                            <option value="outside" data-i18n="optPosOut">Luar Grafik</option>
+                            <option value="outside" data-i18n="optPosOut">Luar Grafik Melayang</option>
                         </select>
                     </div>
 
@@ -304,7 +300,7 @@
                         </label>
                     </div>
                     <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-slate-800 flex items-center gap-1" data-i18n="showYRight">Sumbu Y (Kanan)</label>
+                        <label class="text-xs font-bold text-slate-800 flex items-center gap-1" data-i18n="showYRight">Sumbu Sekunder (Kanan/Atas)</label>
                         <label class="toggle-switch-container">
                             <input type="checkbox" id="toggleAxisYRight" checked>
                             <span class="toggle-slider"></span>
@@ -317,13 +313,10 @@
                 </div>
             </div>
             
-            <div class="mt-8 pt-6 pb-2 flex flex-col items-center justify-center text-center opacity-70 hover:opacity-100 transition-opacity border-t border-slate-200">
-                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400 shadow-inner">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                </div>
+            <div class="mt-8 pt-6 pb-2 flex flex-col items-center justify-center text-center opacity-70 border-t border-slate-200">
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em] mb-1">Official Asset</p>
-                <p class="text-sm font-black text-slate-800 tracking-tight">MNC Channels</p>
-                <p class="text-[9px] text-slate-400 mt-1 font-medium">Data & Analytics Division</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em]">MNC Channels</p>
+                <p class="text-[9px] font-medium text-slate-400 mt-1">Data & Analytics Division</p>
             </div>
             
         </div>
@@ -343,7 +336,6 @@
             </div>
 
             <div class="flex items-center gap-3 pointer-events-auto">
-                <!-- Language Toggle -->
                 <div class="bg-white/90 backdrop-blur-xl px-4 py-3 rounded-full shadow-[0_10px_25px_rgba(0,0,0,0.05)] border border-slate-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105">
                     <span class="text-[10px] font-black text-slate-800 transition-colors" id="langId">ID</span>
                     <label class="toggle-switch-container lang-switch">
@@ -392,14 +384,14 @@
         </section>
     </main>
 
-    <!-- UI/UX Custom Modal Reset Data -->
+    <!-- Modal Custom Reset -->
     <div id="resetModal" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex justify-center items-center opacity-0 transition-opacity duration-300 pointer-events-none">
         <div class="bg-white w-[90%] max-w-sm rounded-[32px] shadow-2xl p-8 transform scale-95 transition-transform duration-300 text-center pointer-events-auto border border-slate-100">
             <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             </div>
             <h3 class="text-xl font-bold text-slate-800 mb-2" data-i18n="resetConfirmTitle">Reset Semua Pengaturan?</h3>
-            <p class="text-sm text-slate-500 mb-8" data-i18n="resetConfirmDesc">Seluruh data, warna, dan layer yang telah Anda buat akan dikembalikan ke kondisi awal (default). Tindakan ini tidak dapat dibatalkan.</p>
+            <p class="text-sm text-slate-500 mb-8" data-i18n="resetConfirmDesc">Seluruh data, warna, dan tumpukan yang telah Anda buat akan dikembalikan ke kondisi awal (default). Tindakan ini tidak dapat dibatalkan.</p>
             <div class="flex gap-3 justify-center">
                 <button onclick="closeResetModal()" class="flex-1 py-3 rounded-full font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors" data-i18n="resetCancel">Batal</button>
                 <button onclick="executeResetApp()" class="flex-1 py-3 rounded-full font-bold text-white bg-red-500 hover:bg-red-600 shadow-[0_4px_14px_rgba(239,68,68,0.4)] transition-colors" data-i18n="resetConfirmBtn">Ya, Reset</button>
@@ -407,7 +399,7 @@
         </div>
     </div>
 
-    <!-- Icon Library Modal -->
+    <!-- Modal Icon Library -->
     <div id="iconLibraryModal" class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex justify-center items-center opacity-0 transition-opacity duration-300 pointer-events-none">
         <div class="bg-white w-[90%] max-w-2xl rounded-[32px] shadow-2xl p-6 transform scale-95 transition-transform duration-300 max-h-[80vh] flex flex-col pointer-events-auto">
             <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
@@ -427,52 +419,59 @@
         try {
             if(typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
             if(typeof ChartGeo !== 'undefined' && typeof Chart !== 'undefined') Chart.register(ChartGeo.ChoroplethController, ChartGeo.GeoFeature, ChartGeo.ColorScale, ChartGeo.ProjectionScale);
+            if(typeof ChartWordCloud !== 'undefined' && typeof Chart !== 'undefined') Chart.register(ChartWordCloud.WordCloudController, ChartWordCloud.WordElement);
         } catch(e) { console.error("Plugin Registration Error", e); }
 
         const i18n = {
             id: {
-                coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik", presetColors: "Tema Warna", multiLayerEngine: "MESIN MULTI-LAPIS", 
-                btnAddSeries: "+ Tambah Grafik", multiLayerDesc: "Ubah jenis chart, urutan lapis, dan warna secara independen.",
-                liveDataInput: "Input Data Langsung", btnOpenLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Data",
+                coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik Utama", presetColors: "Tema Warna", multiLayerEngine: "MESIN MULTI-LAPIS (OVERLAY)", 
+                btnAddSeries: "+ Tambah Grafik", multiLayerDesc: "Tambahkan grafik pelapis (seperti Line) di atas data utama Anda.", 
+                liveDataInput: "Input Data Langsung", btnOpenLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Utama",
                 dimLayout: "Dimensi & Tata Letak", visScale: "Skala Visual", width: "Lebar", height: "Tinggi", 
                 donutHole: "Ketebalan Lubang", elemThick: "Ketebalan Elemen", elemSpace: "Jarak Elemen",
                 typoAest: "Tipografi & Estetika", globalFont: "Jenis Huruf Global", dataLabelTitle: "Label Data (Dalam Grafik)",
-                dataLabelPos: "Posisi Label", optPosCenter: "Tengah (Center)", optPosInTop: "Dalam - Atas/Kanan", optPosInBot: "Dalam - Bawah/Kiri", optPosOut: "Luar Grafik",
+                dataLabelPos: "Posisi Angka", optPosCenter: "Tengah (Center)", optPosInTop: "Dalam - Atas/Kanan", optPosInBot: "Dalam - Bawah/Kiri", optPosOut: "Luar Grafik Melayang",
                 textColor: "Warna Teks", outlineColor: "Garis Luar", size: "Ukuran", outWidth: "Tebal",
                 showLegendTitle: "Tampilkan Legenda", pos: "Posisi", optTop: "Atas", optBottom: "Bawah", optLeft: "Kiri", optRight: "Kanan",
-                color: "Warna", showX: "Sumbu X (Bawah)", showY: "Sumbu Y (Kiri)", showYRight: "Sumbu Y (Kanan)", axisFont: "Ukuran Sumbu",
+                color: "Warna", showX: "Sumbu X (Bawah)", showY: "Sumbu Y (Kiri)", showYRight: "Sumbu Sekunder (Kanan/Atas)", axisFont: "Ukuran Sumbu",
                 visWorkspace: "Ruang Kerja Visual", btnExport: "Ekspor Gambar HD", fetching: "Mengambil Data...",
                 analyticsTracker: "Pelacak Analitik", analyticsDesc: "Distribusi proporsi data utama.", grandTotal: "Total Keseluruhan",
                 iconLibTitle: "Koleksi Ikon", iconLibDesc: "Klik ikon untuk menyalin (copy).",
                 layerFront: "Depan", layerMid1: "Tengah 1", layerMid2: "Tengah 2", layerBack: "Belakang", axisLeft: "Kiri", axisRight: "Kanan", toastCopied: "✅ Disalin!",
                 toastMax: "⚠ Maksimal 4 grafik kombinasi!", resetApp: "Reset Data",
-                resetConfirmTitle: "Reset Semua Pengaturan?", resetConfirmDesc: "Seluruh data, warna, dan layer yang telah Anda buat akan dikembalikan ke kondisi awal (default). Tindakan ini tidak dapat dibatalkan.",
+                resetConfirmTitle: "Reset Semua Pengaturan?", resetConfirmDesc: "Seluruh data, warna, dan tumpukan yang telah Anda buat akan dikembalikan ke kondisi awal (default). Tindakan ini tidak dapat dibatalkan.",
                 resetCancel: "Batal", resetConfirmBtn: "Ya, Reset",
                 optBarV: "Bar Vertical", optBarH: "Bar Horizontal", optLine: "Line Trend", optArea: "Area Soundwave", optDonut: "Donut Chart", optPie: "Pie Chart", optRadar: "Radar Matrix", optPolar: "Polar Area",
+                optAdvanced: "Advanced Charts", optWaterfall: "Waterfall Chart", optScatter: "Scatter Plot", optBubble: "Bubble Chart", optGantt: "Gantt Chart (Timeline)", optWordCloud: "Word Cloud",
                 optMapId: "Geomap: Indonesia", optMapWorld: "Geomap: World",
-                themeMod: "Modern Minimalist (Default)", themeLime: "Neon Lime (AI Theme)", themeCorp: "Corporate Blue", themeEarth: "Earthy Nature", themeSun: "Sunset Vibes", themeMono: "Monochrome Elegant"
+                themeMod: "Modern Minimalist (Default)", themeLime: "Neon Lime (AI Theme)", themeCorp: "Corporate Blue", themeEarth: "Earthy Nature", themeSun: "Sunset Vibes", themeMono: "Monochrome Elegant",
+                optBar: "Bar", optLineType: "Line", optAreaType: "Area", ganttStart: "Mulai", ganttEnd: "Selesai",
+                addStackBtn: "+ Tambah Tumpukan (Sub-Data)", primaryLayerName: "Data Utama", optInherit: "Sesuai Tipe Utama"
             },
             en: {
-                coreSettings: "Core Settings", graphicType: "Graphic Type", presetColors: "Preset Colors", multiLayerEngine: "MULTI-LAYER ENGINE", 
-                btnAddSeries: "+ Add Chart", multiLayerDesc: "Change chart type, layer order, and color independently.",
-                liveDataInput: "Live Data Input", btnOpenLibrary: "Icon Library", dataRowCount: "Data Row Count",
+                coreSettings: "Core Settings", graphicType: "Primary Graphic Type", presetColors: "Preset Colors", multiLayerEngine: "MULTI-LAYER ENGINE (OVERLAY)", 
+                btnAddSeries: "+ Add Overlay", multiLayerDesc: "Add overlay charts (like Lines) on top of your primary data.", 
+                liveDataInput: "Live Data Input", btnOpenLibrary: "Icon Library", dataRowCount: "Primary Row Count",
                 dimLayout: "Dimensions & Layout", visScale: "Visual Scale", width: "Width", height: "Height", 
                 donutHole: "Donut Hole Thickness", elemThick: "Element Thickness", elemSpace: "Element Spacing",
                 typoAest: "Typography & Aesthetics", globalFont: "Global Font Family", dataLabelTitle: "Data Labels",
-                dataLabelPos: "Label Position", optPosCenter: "Center", optPosInTop: "Inside - Top/Right", optPosInBot: "Inside - Bottom/Left", optPosOut: "Outside Chart",
+                dataLabelPos: "Number Position", optPosCenter: "Center", optPosInTop: "Inside - Top/Right", optPosInBot: "Inside - Bottom/Left", optPosOut: "Outside Floating",
                 textColor: "Text Color", outlineColor: "Outline Color", size: "Size", outWidth: "Outline Width",
                 showLegendTitle: "Show Legend", pos: "Position", optTop: "Top", optBottom: "Bottom", optLeft: "Left", optRight: "Right",
-                color: "Color", showX: "Show X-Axis (Bottom)", showY: "Show Y-Axis (Left)", showYRight: "Show Y-Axis (Right)", axisFont: "Axis Font Size",
+                color: "Color", showX: "Show X-Axis (Bottom)", showY: "Show Y-Axis (Left)", showYRight: "Show Sec-Axis (Right/Top)", axisFont: "Axis Font Size",
                 visWorkspace: "Visual Workspace", btnExport: "Export HD Image", fetching: "Fetching Data...",
                 analyticsTracker: "Analytics Tracker", analyticsDesc: "Proportional distribution of primary data.", grandTotal: "Grand Total",
                 iconLibTitle: "Icon Library", iconLibDesc: "Click an icon to copy.",
                 layerFront: "Front", layerMid1: "Middle 1", layerMid2: "Middle 2", layerBack: "Back", axisLeft: "Left", axisRight: "Right", toastCopied: "✅ Copied!",
                 toastMax: "⚠ Maximum 4 chart combinations!", resetApp: "Reset Data",
-                resetConfirmTitle: "Reset All Settings?", resetConfirmDesc: "All data, colors, and layers you have created will be reverted to default conditions. This action cannot be undone.",
+                resetConfirmTitle: "Reset All Settings?", resetConfirmDesc: "All data, colors, and stacks you have created will be reverted to default conditions. This action cannot be undone.",
                 resetCancel: "Cancel", resetConfirmBtn: "Yes, Reset",
                 optBarV: "Vertical Bar", optBarH: "Horizontal Bar", optLine: "Line Trend", optArea: "Area Soundwave", optDonut: "Donut Chart", optPie: "Pie Chart", optRadar: "Radar Matrix", optPolar: "Polar Area",
+                optAdvanced: "Advanced Charts", optWaterfall: "Waterfall Chart", optScatter: "Scatter Plot", optBubble: "Bubble Chart", optGantt: "Gantt Chart (Timeline)", optWordCloud: "Word Cloud",
                 optMapId: "Geomap: Indonesia", optMapWorld: "Geomap: World",
-                themeMod: "Modern Minimalist (Default)", themeLime: "Neon Lime (AI Theme)", themeCorp: "Corporate Blue", themeEarth: "Earthy Nature", themeSun: "Sunset Vibes", themeMono: "Monochrome Elegant"
+                themeMod: "Modern Minimalist (Default)", themeLime: "Neon Lime (AI Theme)", themeCorp: "Corporate Blue", themeEarth: "Earthy Nature", themeSun: "Sunset Vibes", themeMono: "Monochrome Elegant",
+                optBar: "Bar", optLineType: "Line", optAreaType: "Area", ganttStart: "Start", ganttEnd: "End",
+                addStackBtn: "+ Add Stack (Sub-Data)", primaryLayerName: "Primary Data", optInherit: "Set by Global Type"
             }
         };
 
@@ -496,15 +495,14 @@
             showLegend: true, legendFontSize: 14, legendPosition: 'top',
             dataLabelPosition: 'center',
             typography: { family: "'Inter', sans-serif", size: 16, color: '#111111', strokeColor: '#d4ff00', strokeWidth: 3, legendColor: '#475569' },
-            series: [ 
-                { id: 's1', name: 'Data Utama', type: 'bar', order: 2, yAxis: 'y', color: '#d4ff00' },
-                { id: 's2', name: 'Data Tambahan', type: 'line', order: 1, yAxis: 'y2', color: '#111111' }
-            ],
+            series: [
+                { id: 'primary', name: 'Data Utama', isPrimary: true, order: 2, yAxis: 'y' }
+            ], 
             items: [
-                { id: 1, label: 'Jawa Barat', icon: '📍', customColor: null, values: { 's1': 450, 's2': 250 } },
-                { id: 2, label: 'DKI Jakarta', icon: '🏢', customColor: null, values: { 's1': 320, 's2': 300 } },
-                { id: 3, label: 'Sumatera Utara', icon: '🌴', customColor: null, values: { 's1': 150, 's2': 120 } },
-                { id: 4, label: 'Kalimantan', icon: '🌳', customColor: null, values: { 's1': 80, 's2': 150 } },
+                { id: 1, label: 'Jawa Barat', icon: '📍', primaryStacks: [{ id: 'st1', name: 'Data Utama', value: 450, color: null, ganttEnd: 600 }], values: {} },
+                { id: 2, label: 'DKI Jakarta', icon: '🏢', primaryStacks: [{ id: 'st2', name: 'Data Utama', value: 320, color: null, ganttEnd: 450 }], values: {} },
+                { id: 3, label: 'Sumatera Utara', icon: '🌴', primaryStacks: [{ id: 'st3', name: 'Data Utama', value: 150, color: null, ganttEnd: 250 }], values: {} },
+                { id: 4, label: 'Kalimantan', icon: '🌳', primaryStacks: [{ id: 'st4', name: 'Data Utama', value: 80, color: null, ganttEnd: 150 }], values: {} },
             ]
         };
 
@@ -514,7 +512,7 @@
         const els = {
             sidebar: document.getElementById('sidebar'), toggleSidebarBtn: document.getElementById('toggleSidebarBtn'),
             toggleLanguage: document.getElementById('toggleLanguage'), langId: document.getElementById('langId'), langEn: document.getElementById('langEn'),
-            chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'),
+            chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'), 
             multiSeriesPanel: document.getElementById('multiSeriesPanel'), seriesContainer: document.getElementById('seriesContainer'), btnAddSeries: document.getElementById('btnAddSeries'),
             dataCountSlider: document.getElementById('dataCountSlider'), dataCountDisplay: document.getElementById('dataCountDisplay'), dynamicDataForm: document.getElementById('dynamicDataForm'),
             canvasHeightSlider: document.getElementById('canvasHeightSlider'), canvasHeightDisplay: document.getElementById('canvasHeightDisplay'), canvasWidthSlider: document.getElementById('canvasWidthSlider'), canvasWidthDisplay: document.getElementById('canvasWidthDisplay'), chartScaleSlider: document.getElementById('chartScaleSlider'), chartScaleDisplay: document.getElementById('chartScaleDisplay'),
@@ -525,10 +523,31 @@
             exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), mainCanvas: document.getElementById('mainCanvas'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), loadingOverlay: document.getElementById('loadingOverlay')
         };
 
-        function saveState() { localStorage.setItem('proChartVisionStateV3_5', JSON.stringify(appState)); }
+        // --- MIGRATION SAFEGUARD ---
+        function sanitizeState() {
+            if(!appState.items) return;
+            appState.items.forEach(item => {
+                if(!item.primaryStacks) {
+                    item.primaryStacks = [{ id: 'ps_'+Date.now()+Math.random(), name: 'Data Utama', value: item.values['s1'] || 0, color: item.customColor, ganttEnd: (item.values['s2'] || 0) }];
+                }
+                if(item.customColor) {
+                    if(item.primaryStacks[0]) item.primaryStacks[0].color = item.customColor;
+                    delete item.customColor;
+                }
+            });
+            
+            // Ensure 'primary' configuration exists in series
+            if(!appState.series.find(s => s.id === 'primary')) {
+                appState.series.unshift({ id: 'primary', name: 'Data Utama', isPrimary: true, order: 2, yAxis: 'y' });
+                // Clean up old s1 from series if it existed
+                appState.series = appState.series.filter(s => s.id !== 's1');
+            }
+        }
+
+        function saveState() { localStorage.setItem('proChartVisionStateV3_10', JSON.stringify(appState)); }
         function loadState() {
-            const saved = localStorage.getItem('proChartVisionStateV3_5');
-            if (saved) { try { let parsed = JSON.parse(saved); if(parsed && parsed.series && parsed.items) { appState = parsed; } } catch(e) {} }
+            const saved = localStorage.getItem('proChartVisionStateV3_10');
+            if (saved) { try { let parsed = JSON.parse(saved); if(parsed && parsed.items) { appState = parsed; sanitizeState(); } } catch(e) {} }
             syncUI();
         }
 
@@ -549,7 +568,6 @@
             els.dataLabelPosition.value = appState.dataLabelPosition || 'center';
         }
 
-        // Custom UI Modal for Reset
         const resetModal = document.getElementById('resetModal');
         window.openResetModal = function() {
             resetModal.style.display = 'flex'; resetModal.classList.remove('pointer-events-none');
@@ -559,7 +577,7 @@
             resetModal.classList.add('opacity-0'); resetModal.classList.add('pointer-events-none'); resetModal.querySelector('div').classList.add('scale-95');
             setTimeout(() => resetModal.style.display = 'none', 300);
         };
-        window.executeResetApp = function() { localStorage.removeItem('proChartVisionStateV3_5'); location.reload(); };
+        window.executeResetApp = function() { localStorage.removeItem('proChartVisionStateV3_10'); location.reload(); };
 
         function updateLanguageToggleUI() {
             els.toggleLanguage.checked = (appState.language === 'en');
@@ -571,9 +589,12 @@
             const lang = appState.language;
             document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (i18n[lang][key]) el.innerText = i18n[lang][key]; });
             document.getElementById('toastMsg').innerText = i18n[lang].toastCopied;
+            
+            // Re-render to update dynamic translations
+            renderSeriesManager(); renderInputFields();
         }
 
-        els.toggleLanguage.addEventListener('change', (e) => { appState.language = e.target.checked ? 'en' : 'id'; updateLanguageToggleUI(); applyLanguage(); renderSeriesManager(); saveState(); });
+        els.toggleLanguage.addEventListener('change', (e) => { appState.language = e.target.checked ? 'en' : 'id'; updateLanguageToggleUI(); applyLanguage(); updateVisualizations(); saveState(); });
 
         const sidebarScrollArea = document.getElementById('sidebarScrollArea');
         sidebarScrollArea.addEventListener('scroll', () => {
@@ -593,31 +614,42 @@
         function showToast(msgKey) { const toast = document.getElementById('toast'); toast.innerText = i18n[appState.language][msgKey] || msgKey; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
 
         function renderSeriesManager() {
+            let isAdvanced = ['waterfall', 'scatter', 'bubble', 'gantt', 'wordCloud'].includes(appState.chartType);
             let isMulti = appState.chartType.includes('bar') || appState.chartType === 'line' || appState.chartType === 'area';
-            els.multiSeriesPanel.style.display = isMulti ? 'block' : 'none';
+            
+            els.multiSeriesPanel.style.display = (isMulti && !isAdvanced) ? 'block' : 'none';
             els.seriesContainer.innerHTML = '';
             const txt = i18n[appState.language];
 
             appState.series.forEach((s, index) => {
-                let typeOpts = `<option value="bar" ${s.type==='bar'?'selected':''}>Bar</option><option value="line" ${s.type==='line'?'selected':''}>Line</option><option value="area" ${s.type==='area'?'selected':''}>Area</option>`;
+                let isPrimary = s.id === 'primary';
+                
+                let typeOpts = isPrimary
+                    ? `<option value="" selected>${txt.optInherit}</option>`
+                    : `<option value="line" ${s.type==='line'?'selected':''}>${txt.optLineType}</option><option value="area" ${s.type==='area'?'selected':''}>${txt.optAreaType}</option><option value="bar" ${s.type==='bar'?'selected':''}>${txt.optBar}</option>`;
+                
+                // CRITICAL FIX: The parameter must update 'order', NOT 'layer'
                 let layerOpts = `<option value="1" ${s.order===1?'selected':''}>${txt.layerFront}</option><option value="2" ${s.order===2?'selected':''}>${txt.layerMid1}</option><option value="3" ${s.order===3?'selected':''}>${txt.layerMid2}</option><option value="4" ${s.order===4?'selected':''}>${txt.layerBack}</option>`;
                 let axisOpts = `<option value="y" ${s.yAxis==='y'?'selected':''}>${txt.axisLeft}</option><option value="y2" ${s.yAxis==='y2'?'selected':''}>${txt.axisRight}</option>`;
 
                 els.seriesContainer.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-100 p-4 rounded-[20px] border border-slate-200 shadow-sm relative space-y-3">
+                    <div class="bg-slate-100 p-4 rounded-[20px] border ${isPrimary ? 'border-[#d4ff00] shadow-[0_0_10px_rgba(212,255,0,0.2)]' : 'border-slate-200'} shadow-sm relative space-y-3">
                         <div class="flex items-center gap-3">
                             <div class="flex flex-col gap-1 shrink-0">
                                 <button type="button" onclick="moveSeries(${index}, -1)" ${index === 0 ? 'disabled class="opacity-30"' : 'class="hover:text-black text-slate-400"'}><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button>
                                 <button type="button" onclick="moveSeries(${index}, 1)" ${index === appState.series.length - 1 ? 'disabled class="opacity-30"' : 'class="hover:text-black text-slate-400"'}><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button>
                             </div>
-                            <div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" value="${s.color}" onchange="updateSeries('${s.id}', 'color', this.value)" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer"></div>
-                            <input type="text" value="${s.name}" oninput="updateSeries('${s.id}', 'name', this.value)" class="flex-1 min-w-0 text-xs bg-white border border-slate-300 rounded-lg px-2 py-1.5 font-bold text-slate-800 focus:outline-none focus:border-black">
-                            ${appState.series.length > 1 ? `<button type="button" onclick="deleteSeries('${s.id}')" class="w-7 h-7 bg-white text-red-500 rounded-lg font-bold border border-red-100 flex items-center justify-center hover:bg-red-50 shrink-0">✕</button>` : ''}
+                            ${isPrimary
+                                ? `<div class="w-8 h-8 rounded-full bg-[#d4ff00] flex items-center justify-center shrink-0 border border-slate-200 shadow-sm text-black font-black text-xs">*</div>`
+                                : `<div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" value="${s.color}" onchange="updateSeries('${s.id}', 'color', this.value)" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer"></div>`
+                            }
+                            <input type="text" value="${isPrimary ? txt.primaryLayerName : s.name}" ${isPrimary ? 'disabled' : `oninput="updateSeries('${s.id}', 'name', this.value)"`} class="flex-1 min-w-0 text-xs ${isPrimary ? 'bg-transparent border-transparent' : 'bg-white border-slate-300'} border rounded-lg px-2 py-1.5 font-bold text-slate-800 focus:outline-none focus:border-black">
+                            ${!isPrimary ? `<button type="button" onclick="deleteSeries('${s.id}')" class="w-7 h-7 bg-white text-red-500 rounded-lg font-bold border border-red-100 flex items-center justify-center hover:bg-red-50 shrink-0">✕</button>` : ''}
                         </div>
                         <div class="grid grid-cols-3 gap-2">
-                            <select onchange="updateSeries('${s.id}', 'type', this.value)" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${typeOpts}</select>
-                            <select onchange="updateSeries('${s.id}', 'layer', parseInt(this.value))" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${layerOpts}</select>
-                            <select onchange="updateSeries('${s.id}', 'axis', this.value)" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${axisOpts}</select>
+                            <select ${isPrimary ? 'disabled' : `onchange="updateSeries('${s.id}', 'type', this.value)"`} class="w-full text-[10px] p-2 rounded-lg ${isPrimary ? 'bg-transparent text-slate-400 border-dashed' : 'bg-white border-solid'} border border-slate-200 font-bold uppercase cursor-pointer">${typeOpts}</select>
+                            <select onchange="updateSeries('${s.id}', 'order', parseInt(this.value))" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${layerOpts}</select>
+                            <select onchange="updateSeries('${s.id}', 'yAxis', this.value)" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${axisOpts}</select>
                         </div>
                     </div>
                 `);
@@ -626,47 +658,83 @@
 
         window.updateSeries = function(id, action, value) { const sIdx = appState.series.findIndex(s => s.id === id); if(sIdx > -1) { appState.series[sIdx][action] = value; updateVisualizations(); } };
         window.moveSeries = function(index, direction) { let target = index + direction; if(target >= 0 && target < appState.series.length) { let temp = appState.series[index]; appState.series[index] = appState.series[target]; appState.series[target] = temp; renderSeriesManager(); updateVisualizations(); } };
-        window.deleteSeries = function(id) { appState.series = appState.series.filter(s => s.id !== id); appState.items.forEach(item => delete item.values[id]); renderSeriesManager(); renderInputFields(); updateVisualizations(); };
+        window.deleteSeries = function(id) { appState.series = appState.series.filter(s => s.id !== id); renderSeriesManager(); updateVisualizations(); };
 
         els.btnAddSeries.addEventListener('click', () => {
             if(appState.series.length >= 4) return showToast('toastMax');
             const newId = 's' + Date.now(); const activePalette = palettes[appState.colorTheme];
-            appState.series.push({ id: newId, name: 'Data '+(appState.series.length+1), type: 'line', order: 1, yAxis: 'y2', color: activePalette[appState.series.length % activePalette.length] });
+            appState.series.push({ id: newId, name: 'Overlay '+(appState.series.length), type: 'line', order: 1, yAxis: 'y2', color: activePalette[(appState.series.length + 2) % activePalette.length] });
             appState.items.forEach(item => { item.values[newId] = Math.floor(Math.random() * 200) + 50; });
-            renderSeriesManager(); renderInputFields(); updateVisualizations();
+            renderSeriesManager(); updateVisualizations();
         });
+
+        window.addStack = function(itemIndex) {
+            let item = appState.items[itemIndex];
+            item.primaryStacks.push({ id: 'ps_'+Date.now(), name: `Sub ${item.primaryStacks.length+1}`, value: 50, color: null, ganttEnd: 100 });
+            renderInputFields(); updateVisualizations();
+        };
+        window.removeStack = function(itemIndex, stackIndex) {
+            let item = appState.items[itemIndex];
+            if(item.primaryStacks.length > 1) {
+                item.primaryStacks.splice(stackIndex, 1);
+                renderInputFields(); updateVisualizations();
+            }
+        };
 
         function renderInputFields() {
             els.dynamicDataForm.innerHTML = '';
             const activePalette = palettes[appState.colorTheme];
-            let isMulti = appState.chartType.includes('bar') || appState.chartType === 'line' || appState.chartType === 'area';
+            let isGantt = appState.chartType === 'gantt';
+            const txt = i18n[appState.language];
 
             appState.items.forEach((item, index) => {
-                const displayColor = item.customColor || activePalette[index % activePalette.length];
-                let valueInputs = `<div class="flex gap-1.5 shrink-0 overflow-x-auto max-w-[200px] scrollbar-hide">`;
                 
-                if(isMulti) {
-                    appState.series.forEach(s => {
-                        valueInputs += `<div class="flex flex-col items-center"><span class="text-[8px] text-slate-400 font-bold truncate max-w-[40px]" title="${s.name}">${s.name}</span><input type="number" oninput="updateDataValue(${index}, '${s.id}', this.value)" value="${item.values[s.id] !== undefined ? item.values[s.id] : 0}" class="w-12 text-[11px] bg-white rounded-lg py-1 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black"></div>`;
-                    });
-                } else {
-                    valueInputs += `<input type="number" oninput="updateDataValue(${index}, 's1', this.value)" value="${item.values['s1'] || 0}" class="w-16 text-xs bg-white rounded-lg py-1.5 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black">`;
-                }
-                valueInputs += `</div>`;
+                let stacksHtml = '';
+                item.primaryStacks.forEach((stack, sIdx) => {
+                    const displayColor = stack.color || activePalette[(index + sIdx) % activePalette.length];
+                    let inputHtml = '';
+                    if(isGantt) {
+                        inputHtml = `
+                            <div class="flex flex-col"><span class="text-[8px] text-slate-400 font-bold">${txt.ganttStart}</span><input type="number" oninput="updateStackValue(${index}, ${sIdx}, 'value', this.value)" value="${stack.value || 0}" class="w-14 text-[11px] bg-slate-50 rounded py-1 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black"></div>
+                            <div class="flex flex-col"><span class="text-[8px] text-slate-400 font-bold">${txt.ganttEnd}</span><input type="number" oninput="updateStackValue(${index}, ${sIdx}, 'ganttEnd', this.value)" value="${stack.ganttEnd || 0}" class="w-14 text-[11px] bg-slate-50 rounded py-1 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black"></div>
+                        `;
+                    } else {
+                        inputHtml = `<input type="number" oninput="updateStackValue(${index}, ${sIdx}, 'value', this.value)" value="${stack.value || 0}" class="w-16 text-xs bg-slate-50 rounded py-1.5 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black">`;
+                    }
+
+                    stacksHtml += `
+                        <div class="flex items-center gap-2 stack-item py-1.5 pl-2 pr-1 mt-1 group">
+                            <div class="w-3 h-3 border-l-2 border-b-2 border-slate-300 rounded-bl shrink-0 opacity-50"></div>
+                            <div class="relative w-6 h-6 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" onchange="updateStackProp(${index}, ${sIdx}, 'color', this.value)" value="${displayColor}" class="absolute -top-2 -left-2 w-10 h-10 cursor-pointer"></div>
+                            <input type="text" oninput="updateStackProp(${index}, ${sIdx}, 'name', this.value)" value="${stack.name}" class="flex-1 min-w-[60px] text-[10px] border border-transparent bg-transparent p-1 font-semibold text-slate-600 focus:outline-none focus:border-slate-300 rounded hover:bg-slate-100">
+                            ${inputHtml}
+                            ${item.primaryStacks.length > 1 ? `<button type="button" onclick="removeStack(${index}, ${sIdx})" class="w-5 h-5 text-slate-300 hover:text-red-500 rounded flex items-center justify-center transition-colors">✕</button>` : '<div class="w-5 h-5"></div>'}
+                        </div>
+                    `;
+                });
 
                 els.dynamicDataForm.insertAdjacentHTML('beforeend', `
-                    <div class="flex items-center gap-2 p-2.5 rounded-[20px] border border-slate-100 bg-slate-50 shadow-sm w-max min-w-full">
-                        <div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm" title="Warna Custom"><input type="color" onchange="updateDataProp(${index}, 'color', this.value)" value="${displayColor}" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer"></div>
-                        <input type="text" oninput="updateDataProp(${index}, 'icon', this.value)" value="${item.icon || ''}" class="w-8 h-8 text-center text-sm border border-slate-200 bg-white rounded-lg font-medium focus:border-black outline-none shrink-0" placeholder="😀" maxlength="2">
-                        <input type="text" oninput="updateDataProp(${index}, 'label', this.value)" value="${item.label}" class="w-24 text-xs border-0 bg-transparent p-1 font-semibold text-slate-800 focus:outline-none shrink-0">
-                        ${valueInputs}
+                    <div class="p-3 rounded-[20px] border border-slate-100 bg-white shadow-sm w-full">
+                        <div class="flex items-center gap-2 border-b border-slate-50 pb-2">
+                            <input type="text" oninput="updateDataProp(${index}, 'icon', this.value)" value="${item.icon || ''}" class="w-8 h-8 text-center text-sm border border-slate-200 bg-slate-50 rounded-lg font-medium focus:border-black outline-none shrink-0" placeholder="😀" maxlength="2">
+                            <input type="text" oninput="updateDataProp(${index}, 'label', this.value)" value="${item.label}" class="flex-1 text-xs border-0 bg-transparent p-1 font-bold text-slate-800 focus:outline-none">
+                        </div>
+                        <div class="flex flex-col">
+                            ${stacksHtml}
+                        </div>
+                        ${(appState.chartType.includes('bar') || isGantt || appState.chartType === 'area') ? `
+                        <div class="mt-2 pl-6">
+                            <button onclick="addStack(${index})" class="text-[9px] font-bold text-slate-400 hover:text-black uppercase tracking-widest bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1">${txt.addStackBtn}</button>
+                        </div>
+                        ` : ''}
                     </div>
                 `);
             });
         }
 
-        window.updateDataProp = function(index, prop, val) { if(prop === 'label') appState.items[index].label = val; if(prop === 'color') appState.items[index].customColor = val; if(prop === 'icon') appState.items[index].icon = val; updateVisualizations(); };
-        window.updateDataValue = function(index, sId, val) { appState.items[index].values[sId] = parseFloat(val) || 0; updateVisualizations(); };
+        window.updateDataProp = function(index, prop, val) { if(prop === 'label') appState.items[index].label = val; if(prop === 'icon') appState.items[index].icon = val; updateVisualizations(); };
+        window.updateStackProp = function(iIdx, sIdx, prop, val) { appState.items[iIdx].primaryStacks[sIdx][prop] = val; updateVisualizations(); };
+        window.updateStackValue = function(iIdx, sIdx, prop, val) { appState.items[iIdx].primaryStacks[sIdx][prop] = parseFloat(val) || 0; updateVisualizations(); };
 
         async function renderMainChart() {
             if (typeof Chart === 'undefined') return;
@@ -679,42 +747,57 @@
                 
                 let parsedType = appState.chartType;
                 let isMap = parsedType.startsWith('map-');
+                let isAdvanced = ['waterfall', 'scatter', 'bubble', 'gantt', 'wordCloud'].includes(parsedType);
                 let isMulti = parsedType.includes('bar') || parsedType === 'line' || parsedType === 'area';
-                let isHorizontal = parsedType === 'bar-horizontal';
+                let isHorizontal = parsedType === 'bar-horizontal' || parsedType === 'gantt';
 
-                els.axesControlPanel.style.display = isMulti ? 'block' : 'none';
+                els.axesControlPanel.style.display = (isMulti || isAdvanced) && parsedType !== 'wordCloud' ? 'block' : 'none';
                 els.donutCutoutContainer.style.display = parsedType === 'doughnut' ? 'block' : 'none';
-                els.barThicknessContainer.style.display = (isMulti || parsedType === 'radar') ? 'block' : 'none';
-                els.chartSpacingContainer.style.display = parsedType.includes('bar') ? 'block' : 'none';
+                els.barThicknessContainer.style.display = (isMulti || parsedType === 'radar' || parsedType === 'waterfall' || parsedType === 'gantt') ? 'block' : 'none';
+                els.chartSpacingContainer.style.display = (parsedType.includes('bar') || parsedType === 'waterfall' || parsedType === 'gantt') ? 'block' : 'none';
                 
                 let config = {};
                 const axisTickConfig = { font: { family: appState.typography.family, weight: '500', size: appState.axisFontSize }, color: appState.typography.legendColor };
+
+                let maxStacks = Math.max(...appState.items.map(i => i.primaryStacks?.length || 1));
 
                 let dLabelsConfig = {
                     color: appState.typography.color, font: { family: appState.typography.family, weight: 'bold', size: appState.typography.size },
                     textStrokeColor: appState.typography.strokeWidth > 0 ? appState.typography.strokeColor : 'transparent', textStrokeWidth: appState.typography.strokeWidth,
                     formatter: (val, ctx) => {
-                        if (val === 0 || appState.typography.size == 0) return '';
-                        let actualVal = typeof val === 'object' ? val.value : val;
+                        if (appState.typography.size == 0) return '';
+                        let actualVal = typeof val === 'object' ? (val.y !== undefined ? val.y : (val[1] !== undefined ? val[1] - val[0] : val)) : val;
                         if(actualVal === undefined) actualVal = val;
+                        if(actualVal === 0 && parsedType !== 'waterfall') return '';
+                        if(parsedType === 'wordCloud') return actualVal;
+                        
                         let icon = '';
                         if (ctx && ctx.dataIndex !== undefined && appState.items[ctx.dataIndex]) {
-                            if(ctx.datasetIndex === 0) icon = appState.items[ctx.dataIndex].icon || '';
+                            // In stacked mode, only show icon on the first stack to avoid clutter
+                            if(ctx.dataset.stack === 'primaryStack' && ctx.datasetIndex === 0) icon = appState.items[ctx.dataIndex].icon || '';
+                            else if(ctx.dataset.stack !== 'primaryStack') icon = appState.items[ctx.dataIndex].icon || ''; // overlay can have icon
                         }
-                        return icon ? `${icon} ${actualVal.toLocaleString()}` : actualVal.toLocaleString();
+                        let formattedNum = Number.isFinite(Number(actualVal)) ? Number(actualVal).toLocaleString() : actualVal;
+                        return icon ? `${icon} ${formattedNum}` : formattedNum;
                     },
                     align: (c) => {
                         let pos = appState.dataLabelPosition || 'center';
-                        if (pos === 'inside-top') return 'start';
-                        if (pos === 'inside-bottom') return 'end';
-                        if (pos === 'outside') return 'end';
+                        if (parsedType === 'scatter' || parsedType === 'bubble' || parsedType === 'wordCloud') return 'center';
+                        if(c.dataset.type === 'line') return 'end';
+                        
+                        if (pos === 'inside-top') return isHorizontal ? 'left' : 'end'; 
+                        if (pos === 'inside-bottom') return isHorizontal ? 'right' : 'start';
+                        if (pos === 'outside') return isHorizontal ? 'right' : 'end';
                         return 'center';
                     },
                     anchor: (c) => {
                         let pos = appState.dataLabelPosition || 'center';
-                        if (pos === 'inside-top') return 'end';
-                        if (pos === 'inside-bottom') return 'start';
-                        if (pos === 'outside') return 'end';
+                        if (parsedType === 'scatter' || parsedType === 'bubble' || parsedType === 'wordCloud') return 'center';
+                        if(c.dataset.type === 'line') return 'end';
+
+                        if (pos === 'inside-top') return isHorizontal ? 'end' : 'end';
+                        if (pos === 'inside-bottom') return isHorizontal ? 'start' : 'start';
+                        if (pos === 'outside') return isHorizontal ? 'end' : 'end';
                         return 'center';
                     },
                     offset: 4
@@ -736,21 +819,65 @@
                     els.loadingOverlay.style.display = 'none';
                     let features = geoData.features || geoData;
                     let mapDataArray = features.map(d => ({ feature: d, value: null }));
-                    const bgColors = appState.items.map((item, i) => item.customColor || activePalette[i % activePalette.length]);
-
+                    
                     appState.items.forEach((item, i) => {
                         const searchStr = item.label.toLowerCase();
                         let match = mapDataArray.find(m => {
                             const p = m.feature.properties; const n = (p.name || p.hc_a2 || p.NAME || p.Propinsi || '').toLowerCase();
                             return n.includes(searchStr) && searchStr.length > 2;
                         });
-                        if(match) { match.value = item.values['s1']; match.customColor = bgColors[i]; }
+                        let s0 = item.primaryStacks[0];
+                        if(match && s0) { match.value = s0.value; match.customColor = s0.color || activePalette[i % activePalette.length]; }
                     });
                     config = {
                         type: 'choropleth',
                         data: { labels: mapDataArray.map(d => d.feature.properties.name || d.feature.properties.hc_a2), datasets: [{ label: 'Spatial Map', outline: features, data: mapDataArray, backgroundColor: (c) => (c.raw?.value === null || c.raw?.value === undefined) ? '#f1f5f9' : (c.raw?.customColor || activePalette[0]), borderWidth: 1, borderColor: '#ffffff' }] },
                         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { projection: { axis: 'x', projection: parsedType === 'map-indonesia' ? 'equirectangular' : 'equalEarth' } } }
                     };
+                } else if (isAdvanced) {
+                    let chartOptions = { 
+                        responsive: true, maintainAspectRatio: false, layout: { padding: { right: isHorizontal ? 60 : 20, top: 20 } }, 
+                        plugins: { legend: { display: appState.showLegend, position: appState.legendPosition, labels: { color: appState.typography.legendColor, font: { family: appState.typography.family, size: appState.legendFontSize } } }, datalabels: dLabelsConfig },
+                        scales: { x: { display: appState.showAxisX, grid: { color: '#f1f5f9' }, ticks: axisTickConfig }, y: { display: appState.showAxisY, grid: { color: '#f1f5f9' }, ticks: axisTickConfig } } 
+                    };
+                    
+                    const tParam = appState.chartThickness / 100;
+                    const sParam = 1 - (appState.chartSpacing / 100);
+
+                    if (parsedType === 'waterfall') {
+                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
+                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
+                        let runTotal = 0;
+                        let flowData = rawData.map(v => { let prev = runTotal; runTotal += v; return [prev, runTotal]; });
+                        config = { type: 'bar', data: { labels: labels, datasets: [{ label: 'Waterfall', data: flowData, backgroundColor: bgColors, barPercentage: tParam, categoryPercentage: sParam }] }, options: chartOptions };
+                    } else if (parsedType === 'gantt') {
+                        chartOptions.indexAxis = 'y';
+                        chartOptions.scales.y = { type: 'category', display: appState.showAxisY, border: {display: false}, grid: { display: false }, ticks: axisTickConfig }; 
+                        chartOptions.scales.x = { type: 'linear', display: appState.showAxisX, position: 'bottom', grid: { color: '#f1f5f9' }, ticks: axisTickConfig, beginAtZero: true };
+                        
+                        let datasets = [];
+                        for(let j=0; j<maxStacks; j++) {
+                            let ganttData = appState.items.map(i => i.primaryStacks[j] ? [i.primaryStacks[j].value, i.primaryStacks[j].ganttEnd] : null);
+                            let bgColors = appState.items.map((item, i) => item.primaryStacks[j]?.color || activePalette[(i+j) % activePalette.length]);
+                            datasets.push({ label: `Timeline ${j+1}`, data: ganttData, backgroundColor: bgColors, barPercentage: tParam, categoryPercentage: sParam });
+                        }
+                        config = { type: 'bar', data: { labels: labels, datasets: datasets }, options: chartOptions };
+                    } else if (parsedType === 'scatter' || parsedType === 'bubble') {
+                        chartOptions.scales.x.type = 'linear';
+                        chartOptions.scales.x.position = 'bottom';
+                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
+                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
+                        let ptData = rawData.map((v, i) => ({ x: i + 1, y: v, r: parsedType === 'bubble' ? Math.max(5, Math.abs(v)/10) : undefined }));
+                        config = { type: parsedType, data: { datasets: [{ label: 'Data Points', data: ptData, backgroundColor: bgColors, borderColor: '#ffffff', borderWidth: 2, pointRadius: parsedType === 'scatter' ? 8 : undefined }] }, options: chartOptions };
+                    } else if (parsedType === 'wordCloud') {
+                        chartOptions.scales = { x: {display: false}, y: {display: false} };
+                        chartOptions.plugins.datalabels.display = false;
+                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
+                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
+                        let maxV = Math.max(...rawData); if(maxV===0) maxV=1;
+                        let scaledData = rawData.map(v => (v / maxV) * 60 + 10);
+                        config = { type: 'wordCloud', data: { labels: labels, datasets: [{ label: 'Word Cloud', data: scaledData, color: bgColors }] }, options: chartOptions };
+                    }
                 } else {
                     let chartOptions = { 
                         responsive: true, maintainAspectRatio: false, layout: { padding: { right: (isHorizontal) ? 60 : 10, top: 20 } }, 
@@ -765,54 +892,94 @@
                     const tParam = appState.chartThickness / 100;
                     const sParam = 1 - (appState.chartSpacing / 100);
                     let datasets = [];
+                    let hasY = false; let hasY2 = false;
 
                     if(isMulti) {
-                        let hasY = false; let hasY2 = false;
-                        let singleLayerMode = appState.series.length === 1 && appState.series[0].type === 'bar';
-
+                        let primaryIsFill = appState.chartType === 'area';
+                        let primaryIsLine = appState.chartType === 'line' || appState.chartType === 'area';
+                        
                         appState.series.forEach((s) => {
-                            let isLine = s.type === 'line' || s.type === 'area';
-                            let isFill = s.type === 'area'; 
-                            let dArr = appState.items.map(item => item.values[s.id] || 0);
-                            
-                            let bColor, boColor;
-                            if (singleLayerMode) {
-                                bColor = appState.items.map((item, i) => item.customColor || activePalette[i % activePalette.length]);
-                                boColor = 'transparent';
-                            } else {
-                                let layerColor = s.color || activePalette[0];
-                                bColor = (s.type === 'bar') ? layerColor : (isFill ? layerColor+'40' : layerColor);
-                                boColor = (s.type === 'bar') ? 'transparent' : layerColor;
-                            }
-
                             let activeYAxis = isHorizontal ? (s.yAxis === 'y2' ? 'x2' : 'x') : s.yAxis;
-                            if(s.yAxis === 'y') hasY = true;
-                            if(s.yAxis === 'y2') hasY2 = true;
+                            if (activeYAxis === 'y') hasY = true;
+                            if (activeYAxis === 'x') hasY = true;
+                            if (s.yAxis === 'y2') hasY2 = true;
 
-                            let datasetObj = {
-                                type: s.type === 'area' ? 'line' : s.type, label: s.name, data: dArr, backgroundColor: bColor, borderColor: boColor,
-                                borderWidth: s.type === 'bar' ? 0 : 3, borderRadius: s.type === 'bar' ? 8 : 0, fill: isFill,
-                                tension: isLine ? (tParam/2) : 0, order: s.order
-                            };
+                            if (s.id === 'primary') {
+                                for (let j = 0; j < maxStacks; j++) {
+                                    let dArr = appState.items.map(item => item.primaryStacks[j] ? item.primaryStacks[j].value : 0);
+                                    let lblArr = appState.items.map(item => item.primaryStacks[j] ? item.primaryStacks[j].name : '');
+                                    let primaryLabel = lblArr.find(l => l !== '') || `Data Utama ${j+1}`;
 
-                            if (isHorizontal) { datasetObj.xAxisID = activeYAxis; } else { datasetObj.yAxisID = activeYAxis; }
-                            if (s.type === 'bar') { datasetObj.barPercentage = tParam; datasetObj.categoryPercentage = sParam; }
-                            
-                            datasets.push(datasetObj);
+                                    let bColor = appState.items.map((item, i) => {
+                                        let stack = item.primaryStacks[j];
+                                        if(stack && stack.color) return (parsedType === 'bar' || !primaryIsFill) ? stack.color : stack.color+'60';
+                                        return activePalette[(i + j) % activePalette.length];
+                                    });
+                                    
+                                    let isSingleStack = maxStacks === 1;
+                                    let hasOverlays = appState.series.length > 1;
+
+                                    if(primaryIsLine) {
+                                        let strokeCol = appState.items[0].primaryStacks[j]?.color || activePalette[j % activePalette.length];
+                                        bColor = primaryIsFill ? strokeCol+'60' : strokeCol;
+                                    } else if (!isSingleStack || hasOverlays) {
+                                        bColor = appState.items[0].primaryStacks[j]?.color || activePalette[j % activePalette.length];
+                                    }
+
+                                    let boColor = primaryIsLine ? bColor : 'transparent';
+                                    if(primaryIsFill) boColor = appState.items[0].primaryStacks[j]?.color || activePalette[j % activePalette.length];
+
+                                    let datasetObj = {
+                                        type: primaryIsFill ? 'line' : parsedType, 
+                                        label: primaryLabel, data: dArr, backgroundColor: bColor, borderColor: boColor,
+                                        borderWidth: parsedType === 'bar' ? 0 : 3, borderRadius: parsedType === 'bar' ? 8 : 0, fill: primaryIsFill,
+                                        tension: primaryIsLine ? (tParam/2) : 0, order: s.order, stack: 'primaryStack'
+                                    };
+
+                                    if (isHorizontal) { datasetObj.xAxisID = activeYAxis; } else { datasetObj.yAxisID = activeYAxis; }
+                                    if (parsedType === 'bar') { datasetObj.barPercentage = tParam; datasetObj.categoryPercentage = sParam; }
+                                    
+                                    datasets.push(datasetObj);
+                                }
+                            } else {
+                                let isLine = s.type === 'line' || s.type === 'area';
+                                let isFill = s.type === 'area'; 
+                                let dArr = appState.items.map(item => item.values[s.id] || 0);
+                                
+                                let layerColor = s.color || activePalette[0];
+                                let bColor = (s.type === 'bar') ? layerColor : (isFill ? layerColor+'60' : layerColor);
+                                let boColor = (s.type === 'bar') ? 'transparent' : layerColor;
+
+                                let datasetObj = {
+                                    type: s.type === 'area' ? 'line' : s.type, 
+                                    label: s.name, data: dArr, backgroundColor: bColor, borderColor: boColor,
+                                    borderWidth: s.type === 'bar' ? 0 : 3, borderRadius: s.type === 'bar' ? 8 : 0, fill: isFill,
+                                    tension: isLine ? (tParam/2) : 0, order: s.order, stack: s.id
+                                };
+
+                                if (isHorizontal) { datasetObj.xAxisID = activeYAxis; } else { datasetObj.yAxisID = activeYAxis; }
+                                if (s.type === 'bar') { datasetObj.barPercentage = tParam; datasetObj.categoryPercentage = sParam; }
+                                
+                                datasets.push(datasetObj);
+                            }
                         });
 
+                        // Always set stacked true in multi mode to support primaryStack grouping properly
+                        let isStacked = true;
+                        
                         if (isHorizontal) {
-                            chartOptions.scales.y = { type: 'category', display: appState.showAxisY, border: {display: false}, grid: { display: false }, ticks: axisTickConfig }; 
-                            chartOptions.scales.x = { type: 'linear', display: appState.showAxisX, position: 'bottom', grid: { color: '#f1f5f9' }, ticks: axisTickConfig, beginAtZero: true };
-                            if(hasY2) { chartOptions.scales.x2 = { type: 'linear', display: appState.showAxisYRight, position: 'top', border: {display: false}, grid: { drawOnChartArea: false }, beginAtZero: true, ticks: axisTickConfig }; }
+                            chartOptions.scales.y = { type: 'category', display: appState.showAxisY, border: {display: false}, grid: { display: false }, ticks: axisTickConfig, stacked: isStacked }; 
+                            chartOptions.scales.x = { type: 'linear', display: appState.showAxisX, position: 'bottom', grid: { color: '#f1f5f9' }, ticks: axisTickConfig, beginAtZero: true, stacked: isStacked };
+                            if(hasY2) { chartOptions.scales.x2 = { type: 'linear', display: appState.showAxisYRight, position: 'top', border: {display: false}, grid: { drawOnChartArea: false }, beginAtZero: true, ticks: axisTickConfig, stacked: isStacked }; }
                         } else {
-                            chartOptions.scales.x = { type: 'category', display: appState.showAxisX, grid: { display: false }, ticks: axisTickConfig };
-                            if(hasY) chartOptions.scales.y = { type: 'linear', display: appState.showAxisY, position: 'left', border: {display: false}, grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: axisTickConfig };
-                            if(hasY2) chartOptions.scales.y2 = { type: 'linear', display: appState.showAxisYRight, position: 'right', border: {display: false}, grid: { drawOnChartArea: false }, beginAtZero: true, ticks: axisTickConfig };
+                            chartOptions.scales.x = { type: 'category', display: appState.showAxisX, grid: { display: false }, ticks: axisTickConfig, stacked: isStacked };
+                            if(hasY) chartOptions.scales.y = { type: 'linear', display: appState.showAxisY, position: 'left', border: {display: false}, grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: axisTickConfig, stacked: isStacked };
+                            if(hasY2) chartOptions.scales.y2 = { type: 'linear', display: appState.showAxisYRight, position: 'right', border: {display: false}, grid: { drawOnChartArea: false }, beginAtZero: true, ticks: axisTickConfig, stacked: isStacked };
                         }
-                    } else {
-                        const bgColors = appState.items.map((item, i) => item.customColor || activePalette[i % activePalette.length]);
-                        datasets = [{ label: 'Data', data: appState.items.map(i => i.values['s1']), backgroundColor: bgColors, borderColor: '#ffffff', borderWidth: (parsedType === 'pie' || parsedType === 'doughnut') ? 0 : 3, tension: parsedType === 'radar' ? (tParam/2) : 0 }];
+                    } else { 
+                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
+                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
+                        datasets = [{ label: 'Data', data: rawData, backgroundColor: bgColors, borderColor: '#ffffff', borderWidth: (parsedType === 'pie' || parsedType === 'doughnut') ? 0 : 3, tension: parsedType === 'radar' ? (tParam/2) : 0 }];
                         if (parsedType === 'doughnut') datasets[0].cutout = `${appState.donutCutout}%`;
                         if (parsedType === 'radar') chartOptions.scales = { r: { angleLines: { color: '#f1f5f9' }, grid: { color: '#f1f5f9' }, ticks: axisTickConfig, pointLabels: axisTickConfig } };
                     }
@@ -822,24 +989,25 @@
                 els.canvasWrapper.style.width = `${appState.chartWidth}%`;
                 els.canvasWrapper.style.height = `${appState.chartHeight}px`;
                 myChart = new Chart(ctx, config);
-            } catch (err) { els.canvasWrapper.innerHTML = `<div class="text-red-500 font-bold text-center mt-20">Error Rendering Chart. Terjadi tabrakan parameter. Ubah tipe grafik untuk me-reset.</div><canvas id="mainCanvas"></canvas>`; els.mainCanvas = document.getElementById('mainCanvas'); }
+            } catch (err) { els.canvasWrapper.innerHTML = `<div class="text-red-500 font-bold text-center mt-20">Error Rendering Chart. Terjadi tabrakan parameter. Ubah tipe grafik untuk me-reset.</div><canvas id="mainCanvas"></canvas>`; els.mainCanvas = document.getElementById('mainCanvas'); console.error(err); }
         }
 
         function renderPercentageWidgets() {
             const activePalette = palettes[appState.colorTheme];
-            const total = appState.items.reduce((sum, item) => sum + (item.values['s1'] || 0), 0);
+            const total = appState.items.reduce((sum, item) => sum + (item.primaryStacks[0]?.value || 0), 0);
             els.totalSumDisplay.innerText = total.toLocaleString();
             els.percentageContainer.innerHTML = '';
             appState.items.forEach((item, index) => {
-                const percentage = total === 0 ? 0 : ((item.values['s1'] / total) * 100).toFixed(1);
-                const colorHex = item.customColor || activePalette[index % activePalette.length];
+                let v = item.primaryStacks[0]?.value || 0;
+                const percentage = total === 0 ? 0 : ((v / total) * 100).toFixed(1);
+                const colorHex = item.primaryStacks[0]?.color || activePalette[index % activePalette.length];
                 els.percentageContainer.insertAdjacentHTML('beforeend', `
                     <div class="bg-slate-50 border border-slate-100 p-5 rounded-[24px] relative overflow-hidden group hover:shadow-md transition-shadow">
                         <div class="absolute top-0 left-0 w-2.5 h-full" style="background-color: ${colorHex};"></div>
                         <div class="pl-4">
                             <div class="flex justify-between items-end mb-2">
                                 <span class="font-bold text-sm text-slate-800 flex items-center gap-2"><span class="text-xl">${item.icon||''}</span> <span class="truncate max-w-[100px]">${item.label}</span></span>
-                                <span class="text-[11px] font-bold bg-white px-2.5 py-1 rounded-full shadow-sm border border-slate-100 text-slate-600">${item.values['s1'].toLocaleString()}</span>
+                                <span class="text-[11px] font-bold bg-white px-2.5 py-1 rounded-full shadow-sm border border-slate-100 text-slate-600">${v.toLocaleString()}</span>
                             </div>
                             <div class="flex items-end gap-2"><span class="text-3xl font-black tracking-tighter text-black">${percentage}%</span></div>
                         </div>
@@ -853,21 +1021,24 @@
         els.toggleSidebarBtn.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; isSidebarOpen ? els.sidebar.classList.remove('sidebar-collapsed') : els.sidebar.classList.add('sidebar-collapsed'); setTimeout(() => { if(myChart) myChart.resize(); }, 500); });
         window.addEventListener('resize', () => { if(myChart) myChart.resize(); });
         
-        els.chartType.addEventListener('change', (e) => { appState.chartType = e.target.value; renderSeriesManager(); renderInputFields(); updateVisualizations(); });
+        els.chartType.addEventListener('change', (e) => { 
+            appState.chartType = e.target.value; 
+            renderSeriesManager(); renderInputFields(); updateVisualizations(); 
+        });
         
         els.colorTheme.addEventListener('change', (e) => { 
             appState.colorTheme = e.target.value; 
             const activePalette = palettes[appState.colorTheme];
-            appState.series.forEach((s, index) => { s.color = activePalette[index % activePalette.length]; });
-            appState.items.forEach(i => i.customColor = null); 
+            appState.series.forEach((s, index) => { if(s.id !== 'primary') s.color = activePalette[(index + 2) % activePalette.length]; });
+            appState.items.forEach(i => i.primaryStacks.forEach(ps => ps.color = null)); 
             renderSeriesManager(); renderInputFields(); updateVisualizations(); 
         });
         
         els.dataCountSlider.addEventListener('input', (e) => {
             const newCount = parseInt(e.target.value); els.dataCountDisplay.innerText = newCount;
             while(appState.items.length < newCount) {
-                let newItem = { id: Date.now()+Math.random(), label: `Data ${appState.items.length+1}`, icon: '', customColor: null, values: {} };
-                appState.series.forEach(s => newItem.values[s.id] = Math.floor(Math.random() * 200) + 50);
+                let newItem = { id: Date.now()+Math.random(), label: `Data ${appState.items.length+1}`, icon: '', primaryStacks: [{ id: 'ps_'+Date.now(), name: 'Data Utama', value: Math.floor(Math.random() * 200) + 50, color: null, ganttEnd: Math.floor(Math.random() * 300) + 250 }], values: {} };
+                appState.series.forEach(s => { if(s.id !== 'primary') newItem.values[s.id] = Math.floor(Math.random() * 200) + 50; });
                 appState.items.push(newItem);
             }
             if(appState.items.length > newCount) appState.items.length = newCount;
@@ -903,7 +1074,7 @@
             setTimeout(() => { html2canvas(els.canvasWrapper, { scale: 3, backgroundColor: null, logging: false }).then(canvas => { els.exportTarget.style.transform = originalScale; const link = document.createElement('a'); link.download = `ProChart_HD_${Date.now()}.png`; link.href = canvas.toDataURL("image/png", 1.0); link.click(); }); }, 100);
         });
 
-        const iconCats = { 'Bisnis & Kantor': ['💼','🏢','🏭','📈','📉','📊','💰','💳','💻','📱','🛒'], 'Demografi & Orang': ['👨‍💼','👩‍💼','👨‍🎓','👩‍🎓','👨‍🔧','👩‍‍🔧','👨‍🌾','👮‍♂️','👨‍⚕️','👥','👤'], 'Lokasi & Alam': ['📍','🗺','🌍','🌴','🌳','🌲','🏜️','⛰️','🏖️','🏙️','🏡'], 'Medis & Edukasi': ['⚕','🏥','💊','🧬','🎓','🏫','📚','🔬','🧠','🩺'], 'Transportasi': ['🚗','🚕','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛴','🚲','🛵','🏍️'] };
+        const iconCats = { 'Bisnis & Kantor': ['💼','🏢','🏭','📈','📉','📊','💰','💳','💻','📱','🛒'], 'Demografi & Orang': ['👨‍💼','👩‍💼','👨‍🎓','👩‍🎓','👨‍🔧','👩‍‍🔧','👨‍🌾','👮‍♂️','👨‍⚕️','👥','👤'], 'Lokasi & Alam': ['📍','🗺','🌍','🌴','🌳','🌲','🏜️','⛰️','🏖️','🏙️','🏡'], 'Medis & Edukasi': ['⚕','🏥','💊','🧬','🎓','🏫','📚','🔬','🧠','🩺'], 'Transportasi': ['🚗','🚕','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛴','🚲','🛵','🏍'] };
         const modal = document.getElementById('iconLibraryModal'); const iconContainer = document.getElementById('iconContainer');
         document.getElementById('btnOpenLibrary').addEventListener('click', (e) => {
             e.preventDefault(); iconContainer.innerHTML = ''; 
