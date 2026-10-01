@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Chart Vision 3.0 - Ultimate Edition</title>
+    <link id="pwa-manifest" rel="manifest">
+    <meta name="theme-color" content="#f8fafc">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js & Plugins (UMD Versions for Stability) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    
+    <!-- Geo Chart & TopoJSON -->
+    <script src="https://unpkg.com/topojson-client@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.2.8/build/index.umd.min.js"></script>
+    
+    <!-- HTML2Canvas for HD Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --lime-neon: #d4ff00;
+            --dark-ink: #111111;
+            --soft-bg: #f8fafc;
+            --border-light: #e2e8f0;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--soft-bg); color: var(--dark-ink); }
+
+        /* Scrollbar Styling */
+        .scrollbar-hide::-webkit-scrollbar { width: 6px; height: 6px; }
+        .scrollbar-hide::-webkit-scrollbar-track { background: transparent; }
+        .scrollbar-hide::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        .scrollbar-hide::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+
+        /* Rubber Animation Effect */
+        .rubber-effect { transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .rubber-effect:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+        .rubber-effect:active { transform: scale(0.95); }
+
+        /* Smooth Sidebar */
+        #sidebar { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-collapsed { width: 0 !important; padding: 0 !important; opacity: 0; overflow: hidden; border: none !important; margin: 0 !important; }
+
+        /* Custom Modern Inputs */
+        .pill-input { border-radius: 9999px; background-color: #ffffff; border: 1.5px solid var(--border-light); padding: 0.6rem 1.2rem; transition: all 0.3s ease; appearance: none; }
+        .pill-input:focus { outline: none; border-color: var(--dark-ink); box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.1); }
+
+        /* iOS Style Toggle Switch (Black & Lime) */
+        .toggle-switch-container { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+        .toggle-switch-container input { opacity: 0; width: 0; height: 0; cursor: pointer; position: absolute; z-index: 2; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e2e8f0; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 30px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .toggle-switch-container input:checked + .toggle-slider { background-color: var(--dark-ink); }
+        .toggle-switch-container input:checked + .toggle-slider:before { transform: translateX(20px); background-color: var(--lime-neon); }
+        
+        /* Modern Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--dark-ink); cursor: pointer; margin-top: -7px; box-shadow: 0 2px 6px rgba(17, 17, 17, 0.4); transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); background: var(--lime-neon); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; cursor: pointer; background: #e2e8f0; border-radius: 6px; }
+
+        input[type="color"] { -webkit-appearance: none; border: none; padding: 0; overflow: hidden; border-radius: 50%; cursor: pointer; background: transparent; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 2px solid white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+        .loading-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 50; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--dark-ink); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Icon Library Modal */
+        #iconLibraryModal { display: none; }
+        .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
+        .icon-btn { font-size: 1.5rem; display: flex; justify-content: center; align-items: center; padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #f8fafc; border: 1px solid transparent; }
+        .icon-btn:hover { background: #fff; border-color: var(--dark-ink); transform: scale(1.1); box-shadow: 0 4px 12px rgba(17, 17, 17, 0.1); }
+        
+        /* Toast Notification */
+        #toast { position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background: var(--dark-ink); color: var(--lime-neon); padding: 12px 24px; border-radius: 99px; font-weight: bold; font-size: 14px; transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        #toast.show { bottom: 40px; }
+        
+        /* Menyembunyikan panah atas-bawah pada input angka (Spinners) untuk tampilan UI lebih bersih */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* CRITICAL FIX: Ensure canvas is absolute block to prevent flexbox crash */
+        .chart-container-strict {
+            display: block;
+            position: relative;
+            margin: 0 auto;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Collapsible Sidebar -->
+    <aside id="sidebar" class="w-[420px] bg-white border-r border-slate-200 flex flex-col h-full shrink-0 relative z-20 shadow-[10px_0_30px_rgba(0,0,0,0.03)] m-4 rounded-[32px] overflow-hidden">
+        
+        <!-- Header -->
+        <div id="sidebarHeader" class="px-8 py-6 border-b border-slate-100 flex items-center gap-4 transition-all duration-300 ease-in-out bg-white z-10 shrink-0">
+            <div id="sidebarLogo" class="w-12 h-12 rounded-full bg-[#d4ff00] flex items-center justify-center text-black font-black text-2xl shadow-sm transition-all duration-300 shrink-0">*</div>
+            <div id="sidebarTitleGroup" class="transition-all duration-300 overflow-hidden">
+                <h1 id="sidebarTitle" class="text-2xl font-bold tracking-tight whitespace-nowrap text-slate-800">Pro Chart</h1>
+                <p id="sidebarSubtitle" class="text-[11px] uppercase font-bold text-slate-400 tracking-widest origin-top-left transition-all duration-300 mt-0.5">Vision V3.0</p>
+            </div>
+        </div>
+
+        <div id="sidebarScrollArea" class="flex-1 overflow-y-auto scrollbar-hide px-6 py-6 space-y-6">
+            
+            <div class="bg-slate-50 p-6 rounded-[28px] border border-slate-100 space-y-5">
+                <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#d4ff00]"></span> Core Settings</h2>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-2">Graphic Type</label>
+                    <select id="chartType" class="w-full pill-input text-sm font-semibold text-slate-800 bg-white">
+                        <optgroup label="Standard Charts">
+                            <option value="bar-vertical" selected>Bar Vertical</option>
+                            <option value="bar-horizontal">Bar Horizontal</option>
+                            <option value="line">Line Trend</option>
+                            <option value="area">Area Soundwave</option>
+                            <option value="doughnut">Donut Chart</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="radar">Radar Matrix</option>
+                            <option value="polarArea">Polar Area</option>
+                        </optgroup>
+                        <optgroup label="Spatial Maps (Geo)">
+                            <option value="map-indonesia">Geomap: Indonesia</option>
+                            <option value="map-world">Geomap: World</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-2">Preset Colors</label>
+                    <select id="colorTheme" class="w-full pill-input text-sm text-slate-700 bg-white">
+                        <option value="modern">Modern Minimalist (Default)</option>
+                        <option value="lime" selected>Neon Lime (AI Theme)</option>
+                        <option value="corporate">Corporate Blue</option>
+                        <option value="earth">Earthy Nature</option>
+                        <option value="sunset">Sunset Vibes</option>
+                        <option value="monochrome">Monochrome Elegant</option>
+                    </select>
+                </div>
+
+                <!-- Multi-Layer Engine -->
+                <div id="multiSeriesPanel" class="space-y-4 pt-4 border-t border-slate-200">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-[11px] font-bold text-slate-800 flex items-center gap-2 tracking-widest">
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span> MULTI-LAYER ENGINE
+                        </label>
+                        <button id="btnAddSeries" type="button" class="bg-[#111111] text-[#d4ff00] text-[10px] px-3.5 py-2 rounded-full font-bold hover:bg-[#d4ff00] hover:text-[#111111] transition-colors shadow-sm rubber-effect border border-transparent hover:border-[#111111] flex items-center gap-1">
+                            <span>+ Tambah Grafik</span>
+                        </button>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium">Ubah jenis chart, urutan lapis (layer), dan warna masing-masing seri secara independen.</p>
+                    <div id="seriesContainer" class="space-y-3">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 p-6 rounded-[28px] relative shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-[11px] font-bold text-slate-800 uppercase tracking-widest flex items-center gap-2">Live Data Input</h2>
+                    <button id="btnOpenLibrary" class="text-[11px] font-bold bg-[#111111] text-[#d4ff00] px-4 py-2 rounded-full hover:bg-[#d4ff00] hover:text-[#111111] transition-colors flex items-center gap-2 shadow-sm rubber-effect border border-transparent hover:border-[#111111]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        Koleksi Ikon
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between items-center">
+                        <span>Jumlah Baris Data</span>
+                        <span id="dataCountDisplay" class="bg-[#111111] text-[#d4ff00] px-2.5 py-0.5 rounded-full text-[11px]">4</span>
+                    </label>
+                    <input type="range" id="dataCountSlider" min="2" max="15" value="4">
+                </div>
+
+                <div id="dynamicDataForm" class="space-y-3 pt-2 border-t border-slate-100 overflow-x-auto pb-2 scrollbar-hide">
+                    <!-- Inputs injected via JS -->
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-6 rounded-[28px] border border-slate-100 space-y-5">
+                <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span> Dimensions & Layout</h2>
+                <div class="grid grid-cols-2 gap-x-5 gap-y-6">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Visual Scale (Zoom Canvas)</span><span id="chartScaleDisplay" class="text-slate-900 font-bold">100%</span></label>
+                        <input type="range" id="chartScaleSlider" min="40" max="150" value="100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Width</span><span id="canvasWidthDisplay">100%</span></label>
+                        <input type="range" id="canvasWidthSlider" min="40" max="100" step="5" value="100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Height</span><span id="canvasHeightDisplay">500px</span></label>
+                        <input type="range" id="canvasHeightSlider" min="300" max="900" step="10" value="500">
+                    </div>
+                    <div class="col-span-2" id="donutCutoutContainer" style="display: none;">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Donut Hole Thickness</span><span id="donutCutoutDisplay">60%</span></label>
+                        <input type="range" id="donutCutoutSlider" min="0" max="90" value="60">
+                    </div>
+                    <div class="col-span-2" id="barThicknessContainer">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Element Thickness</span><span id="chartThicknessDisplay">100%</span></label>
+                        <input type="range" id="chartThicknessSlider" min="10" max="150" value="100">
+                    </div>
+                    <div class="col-span-2" id="chartSpacingContainer">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Element Spacing (Gap)</span><span id="chartSpacingDisplay">10%</span></label>
+                        <input type="range" id="chartSpacingSlider" min="0" max="50" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-6 rounded-[28px] border border-slate-100 space-y-6">
+                <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span> Typography & Aesthetics</h2>
+                
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-2">Global Font Family</label>
+                    <select id="fontFamily" class="w-full pill-input text-sm bg-white">
+                        <option value="'Inter', sans-serif">Inter (Modern Clean)</option>
+                        <option value="'Poppins', sans-serif">Poppins (Rounded)</option>
+                        <option value="'Roboto Mono', monospace">Roboto Mono (Tech)</option>
+                        <option value="Georgia, serif">Georgia (Elegant Serif)</option>
+                    </select>
+                </div>
+
+                <!-- Datalabel -->
+                <div class="space-y-5 pt-4 border-t border-slate-200">
+                    <label class="block text-xs font-bold text-slate-800">Data Labels (Inside Chart)</label>
+                    <div class="flex gap-4">
+                        <div class="flex-1 flex flex-col items-center">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Text Color</label>
+                            <input type="color" id="fontColor" value="#111111" class="w-10 h-10">
+                        </div>
+                        <div class="flex-1 flex flex-col items-center">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Outline Color</label>
+                            <input type="color" id="strokeColor" value="#d4ff00" class="w-10 h-10">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Size</span><span id="fontSizeDisplay">16px</span></label>
+                            <input type="range" id="fontSizeSlider" min="0" max="40" value="16">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Outline Width</span><span id="strokeWidthDisplay">3px</span></label>
+                            <input type="range" id="strokeWidthSlider" min="0" max="10" value="3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Legend & Axis -->
+                <div class="space-y-5 pt-4 border-t border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-800">Tampilkan Legenda (Categories)</label>
+                        <label class="toggle-switch-container">
+                            <input type="checkbox" id="toggleLegend" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="flex gap-3 items-center">
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 text-center">Posisi</label>
+                            <select id="legendPosition" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 font-bold bg-white text-slate-700 outline-none focus:border-black cursor-pointer">
+                                <option value="top" selected>Atas</option>
+                                <option value="bottom">Bawah</option>
+                                <option value="left">Kiri</option>
+                                <option value="right">Kanan</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 text-center">Warna</label>
+                            <div class="flex justify-center"><input type="color" id="legendFontColor" value="#475569" class="w-8 h-8 rounded-full cursor-pointer shadow-sm border border-slate-200"></div>
+                        </div>
+                        <div class="flex-[1.5]">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Size</span><span id="legendFontSizeDisplay">14px</span></label>
+                            <input type="range" id="legendFontSizeSlider" min="8" max="24" value="14">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="axesControlPanel" class="space-y-5 pt-4 border-t border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-800">Show X-Axis (Bottom)</label>
+                        <label class="toggle-switch-container">
+                            <input type="checkbox" id="toggleAxisX" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-800">Show Y-Axis (Left)</label>
+                        <label class="toggle-switch-container">
+                            <input type="checkbox" id="toggleAxisY" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-800 flex items-center gap-1">Show Y-Axis (Right)</label>
+                        <label class="toggle-switch-container">
+                            <input type="checkbox" id="toggleAxisYRight" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Axis Font Size</span><span id="axisFontSizeDisplay">12px</span></label>
+                        <input type="range" id="axisFontSizeSlider" min="8" max="24" value="12">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="mt-8 pt-6 pb-2 flex flex-col items-center justify-center text-center opacity-70 hover:opacity-100 transition-opacity border-t border-slate-200">
+                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400 shadow-inner">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                </div>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em] mb-1">Official Asset</p>
+                <p class="text-sm font-black text-slate-800 tracking-tight">MNC Channels</p>
+                <p class="text-[9px] text-slate-400 mt-1 font-medium">Data & Analytics Division</p>
+            </div>
+            
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex flex-col relative w-full h-full overflow-hidden bg-slate-50/50">
+        
+        <!-- Floating Header -->
+        <header class="absolute top-8 left-8 right-8 z-10 flex justify-between items-center pointer-events-none">
+            <div class="flex items-center gap-4 pointer-events-auto">
+                <button id="toggleSidebarBtn" class="w-12 h-12 bg-white rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center rubber-effect text-slate-700 hover:text-slate-900 hover:bg-[#d4ff00] border border-slate-100 transition-colors duration-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                </button>
+                <div class="bg-white/80 backdrop-blur-xl px-6 py-3.5 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.04)] border border-white flex items-center gap-3">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#d4ff00] shadow-[0_0_12px_#d4ff00]"></span>
+                    <h2 class="text-sm font-bold text-slate-800 tracking-wide">Visual Workspace</h2>
+                </div>
+            </div>
+
+            <div class="pointer-events-auto">
+                <button id="btnExport" class="bg-slate-900 text-white hover:bg-[#d4ff00] hover:text-black px-7 py-3.5 rounded-full text-sm font-bold shadow-[0_10px_25px_rgba(0,0,0,0.15)] flex items-center gap-2 rubber-effect transition-colors duration-300">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Export HD Image
+                </button>
+            </div>
+        </header>
+
+        <div id="loadingOverlay" class="loading-overlay rounded-3xl m-4">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-sm font-bold text-slate-800 animate-pulse tracking-widest uppercase">Fetching Spatial Data...</p>
+        </div>
+
+        <!-- Canvas Area -->
+        <section class="flex-1 overflow-y-auto pt-32 pb-20 px-8 flex flex-col items-center w-full block">
+            
+            <div id="exportTargetWrapper" class="w-full flex justify-center items-start">
+                <!-- Wrapper for Chart -->
+                <div id="exportTarget" class="transition-all duration-300" style="width: 100%; max-width: 1000px; transform-origin: top center; background-color: transparent;">
+                    
+                    <div id="canvasWrapper" class="chart-container-strict">
+                        <canvas id="mainCanvas"></canvas>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Analytics Dashboard -->
+            <div class="w-full max-w-5xl mt-20 bg-white p-8 rounded-[40px] shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100" data-html2canvas-ignore>
+                <div class="flex justify-between items-end mb-8 border-b border-slate-100 pb-5">
+                    <div>
+                        <h3 class="text-2xl font-black text-slate-800 tracking-tight">Analytics Tracker</h3>
+                        <p class="text-sm text-slate-400 mt-1 font-medium">Distribusi proporsi masing-masing data dengan ikon.</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Keseluruhan</p>
+                        <p class="text-4xl font-black text-[#d4ff00] bg-slate-900 px-5 py-1.5 rounded-full inline-block mt-2 shadow-lg" id="totalSumDisplay">0</p>
+                    </div>
+                </div>
+                <div id="percentageContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Progress cards injected via JS -->
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Modal Icon Library -->
+    <div id="iconLibraryModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex justify-center items-center opacity-0 transition-opacity duration-300 pointer-events-none">
+        <div class="bg-white w-[90%] max-w-2xl rounded-[32px] shadow-2xl p-6 transform scale-95 transition-transform duration-300 max-h-[80vh] flex flex-col pointer-events-auto">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Koleksi Ikon (Emoji)</h3>
+                    <p class="text-xs text-slate-500">Klik ikon untuk menyalin (copy) lalu paste di kolom input data.</p>
+                </div>
+                <button id="btnCloseLibrary" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center hover:bg-slate-200 text-slate-600 font-bold">✕</button>
+            </div>
+            <div class="overflow-y-auto p-2 scrollbar-hide space-y-6" id="iconContainer"></div>
+        </div>
+    </div>
+    
+    <div id="toast">✅ Disalin!</div>
+
+    <script>
+        try {
+            if(typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+            if(typeof ChartGeo !== 'undefined' && typeof Chart !== 'undefined') Chart.register(ChartGeo.ChoroplethController, ChartGeo.GeoFeature, ChartGeo.ColorScale, ChartGeo.ProjectionScale);
+        } catch(e) { console.error("Plugin Registration Error", e); }
+
+        const palettes = {
+            'modern': ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#3b82f6', '#10b981', '#f43f5e'],
+            'lime': ['#d4ff00', '#111111', '#94a3b8', '#e2e8f0', '#4ade80', '#22d3ee', '#ec4899', '#f59e0b'],
+            'corporate': ['#1e3a8a', '#2563eb', '#60a5fa', '#93c5fd', '#bfdbfe', '#e0e7ff', '#1d4ed8', '#3b82f6'],
+            'earth': ['#065f46', '#059669', '#34d399', '#d97706', '#f59e0b', '#fbbf24', '#78350f', '#b45309'],
+            'sunset': ['#be123c', '#e11d48', '#f43f5e', '#c2410c', '#ea580c', '#f97316', '#7c2d12', '#9a3412'],
+            'monochrome': ['#0f172a', '#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#1e293b']
+        };
+
+        let geoCache = { indonesia: null, world: null };
+
+        let appState = {
+            chartType: 'bar-vertical', colorTheme: 'lime',
+            showAxisX: true, showAxisY: true, showAxisYRight: true, axisFontSize: 12, 
+            chartScale: 100, chartWidth: 100, chartHeight: 500, 
+            donutCutout: 60, chartThickness: 100, chartSpacing: 10,
+            showLegend: true, legendFontSize: 14, legendPosition: 'top',
+            typography: { family: "'Inter', sans-serif", size: 16, color: '#111111', strokeColor: '#d4ff00', strokeWidth: 3, legendColor: '#475569' },
+            series: [
+                { id: 's1', name: 'Data Utama', type: 'bar', order: 2, yAxis: 'y', color: '#d4ff00' }, 
+                { id: 's2', name: 'Data Tambahan', type: 'line', order: 1, yAxis: 'y2', color: '#111111' }
+            ],
+            items: [
+                { id: 1, label: 'Jawa Barat', icon: '📍', customColor: null, values: { 's1': 450, 's2': 250 } },
+                { id: 2, label: 'DKI Jakarta', icon: '🏢', customColor: null, values: { 's1': 320, 's2': 300 } },
+                { id: 3, label: 'Sumatera Utara', icon: '🌴', customColor: null, values: { 's1': 150, 's2': 120 } },
+                { id: 4, label: 'Kalimantan', icon: '🌳', customColor: null, values: { 's1': 80, 's2': 150 } },
+            ]
+        };
+
+        let myChart = null; let isSidebarOpen = true;
+
+        const els = {
+            sidebar: document.getElementById('sidebar'), toggleSidebarBtn: document.getElementById('toggleSidebarBtn'),
+            chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'),
+            multiSeriesPanel: document.getElementById('multiSeriesPanel'), seriesContainer: document.getElementById('seriesContainer'), btnAddSeries: document.getElementById('btnAddSeries'),
+            dataCountSlider: document.getElementById('dataCountSlider'), dataCountDisplay: document.getElementById('dataCountDisplay'), dynamicDataForm: document.getElementById('dynamicDataForm'),
+            canvasHeightSlider: document.getElementById('canvasHeightSlider'), canvasHeightDisplay: document.getElementById('canvasHeightDisplay'), canvasWidthSlider: document.getElementById('canvasWidthSlider'), canvasWidthDisplay: document.getElementById('canvasWidthDisplay'), chartScaleSlider: document.getElementById('chartScaleSlider'), chartScaleDisplay: document.getElementById('chartScaleDisplay'),
+            donutCutoutSlider: document.getElementById('donutCutoutSlider'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), donutCutoutContainer: document.getElementById('donutCutoutContainer'), chartThicknessSlider: document.getElementById('chartThicknessSlider'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), barThicknessContainer: document.getElementById('barThicknessContainer'), chartSpacingSlider: document.getElementById('chartSpacingSlider'), chartSpacingDisplay: document.getElementById('chartSpacingDisplay'), chartSpacingContainer: document.getElementById('chartSpacingContainer'),
+            fontFamily: document.getElementById('fontFamily'), fontSizeSlider: document.getElementById('fontSizeSlider'), fontSizeDisplay: document.getElementById('fontSizeDisplay'), fontColor: document.getElementById('fontColor'), strokeColor: document.getElementById('strokeColor'), strokeWidthSlider: document.getElementById('strokeWidthSlider'), strokeWidthDisplay: document.getElementById('strokeWidthDisplay'), legendFontColor: document.getElementById('legendFontColor'), toggleLegend: document.getElementById('toggleLegend'), legendFontSizeSlider: document.getElementById('legendFontSizeSlider'), legendFontSizeDisplay: document.getElementById('legendFontSizeDisplay'), legendPosition: document.getElementById('legendPosition'),
+            toggleAxisX: document.getElementById('toggleAxisX'), toggleAxisY: document.getElementById('toggleAxisY'), toggleAxisYRight: document.getElementById('toggleAxisYRight'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
+            exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), mainCanvas: document.getElementById('mainCanvas'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), loadingOverlay: document.getElementById('loadingOverlay')
+        };
+
+        // Scroll Animation
+        const sidebarScrollArea = document.getElementById('sidebarScrollArea');
+        sidebarScrollArea.addEventListener('scroll', () => {
+            if (sidebarScrollArea.scrollTop > 30) {
+                document.getElementById('sidebarHeader').classList.replace('py-6', 'py-3');
+                document.getElementById('sidebarLogo').classList.replace('w-12', 'w-8'); document.getElementById('sidebarLogo').classList.replace('h-12', 'h-8'); document.getElementById('sidebarLogo').classList.replace('text-2xl', 'text-sm');
+                document.getElementById('sidebarTitle').classList.replace('text-2xl', 'text-base');
+                document.getElementById('sidebarSubtitle').style.height = '0px'; document.getElementById('sidebarSubtitle').style.opacity = '0';
+            } else {
+                document.getElementById('sidebarHeader').classList.replace('py-3', 'py-6');
+                document.getElementById('sidebarLogo').classList.replace('w-8', 'w-12'); document.getElementById('sidebarLogo').classList.replace('h-8', 'h-12'); document.getElementById('sidebarLogo').classList.replace('text-sm', 'text-2xl');
+                document.getElementById('sidebarTitle').classList.replace('text-base', 'text-2xl');
+                document.getElementById('sidebarSubtitle').style.height = 'auto'; document.getElementById('sidebarSubtitle').style.opacity = '1';
+            }
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg; toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function renderSeriesManager() {
+            let isMulti = appState.chartType.includes('bar') || appState.chartType === 'line' || appState.chartType === 'area';
+            els.multiSeriesPanel.style.display = isMulti ? 'block' : 'none';
+            els.seriesContainer.innerHTML = '';
+
+            appState.series.forEach((s, index) => {
+                let typeOpts = `<option value="bar" ${s.type==='bar'?'selected':''}>Bar</option><option value="line" ${s.type==='line'?'selected':''}>Line</option><option value="area" ${s.type==='area'?'selected':''}>Area</option>`;
+                let layerOpts = `<option value="1" ${s.order===1?'selected':''}>Depan</option><option value="2" ${s.order===2?'selected':''}>Tengah 1</option><option value="3" ${s.order===3?'selected':''}>Tengah 2</option><option value="4" ${s.order===4?'selected':''}>Belakang</option>`;
+                let axisOpts = `<option value="y" ${s.yAxis==='y'?'selected':''}>Kiri</option><option value="y2" ${s.yAxis==='y2'?'selected':''}>Kanan</option>`;
+
+                els.seriesContainer.insertAdjacentHTML('beforeend', `
+                    <div class="bg-slate-100 p-4 rounded-[20px] border border-slate-200 shadow-sm relative space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col gap-1 shrink-0">
+                                <button type="button" onclick="moveSeries(${index}, -1)" ${index === 0 ? 'disabled class="opacity-30"' : 'class="hover:text-black text-slate-400"'}><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button>
+                                <button type="button" onclick="moveSeries(${index}, 1)" ${index === appState.series.length - 1 ? 'disabled class="opacity-30"' : 'class="hover:text-black text-slate-400"'}><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button>
+                            </div>
+                            <input type="color" value="${s.color}" onchange="updateSeries('${s.id}', 'color', this.value)" class="w-8 h-8 rounded cursor-pointer shadow-sm shrink-0">
+                            <input type="text" value="${s.name}" oninput="updateSeries('${s.id}', 'name', this.value)" class="flex-1 min-w-0 text-xs bg-white border border-slate-300 rounded-lg px-2 py-1.5 font-bold text-slate-800 focus:outline-none focus:border-black">
+                            ${appState.series.length > 1 ? `<button type="button" onclick="deleteSeries('${s.id}')" class="w-7 h-7 bg-white text-red-500 rounded-lg font-bold border border-red-100 flex items-center justify-center hover:bg-red-50 shrink-0">✕</button>` : ''}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <select onchange="updateSeries('${s.id}', 'type', this.value)" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${typeOpts}</select>
+                            <select onchange="updateSeries('${s.id}', 'layer', parseInt(this.value))" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${layerOpts}</select>
+                            <select onchange="updateSeries('${s.id}', 'axis', this.value)" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${axisOpts}</select>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        // Global exposing for onclick attributes
+        window.updateSeries = function(id, action, value) {
+            const sIdx = appState.series.findIndex(s => s.id === id);
+            if(sIdx > -1) { appState.series[sIdx][action] = value; updateVisualizations(); }
+        };
+        window.moveSeries = function(index, direction) {
+            let target = index + direction;
+            if(target >= 0 && target < appState.series.length) {
+                let temp = appState.series[index];
+                appState.series[index] = appState.series[target];
+                appState.series[target] = temp;
+                renderSeriesManager(); updateVisualizations();
+            }
+        };
+        window.deleteSeries = function(id) {
+            appState.series = appState.series.filter(s => s.id !== id);
+            appState.items.forEach(item => delete item.values[id]);
+            renderSeriesManager(); renderInputFields(); updateVisualizations();
+        };
+
+        els.btnAddSeries.addEventListener('click', () => {
+            if(appState.series.length >= 4) return showToast('⚠ Maksimal 4 grafik kombinasi!');
+            const newId = 's' + Date.now();
+            const activePalette = palettes[appState.colorTheme];
+            appState.series.push({ id: newId, name: 'Data '+(appState.series.length+1), type: 'line', order: 1, yAxis: 'y2', color: activePalette[appState.series.length % activePalette.length] });
+            appState.items.forEach(item => { item.values[newId] = Math.floor(Math.random() * 200) + 50; });
+            renderSeriesManager(); renderInputFields(); updateVisualizations();
+        });
+
+        function renderInputFields() {
+            els.dynamicDataForm.innerHTML = '';
+            const activePalette = palettes[appState.colorTheme];
+            let isMulti = appState.chartType.includes('bar') || appState.chartType === 'line' || appState.chartType === 'area';
+
+            appState.items.forEach((item, index) => {
+                const displayColor = item.customColor || activePalette[index % activePalette.length];
+                let valueInputs = `<div class="flex gap-1.5 shrink-0 overflow-x-auto max-w-[200px] scrollbar-hide">`;
+                
+                if(isMulti) {
+                    appState.series.forEach(s => {
+                        valueInputs += `<div class="flex flex-col items-center"><span class="text-[8px] text-slate-400 font-bold truncate max-w-[40px]" title="${s.name}">${s.name}</span><input type="number" oninput="updateDataValue(${index}, '${s.id}', this.value)" value="${item.values[s.id] !== undefined ? item.values[s.id] : 0}" class="w-12 text-[11px] bg-white rounded-lg py-1 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black"></div>`;
+                    });
+                } else {
+                    valueInputs += `<input type="number" oninput="updateDataValue(${index}, 's1', this.value)" value="${item.values['s1'] || 0}" class="w-16 text-xs bg-white rounded-lg py-1.5 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black">`;
+                }
+                valueInputs += `</div>`;
+
+                els.dynamicDataForm.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-center gap-2 p-2.5 rounded-[20px] border border-slate-100 bg-slate-50 shadow-sm w-max min-w-full">
+                        <div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200" title="Warna Identitas Item">
+                            <input type="color" onchange="updateDataProp(${index}, 'color', this.value)" value="${displayColor}" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer">
+                        </div>
+                        <input type="text" oninput="updateDataProp(${index}, 'icon', this.value)" value="${item.icon || ''}" class="w-8 h-8 text-center text-sm border border-slate-200 bg-white rounded-lg font-medium focus:border-black outline-none shrink-0" placeholder="😀" maxlength="2">
+                        <input type="text" oninput="updateDataProp(${index}, 'label', this.value)" value="${item.label}" class="w-24 text-xs border-0 bg-transparent p-1 font-semibold text-slate-800 focus:outline-none shrink-0">
+                        ${valueInputs}
+                    </div>
+                `);
+            });
+        }
+
+        window.updateDataProp = function(index, prop, val) {
+            if(prop === 'label') appState.items[index].label = val;
+            if(prop === 'color') appState.items[index].customColor = val;
+            if(prop === 'icon') appState.items[index].icon = val;
+            updateVisualizations();
+        };
+        window.updateDataValue = function(index, sId, val) {
+            appState.items[index].values[sId] = parseFloat(val) || 0;
+            updateVisualizations();
+        };
+
+        async function renderMainChart() {
+            if (typeof Chart === 'undefined') return;
+            
+            try {
+                if (myChart) { myChart.destroy(); myChart = null; }
+                
+                const ctx = els.mainCanvas.getContext('2d');
+                const activePalette = palettes[appState.colorTheme];
+                const labels = appState.items.map(i => i.label);
+                const bgColors = appState.items.map((item, i) => item.customColor || activePalette[i % activePalette.length]);
+                
+                let parsedType = appState.chartType;
+                let isMap = parsedType.startsWith('map-');
+                let isMulti = parsedType.includes('bar') || parsedType === 'line' || parsedType === 'area';
+                let isHorizontal = parsedType === 'bar-horizontal';
+
+                els.axesControlPanel.style.display = isMulti ? 'block' : 'none';
+                els.donutCutoutContainer.style.display = parsedType === 'doughnut' ? 'block' : 'none';
+                els.barThicknessContainer.style.display = (isMulti || parsedType === 'radar') ? 'block' : 'none';
+                els.chartSpacingContainer.style.display = parsedType.includes('bar') ? 'block' : 'none';
+                
+                let config = {};
+                const axisTickConfig = { font: { family: appState.typography.family, weight: '500', size: appState.axisFontSize }, color: appState.typography.legendColor };
+
+                let dLabelsConfig = {
+                    color: appState.typography.color, font: { family: appState.typography.family, weight: 'bold', size: appState.typography.size },
+                    textStrokeColor: appState.typography.strokeWidth > 0 ? appState.typography.strokeColor : 'transparent', textStrokeWidth: appState.typography.strokeWidth,
+                    formatter: (val, ctx) => {
+                        if (val === 0 || appState.typography.size == 0) return '';
+                        let actualVal = typeof val === 'object' ? val.value : val;
+                        if(actualVal === undefined) actualVal = val;
+                        let icon = '';
+                        if (ctx && ctx.dataIndex !== undefined && appState.items[ctx.dataIndex]) {
+                            // Only show icon on the first series (dataset 0) to avoid clutter
+                            if(ctx.datasetIndex === 0) icon = appState.items[ctx.dataIndex].icon || '';
+                        }
+                        return icon ? `${icon} ${actualVal.toLocaleString()}` : actualVal.toLocaleString();
+                    },
+                    align: (c) => {
+                        if(isMulti && appState.series.length > 1) {
+                            let ds = appState.series[c.datasetIndex];
+                            if(ds && (ds.type === 'line' || ds.type === 'area')) return 'end'; // Put number above the point
+                        }
+                        return 'center';
+                    },
+                    anchor: (c) => {
+                        if(isMulti && appState.series.length > 1) {
+                            let ds = appState.series[c.datasetIndex];
+                            if(ds && (ds.type === 'line' || ds.type === 'area')) return 'end';
+                        }
+                        return 'center';
+                    },
+                    offset: 4
+                };
+
+                if (isMap) {
+                    els.loadingOverlay.style.display = 'flex';
+                    let geoData;
+                    if(parsedType === 'map-indonesia') {
+                        // CRITICAL FIX: Using reliable Github source for Indonesia GeoJSON
+                        if(!geoCache.indonesia) geoCache.indonesia = await (await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province-simple.json')).json();
+                        geoData = geoCache.indonesia;
+                    } else {
+                        if(!geoCache.world) {
+                            const topo = await (await fetch('https://unpkg.com/world-atlas/countries-50m.json')).json();
+                            geoCache.world = typeof topojson !== 'undefined' ? topojson.feature(topo, topo.objects.countries) : ChartGeo.topojson.feature(topo, topo.objects.countries);
+                        }
+                        geoData = geoCache.world;
+                    }
+                    els.loadingOverlay.style.display = 'none';
+                    
+                    let features = geoData.features || geoData;
+                    let mapDataArray = features.map(d => ({ feature: d, value: null }));
+                    
+                    appState.items.forEach((item, i) => {
+                        const searchStr = item.label.toLowerCase();
+                        let match = mapDataArray.find(m => {
+                            const p = m.feature.properties;
+                            const n = (p.name || p.hc_a2 || p.NAME || p.Propinsi || '').toLowerCase();
+                            return n.includes(searchStr) && searchStr.length > 2;
+                        });
+                        if(match) { match.value = item.values['s1']; match.customColor = bgColors[i]; }
+                    });
+
+                    config = {
+                        type: 'choropleth',
+                        data: {
+                            labels: mapDataArray.map(d => d.feature.properties.name || d.feature.properties.hc_a2),
+                            datasets: [{ label: 'Spatial Map', outline: features, data: mapDataArray, backgroundColor: (c) => (c.raw?.value === null || c.raw?.value === undefined) ? '#f1f5f9' : (c.raw?.customColor || activePalette[0]), borderWidth: 1, borderColor: '#ffffff' }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { projection: { axis: 'x', projection: parsedType === 'map-indonesia' ? 'equirectangular' : 'equalEarth' } } }
+                    };
+                } else {
+                    let chartOptions = { 
+                        responsive: true, maintainAspectRatio: false, 
+                        layout: { padding: { right: (isHorizontal) ? 60 : 10 } }, 
+                        plugins: { legend: { display: appState.showLegend, position: appState.legendPosition, labels: { color: appState.typography.legendColor, font: { family: appState.typography.family, size: appState.legendFontSize } } }, datalabels: dLabelsConfig },
+                        scales: {} // Ensure scales object is ready
+                    };
+                    
+                    if (isHorizontal) { parsedType = 'bar'; chartOptions.indexAxis = 'y'; } 
+                    else if (parsedType === 'bar-vertical') { parsedType = 'bar'; }
+                    else if (parsedType === 'line' || parsedType === 'area') { parsedType = 'line'; }
+
+                    const tParam = appState.chartThickness / 100;
+                    const sParam = 1 - (appState.chartSpacing / 100);
+                    let datasets = [];
+
+                    if(isMulti) {
+                        let hasY = false;
+                        let hasY2 = false;
+
+                        appState.series.forEach((s) => {
+                            let isLine = s.type === 'line' || s.type === 'area';
+                            let isFill = s.type === 'area';
+                            let dArr = appState.items.map(item => item.values[s.id] || 0);
+                            
+                            let layerColor = s.color || activePalette[0];
+                            let bColor = (s.type === 'bar') ? layerColor : (isFill ? layerColor+'40' : layerColor);
+                            let boColor = (s.type === 'bar') ? 'transparent' : layerColor;
+
+                            // CRITICAL FIX: If horizontal bar, disable y2 (dual axis) to prevent Chart.js crash
+                            let activeYAxis = isHorizontal ? 'y' : s.yAxis;
+                            if(activeYAxis === 'y') hasY = true;
+                            if(activeYAxis === 'y2') hasY2 = true;
+
+                            datasets.push({
+                                type: s.type === 'area' ? 'line' : s.type, label: s.name, data: dArr, backgroundColor: bColor, borderColor: boColor,
+                                borderWidth: s.type === 'bar' ? 0 : 3, borderRadius: s.type === 'bar' ? 8 : 0, fill: isFill,
+                                tension: isLine ? (tParam/2) : 0, barPercentage: s.type === 'bar' ? tParam : undefined, categoryPercentage: s.type === 'bar' ? sParam : undefined,
+                                yAxisID: activeYAxis, order: s.order
+                            });
+                        });
+
+                        chartOptions.scales.x = { display: appState.showAxisX, grid: { display: false }, ticks: axisTickConfig };
+                        // Only add scales if they are actually used by a dataset
+                        if(hasY) {
+                            chartOptions.scales.y = { type: 'linear', display: appState.showAxisY, position: isHorizontal ? 'bottom' : 'left', border: {display: false}, grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: axisTickConfig };
+                        }
+                        if(hasY2 && !isHorizontal) {
+                            chartOptions.scales.y2 = { type: 'linear', display: appState.showAxisYRight, position: 'right', border: {display: false}, grid: { drawOnChartArea: false }, beginAtZero: true, ticks: axisTickConfig };
+                        }
+                    
+                    } else {
+                        datasets = [{ label: 'Data', data: appState.items.map(i => i.values['s1']), backgroundColor: bgColors, borderColor: '#ffffff', borderWidth: (parsedType === 'pie' || parsedType === 'doughnut') ? 0 : 3, tension: parsedType === 'radar' ? (tParam/2) : 0 }];
+                        if (parsedType === 'doughnut') datasets[0].cutout = `${appState.donutCutout}%`;
+                        if (parsedType === 'radar') chartOptions.scales = { r: { angleLines: { color: '#f1f5f9' }, grid: { color: '#f1f5f9' }, ticks: axisTickConfig, pointLabels: axisTickConfig } };
+                    }
+
+                    config = { type: parsedType, data: { labels: labels, datasets: datasets }, options: chartOptions };
+                }
+
+                els.canvasWrapper.style.width = `${appState.chartWidth}%`;
+                els.canvasWrapper.style.height = `${appState.chartHeight}px`;
+                
+                myChart = new Chart(ctx, config);
+            } catch (err) { 
+                console.error("Chart Render Err:", err); 
+                // Don't leave screen blank, show error in canvas wrapper for debugging
+                els.canvasWrapper.innerHTML = `<div class="text-red-500 font-bold text-center mt-20">Error Rendering Chart. Terjadi tabrakan parameter. Ubah tipe grafik untuk me-reset.</div><canvas id="mainCanvas"></canvas>`;
+                els.mainCanvas = document.getElementById('mainCanvas'); // re-bind
+            }
+        }
+
+        function renderPercentageWidgets() {
+            const activePalette = palettes[appState.colorTheme];
+            const total = appState.items.reduce((sum, item) => sum + (item.values['s1'] || 0), 0);
+            els.totalSumDisplay.innerText = total.toLocaleString();
+            els.percentageContainer.innerHTML = '';
+
+            appState.items.forEach((item, index) => {
+                const percentage = total === 0 ? 0 : ((item.values['s1'] / total) * 100).toFixed(1);
+                const colorHex = item.customColor || activePalette[index % activePalette.length];
+                els.percentageContainer.insertAdjacentHTML('beforeend', `
+                    <div class="bg-slate-50 border border-slate-100 p-5 rounded-[24px] relative overflow-hidden group hover:shadow-md transition-shadow">
+                        <div class="absolute top-0 left-0 w-2.5 h-full" style="background-color: ${colorHex};"></div>
+                        <div class="pl-4">
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="font-bold text-sm text-slate-800 flex items-center gap-2"><span class="text-xl">${item.icon||''}</span> <span class="truncate max-w-[100px]">${item.label}</span></span>
+                                <span class="text-[11px] font-bold bg-white px-2.5 py-1 rounded-full shadow-sm border border-slate-100 text-slate-600">${item.values['s1'].toLocaleString()}</span>
+                            </div>
+                            <div class="flex items-end gap-2"><span class="text-3xl font-black tracking-tighter text-black">${percentage}%</span></div>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        function updateVisualizations() {
+            els.exportTarget.style.transform = `scale(${appState.chartScale / 100})`;
+            renderMainChart(); renderPercentageWidgets();
+        }
+
+        els.toggleSidebarBtn.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; isSidebarOpen ? els.sidebar.classList.remove('sidebar-collapsed') : els.sidebar.classList.add('sidebar-collapsed'); setTimeout(() => { if(myChart) myChart.resize(); }, 500); });
+        window.addEventListener('resize', () => { if(myChart) myChart.resize(); });
+        
+        els.chartType.addEventListener('change', (e) => { appState.chartType = e.target.value; renderSeriesManager(); renderInputFields(); updateVisualizations(); });
+        els.colorTheme.addEventListener('change', (e) => { appState.colorTheme = e.target.value; appState.items.forEach(i => i.customColor = null); renderInputFields(); updateVisualizations(); });
+        
+        els.dataCountSlider.addEventListener('input', (e) => {
+            const newCount = parseInt(e.target.value); els.dataCountDisplay.innerText = newCount;
+            while(appState.items.length < newCount) {
+                let newItem = { id: Date.now()+Math.random(), label: `Data ${appState.items.length+1}`, icon: '', customColor: null, values: {} };
+                appState.series.forEach(s => newItem.values[s.id] = Math.floor(Math.random() * 200) + 50);
+                appState.items.push(newItem);
+            }
+            if(appState.items.length > newCount) appState.items.length = newCount;
+            renderInputFields(); updateVisualizations();
+        });
+
+        els.chartScaleSlider.addEventListener('input', (e) => { els.chartScaleDisplay.innerText = e.target.value + '%'; appState.chartScale = e.target.value; updateVisualizations(); });
+        els.canvasWidthSlider.addEventListener('input', (e) => { els.canvasWidthDisplay.innerText = e.target.value + '%'; appState.chartWidth = e.target.value; updateVisualizations(); });
+        els.canvasHeightSlider.addEventListener('input', (e) => { els.canvasHeightDisplay.innerText = e.target.value + 'px'; appState.chartHeight = e.target.value; updateVisualizations(); });
+        els.donutCutoutSlider.addEventListener('input', (e) => { els.donutCutoutDisplay.innerText = e.target.value + '%'; appState.donutCutout = e.target.value; updateVisualizations(); });
+        els.chartThicknessSlider.addEventListener('input', (e) => { els.chartThicknessDisplay.innerText = e.target.value + '%'; appState.chartThickness = e.target.value; updateVisualizations(); });
+        els.chartSpacingSlider.addEventListener('input', (e) => { els.chartSpacingDisplay.innerText = e.target.value + '%'; appState.chartSpacing = parseInt(e.target.value); updateVisualizations(); });
+
+        els.fontFamily.addEventListener('change', (e) => { appState.typography.family = e.target.value; updateVisualizations(); });
+        els.fontSizeSlider.addEventListener('input', (e) => { els.fontSizeDisplay.innerText = e.target.value + 'px'; appState.typography.size = e.target.value; updateVisualizations(); });
+        els.fontColor.addEventListener('input', (e) => { appState.typography.color = e.target.value; updateVisualizations(); });
+        els.strokeColor.addEventListener('input', (e) => { appState.typography.strokeColor = e.target.value; updateVisualizations(); });
+        els.strokeWidthSlider.addEventListener('input', (e) => { els.strokeWidthDisplay.innerText = e.target.value + 'px'; appState.typography.strokeWidth = e.target.value; updateVisualizations(); });
+        els.toggleLegend.addEventListener('change', (e) => { appState.showLegend = e.target.checked; updateVisualizations(); });
+        els.legendPosition.addEventListener('change', (e) => { appState.legendPosition = e.target.value; updateVisualizations(); });
+        els.legendFontColor.addEventListener('input', (e) => { appState.typography.legendColor = e.target.value; updateVisualizations(); });
+        els.legendFontSizeSlider.addEventListener('input', (e) => { els.legendFontSizeDisplay.innerText = e.target.value + 'px'; appState.legendFontSize = parseInt(e.target.value); updateVisualizations(); });
+        els.toggleAxisX.addEventListener('change', (e) => { appState.showAxisX = e.target.checked; updateVisualizations(); });
+        els.toggleAxisY.addEventListener('change', (e) => { appState.showAxisY = e.target.checked; updateVisualizations(); });
+        els.toggleAxisYRight.addEventListener('change', (e) => { appState.showAxisYRight = e.target.checked; updateVisualizations(); });
+        els.axisFontSizeSlider.addEventListener('input', (e) => { els.axisFontSizeDisplay.innerText = e.target.value + 'px'; appState.axisFontSize = parseInt(e.target.value); updateVisualizations(); });
+
+        els.btnExport.addEventListener('click', () => {
+            const originalScale = els.exportTarget.style.transform;
+            els.exportTarget.style.transform = 'scale(1)'; 
+            setTimeout(() => {
+                html2canvas(els.canvasWrapper, { scale: 3, backgroundColor: null, logging: false }).then(canvas => {
+                    els.exportTarget.style.transform = originalScale;
+                    const link = document.createElement('a'); link.download = `ProChart_HD_${Date.now()}.png`; link.href = canvas.toDataURL("image/png", 1.0); link.click();
+                });
+            }, 100);
+        });
+
+        const iconCats = {
+            'Bisnis & Kantor': ['💼','🏢','🏭','📈','📉','📊','💰','💳','💻','📱','🛒'],
+            'Demografi & Orang': ['👨‍💼','👩‍💼','👨‍🎓','👩‍🎓','👨‍🔧','👩‍‍🔧','👨‍🌾','👮‍♂️','👨‍⚕️','👥','👤'],
+            'Lokasi & Alam': ['📍','🗺️','🌍','🌴','🌳','🌲','🏜️','⛰️','🏖️','🏙️','🏡'],
+            'Medis & Edukasi': ['⚕','🏥','💊','🧬','🎓','🏫','📚','🔬','🧠','🩺'],
+            'Transportasi': ['🚗','🚕','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛴','🚲','🛵','🏍️']
+        };
+        const modal = document.getElementById('iconLibraryModal');
+        const iconContainer = document.getElementById('iconContainer');
+        document.getElementById('btnOpenLibrary').addEventListener('click', (e) => {
+            e.preventDefault(); iconContainer.innerHTML = ''; 
+            for (const [cat, icons] of Object.entries(iconCats)) {
+                const catDiv = document.createElement('div'); catDiv.innerHTML = `<h4 class="text-xs font-bold text-slate-400 mb-2 uppercase">${cat}</h4>`;
+                const grid = document.createElement('div'); grid.className = 'icon-grid mb-4';
+                icons.forEach(i => { const btn = document.createElement('button'); btn.className = 'icon-btn'; btn.innerText = i; btn.onclick = () => { const tempInput = document.createElement("input"); tempInput.value = i; document.body.appendChild(tempInput); tempInput.select(); document.execCommand("copy"); document.body.removeChild(tempInput); showToast(`✅ Ikon ${i} disalin!`); modal.classList.add('opacity-0'); modal.classList.add('pointer-events-none'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => modal.style.display = 'none', 300); }; grid.appendChild(btn); });
+                catDiv.appendChild(grid); iconContainer.appendChild(catDiv);
+            }
+            modal.style.display = 'flex'; modal.classList.remove('pointer-events-none');
+            setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10);
+        });
+        document.getElementById('btnCloseLibrary').addEventListener('click', () => { modal.classList.add('opacity-0'); modal.classList.add('pointer-events-none'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => modal.style.display = 'none', 300); });
+
+        function initPWA() { const manifest = { name: "Pro Chart Vision V3", short_name: "ProChart", start_url: "./", display: "standalone", background_color: "#f8fafc", theme_color: "#111111", icons: [{ src: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23d4ff00'/%3E%3Ctext x='50' y='50' font-family='sans-serif' font-size='50' font-weight='bold' text-anchor='middle' dy='.35em' fill='%23000'%3E*%3C/text%3E%3C/svg%3E", sizes: "192x192", type: "image/svg+xml" }] }; document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type: 'application/json'})); if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(new Blob(["self.addEventListener('install', (e) => self.skipWaiting());"], {type: 'application/javascript'}))).catch(()=>{}); }
+        
+        // Execute Initialization safely
+        window.onload = () => { 
+            initPWA();
+            renderSeriesManager(); 
+            renderInputFields(); 
+            updateVisualizations(); 
+        };
+    </script>
+</body>
+</html>
