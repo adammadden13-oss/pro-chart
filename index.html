@@ -3,1140 +3,1169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Chart Vision 3.0 - Ultimate Edition</title>
+    <title>Pro Chart Vision 3.0</title>
     
-    <!-- Favicon (Inline SVG for stability) -->
-    <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%231b2609%22/><path fill=%22%23c4f033%22 d=%22M46 25 h10 v16 h14 v5 L52 75 h-7 v-16 h-15 v-6 L46 25 z%22/></svg>" type="image/svg+xml">
-
-    <link id="pwa-manifest" rel="manifest">
-    <meta name="theme-color" content="#f8fafc">
+    <!-- SVG Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23CAFC03'/><path d='M45 20L25 60h20l-5 20 25-40H45z' fill='%23111827'/></svg>">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <!-- Chart.js & Plugins -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
-    
-    <!-- Geo Chart & Word Cloud -->
-    <script src="https://unpkg.com/topojson-client@3"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.2.8/build/index.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-wordcloud@4.3.1/build/index.umd.min.js"></script>
-    
-    <!-- HTML2Canvas for HD Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://unpkg.com/chartjs-chart-wordcloud@4"></script>
     
     <style>
-        :root { --lime-neon: #d4ff00; --dark-ink: #111111; --soft-bg: #f8fafc; --border-light: #e2e8f0; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--soft-bg); color: var(--dark-ink); }
-        .scrollbar-hide::-webkit-scrollbar { width: 6px; height: 6px; }
-        .scrollbar-hide::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-hide::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
-        .scrollbar-hide::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
-        .rubber-effect { transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        .rubber-effect:hover { transform: scale(1.05) translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
-        .rubber-effect:active { transform: scale(0.95); }
-        #sidebar { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-collapsed { width: 0 !important; padding: 0 !important; opacity: 0; overflow: hidden; border: none !important; margin: 0 !important; }
-        .pill-input { border-radius: 9999px; background-color: #ffffff; border: 1.5px solid var(--border-light); padding: 0.6rem 1.2rem; transition: all 0.3s ease; appearance: none; cursor: pointer; }
-        .pill-input:focus { outline: none; border-color: var(--dark-ink); box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.1); }
-        .toggle-switch-container { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
-        .toggle-switch-container input { opacity: 0; width: 0; height: 0; cursor: pointer; position: absolute; z-index: 2; }
-        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #e2e8f0; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 30px; }
-        .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .toggle-switch-container input:checked + .toggle-slider { background-color: var(--dark-ink); }
-        .toggle-switch-container input:checked + .toggle-slider:before { transform: translateX(20px); background-color: var(--lime-neon); }
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--dark-ink); cursor: pointer; margin-top: -7px; box-shadow: 0 2px 6px rgba(17, 17, 17, 0.4); transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); background: var(--lime-neon); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; cursor: pointer; background: #e2e8f0; border-radius: 6px; }
-        input[type="color"] { -webkit-appearance: none; border: none; padding: 0; overflow: hidden; border-radius: 50%; cursor: pointer; background: transparent; }
-        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-        input[type="color"]::-webkit-color-swatch { border: 2px solid white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        .loading-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 50; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--dark-ink); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal-overlay { display: none; }
-        .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 8px; }
-        .icon-btn { font-size: 1.5rem; display: flex; justify-content: center; align-items: center; padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; background: #f8fafc; border: 1px solid transparent; }
-        .icon-btn:hover { background: #fff; border-color: var(--dark-ink); transform: scale(1.1); box-shadow: 0 4px 12px rgba(17, 17, 17, 0.1); }
-        #toast { position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); background: var(--dark-ink); color: var(--lime-neon); padding: 12px 24px; border-radius: 99px; font-weight: bold; font-size: 14px; transition: bottom 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        #toast.show { bottom: 40px; }
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-        .chart-container-strict { display: block; position: relative; margin: 0 auto; width: 100%; }
-        .lang-switch { width: 34px; height: 20px; }
-        .lang-switch .toggle-slider:before { height: 14px; width: 14px; left: 3px; bottom: 3px; }
-        .lang-switch input:checked + .toggle-slider:before { transform: translateX(14px); }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        .stack-item { transition: all 0.2s ease; border-left: 2px solid transparent; }
-        .stack-item:hover { border-left-color: #cbd5e1; background: #f8fafc; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #cafc03; cursor: pointer; border: 2px solid #111827; margin-top: -6px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
+        
+        /* PENGHANCUR PANAH (SPIN BUTTON) PADA INPUT ANGKA MUTLAK */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none !important; 
+            margin: 0 !important; 
+        }
+        input[type="number"] {
+            -moz-appearance: textfield !important;
+        }
+        
+        .toggle-checkbox:checked + .toggle-label { background-color: #111827; }
+        .toggle-checkbox:checked + .toggle-label::after { transform: translateX(100%); border-color: white; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .chart-wrapper-transition { transition: all 0.3s ease; }
+        .modal-bg-blur { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body class="h-screen flex overflow-hidden selection:bg-lime-300 selection:text-slate-900">
 
-    <aside id="sidebar" class="w-[420px] bg-white border-r border-slate-200 flex flex-col h-full shrink-0 relative z-20 shadow-[10px_0_30px_rgba(0,0,0,0.03)] m-4 rounded-[32px] overflow-hidden">
-        
-        <div id="sidebarHeader" class="px-8 py-6 border-b border-slate-100 flex items-center gap-4 transition-all duration-300 ease-in-out bg-white z-10 shrink-0">
-            <div id="sidebarLogo" class="w-12 h-12 shrink-0 transition-all duration-300">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-full h-full drop-shadow-sm">
-                    <circle cx="50" cy="50" r="50" fill="#1b2609"/>
-                    <path fill="#c4f033" d="M46 25 h10 v16 h14 v5 L52 75 h-7 v-16 h-15 v-6 L46 25 z"/>
-                </svg>
+    <!-- MODAL KOLEKSI IKON -->
+    <div id="iconModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300" id="iconModalContent">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-800" data-i18n="iconLibrary">Koleksi Ikon</h3>
+                <button onclick="closeIconModal()" class="text-slate-400 hover:text-red-500 transition"><i class="ph ph-x text-xl"></i></button>
             </div>
-            <div id="sidebarTitleGroup" class="transition-all duration-300 overflow-hidden">
-                <h1 id="sidebarTitle" class="text-2xl font-bold tracking-tight whitespace-nowrap text-slate-800">Pro Chart</h1>
-                <p id="sidebarSubtitle" class="text-[11px] uppercase font-bold text-slate-400 tracking-widest origin-top-left transition-all duration-300 mt-0.5">Vision V3.0</p>
+            <div class="p-4">
+                <input type="text" id="iconSearch" data-i18n-placeholder="searchIcon" placeholder="Cari ikon..." class="w-full bg-slate-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-lime-400 mb-4">
+                <div class="grid grid-cols-6 gap-2 max-h-64 overflow-y-auto p-1" id="iconGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RESET DATA KUSTOM -->
+    <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 text-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 border border-slate-700" id="resetModalContent">
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-500/30">
+                    <i class="ph ph-warning-circle text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-3" data-i18n="resetConfirmTitle">Reset Semua Pengaturan?</h3>
+                <p class="text-slate-400 text-sm mb-8 leading-relaxed" data-i18n="resetConfirmDesc">Aksi ini akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.</p>
+                <div class="flex gap-3 justify-center">
+                    <button onclick="closeResetModal()" class="flex-1 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold transition text-slate-300" data-i18n="cancel">Batal</button>
+                    <button onclick="executeResetData()" class="flex-1 px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition text-white shadow-lg shadow-red-500/30" data-i18n="yesReset">Ya, Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEFT PANEL: SETTINGS -->
+    <div class="w-[420px] bg-white border-r border-slate-200 flex flex-col h-full shrink-0 relative z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        
+        <div class="p-6 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-white">
+            <div class="w-10 h-10 bg-[#cafc03] rounded-xl flex items-center justify-center text-slate-900 shadow-sm border border-[#b5e003]">
+                <i class="ph-fill ph-lightning text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-xl text-slate-900 tracking-tight leading-none">Pro Chart</h1>
+                <p class="text-[10px] font-bold text-slate-400 tracking-widest mt-1 uppercase">Vision V3.0</p>
             </div>
         </div>
 
-        <div id="sidebarScrollArea" class="flex-1 overflow-y-auto scrollbar-hide px-6 py-6 space-y-6">
+        <div class="flex-1 overflow-y-auto p-6 space-y-8 pb-32 relative">
             
-            <div class="bg-slate-50 p-6 rounded-[28px] border border-slate-100 space-y-5">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#d4ff00]"></span> <span data-i18n="coreSettings">Pengaturan Utama</span></h2>
-                    <!-- Tombol Reset Data -->
-                    <button onclick="openResetModal()" class="text-[9px] text-red-500 hover:text-red-600 font-bold uppercase transition-colors tracking-widest border border-red-200 px-2.5 py-1 rounded-md bg-red-50 hover:bg-red-100" data-i18n="resetApp">Reset Data</button>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2" data-i18n="graphicType">Tipe Grafik Utama</label>
-                    <select id="chartType" class="w-full pill-input text-sm font-semibold text-slate-800 bg-white">
-                        <optgroup label="Standard Charts" data-i18n-optgroup="stdCharts">
-                            <option value="bar-vertical" selected data-i18n="optBarV">Bar Vertical</option>
-                            <option value="bar-horizontal" data-i18n="optBarH">Bar Horizontal</option>
-                            <option value="line" data-i18n="optLine">Line Trend</option>
-                            <option value="area" data-i18n="optArea">Area Soundwave</option>
-                            <option value="doughnut" data-i18n="optDonut">Donut Chart</option>
-                            <option value="pie" data-i18n="optPie">Pie Chart</option>
-                            <option value="radar" data-i18n="optRadar">Radar Matrix</option>
-                            <option value="polarArea" data-i18n="optPolar">Polar Area</option>
-                        </optgroup>
-                        <optgroup label="Advanced / Specialty" data-i18n-optgroup="optAdvanced">
-                            <option value="waterfall" data-i18n="optWaterfall">Waterfall Chart</option>
-                            <option value="scatter" data-i18n="optScatter">Scatter Plot</option>
-                            <option value="bubble" data-i18n="optBubble">Bubble Chart</option>
-                            <option value="gantt" data-i18n="optGantt">Gantt Chart (Timeline)</option>
-                            <option value="wordCloud" data-i18n="optWordCloud">Word Cloud</option>
-                        </optgroup>
-                        <optgroup label="Spatial Maps (Geo)" data-i18n-optgroup="geoCharts">
-                            <option value="map-indonesia" data-i18n="optMapId">Geomap: Indonesia</option>
-                            <option value="map-world" data-i18n="optMapWorld">Geomap: World</option>
-                        </optgroup>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2" data-i18n="presetColors">Tema Warna</label>
-                    <select id="colorTheme" class="w-full pill-input text-sm text-slate-700 bg-white">
-                        <option value="modern" data-i18n="themeMod">Modern Minimalist (Default)</option>
-                        <option value="lime" selected data-i18n="themeLime">Neon Lime (AI Theme)</option>
-                        <option value="corporate" data-i18n="themeCorp">Corporate Blue</option>
-                        <option value="earth" data-i18n="themeEarth">Earthy Nature</option>
-                        <option value="sunset" data-i18n="themeSun">Sunset Vibes</option>
-                        <option value="monochrome" data-i18n="themeMono">Monochrome Elegant</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2" data-i18n="stackModeTitle">Logika Sub-Data (Tumpukan)</label>
-                    <select id="stackMode" class="w-full pill-input text-sm text-slate-800 bg-slate-50 border-[#d4ff00] font-bold">
-                        <option value="accumulate" selected data-i18n="stackModeAcc">Akumulasi (Tambah Tinggi)</option>
-                        <option value="include" data-i18n="stackModeInc">Include (Proporsi ke Data Utama)</option>
-                    </select>
-                </div>
-
-                <div id="multiSeriesPanel" class="space-y-4 pt-4 border-t border-slate-200">
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="text-[11px] font-bold text-slate-800 flex items-center gap-2 tracking-widest">
-                            <span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span> <span data-i18n="multiLayerEngine">MESIN MULTI-LAPIS (OVERLAY)</span>
-                        </label>
-                        <button id="btnAddSeries" type="button" class="bg-[#111111] text-[#d4ff00] text-[10px] px-3.5 py-2 rounded-full font-bold hover:bg-[#d4ff00] hover:text-[#111111] transition-colors shadow-sm rubber-effect border border-transparent hover:border-[#111111] flex items-center gap-1">
-                            <span data-i18n="btnAddSeries">+ Tambah Grafik</span>
-                        </button>
+            <!-- PENGATURAN UTAMA -->
+            <div class="bg-slate-50 border border-slate-100 rounded-3xl p-5 shadow-sm relative">
+                <div class="flex items-center justify-between mb-5">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-[#cafc03]"></div>
+                        <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="coreSettings">Pengaturan Utama</h2>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium" data-i18n="multiLayerDesc">Tambahkan grafik pelapis (seperti Line) di atas data utama Anda.</p>
-                    <div id="seriesContainer" class="space-y-3">
-                        <!-- Injected via JS -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white border border-slate-200 p-6 rounded-[28px] relative shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-[11px] font-bold text-slate-800 uppercase tracking-widest flex items-center gap-2" data-i18n="liveDataInput">Input Data Langsung</h2>
-                    <button id="btnOpenLibrary" class="text-[11px] font-bold bg-[#111111] text-[#d4ff00] px-4 py-2 rounded-full hover:bg-[#d4ff00] hover:text-[#111111] transition-colors flex items-center gap-2 shadow-sm rubber-effect border border-transparent hover:border-[#111111]">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                        <span data-i18n="btnOpenLibrary">Koleksi Ikon</span>
-                    </button>
+                    <button onclick="openResetModal()" class="text-[10px] font-bold text-red-500 uppercase border border-red-200 hover:bg-red-50 hover:border-red-300 bg-white px-3 py-1.5 rounded-lg transition shadow-sm" data-i18n="resetData">Reset Data</button>
                 </div>
                 
-                <div class="mb-4">
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between items-center">
-                        <span data-i18n="dataRowCount">Jumlah Baris Utama</span>
-                        <span id="dataCountDisplay" class="bg-[#111111] text-[#d4ff00] px-2.5 py-0.5 rounded-full text-[11px]">4</span>
-                    </label>
-                    <input type="range" id="dataCountSlider" min="2" max="15" value="4">
-                </div>
-
-                <div id="dynamicDataForm" class="space-y-4 pt-2 border-t border-slate-100 overflow-x-hidden pb-2">
-                    <!-- Inputs injected via JS -->
-                </div>
-            </div>
-
-            <div class="bg-slate-50 p-6 rounded-[28px] border border-slate-100 space-y-5">
-                <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span> <span data-i18n="dimLayout">Dimensi & Tata Letak</span></h2>
-                <div class="grid grid-cols-2 gap-x-5 gap-y-6">
-                    <div class="col-span-2">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="visScale">Skala Visual</span><span id="chartScaleDisplay" class="text-slate-900 font-bold">100%</span></label>
-                        <input type="range" id="chartScaleSlider" min="40" max="150" value="100">
-                    </div>
+                <div class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="width">Lebar</span><span id="canvasWidthDisplay">100%</span></label>
-                        <input type="range" id="canvasWidthSlider" min="40" max="100" step="5" value="100">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="height">Tinggi</span><span id="canvasHeightDisplay">500px</span></label>
-                        <input type="range" id="canvasHeightSlider" min="300" max="900" step="10" value="500">
-                    </div>
-                    <div class="col-span-2" id="donutCutoutContainer" style="display: none;">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="donutHole">Ketebalan Lubang</span><span id="donutCutoutDisplay">60%</span></label>
-                        <input type="range" id="donutCutoutSlider" min="0" max="90" value="60">
-                    </div>
-                    <div class="col-span-2" id="barThicknessContainer">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="elemThick">Ketebalan Elemen</span><span id="chartThicknessDisplay">100%</span></label>
-                        <input type="range" id="chartThicknessSlider" min="10" max="150" value="100">
-                    </div>
-                    <div class="col-span-2" id="chartSpacingContainer">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="elemSpace">Jarak Elemen</span><span id="chartSpacingDisplay">10%</span></label>
-                        <input type="range" id="chartSpacingSlider" min="0" max="50" value="10">
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-slate-50 p-6 rounded-[28px] border border-slate-100 space-y-6">
-                <h2 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span> <span data-i18n="typoAest">Tipografi & Estetika</span></h2>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-2" data-i18n="globalFont">Jenis Huruf Global</label>
-                    <select id="fontFamily" class="w-full pill-input text-sm bg-white">
-                        <option value="'Inter', sans-serif">Inter (Modern Clean)</option>
-                        <option value="'Poppins', sans-serif">Poppins (Rounded)</option>
-                        <option value="'Roboto Mono', monospace">Roboto Mono (Tech)</option>
-                        <option value="Georgia, serif">Georgia (Elegant Serif)</option>
-                    </select>
-                </div>
-
-                <div class="space-y-5 pt-4 border-t border-slate-200">
-                    <label class="block text-xs font-bold text-slate-800" data-i18n="dataLabelTitle">Label Data (Dalam Grafik)</label>
-                    
-                    <div class="mb-4 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="dataLabelPos">Posisi Angka</label>
-                        <select id="dataLabelPosition" class="w-full text-xs border border-slate-200 rounded-lg p-2 font-bold bg-slate-50 text-slate-800 outline-none focus:border-black cursor-pointer">
-                            <option value="center" selected data-i18n="optPosCenter">Tengah (Center)</option>
-                            <option value="inside-top" data-i18n="optPosInTop">Dalam - Atas/Kanan</option>
-                            <option value="inside-bottom" data-i18n="optPosInBot">Dalam - Bawah/Kiri</option>
-                            <option value="outside" data-i18n="optPosOut">Luar Grafik Melayang</option>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="graphicType">Tipe Grafik Utama</label>
+                        <select id="chartType" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
+                            <option value="bar-vertical">Bar Vertical (Batang Vertikal)</option>
+                            <option value="bar-horizontal">Bar Horizontal (Batang Mendatar)</option>
+                            <option value="line">Line Chart (Garis Tren)</option>
+                            <option value="area">Area Soundwave</option>
+                            <option value="pie">Pie Chart</option>
+                            <option value="doughnut">Donut Chart</option>
+                            <option value="polarArea">Polar Area</option>
+                            <option value="radar">Radar Chart</option>
+                            <option value="waterfall">Waterfall Chart (Air Terjun)</option>
+                            <option value="scatter">Scatter Plot (Sebaran)</option>
+                            <option value="bubble">Bubble Chart (Gelembung)</option>
+                            <option value="gantt">Gantt Chart (Timeline)</option>
+                            <option value="wordCloud">Word Cloud (Awan Teks)</option>
                         </select>
                     </div>
-
-                    <div class="flex gap-4">
-                        <div class="flex-1 flex flex-col items-center">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="textColor">Warna Teks</label>
-                            <div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" id="fontColor" value="#111111" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer"></div>
-                        </div>
-                        <div class="flex-1 flex flex-col items-center">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="outlineColor">Garis Luar</label>
-                            <div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" id="strokeColor" value="#d4ff00" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer"></div>
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="themeColor">Tema Warna</label>
+                        <select id="colorTheme" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
+                            <option value="lime">Neon Lime (AI Theme)</option>
+                            <option value="default">Modern Minimalist (Default)</option>
+                            <option value="corporate">Corporate Blue</option>
+                            <option value="earth">Earthy Nature</option>
+                            <option value="sunset">Sunset Vibes</option>
+                            <option value="monochrome">Monochrome Elegant</option>
+                        </select>
                     </div>
-                    <div class="grid grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="size">Ukuran</span><span id="fontSizeDisplay">16px</span></label>
-                            <input type="range" id="fontSizeSlider" min="0" max="40" value="16">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="outWidth">Tebal</span><span id="strokeWidthDisplay">3px</span></label>
-                            <input type="range" id="strokeWidthSlider" min="0" max="10" value="3">
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="subDataLogic">Logika Sub-Data (Tumpukan)</label>
+                        <select id="stackMode" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
+                            <option value="accumulate" data-i18n="accumulate">Akumulasi (Tambah Tinggi)</option>
+                            <option value="include" data-i18n="include">Include (Masuk ke Data Utama)</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="space-y-5 pt-4 border-t border-slate-200">
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-slate-800" data-i18n="showLegendTitle">Tampilkan Legenda</label>
-                        <label class="toggle-switch-container">
-                            <input type="checkbox" id="toggleLegend" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
+                <!-- OVERLAY ENGINE -->
+                <div class="mt-6 pt-5 border-t border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-slate-800"></div>
+                            <h3 class="text-[11px] font-black text-slate-800 tracking-wider uppercase" data-i18n="multiLayerEngine">Mesin Multi-Lapis (Overlay)</h3>
+                        </div>
+                        <button id="btnAddOverlay" class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-[10px] font-bold px-3 py-1.5 rounded-xl transition uppercase flex items-center gap-1 shadow-md">
+                            <span>+</span> <span data-i18n="addChart">Tambah Grafik</span>
+                        </button>
                     </div>
-                    <div class="flex gap-3 items-center">
-                        <div class="flex-1">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 text-center" data-i18n="pos">Posisi</label>
-                            <select id="legendPosition" class="w-full text-xs border border-slate-200 rounded-lg p-1.5 font-bold bg-white text-slate-700 outline-none focus:border-black cursor-pointer">
-                                <option value="top" selected data-i18n="optTop">Atas</option>
-                                <option value="bottom" data-i18n="optBottom">Bawah</option>
-                                <option value="left" data-i18n="optLeft">Kiri</option>
-                                <option value="right" data-i18n="optRight">Kanan</option>
+                    <p class="text-[10px] text-slate-500 mb-4 leading-relaxed" data-i18n="multiLayerDesc">Tambahkan grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.</p>
+                    
+                    <div id="seriesContainer" class="space-y-3">
+                        <!-- Series layers generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- INPUT DATA LANGSUNG (Matriks Sempurna 1:1) -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xs font-bold text-slate-800 tracking-widest uppercase" data-i18n="liveDataInput">Input Data Langsung</h2>
+                    <button onclick="openIconModal()" class="bg-slate-900 text-[#cafc03] text-[10px] font-bold px-3 py-1.5 rounded-xl transition uppercase flex items-center gap-1 hover:bg-slate-800 shadow-md">
+                        <i class="ph ph-squares-four"></i> <span data-i18n="iconLibrary">Koleksi Ikon</span>
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase" data-i18n="dataRowCount">Jumlah Baris Label (Kategori)</span>
+                    <div class="flex items-center bg-white rounded-lg border border-slate-200 p-0.5 shadow-sm">
+                        <button id="btnRemoveRow" class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-md transition"><i class="ph ph-minus"></i></button>
+                        <span id="rowCountDisplay" class="w-8 text-center text-xs font-bold text-slate-800">4</span>
+                        <button id="btnAddRow" class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-[#cafc03] hover:bg-slate-900 rounded-md transition"><i class="ph ph-plus"></i></button>
+                    </div>
+                </div>
+
+                <div id="dataRowsContainer" class="space-y-4">
+                    <!-- Data rows matriks JS -->
+                </div>
+            </div>
+
+            <!-- DIMENSI & TATA LETAK -->
+            <div class="bg-slate-50 border border-slate-100 rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-2 h-2 rounded-full bg-slate-800"></div>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="dimensionLayout">Dimensi & Tata Letak</h2>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="visualScale">Skala Visual (Zoom Canvas)</span><span id="chartScaleDisplay">100%</span></label>
+                        <input type="range" id="chartScale" min="50" max="150" value="100">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="width">Lebar</span><span id="chartWidthDisplay">100%</span></label>
+                            <input type="range" id="chartWidth" min="30" max="100" value="100">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="height">Tinggi</span><span id="chartHeightDisplay">500px</span></label>
+                            <input type="range" id="chartHeight" min="300" max="1000" step="50" value="500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="thickness">Ketebalan Elemen</span><span id="chartThicknessDisplay">100%</span></label>
+                            <input type="range" id="chartThickness" min="10" max="150" value="100">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="spacing">Jarak Antar Elemen</span><span id="chartSpacingDisplay">10px</span></label>
+                            <input type="range" id="chartSpacing" min="0" max="50" value="10">
+                        </div>
+                    </div>
+
+                    <div id="donutCutoutContainer">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="donutHole">Lubang Donut</span><span id="donutCutoutDisplay">60%</span></label>
+                        <input type="range" id="donutCutout" min="0" max="90" value="60">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="borderRadius">Sudut Melengkung</span><span id="borderRadiusDisplay">8px</span></label>
+                            <input type="range" id="borderRadiusSlider" min="0" max="50" value="8">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="lineStyle">Gaya Garis</label>
+                            <select id="lineStyleSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                                <option value="smooth" data-i18n="smooth">Melengkung (Smooth)</option>
+                                <option value="straight" data-i18n="straight">Lurus (Straight)</option>
+                                <option value="stepped" data-i18n="stepped">Tangga (Stepped)</option>
                             </select>
                         </div>
-                        <div class="flex-1">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 text-center" data-i18n="color">Warna</label>
-                            <div class="flex justify-center"><div class="relative w-7 h-7 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" id="legendFontColor" value="#475569" class="absolute -top-2 -left-2 w-10 h-10 cursor-pointer"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIPOGRAFI & ESTETIKA -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="typographyEst">Tipografi & Estetika</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700" data-i18n="showLegend">Tampilkan Legenda</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleLegend" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                        </label>
+                    </div>
+                    
+                    <div id="legendControls" class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" data-i18n="legendPosition">Posisi</label>
+                            <select id="legendPosition" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none">
+                                <option value="top">Atas (Horizontal)</option>
+                                <option value="bottom">Bawah (Horizontal)</option>
+                                <option value="left">Kiri (Vertikal)</option>
+                                <option value="right">Kanan (Vertikal)</option>
+                            </select>
                         </div>
-                        <div class="flex-[1.5]">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="size">Ukuran</span><span id="legendFontSizeDisplay">14px</span></label>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" data-i18n="legendAlign">Perataan</label>
+                            <select id="legendAlign" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none">
+                                <option value="center" data-i18n="alignCenter">Tengah</option>
+                                <option value="start" data-i18n="alignStart">Kiri/Atas (Mulai)</option>
+                                <option value="end" data-i18n="alignEnd">Kanan/Bawah (Akhir)</option>
+                            </select>
+                        </div>
+                        <div class="col-span-2 mt-2">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex justify-between"><span data-i18n="legendSize">Ukuran Legenda</span><span id="legendFontSizeDisplay">14px</span></label>
                             <input type="range" id="legendFontSizeSlider" min="8" max="24" value="14">
                         </div>
                     </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" data-i18n="datalabelPos">Posisi Angka (Datalabels)</label>
+                        <select id="datalabelPositionSelect" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <option value="center" data-i18n="posCenter">Tengah Batang (Default)</option>
+                            <option value="end" data-i18n="posInsideTop">Dalam - Ujung Atas/Kanan</option>
+                            <option value="start" data-i18n="posInsideBottom">Dalam - Pangkal Bawah/Kiri</option>
+                            <option value="outside" data-i18n="posOutside">Luar Grafik (Melayang)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LATAR BELAKANG & KISI -->
+            <div class="bg-slate-50 border border-slate-100 rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="bgAreaTitle">Latar Belakang & Kisi</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="bgColorTitle">Warna Latar Belakang</label>
+                        <div class="flex h-10 overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                            <input type="color" id="bgColor" value="#ffffff" class="w-12 h-14 -mt-2 -ml-2 cursor-pointer">
+                            <div class="flex-1 bg-white flex items-center px-3 text-xs font-mono text-slate-500" id="bgColorText">#ffffff</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="opacity">Transparansi (Opasitas)</span><span id="bgOpacityDisplay">0%</span></label>
+                        <input type="range" id="bgOpacitySlider" min="0" max="100" value="0">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="borderRadius">Sudut Melengkung</span><span id="bgRadiusDisplay">0px</span></label>
+                            <input type="range" id="bgRadiusSlider" min="0" max="100" value="0">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="bgPaddingTitle">Jarak (Padding)</span><span id="bgPaddingDisplay">0px</span></label>
+                            <input type="range" id="bgPaddingSlider" min="0" max="100" value="0">
+                        </div>
+                    </div>
                 </div>
 
-                <div id="axesControlPanel" class="space-y-5 pt-4 border-t border-slate-200">
+                <div id="gridControlPanel" class="space-y-4 pt-4 mt-4 border-t border-slate-200">
                     <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-slate-800" data-i18n="showX">Sumbu X (Bawah)</label>
-                        <label class="toggle-switch-container">
-                            <input type="checkbox" id="toggleAxisX" checked>
-                            <span class="toggle-slider"></span>
+                        <label class="text-xs font-bold text-slate-700" data-i18n="showGridX">Kisi Vertikal (X)</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleGridX" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
                         </label>
                     </div>
                     <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-slate-800" data-i18n="showY">Sumbu Y (Kiri)</label>
-                        <label class="toggle-switch-container">
-                            <input type="checkbox" id="toggleAxisY" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-slate-800 flex items-center gap-1" data-i18n="showYRight">Sumbu Sekunder (Kanan/Atas)</label>
-                        <label class="toggle-switch-container">
-                            <input type="checkbox" id="toggleAxisYRight" checked>
-                            <span class="toggle-slider"></span>
+                        <label class="text-xs font-bold text-slate-700" data-i18n="showGridY">Kisi Horizontal (Y)</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleGridY" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
                         </label>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="axisFont">Ukuran Sumbu</span><span id="axisFontSizeDisplay">12px</span></label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="gridColor">Warna Garis Kisi</label>
+                        <div class="flex h-8 overflow-hidden rounded-lg border border-slate-200 w-full">
+                            <input type="color" id="gridColor" value="#e2e8f0" class="w-8 h-10 -mt-1 -ml-1 cursor-pointer">
+                            <div class="flex-1 bg-white flex items-center px-2 text-[10px] font-mono text-slate-500" id="gridColorText">#e2e8f0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMBU & GARIS -->
+            <div id="axesControlPanel" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="axisGrid">Sumbu Angka</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700" data-i18n="axisX">Sumbu Utama</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleAxisX" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700" data-i18n="axisYLeft">Sumbu Kategori</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleAxisY" class="sr-only peer" checked>
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                        </label>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-700" data-i18n="axisYRight">Sumbu Sekunder</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggleAxisYRight" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                        </label>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="axisSize">Ukuran Font Sumbu</span><span id="axisFontSizeDisplay">12px</span></label>
                         <input type="range" id="axisFontSizeSlider" min="8" max="24" value="12">
                     </div>
                 </div>
             </div>
-            
-            <div class="mt-8 pt-6 pb-2 flex flex-col items-center justify-center text-center opacity-70 border-t border-slate-200">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em] mb-1">Official Asset</p>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em]">MNC Channels</p>
-                <p class="text-[9px] font-medium text-slate-400 mt-1">Data & Analytics Division</p>
-            </div>
-            
-        </div>
-    </aside>
 
-    <main class="flex-1 flex flex-col relative w-full h-full overflow-hidden bg-slate-50/50">
-        
-        <header class="absolute top-8 left-8 right-8 z-10 flex justify-between items-center pointer-events-none">
-            <div class="flex items-center gap-4 pointer-events-auto">
-                <button id="toggleSidebarBtn" class="w-12 h-12 bg-white rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center rubber-effect text-slate-700 hover:text-slate-900 hover:bg-[#d4ff00] border border-slate-100 transition-colors duration-300">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+            <!-- WATERMARK FOOTER -->
+            <div class="text-center pt-2 pb-8 opacity-60">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400 bg-slate-50 border border-slate-100">
+                    <i class="ph ph-buildings text-xl"></i>
+                </div>
+                <p class="text-[9px] text-slate-400 tracking-widest uppercase mb-0.5 font-bold">Official Asset</p>
+                <h3 class="text-sm font-bold text-slate-700">MNC Channels</h3>
+                <p class="text-[10px] text-slate-400">Data & Analytics Division</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: CANVAS WORKSPACE -->
+    <div class="flex-1 bg-[#f8fafc] flex flex-col relative overflow-hidden" id="workspaceArea">
+        <!-- HEADER KANAN -->
+        <div class="h-20 px-8 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/50 bg-white/50 backdrop-blur-md">
+            <div class="flex items-center gap-4">
+                <button class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 transition border border-slate-200">
+                    <i class="ph ph-list text-lg"></i>
                 </button>
-                <div class="bg-white/80 backdrop-blur-xl px-6 py-3.5 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.04)] border border-white flex items-center gap-3">
-                    <span class="w-2.5 h-2.5 rounded-full bg-[#d4ff00] shadow-[0_0_12px_#d4ff00]"></span>
-                    <h2 class="text-sm font-bold text-slate-800 tracking-wide" data-i18n="visWorkspace">Ruang Kerja Visual</h2>
+                <div class="glass-panel px-5 py-2.5 rounded-full flex items-center gap-2 shadow-sm">
+                    <div class="w-2.5 h-2.5 rounded-full bg-[#cafc03] animate-pulse"></div>
+                    <span class="text-sm font-bold text-slate-800" data-i18n="visualWorkspace">Ruang Kerja Visual</span>
                 </div>
             </div>
-
-            <div class="flex items-center gap-3 pointer-events-auto">
-                <div class="bg-white/90 backdrop-blur-xl px-4 py-3 rounded-full shadow-[0_10px_25px_rgba(0,0,0,0.05)] border border-slate-100 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105">
-                    <span class="text-[10px] font-black text-slate-800 transition-colors" id="langId">ID</span>
-                    <label class="toggle-switch-container lang-switch">
-                        <input type="checkbox" id="toggleLanguage">
-                        <span class="toggle-slider"></span>
+            <div class="flex items-center gap-4">
+                <!-- SAKELAR BAHASA -->
+                <div class="glass-panel px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-slate-200">
+                    <span class="text-[10px] font-black text-slate-800">ID</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="langToggle" class="sr-only peer">
+                        <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[16px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-800"></div>
                     </label>
-                    <span class="text-[10px] font-black text-slate-300 transition-colors" id="langEn">EN</span>
+                    <span class="text-[10px] font-black text-slate-400">EN</span>
                 </div>
 
-                <button id="btnExport" class="bg-slate-900 text-white hover:bg-[#d4ff00] hover:text-black px-7 py-3.5 rounded-full text-sm font-bold shadow-[0_10px_25px_rgba(0,0,0,0.15)] flex items-center gap-2 rubber-effect transition-colors duration-300">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    <span data-i18n="btnExport">Ekspor Gambar HD</span>
+                <button id="btnExport" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 border border-slate-700">
+                    <i class="ph ph-download-simple"></i> <span data-i18n="exportImage">Ekspor Gambar HD</span>
                 </button>
             </div>
-        </header>
-
-        <div id="loadingOverlay" class="loading-overlay rounded-3xl m-4">
-            <div class="loading-spinner mb-4"></div>
-            <p class="text-sm font-bold text-slate-800 animate-pulse tracking-widest uppercase" data-i18n="fetching">Mengambil Data...</p>
         </div>
 
-        <section class="flex-1 overflow-y-auto pt-32 pb-20 px-8 flex flex-col items-center w-full block">
-            
-            <div id="exportTargetWrapper" class="w-full flex justify-center items-start">
-                <div id="exportTarget" class="transition-all duration-300" style="width: 100%; max-width: 1000px; transform-origin: top center; background-color: transparent;">
-                    <div id="canvasWrapper" class="chart-container-strict">
-                        <canvas id="mainCanvas"></canvas>
+        <!-- AREA CANVAS UTAMA -->
+        <div class="flex-1 overflow-auto flex items-center justify-center p-8 pb-32">
+            <div id="exportTarget" class="relative chart-wrapper-transition origin-center" style="width: 100%; height: 500px;">
+                <div id="canvasWrapper" class="w-full h-full relative transition-all duration-300 overflow-hidden box-border flex items-center justify-center">
+                    <!-- Error fallback text -->
+                    <div id="errorDisplay" class="absolute inset-0 bg-red-50 flex flex-col items-center justify-center hidden z-50 text-red-500 rounded-xl border border-red-200 p-6 text-center">
+                        <i class="ph ph-warning-octagon text-4xl mb-2"></i>
+                        <h3 class="font-bold text-lg mb-1">Menyesuaikan Layout...</h3>
+                        <p class="text-sm">Sistem sedang mereset konfigurasi yang tidak valid.</p>
                     </div>
+                    <canvas id="mainCanvas"></canvas>
                 </div>
-            </div>
-
-            <div class="w-full max-w-5xl mt-20 bg-white p-8 rounded-[40px] shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-100" data-html2canvas-ignore>
-                <div class="flex justify-between items-end mb-8 border-b border-slate-100 pb-5">
-                    <div>
-                        <h3 class="text-2xl font-black text-slate-800 tracking-tight" data-i18n="analyticsTracker">Pelacak Analitik</h3>
-                        <p class="text-sm text-slate-400 mt-1 font-medium" data-i18n="analyticsDesc">Distribusi proporsi data utama.</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" data-i18n="grandTotal">Total Keseluruhan</p>
-                        <p class="text-4xl font-black text-[#d4ff00] bg-slate-900 px-5 py-1.5 rounded-full inline-block mt-2 shadow-lg" id="totalSumDisplay">0</p>
-                    </div>
-                </div>
-                <div id="percentageContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal Custom Reset -->
-    <div id="resetModal" class="modal-overlay fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex justify-center items-center opacity-0 transition-opacity duration-300 pointer-events-none">
-        <div class="bg-white w-[90%] max-w-sm rounded-[32px] shadow-2xl p-8 transform scale-95 transition-transform duration-300 text-center pointer-events-auto border border-slate-100">
-            <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-            <h3 class="text-xl font-bold text-slate-800 mb-2" data-i18n="resetConfirmTitle">Reset Semua Pengaturan?</h3>
-            <p class="text-sm text-slate-500 mb-8" data-i18n="resetConfirmDesc">Seluruh data, warna, dan tumpukan yang telah Anda buat akan dikembalikan ke kondisi awal (default). Tindakan ini tidak dapat dibatalkan.</p>
-            <div class="flex gap-3 justify-center">
-                <button onclick="closeResetModal()" class="flex-1 py-3 rounded-full font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors" data-i18n="resetCancel">Batal</button>
-                <button onclick="executeResetApp()" class="flex-1 py-3 rounded-full font-bold text-white bg-red-500 hover:bg-red-600 shadow-[0_4px_14px_rgba(239,68,68,0.4)] transition-colors" data-i18n="resetConfirmBtn">Ya, Reset</button>
             </div>
         </div>
-    </div>
-
-    <!-- Modal Icon Library -->
-    <div id="iconLibraryModal" class="modal-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex justify-center items-center opacity-0 transition-opacity duration-300 pointer-events-none">
-        <div class="bg-white w-[90%] max-w-2xl rounded-[32px] shadow-2xl p-6 transform scale-95 transition-transform duration-300 max-h-[80vh] flex flex-col pointer-events-auto">
-            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+        
+        <!-- PANEL ANALITIK BAWAH -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-6 py-4 shadow-xl flex items-center gap-6 z-10 w-[80%] max-w-4xl border border-white/40">
+            <div class="flex items-center gap-3 pr-6 border-r border-slate-200 shrink-0">
+                <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03]">
+                    <i class="ph ph-sigma text-xl"></i>
+                </div>
                 <div>
-                    <h3 class="text-lg font-bold text-slate-800" data-i18n="iconLibTitle">Koleksi Ikon</h3>
-                    <p class="text-xs text-slate-500" data-i18n="iconLibDesc">Klik ikon untuk menyalin (copy).</p>
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase" data-i18n="totalData">Total Keseluruhan</p>
+                    <h4 class="text-xl font-black text-slate-800" id="totalSumDisplay">0</h4>
                 </div>
-                <button id="btnCloseLibrary" class="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center hover:bg-slate-200 text-slate-600 font-bold">✕</button>
             </div>
-            <div class="overflow-y-auto p-2 scrollbar-hide space-y-6" id="iconContainer"></div>
+            <div class="flex-1 flex gap-4 overflow-x-auto pb-1" id="percentageContainer">
+                <!-- Persentase otomatis via JS -->
+            </div>
+        </div>
+
+        <div id="loadingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+            <div class="flex flex-col items-center gap-3">
+                <i class="ph ph-spinner-gap text-4xl text-[#cafc03] animate-spin"></i>
+                <p class="text-sm font-bold text-slate-600 tracking-widest uppercase" data-i18n="rendering">Memproses HD...</p>
+            </div>
         </div>
     </div>
-    
-    <div id="toast"><span id="toastMsg">✅ Disalin!</span></div>
 
     <script>
-        try {
-            if(typeof Chart !== 'undefined' && typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
-            if(typeof ChartGeo !== 'undefined' && typeof Chart !== 'undefined') Chart.register(ChartGeo.ChoroplethController, ChartGeo.GeoFeature, ChartGeo.ColorScale, ChartGeo.ProjectionScale);
-            if(typeof ChartWordCloud !== 'undefined' && typeof Chart !== 'undefined') Chart.register(ChartWordCloud.WordCloudController, ChartWordCloud.WordElement);
-        } catch(e) { console.error("Plugin Registration Error", e); }
-
-        const i18n = {
+        const translations = {
             id: {
-                coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik Utama", presetColors: "Tema Warna", multiLayerEngine: "MESIN MULTI-LAPIS (OVERLAY)", 
-                btnAddSeries: "+ Tambah Grafik", multiLayerDesc: "Tambahkan grafik pelapis (seperti Line) di atas data utama Anda.", 
-                liveDataInput: "Input Data Langsung", btnOpenLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Utama",
-                dimLayout: "Dimensi & Tata Letak", visScale: "Skala Visual", width: "Lebar", height: "Tinggi", 
-                donutHole: "Ketebalan Lubang", elemThick: "Ketebalan Elemen", elemSpace: "Jarak Elemen",
-                typoAest: "Tipografi & Estetika", globalFont: "Jenis Huruf Global", dataLabelTitle: "Label Data (Dalam Grafik)",
-                dataLabelPos: "Posisi Angka", optPosCenter: "Tengah (Center)", optPosInTop: "Dalam - Atas/Kanan", optPosInBot: "Dalam - Bawah/Kiri", optPosOut: "Luar Grafik Melayang",
-                textColor: "Warna Teks", outlineColor: "Garis Luar", size: "Ukuran", outWidth: "Tebal",
-                showLegendTitle: "Tampilkan Legenda", pos: "Posisi", optTop: "Atas", optBottom: "Bawah", optLeft: "Kiri", optRight: "Kanan",
-                color: "Warna", showX: "Sumbu X (Bawah)", showY: "Sumbu Y (Kiri)", showYRight: "Sumbu Sekunder (Kanan/Atas)", axisFont: "Ukuran Sumbu",
-                visWorkspace: "Ruang Kerja Visual", btnExport: "Ekspor Gambar HD", fetching: "Mengambil Data...",
-                analyticsTracker: "Pelacak Analitik", analyticsDesc: "Distribusi proporsi data utama.", grandTotal: "Total Keseluruhan",
-                iconLibTitle: "Koleksi Ikon", iconLibDesc: "Klik ikon untuk menyalin (copy).",
-                layerFront: "Depan", layerMid1: "Tengah 1", layerMid2: "Tengah 2", layerBack: "Belakang", axisLeft: "Kiri", axisRight: "Kanan", toastCopied: "✅ Disalin!",
-                toastMax: "⚠ Maksimal 4 grafik kombinasi!", resetApp: "Reset Data",
-                resetConfirmTitle: "Reset Semua Pengaturan?", resetConfirmDesc: "Seluruh data, warna, dan tumpukan yang telah Anda buat akan dikembalikan ke kondisi awal (default). Tindakan ini tidak dapat dibatalkan.",
-                resetCancel: "Batal", resetConfirmBtn: "Ya, Reset",
-                optBarV: "Bar Vertical", optBarH: "Bar Horizontal", optLine: "Line Trend", optArea: "Area Soundwave", optDonut: "Donut Chart", optPie: "Pie Chart", optRadar: "Radar Matrix", optPolar: "Polar Area",
-                optAdvanced: "Advanced Charts", optWaterfall: "Waterfall Chart", optScatter: "Scatter Plot", optBubble: "Bubble Chart", optGantt: "Gantt Chart (Timeline)", optWordCloud: "Word Cloud",
-                optMapId: "Geomap: Indonesia", optMapWorld: "Geomap: World",
-                themeMod: "Modern Minimalist (Default)", themeLime: "Neon Lime (AI Theme)", themeCorp: "Corporate Blue", themeEarth: "Earthy Nature", themeSun: "Sunset Vibes", themeMono: "Monochrome Elegant",
-                optBar: "Bar", optLineType: "Line", optAreaType: "Area", ganttStart: "Mulai", ganttEnd: "Selesai",
-                addStackBtn: "+ Tambah Tumpukan (Sub-Data)", primaryLayerName: "Data Utama", optInherit: "Sesuai Tipe Utama",
-                stackModeTitle: "Logika Sub-Data (Tumpukan)", stackModeAcc: "Akumulasi (Tambah Tinggi)", stackModeInc: "Include (Proporsi ke Data Utama)"
+                coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik Utama", themeColor: "Tema Warna", subDataLogic: "Logika Sub-Data (Tumpukan)", accumulate: "Akumulasi (Tambah Tinggi)", include: "Include (Masuk ke Data Utama)",
+                resetData: "Reset Data", resetConfirmTitle: "Reset Semua Pengaturan?", resetConfirmDesc: "Aksi ini akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.", cancel: "Batal", yesReset: "Ya, Reset",
+                multiLayerEngine: "Mesin Multi-Lapis (Overlay)", addChart: "Tambah Grafik", multiLayerDesc: "Tambahkan grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.",
+                liveDataInput: "Input Data Langsung", iconLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Label (Kategori)", searchIcon: "Cari ikon...",
+                dimensionLayout: "Dimensi & Tata Letak", visualScale: "Skala Visual (Zoom Canvas)", width: "Lebar", height: "Tinggi", donutHole: "Lubang Donut", thickness: "Ketebalan Elemen", spacing: "Jarak Antar Elemen", borderRadius: "Sudut Melengkung", lineStyle: "Gaya Garis", smooth: "Melengkung (Smooth)", straight: "Lurus (Straight)", stepped: "Tangga (Stepped)",
+                typographyEst: "Tipografi & Estetika", showLegend: "Tampilkan Legenda", legendPosition: "Posisi", legendAlign: "Perataan", alignCenter: "Tengah", alignStart: "Kiri/Atas (Mulai)", alignEnd: "Kanan/Bawah (Akhir)", legendSize: "Ukuran Legenda", datalabelPos: "Posisi Angka (Datalabels)", posCenter: "Tengah Batang (Default)", posInsideTop: "Dalam - Ujung Atas/Kanan", posInsideBottom: "Dalam - Pangkal Bawah/Kiri", posOutside: "Luar Grafik (Melayang)",
+                bgAreaTitle: "Latar Belakang & Kisi", bgColorTitle: "Warna Latar Belakang", opacity: "Transparansi (Opasitas)", showGridX: "Kisi Vertikal (X)", showGridY: "Kisi Horizontal (Y)", gridColor: "Warna Garis Kisi", bgPaddingTitle: "Jarak (Padding)",
+                axisGrid: "Sumbu Angka", axisX: "Sumbu Utama", axisYLeft: "Sumbu Kategori", axisYRight: "Sumbu Sekunder", axisSize: "Ukuran Font Sumbu",
+                visualWorkspace: "Ruang Kerja Visual", exportImage: "Ekspor Gambar HD", totalData: "Total Keseluruhan", rendering: "Memproses HD..."
             },
             en: {
-                coreSettings: "Core Settings", graphicType: "Primary Graphic Type", presetColors: "Preset Colors", multiLayerEngine: "MULTI-LAYER ENGINE (OVERLAY)", 
-                btnAddSeries: "+ Add Overlay", multiLayerDesc: "Add overlay charts (like Lines) on top of your primary data.", 
-                liveDataInput: "Live Data Input", btnOpenLibrary: "Icon Library", dataRowCount: "Primary Row Count",
-                dimLayout: "Dimensions & Layout", visScale: "Visual Scale", width: "Width", height: "Height", 
-                donutHole: "Donut Hole Thickness", elemThick: "Element Thickness", elemSpace: "Element Spacing",
-                typoAest: "Typography & Aesthetics", globalFont: "Global Font Family", dataLabelTitle: "Data Labels",
-                dataLabelPos: "Number Position", optPosCenter: "Center", optPosInTop: "Inside - Top/Right", optPosInBot: "Inside - Bottom/Left", optPosOut: "Outside Floating",
-                textColor: "Text Color", outlineColor: "Outline Color", size: "Size", outWidth: "Outline Width",
-                showLegendTitle: "Show Legend", pos: "Position", optTop: "Top", optBottom: "Bottom", optLeft: "Left", optRight: "Right",
-                color: "Color", showX: "Show X-Axis (Bottom)", showY: "Show Y-Axis (Left)", showYRight: "Show Sec-Axis (Right/Top)", axisFont: "Axis Font Size",
-                visWorkspace: "Visual Workspace", btnExport: "Export HD Image", fetching: "Fetching Data...",
-                analyticsTracker: "Analytics Tracker", analyticsDesc: "Proportional distribution of primary data.", grandTotal: "Grand Total",
-                iconLibTitle: "Icon Library", iconLibDesc: "Click an icon to copy.",
-                layerFront: "Front", layerMid1: "Middle 1", layerMid2: "Middle 2", layerBack: "Back", axisLeft: "Left", axisRight: "Right", toastCopied: "✅ Copied!",
-                toastMax: "⚠ Maximum 4 chart combinations!", resetApp: "Reset Data",
-                resetConfirmTitle: "Reset All Settings?", resetConfirmDesc: "All data, colors, and stacks you have created will be reverted to default conditions. This action cannot be undone.",
-                resetCancel: "Cancel", resetConfirmBtn: "Yes, Reset",
-                optBarV: "Vertical Bar", optBarH: "Horizontal Bar", optLine: "Line Trend", optArea: "Area Soundwave", optDonut: "Donut Chart", optPie: "Pie Chart", optRadar: "Radar Matrix", optPolar: "Polar Area",
-                optAdvanced: "Advanced Charts", optWaterfall: "Waterfall Chart", optScatter: "Scatter Plot", optBubble: "Bubble Chart", optGantt: "Gantt Chart (Timeline)", optWordCloud: "Word Cloud",
-                optMapId: "Geomap: Indonesia", optMapWorld: "Geomap: World",
-                themeMod: "Modern Minimalist (Default)", themeLime: "Neon Lime (AI Theme)", themeCorp: "Corporate Blue", themeEarth: "Earthy Nature", themeSun: "Sunset Vibes", themeMono: "Monochrome Elegant",
-                optBar: "Bar", optLineType: "Line", optAreaType: "Area", ganttStart: "Start", ganttEnd: "End",
-                addStackBtn: "+ Add Stack (Sub-Data)", primaryLayerName: "Primary Data", optInherit: "Set by Global Type",
-                stackModeTitle: "Sub-Data Logic (Stacking)", stackModeAcc: "Accumulate (Increase Height)", stackModeInc: "Include (Inside Primary Data)"
+                coreSettings: "Core Settings", graphicType: "Main Graphic Type", themeColor: "Theme Color", subDataLogic: "Sub-Data Logic (Stack)", accumulate: "Accumulate (Increase Height)", include: "Include (Inside Main Data)",
+                resetData: "Reset Data", resetConfirmTitle: "Reset All Settings?", resetConfirmDesc: "This action will clear all your data, layers, and colors, reverting to the factory defaults.", cancel: "Cancel", yesReset: "Yes, Reset",
+                multiLayerEngine: "Multi-Layer Engine (Overlay)", addChart: "Add Chart", multiLayerDesc: "Add overlay charts on top of your main data. Input matrix will adapt.",
+                liveDataInput: "Live Data Input", iconLibrary: "Icon Library", dataRowCount: "Label Row Count (Categories)", searchIcon: "Search icon...",
+                dimensionLayout: "Dimension & Layout", visualScale: "Visual Scale (Zoom)", width: "Width", height: "Height", donutHole: "Donut Hole", thickness: "Element Thickness", spacing: "Element Spacing", borderRadius: "Border Radius", lineStyle: "Line Style", smooth: "Smooth", straight: "Straight", stepped: "Stepped",
+                typographyEst: "Typography & Aesthetics", showLegend: "Show Legend", legendPosition: "Position", legendAlign: "Alignment", alignCenter: "Center", alignStart: "Left/Top (Start)", alignEnd: "Right/Bottom (End)", legendSize: "Legend Size", datalabelPos: "Number Position (Datalabels)", posCenter: "Center (Default)", posInsideTop: "Inside - Top/Right End", posInsideBottom: "Inside - Bottom/Left Base", posOutside: "Outside Chart (Floating)",
+                bgAreaTitle: "Background & Grid", bgColorTitle: "Background Color", opacity: "Opacity", showGridX: "Vertical Grid (X)", showGridY: "Horizontal Grid (Y)", gridColor: "Grid Line Color", bgPaddingTitle: "Background Padding",
+                axisGrid: "Number Axes", axisX: "Primary Axis", axisYLeft: "Category Axis", axisYRight: "Secondary Axis", axisSize: "Axis Font Size",
+                visualWorkspace: "Visual Workspace", exportImage: "Export HD Image", totalData: "Grand Total", rendering: "Processing HD..."
             }
         };
 
-        const palettes = {
-            'modern': ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#3b82f6', '#10b981', '#f43f5e'],
-            'lime': ['#d4ff00', '#111111', '#94a3b8', '#e2e8f0', '#4ade80', '#22d3ee', '#ec4899', '#f59e0b'],
-            'corporate': ['#1e3a8a', '#2563eb', '#60a5fa', '#93c5fd', '#bfdbfe', '#e0e7ff', '#1d4ed8', '#3b82f6'],
-            'earth': ['#065f46', '#059669', '#34d399', '#d97706', '#f59e0b', '#fbbf24', '#78350f', '#b45309'],
-            'sunset': ['#be123c', '#e11d48', '#f43f5e', '#c2410c', '#ea580c', '#f97316', '#7c2d12', '#9a3412'],
-            'monochrome': ['#0f172a', '#334155', '#475569', '#64748b', '#94a3b8', '#cbd5e1', '#e2e8f0', '#1e293b']
+        const themes = {
+            lime: ['#cafc03', '#111827', '#94a3b8', '#e2e8f0', '#334155'],
+            default: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+            corporate: ['#0f172a', '#1e293b', '#334155', '#475569', '#64748b'],
+            earth: ['#064e3b', '#047857', '#059669', '#10b981', '#34d399'],
+            sunset: ['#991b1b', '#b91c1c', '#dc2626', '#ef4444', '#f87171'],
+            monochrome: ['#171717', '#404040', '#737373', '#a3a3a3', '#d4d4d4']
         };
 
-        let geoCache = { indonesia: null, world: null };
+        function hexToRgba(hex, opacity) {
+            let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity / 100})`;
+        }
 
+        let mainChart = null;
+        let activeIconInput = null;
+        
+        // CLEAN SLATE MEMORY KEY - FORCING CACHE REFRESH
+        const STORAGE_KEY = 'proChartVision_Gold_V5'; 
+        
         const defaultAppState = {
             language: 'id', 
             chartType: 'bar-vertical', colorTheme: 'lime', stackMode: 'accumulate',
-            showAxisX: true, showAxisY: true, showAxisYRight: true, axisFontSize: 12, 
+            showAxisX: true, showAxisY: true, showAxisYRight: false, axisFontSize: 12, 
             chartScale: 100, chartWidth: 100, chartHeight: 500, 
             donutCutout: 60, chartThickness: 100, chartSpacing: 10,
-            showLegend: true, legendFontSize: 14, legendPosition: 'top',
-            dataLabelPosition: 'center',
-            typography: { family: "'Inter', sans-serif", size: 16, color: '#111111', strokeColor: '#d4ff00', strokeWidth: 3, legendColor: '#475569' },
+            borderRadius: 8, lineStyle: 'smooth', 
+            bgColor: '#ffffff', bgOpacity: 0, bgRadius: 0, bgPadding: 0, showGridX: false, showGridY: true, gridColor: '#e2e8f0',
+            showLegend: true, legendFontSize: 14, legendPosition: 'top', legendAlign: 'center', datalabelPosition: 'center',
+            
+            // Core Matriks Data
             series: [
-                { id: 'primary', name: 'Data Utama', isPrimary: true, order: 2, yAxis: 'y' }
-            ], 
-            items: [
-                { id: 1, label: 'Jawa Barat', icon: '📍', primaryStacks: [{ id: 'st1', name: 'Data Utama', value: 450, color: null, ganttEnd: 600 }], values: {} },
-                { id: 2, label: 'DKI Jakarta', icon: '🏢', primaryStacks: [{ id: 'st2', name: 'Data Utama', value: 320, color: null, ganttEnd: 450 }], values: {} },
-                { id: 3, label: 'Sumatera Utara', icon: '🌴', primaryStacks: [{ id: 'st3', name: 'Data Utama', value: 150, color: null, ganttEnd: 250 }], values: {} },
-                { id: 4, label: 'Kalimantan', icon: '🌳', primaryStacks: [{ id: 'st4', name: 'Data Utama', value: 80, color: null, ganttEnd: 150 }], values: {} },
+                { id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' },
+                { id: 's_over1', name: 'Overlay 1', type: 'line', axis: 'y', zIndex: 'front' }
+            ],
+            rows: [
+                { id: 'r_1', label: 'Jawa Barat', icon: '📍', values: [ { val: 450, val2: 500, color: '#cafc03' }, { val: 36, val2: 50, color: '#111827' } ] },
+                { id: 'r_2', label: 'DKI Jakarta', icon: '🏢', values: [ { val: 320, val2: 380, color: '#cafc03' }, { val: 61, val2: 80, color: '#111827' } ] },
+                { id: 'r_3', label: 'Sumatera Utara', icon: '🌴', values: [ { val: 150, val2: 200, color: '#cafc03' }, { val: 46, val2: 60, color: '#111827' } ] },
+                { id: 'r_4', label: 'Kalimantan', icon: '🌳', values: [ { val: 80, val2: 120, color: '#cafc03' }, { val: 24, val2: 30, color: '#111827' } ] }
             ]
         };
 
-        let appState = JSON.parse(JSON.stringify(defaultAppState));
-        let myChart = null; let isSidebarOpen = true;
+        let appState = JSON.parse(JSON.stringify(defaultAppState)); // Deep copy
 
         const els = {
-            sidebar: document.getElementById('sidebar'), toggleSidebarBtn: document.getElementById('toggleSidebarBtn'),
-            toggleLanguage: document.getElementById('toggleLanguage'), langId: document.getElementById('langId'), langEn: document.getElementById('langEn'),
-            chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'), 
-            multiSeriesPanel: document.getElementById('multiSeriesPanel'), seriesContainer: document.getElementById('seriesContainer'), btnAddSeries: document.getElementById('btnAddSeries'),
-            dataCountSlider: document.getElementById('dataCountSlider'), dataCountDisplay: document.getElementById('dataCountDisplay'), dynamicDataForm: document.getElementById('dynamicDataForm'),
-            canvasHeightSlider: document.getElementById('canvasHeightSlider'), canvasHeightDisplay: document.getElementById('canvasHeightDisplay'), canvasWidthSlider: document.getElementById('canvasWidthSlider'), canvasWidthDisplay: document.getElementById('canvasWidthDisplay'), chartScaleSlider: document.getElementById('chartScaleSlider'), chartScaleDisplay: document.getElementById('chartScaleDisplay'),
-            donutCutoutSlider: document.getElementById('donutCutoutSlider'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), donutCutoutContainer: document.getElementById('donutCutoutContainer'), chartThicknessSlider: document.getElementById('chartThicknessSlider'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), barThicknessContainer: document.getElementById('barThicknessContainer'), chartSpacingSlider: document.getElementById('chartSpacingSlider'), chartSpacingDisplay: document.getElementById('chartSpacingDisplay'), chartSpacingContainer: document.getElementById('chartSpacingContainer'),
-            fontFamily: document.getElementById('fontFamily'), fontSizeSlider: document.getElementById('fontSizeSlider'), fontSizeDisplay: document.getElementById('fontSizeDisplay'), fontColor: document.getElementById('fontColor'), strokeColor: document.getElementById('strokeColor'), strokeWidthSlider: document.getElementById('strokeWidthSlider'), strokeWidthDisplay: document.getElementById('strokeWidthDisplay'), legendFontColor: document.getElementById('legendFontColor'), toggleLegend: document.getElementById('toggleLegend'), legendFontSizeSlider: document.getElementById('legendFontSizeSlider'), legendFontSizeDisplay: document.getElementById('legendFontSizeDisplay'), legendPosition: document.getElementById('legendPosition'),
-            dataLabelPosition: document.getElementById('dataLabelPosition'),
+            langToggle: document.getElementById('langToggle'), errorDisplay: document.getElementById('errorDisplay'),
+            chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'), stackMode: document.getElementById('stackMode'),
+            seriesContainer: document.getElementById('seriesContainer'), btnAddOverlay: document.getElementById('btnAddOverlay'),
+            dataRowsContainer: document.getElementById('dataRowsContainer'), btnAddRow: document.getElementById('btnAddRow'), btnRemoveRow: document.getElementById('btnRemoveRow'), rowCountDisplay: document.getElementById('rowCountDisplay'),
+            chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), chartSpacing: document.getElementById('chartSpacing'), chartSpacingDisplay: document.getElementById('chartSpacingDisplay'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'), lineStyleSelect: document.getElementById('lineStyleSelect'), donutCutoutContainer: document.getElementById('donutCutoutContainer'),
+            toggleLegend: document.getElementById('toggleLegend'), legendPosition: document.getElementById('legendPosition'), legendAlign: document.getElementById('legendAlign'), legendFontSizeSlider: document.getElementById('legendFontSizeSlider'), legendFontSizeDisplay: document.getElementById('legendFontSizeDisplay'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'),
             toggleAxisX: document.getElementById('toggleAxisX'), toggleAxisY: document.getElementById('toggleAxisY'), toggleAxisYRight: document.getElementById('toggleAxisYRight'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
+            bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), bgRadiusSlider: document.getElementById('bgRadiusSlider'), bgRadiusDisplay: document.getElementById('bgRadiusDisplay'), bgPaddingSlider: document.getElementById('bgPaddingSlider'), bgPaddingDisplay: document.getElementById('bgPaddingDisplay'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'), gridColor: document.getElementById('gridColor'), gridColorText: document.getElementById('gridColorText'),
             exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), mainCanvas: document.getElementById('mainCanvas'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), loadingOverlay: document.getElementById('loadingOverlay')
         };
 
-        // --- MIGRATION SAFEGUARD ---
-        function sanitizeState() {
-            if(!appState.items) return;
-            appState.items.forEach(item => {
-                if(!item.primaryStacks) {
-                    item.primaryStacks = [{ id: 'ps_'+Date.now()+Math.random(), name: 'Data Utama', value: item.values['s1'] || 0, color: item.customColor, ganttEnd: (item.values['s2'] || 0) }];
-                }
-                if(item.customColor) {
-                    if(item.primaryStacks[0]) item.primaryStacks[0].color = item.customColor;
-                    delete item.customColor;
-                }
-            });
-            
-            // Ensure 'primary' configuration exists in series
-            if(!appState.series.find(s => s.id === 'primary')) {
-                appState.series.unshift({ id: 'primary', name: 'Data Utama', isPrimary: true, order: 2, yAxis: 'y' });
-                // Clean up old s1 from series if it existed
-                appState.series = appState.series.filter(s => s.id !== 's1');
-            }
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
         }
-
-        function saveState() { localStorage.setItem('proChartVisionStateV3_10', JSON.stringify(appState)); }
         function loadState() {
-            const saved = localStorage.getItem('proChartVisionStateV3_10');
-            if (saved) { try { let parsed = JSON.parse(saved); if(parsed && parsed.items) { appState = parsed; sanitizeState(); } } catch(e) {} }
-            syncUI();
-        }
-
-        function syncUI() {
-            updateLanguageToggleUI(); applyLanguage();
-            els.chartType.value = appState.chartType; els.colorTheme.value = appState.colorTheme;
-            if(document.getElementById('stackMode')) document.getElementById('stackMode').value = appState.stackMode || 'accumulate';
-            els.dataCountSlider.value = appState.items.length; els.dataCountDisplay.innerText = appState.items.length;
-            els.chartScaleSlider.value = appState.chartScale; els.chartScaleDisplay.innerText = appState.chartScale + '%';
-            els.canvasWidthSlider.value = appState.chartWidth; els.canvasWidthDisplay.innerText = appState.chartWidth + '%';
-            els.canvasHeightSlider.value = appState.chartHeight; els.canvasHeightDisplay.innerText = appState.chartHeight + 'px';
-            els.donutCutoutSlider.value = appState.donutCutout; els.donutCutoutDisplay.innerText = appState.donutCutout + '%';
-            els.chartThicknessSlider.value = appState.chartThickness; els.chartThicknessDisplay.innerText = appState.chartThickness + '%';
-            els.chartSpacingSlider.value = appState.chartSpacing; els.chartSpacingDisplay.innerText = appState.chartSpacing + '%';
-            els.fontFamily.value = appState.typography.family; els.fontSizeSlider.value = appState.typography.size; els.fontSizeDisplay.innerText = appState.typography.size + 'px';
-            els.fontColor.value = appState.typography.color; els.strokeColor.value = appState.typography.strokeColor; els.strokeWidthSlider.value = appState.typography.strokeWidth; els.strokeWidthDisplay.innerText = appState.typography.strokeWidth + 'px';
-            els.toggleLegend.checked = appState.showLegend; els.legendPosition.value = appState.legendPosition; els.legendFontColor.value = appState.typography.legendColor; els.legendFontSizeSlider.value = appState.legendFontSize; els.legendFontSizeDisplay.innerText = appState.legendFontSize + 'px';
-            els.toggleAxisX.checked = appState.showAxisX; els.toggleAxisY.checked = appState.showAxisY; els.toggleAxisYRight.checked = appState.showAxisYRight; els.axisFontSizeSlider.value = appState.axisFontSize; els.axisFontSizeDisplay.innerText = appState.axisFontSize + 'px';
-            els.dataLabelPosition.value = appState.dataLabelPosition || 'center';
-        }
-
-        const resetModal = document.getElementById('resetModal');
-        window.openResetModal = function() {
-            resetModal.style.display = 'flex'; resetModal.classList.remove('pointer-events-none');
-            setTimeout(() => { resetModal.classList.remove('opacity-0'); resetModal.querySelector('div').classList.remove('scale-95'); }, 10);
-        };
-        window.closeResetModal = function() {
-            resetModal.classList.add('opacity-0'); resetModal.classList.add('pointer-events-none'); resetModal.querySelector('div').classList.add('scale-95');
-            setTimeout(() => resetModal.style.display = 'none', 300);
-        };
-        window.executeResetApp = function() { localStorage.removeItem('proChartVisionStateV3_10'); location.reload(); };
-
-        function updateLanguageToggleUI() {
-            els.toggleLanguage.checked = (appState.language === 'en');
-            if(appState.language === 'en') { els.langId.classList.replace('text-slate-800', 'text-slate-300'); els.langEn.classList.replace('text-slate-300', 'text-slate-800'); } 
-            else { els.langId.classList.replace('text-slate-300', 'text-slate-800'); els.langEn.classList.replace('text-slate-800', 'text-slate-300'); }
-        }
-
-        function applyLanguage() {
-            const lang = appState.language;
-            document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (i18n[lang][key]) el.innerText = i18n[lang][key]; });
-            document.getElementById('toastMsg').innerText = i18n[lang].toastCopied;
-            
-            // Re-render to update dynamic translations
-            renderSeriesManager(); renderInputFields();
-        }
-
-        els.toggleLanguage.addEventListener('change', (e) => { appState.language = e.target.checked ? 'en' : 'id'; updateLanguageToggleUI(); applyLanguage(); updateVisualizations(); saveState(); });
-
-        const sidebarScrollArea = document.getElementById('sidebarScrollArea');
-        sidebarScrollArea.addEventListener('scroll', () => {
-            if (sidebarScrollArea.scrollTop > 30) {
-                document.getElementById('sidebarHeader').classList.replace('py-6', 'py-3');
-                document.getElementById('sidebarLogo').classList.replace('w-12', 'w-8'); document.getElementById('sidebarLogo').classList.replace('h-12', 'h-8');
-                document.getElementById('sidebarTitle').classList.replace('text-2xl', 'text-base');
-                document.getElementById('sidebarSubtitle').style.height = '0px'; document.getElementById('sidebarSubtitle').style.opacity = '0';
-            } else {
-                document.getElementById('sidebarHeader').classList.replace('py-3', 'py-6');
-                document.getElementById('sidebarLogo').classList.replace('w-8', 'w-12'); document.getElementById('sidebarLogo').classList.replace('h-8', 'h-12');
-                document.getElementById('sidebarTitle').classList.replace('text-base', 'text-2xl');
-                document.getElementById('sidebarSubtitle').style.height = 'auto'; document.getElementById('sidebarSubtitle').style.opacity = '1';
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if(saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    appState = { ...defaultAppState, ...parsed };
+                    if(!appState.series || appState.series.length === 0) appState.series = defaultAppState.series;
+                    if(!appState.rows || appState.rows.length === 0) appState.rows = defaultAppState.rows;
+                } catch(e) { console.error("Error loading state", e); executeResetData(); }
             }
-        });
+        }
 
-        function showToast(msgKey) { const toast = document.getElementById('toast'); toast.innerText = i18n[appState.language][msgKey] || msgKey; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+        function translatePage() {
+            const lang = appState.language;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(translations[lang][key]) el.innerText = translations[lang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if(translations[lang][key]) el.placeholder = translations[lang][key];
+            });
+            if(els.langToggle) els.langToggle.checked = (lang === 'en');
+        }
 
-        function renderSeriesManager() {
-            let isAdvanced = ['waterfall', 'scatter', 'bubble', 'gantt', 'wordCloud'].includes(appState.chartType);
-            let isMulti = appState.chartType.includes('bar') || appState.chartType === 'line' || appState.chartType === 'area';
-            
-            els.multiSeriesPanel.style.display = (isMulti && !isAdvanced) ? 'block' : 'none';
-            els.seriesContainer.innerHTML = '';
-            const txt = i18n[appState.language];
-
-            appState.series.forEach((s, index) => {
-                let isPrimary = s.id === 'primary';
-                
-                let typeOpts = isPrimary
-                    ? `<option value="" selected>${txt.optInherit}</option>`
-                    : `<option value="line" ${s.type==='line'?'selected':''}>${txt.optLineType}</option><option value="area" ${s.type==='area'?'selected':''}>${txt.optAreaType}</option><option value="bar" ${s.type==='bar'?'selected':''}>${txt.optBar}</option>`;
-                
-                // CRITICAL FIX: The parameter must update 'order', NOT 'layer'
-                let layerOpts = `<option value="1" ${s.order===1?'selected':''}>${txt.layerFront}</option><option value="2" ${s.order===2?'selected':''}>${txt.layerMid1}</option><option value="3" ${s.order===3?'selected':''}>${txt.layerMid2}</option><option value="4" ${s.order===4?'selected':''}>${txt.layerBack}</option>`;
-                let axisOpts = `<option value="y" ${s.yAxis==='y'?'selected':''}>${txt.axisLeft}</option><option value="y2" ${s.yAxis==='y2'?'selected':''}>${txt.axisRight}</option>`;
-
-                els.seriesContainer.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-100 p-4 rounded-[20px] border ${isPrimary ? 'border-[#d4ff00] shadow-[0_0_10px_rgba(212,255,0,0.2)]' : 'border-slate-200'} shadow-sm relative space-y-3">
-                        <div class="flex items-center gap-3">
-                            <div class="flex flex-col gap-1 shrink-0">
-                                <button type="button" onclick="moveSeries(${index}, -1)" ${index === 0 ? 'disabled class="opacity-30"' : 'class="hover:text-black text-slate-400"'}><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button>
-                                <button type="button" onclick="moveSeries(${index}, 1)" ${index === appState.series.length - 1 ? 'disabled class="opacity-30"' : 'class="hover:text-black text-slate-400"'}><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button>
-                            </div>
-                            ${isPrimary
-                                ? `<div class="w-8 h-8 rounded-full bg-[#d4ff00] flex items-center justify-center shrink-0 border border-slate-200 shadow-sm text-black font-black text-xs">*</div>`
-                                : `<div class="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" value="${s.color}" onchange="updateSeries('${s.id}', 'color', this.value)" class="absolute -top-2 -left-2 w-12 h-12 cursor-pointer"></div>`
-                            }
-                            <input type="text" value="${isPrimary ? txt.primaryLayerName : s.name}" ${isPrimary ? 'disabled' : `oninput="updateSeries('${s.id}', 'name', this.value)"`} class="flex-1 min-w-0 text-xs ${isPrimary ? 'bg-transparent border-transparent' : 'bg-white border-slate-300'} border rounded-lg px-2 py-1.5 font-bold text-slate-800 focus:outline-none focus:border-black">
-                            ${!isPrimary ? `<button type="button" onclick="deleteSeries('${s.id}')" class="w-7 h-7 bg-white text-red-500 rounded-lg font-bold border border-red-100 flex items-center justify-center hover:bg-red-50 shrink-0">✕</button>` : ''}
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <select ${isPrimary ? 'disabled' : `onchange="updateSeries('${s.id}', 'type', this.value)"`} class="w-full text-[10px] p-2 rounded-lg ${isPrimary ? 'bg-transparent text-slate-400 border-dashed' : 'bg-white border-solid'} border border-slate-200 font-bold uppercase cursor-pointer">${typeOpts}</select>
-                            <select onchange="updateSeries('${s.id}', 'order', parseInt(this.value))" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${layerOpts}</select>
-                            <select onchange="updateSeries('${s.id}', 'yAxis', this.value)" class="w-full text-[10px] p-2 rounded-lg bg-white border border-slate-200 font-bold uppercase cursor-pointer">${axisOpts}</select>
-                        </div>
-                    </div>
-                `);
+        function forceRecolor(theme) {
+            const palette = themes[theme] || themes['lime'];
+            let isSingleLayer = appState.series.length === 1;
+            appState.rows.forEach((r, rIdx) => {
+                r.values.forEach((v, sIdx) => { 
+                    if (isSingleLayer) v.color = palette[rIdx % palette.length]; 
+                    else v.color = palette[sIdx % palette.length]; 
+                });
             });
         }
 
-        window.updateSeries = function(id, action, value) { const sIdx = appState.series.findIndex(s => s.id === id); if(sIdx > -1) { appState.series[sIdx][action] = value; updateVisualizations(); } };
-        window.moveSeries = function(index, direction) { let target = index + direction; if(target >= 0 && target < appState.series.length) { let temp = appState.series[index]; appState.series[index] = appState.series[target]; appState.series[target] = temp; renderSeriesManager(); updateVisualizations(); } };
-        window.deleteSeries = function(id) { appState.series = appState.series.filter(s => s.id !== id); renderSeriesManager(); updateVisualizations(); };
+        function syncUIToState() {
+            els.chartType.value = appState.chartType; 
+            els.colorTheme.value = appState.colorTheme; 
+            els.stackMode.value = appState.stackMode || 'accumulate';
+            
+            els.chartScale.value = appState.chartScale; els.chartScaleDisplay.innerText = appState.chartScale + '%';
+            els.chartWidth.value = appState.chartWidth; els.chartWidthDisplay.innerText = appState.chartWidth + '%';
+            els.chartHeight.value = appState.chartHeight; els.chartHeightDisplay.innerText = appState.chartHeight + 'px';
+            els.donutCutout.value = appState.donutCutout; els.donutCutoutDisplay.innerText = appState.donutCutout + '%';
+            els.chartThickness.value = appState.chartThickness; els.chartThicknessDisplay.innerText = appState.chartThickness + '%';
+            els.chartSpacing.value = appState.chartSpacing; els.chartSpacingDisplay.innerText = appState.chartSpacing + 'px';
+            els.borderRadiusSlider.value = appState.borderRadius !== undefined ? appState.borderRadius : 8; els.borderRadiusDisplay.innerText = (appState.borderRadius !== undefined ? appState.borderRadius : 8) + 'px';
+            els.lineStyleSelect.value = appState.lineStyle || 'smooth';
+            
+            els.toggleLegend.checked = appState.showLegend; els.legendPosition.value = appState.legendPosition; els.legendAlign.value = appState.legendAlign || 'center';
+            els.legendFontSizeSlider.value = appState.legendFontSize; els.legendFontSizeDisplay.innerText = appState.legendFontSize + 'px';
+            els.datalabelPositionSelect.value = appState.datalabelPosition || 'center';
+            
+            els.toggleAxisX.checked = appState.showAxisX; els.toggleAxisY.checked = appState.showAxisY; els.toggleAxisYRight.checked = appState.showAxisYRight;
+            els.axisFontSizeSlider.value = appState.axisFontSize; els.axisFontSizeDisplay.innerText = appState.axisFontSize + 'px';
+            
+            els.bgColor.value = appState.bgColor || '#ffffff'; els.bgColorText.innerText = appState.bgColor || '#ffffff';
+            els.bgOpacitySlider.value = appState.bgOpacity || 0; els.bgOpacityDisplay.innerText = (appState.bgOpacity || 0) + '%';
+            els.bgRadiusSlider.value = appState.bgRadius || 0; els.bgRadiusDisplay.innerText = (appState.bgRadius || 0) + 'px';
+            els.bgPaddingSlider.value = appState.bgPadding || 0; els.bgPaddingDisplay.innerText = (appState.bgPadding || 0) + 'px';
+            
+            els.toggleGridX.checked = appState.showGridX; els.toggleGridY.checked = appState.showGridY; 
+            els.gridColor.value = appState.gridColor || '#e2e8f0'; els.gridColorText.innerText = appState.gridColor || '#e2e8f0';
 
-        els.btnAddSeries.addEventListener('click', () => {
-            if(appState.series.length >= 4) return showToast('toastMax');
-            const newId = 's' + Date.now(); const activePalette = palettes[appState.colorTheme];
-            appState.series.push({ id: newId, name: 'Overlay '+(appState.series.length), type: 'line', order: 1, yAxis: 'y2', color: activePalette[(appState.series.length + 2) % activePalette.length] });
-            appState.items.forEach(item => { item.values[newId] = Math.floor(Math.random() * 200) + 50; });
-            renderSeriesManager(); updateVisualizations();
-        });
+            els.rowCountDisplay.innerText = appState.rows.length;
+            
+            let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(appState.chartType);
+            els.donutCutoutContainer.style.display = appState.chartType === 'doughnut' ? 'block' : 'none';
+            els.axesControlPanel.style.display = isRadial ? 'none' : 'block';
+            els.gridControlPanel.style.display = (isRadial || appState.chartType === 'pie' || appState.chartType === 'wordCloud') ? 'none' : 'block';
 
-        window.addStack = function(itemIndex) {
-            let item = appState.items[itemIndex];
-            item.primaryStacks.push({ id: 'ps_'+Date.now(), name: `Sub ${item.primaryStacks.length+1}`, value: 50, color: null, ganttEnd: 100 });
-            renderInputFields(); updateVisualizations();
-        };
-        window.removeStack = function(itemIndex, stackIndex) {
-            let item = appState.items[itemIndex];
-            if(item.primaryStacks.length > 1) {
-                item.primaryStacks.splice(stackIndex, 1);
-                renderInputFields(); updateVisualizations();
-            }
-        };
+            renderMultiLayerEngine();
+            renderDataInputs();
+            updateVisualizations();
+        }
 
-        function renderInputFields() {
-            els.dynamicDataForm.innerHTML = '';
-            const activePalette = palettes[appState.colorTheme];
-            let isGantt = appState.chartType === 'gantt';
-            const txt = i18n[appState.language];
-
-            appState.items.forEach((item, index) => {
+        function renderMultiLayerEngine() {
+            els.seriesContainer.innerHTML = '';
+            appState.series.forEach((s, index) => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-2xl border border-slate-200 flex flex-col gap-2 shadow-sm relative transition-all hover:border-slate-300";
                 
-                let stacksHtml = '';
-                item.primaryStacks.forEach((stack, sIdx) => {
-                    const displayColor = stack.color || activePalette[(index + sIdx) % activePalette.length];
-                    let inputHtml = '';
-                    if(isGantt) {
-                        inputHtml = `
-                            <div class="flex flex-col"><span class="text-[8px] text-slate-400 font-bold">${txt.ganttStart}</span><input type="number" oninput="updateStackValue(${index}, ${sIdx}, 'value', this.value)" value="${stack.value || 0}" class="w-14 text-[11px] bg-slate-50 rounded py-1 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black"></div>
-                            <div class="flex flex-col"><span class="text-[8px] text-slate-400 font-bold">${txt.ganttEnd}</span><input type="number" oninput="updateStackValue(${index}, ${sIdx}, 'ganttEnd', this.value)" value="${stack.ganttEnd || 0}" class="w-14 text-[11px] bg-slate-50 rounded py-1 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black"></div>
-                        `;
-                    } else {
-                        inputHtml = `<input type="number" oninput="updateStackValue(${index}, ${sIdx}, 'value', this.value)" value="${stack.value || 0}" class="w-16 text-xs bg-slate-50 rounded py-1.5 px-1 text-center font-bold outline-none border border-slate-200 focus:border-black">`;
-                    }
+                let isMain = index === 0;
+                let typeOptions = isMain ? `<option value="auto">SESUAI TIPE UTAMA</option><option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>` : `<option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>`;
+                let deleteBtn = isMain ? `` : `<button class="w-8 h-8 flex items-center justify-center rounded-xl border border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 transition" onclick="removeSeries(${index})"><i class="ph ph-x text-lg"></i></button>`;
 
-                    stacksHtml += `
-                        <div class="flex items-center gap-2 stack-item py-1.5 pl-2 pr-1 mt-1 group">
-                            <div class="w-3 h-3 border-l-2 border-b-2 border-slate-300 rounded-bl shrink-0 opacity-50"></div>
-                            <div class="relative w-6 h-6 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-sm"><input type="color" onchange="updateStackProp(${index}, ${sIdx}, 'color', this.value)" value="${displayColor}" class="absolute -top-2 -left-2 w-10 h-10 cursor-pointer"></div>
-                            <input type="text" oninput="updateStackProp(${index}, ${sIdx}, 'name', this.value)" value="${stack.name}" class="flex-1 min-w-[60px] text-[10px] border border-transparent bg-transparent p-1 font-semibold text-slate-600 focus:outline-none focus:border-slate-300 rounded hover:bg-slate-100">
-                            ${inputHtml}
-                            ${item.primaryStacks.length > 1 ? `<button type="button" onclick="removeStack(${index}, ${sIdx})" class="w-5 h-5 text-slate-300 hover:text-red-500 rounded flex items-center justify-center transition-colors">✕</button>` : '<div class="w-5 h-5"></div>'}
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="flex flex-col gap-1 text-slate-300">
+                            ${index > 0 ? `<button onclick="moveSeries(${index}, -1)" class="hover:text-slate-600 transition"><i class="ph-fill ph-caret-up"></i></button>` : `<div class="h-4"></div>`}
+                            ${index < appState.series.length - 1 ? `<button onclick="moveSeries(${index}, 1)" class="hover:text-slate-600 transition"><i class="ph-fill ph-caret-down"></i></button>` : `<div class="h-4"></div>`}
+                        </div>
+                        <div class="w-8 h-8 rounded-full shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-black shrink-0" style="background-color: ${isMain ? '#cafc03' : '#e2e8f0'}">${isMain ? '*' : (index)}</div>
+                        <input type="text" value="${s.name}" onchange="updateSeriesName(${index}, this.value)" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#cafc03] outline-none transition">
+                        ${deleteBtn}
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-2 pl-12">
+                        <select onchange="updateSeriesProp(${index}, 'type', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            ${typeOptions.replace(`value="${s.type}"`, `value="${s.type}" selected`)}
+                        </select>
+                        <select onchange="updateSeriesProp(${index}, 'zIndex', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <option value="front" ${s.zIndex==='front'?'selected':''}>DEPAN</option>
+                            <option value="back" ${s.zIndex==='back'?'selected':''}>BELAKANG</option>
+                        </select>
+                        <select onchange="updateSeriesProp(${index}, 'axis', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <option value="y" ${s.axis==='y'?'selected':''}>KIRI/BAWAH</option>
+                            <option value="y2" ${s.axis==='y2'?'selected':''}>KANAN/ATAS</option>
+                        </select>
+                    </div>
+                `;
+                els.seriesContainer.appendChild(div);
+            });
+        }
+
+        function renderDataInputs() {
+            els.dataRowsContainer.innerHTML = '';
+            let isGantt = appState.chartType === 'gantt';
+
+            appState.rows.forEach((row, rowIndex) => {
+                const div = document.createElement('div');
+                div.className = "bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col gap-3 shadow-sm";
+                
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <button onclick="openIconFor('${row.id}')" class="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl hover:border-[#cafc03] hover:shadow-md transition shadow-sm">${row.icon}</button>
+                        <input type="text" value="${row.label}" onchange="updateRowLabel('${row.id}', this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
+                    </div>
+                `;
+
+                const valsContainer = document.createElement('div');
+                valsContainer.className = "flex gap-2 overflow-x-auto pb-2 border-t border-slate-200 pt-3 mt-1";
+
+                appState.series.forEach((s, sIdx) => {
+                    if (!row.values[sIdx]) {
+                        const palette = themes[appState.colorTheme] || themes['lime'];
+                        row.values[sIdx] = { val: 0, val2: 0, color: palette[(rowIndex + sIdx) % palette.length] };
+                    }
+                    let v = row.values[sIdx];
+
+                    const vDiv = document.createElement('div');
+                    vDiv.className = "flex flex-col gap-1 flex-1 min-w-[80px]";
+                    
+                    let seriesName = s.name.length > 12 ? s.name.substring(0, 10) + '..' : s.name;
+                    
+                    let valInputHTML = isGantt ? 
+                        `<div class="flex flex-col gap-1">
+                            <input type="number" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" placeholder="Mulai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
+                            <input type="number" value="${v.val2}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val2', this.value)" placeholder="Selesai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
+                         </div>` 
+                        : 
+                        `<input type="number" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm font-black text-center focus:ring-2 focus:ring-slate-900 outline-none shadow-sm">`;
+
+                    vDiv.innerHTML = `
+                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-wider text-center truncate mb-1">${seriesName}</div>
+                        <div class="relative group">
+                            ${valInputHTML}
+                            <div class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border border-white overflow-hidden shadow-sm cursor-pointer hover:scale-125 transition-transform opacity-60 group-hover:opacity-100 z-10">
+                                <input type="color" value="${v.color}" onchange="updateRowValue('${row.id}', ${sIdx}, 'color', this.value)" class="absolute -top-2 -left-2 w-8 h-8 cursor-pointer">
+                            </div>
                         </div>
                     `;
+                    valsContainer.appendChild(vDiv);
                 });
 
-                els.dynamicDataForm.insertAdjacentHTML('beforeend', `
-                    <div class="p-3 rounded-[20px] border border-slate-100 bg-white shadow-sm w-full">
-                        <div class="flex items-center gap-2 border-b border-slate-50 pb-2">
-                            <input type="text" oninput="updateDataProp(${index}, 'icon', this.value)" value="${item.icon || ''}" class="w-8 h-8 text-center text-sm border border-slate-200 bg-slate-50 rounded-lg font-medium focus:border-black outline-none shrink-0" placeholder="😀" maxlength="2">
-                            <input type="text" oninput="updateDataProp(${index}, 'label', this.value)" value="${item.label}" class="flex-1 text-xs border-0 bg-transparent p-1 font-bold text-slate-800 focus:outline-none">
-                        </div>
-                        <div class="flex flex-col">
-                            ${stacksHtml}
-                        </div>
-                        ${(appState.chartType.includes('bar') || isGantt || appState.chartType === 'area') ? `
-                        <div class="mt-2 pl-6">
-                            <button onclick="addStack(${index})" class="text-[9px] font-bold text-slate-400 hover:text-black uppercase tracking-widest bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1">${txt.addStackBtn}</button>
-                        </div>
-                        ` : ''}
-                    </div>
-                `);
+                div.appendChild(valsContainer);
+                els.dataRowsContainer.appendChild(div);
             });
+            translatePage();
         }
 
-        window.updateDataProp = function(index, prop, val) { if(prop === 'label') appState.items[index].label = val; if(prop === 'icon') appState.items[index].icon = val; updateVisualizations(); };
-        window.updateStackProp = function(iIdx, sIdx, prop, val) { appState.items[iIdx].primaryStacks[sIdx][prop] = val; updateVisualizations(); };
-        window.updateStackValue = function(iIdx, sIdx, prop, val) { appState.items[iIdx].primaryStacks[sIdx][prop] = parseFloat(val) || 0; updateVisualizations(); };
-
-        async function renderMainChart() {
-            if (typeof Chart === 'undefined') return;
-            
-            try {
-                if (myChart) { myChart.destroy(); myChart = null; }
-                const ctx = els.mainCanvas.getContext('2d');
-                const activePalette = palettes[appState.colorTheme];
-                const labels = appState.items.map(i => i.label);
-                
-                let parsedType = appState.chartType;
-                let isMap = parsedType.startsWith('map-');
-                let isAdvanced = ['waterfall', 'scatter', 'bubble', 'gantt', 'wordCloud'].includes(parsedType);
-                let isMulti = parsedType.includes('bar') || parsedType === 'line' || parsedType === 'area';
-                let isHorizontal = parsedType === 'bar-horizontal' || parsedType === 'gantt';
-
-                els.axesControlPanel.style.display = (isMulti || isAdvanced) && parsedType !== 'wordCloud' ? 'block' : 'none';
-                els.donutCutoutContainer.style.display = parsedType === 'doughnut' ? 'block' : 'none';
-                els.barThicknessContainer.style.display = (isMulti || parsedType === 'radar' || parsedType === 'waterfall' || parsedType === 'gantt') ? 'block' : 'none';
-                els.chartSpacingContainer.style.display = (parsedType.includes('bar') || parsedType === 'waterfall' || parsedType === 'gantt') ? 'block' : 'none';
-                
-                let config = {};
-                const axisTickConfig = { font: { family: appState.typography.family, weight: '500', size: appState.axisFontSize }, color: appState.typography.legendColor };
-
-                let maxStacks = Math.max(...appState.items.map(i => i.primaryStacks?.length || 1));
-
-                let dLabelsConfig = {
-                    color: appState.typography.color, font: { family: appState.typography.family, weight: 'bold', size: appState.typography.size },
-                    textStrokeColor: appState.typography.strokeWidth > 0 ? appState.typography.strokeColor : 'transparent', textStrokeWidth: appState.typography.strokeWidth,
-                    formatter: (val, ctx) => {
-                        if (appState.typography.size == 0) return '';
-                        let actualVal = typeof val === 'object' ? (val.y !== undefined ? val.y : (val[1] !== undefined ? val[1] - val[0] : val)) : val;
-                        if(actualVal === undefined) actualVal = val;
-                        if(actualVal === 0 && parsedType !== 'waterfall') return '';
-                        if(parsedType === 'wordCloud') return actualVal;
-                        
-                        let icon = '';
-                        if (ctx && ctx.dataIndex !== undefined && appState.items[ctx.dataIndex]) {
-                            // In stacked mode, only show icon on the first stack to avoid clutter
-                            if(ctx.dataset.stack === 'primaryStack' && ctx.datasetIndex === 0) icon = appState.items[ctx.dataIndex].icon || '';
-                            else if(ctx.dataset.stack !== 'primaryStack') icon = appState.items[ctx.dataIndex].icon || ''; // overlay can have icon
-                        }
-                        let formattedNum = Number.isFinite(Number(actualVal)) ? Number(actualVal).toLocaleString() : actualVal;
-                        return icon ? `${icon} ${formattedNum}` : formattedNum;
-                    },
-                    align: (c) => {
-                        let pos = appState.dataLabelPosition || 'center';
-                        if (parsedType === 'scatter' || parsedType === 'bubble' || parsedType === 'wordCloud') return 'center';
-                        if(c.dataset.type === 'line') return 'end';
-                        
-                        if (pos === 'inside-top') return isHorizontal ? 'left' : 'end'; 
-                        if (pos === 'inside-bottom') return isHorizontal ? 'right' : 'start';
-                        if (pos === 'outside') return isHorizontal ? 'right' : 'end';
-                        return 'center';
-                    },
-                    anchor: (c) => {
-                        let pos = appState.dataLabelPosition || 'center';
-                        if (parsedType === 'scatter' || parsedType === 'bubble' || parsedType === 'wordCloud') return 'center';
-                        if(c.dataset.type === 'line') return 'end';
-
-                        if (pos === 'inside-top') return isHorizontal ? 'end' : 'end';
-                        if (pos === 'inside-bottom') return isHorizontal ? 'start' : 'start';
-                        if (pos === 'outside') return isHorizontal ? 'end' : 'end';
-                        return 'center';
-                    },
-                    offset: 4
-                };
-
-                if (isMap) {
-                    els.loadingOverlay.style.display = 'flex';
-                    let geoData;
-                    if(parsedType === 'map-indonesia') {
-                        if(!geoCache.indonesia) geoCache.indonesia = await (await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province-simple.json')).json();
-                        geoData = geoCache.indonesia;
-                    } else {
-                        if(!geoCache.world) {
-                            const topo = await (await fetch('https://unpkg.com/world-atlas/countries-50m.json')).json();
-                            geoCache.world = typeof topojson !== 'undefined' ? topojson.feature(topo, topo.objects.countries) : ChartGeo.topojson.feature(topo, topo.objects.countries);
-                        }
-                        geoData = geoCache.world;
-                    }
-                    els.loadingOverlay.style.display = 'none';
-                    let features = geoData.features || geoData;
-                    let mapDataArray = features.map(d => ({ feature: d, value: null }));
-                    
-                    appState.items.forEach((item, i) => {
-                        const searchStr = item.label.toLowerCase();
-                        let match = mapDataArray.find(m => {
-                            const p = m.feature.properties; const n = (p.name || p.hc_a2 || p.NAME || p.Propinsi || '').toLowerCase();
-                            return n.includes(searchStr) && searchStr.length > 2;
-                        });
-                        let s0 = item.primaryStacks[0];
-                        if(match && s0) { match.value = s0.value; match.customColor = s0.color || activePalette[i % activePalette.length]; }
-                    });
-                    config = {
-                        type: 'choropleth',
-                        data: { labels: mapDataArray.map(d => d.feature.properties.name || d.feature.properties.hc_a2), datasets: [{ label: 'Spatial Map', outline: features, data: mapDataArray, backgroundColor: (c) => (c.raw?.value === null || c.raw?.value === undefined) ? '#f1f5f9' : (c.raw?.customColor || activePalette[0]), borderWidth: 1, borderColor: '#ffffff' }] },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { projection: { axis: 'x', projection: parsedType === 'map-indonesia' ? 'equirectangular' : 'equalEarth' } } }
-                    };
-                } else if (isAdvanced) {
-                    let chartOptions = { 
-                        responsive: true, maintainAspectRatio: false, layout: { padding: { right: isHorizontal ? 60 : 20, top: 20 } }, 
-                        plugins: { legend: { display: appState.showLegend, position: appState.legendPosition, labels: { color: appState.typography.legendColor, font: { family: appState.typography.family, size: appState.legendFontSize } } }, datalabels: dLabelsConfig },
-                        scales: { x: { display: appState.showAxisX, grid: { color: '#f1f5f9' }, ticks: axisTickConfig }, y: { display: appState.showAxisY, grid: { color: '#f1f5f9' }, ticks: axisTickConfig } } 
-                    };
-                    
-                    const tParam = appState.chartThickness / 100;
-                    const sParam = 1 - (appState.chartSpacing / 100);
-
-                    if (parsedType === 'waterfall') {
-                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
-                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
-                        let runTotal = 0;
-                        let flowData = rawData.map(v => { let prev = runTotal; runTotal += v; return [prev, runTotal]; });
-                        config = { type: 'bar', data: { labels: labels, datasets: [{ label: 'Waterfall', data: flowData, backgroundColor: bgColors, barPercentage: tParam, categoryPercentage: sParam }] }, options: chartOptions };
-                    } else if (parsedType === 'gantt') {
-                        chartOptions.indexAxis = 'y';
-                        chartOptions.scales.y = { type: 'category', display: appState.showAxisY, border: {display: false}, grid: { display: false }, ticks: axisTickConfig }; 
-                        chartOptions.scales.x = { type: 'linear', display: appState.showAxisX, position: 'bottom', grid: { color: '#f1f5f9' }, ticks: axisTickConfig, beginAtZero: true };
-                        
-                        let datasets = [];
-                        for(let j=0; j<maxStacks; j++) {
-                            let ganttData = appState.items.map(i => i.primaryStacks[j] ? [i.primaryStacks[j].value, i.primaryStacks[j].ganttEnd] : null);
-                            let bgColors = appState.items.map((item, i) => item.primaryStacks[j]?.color || activePalette[(i+j) % activePalette.length]);
-                            datasets.push({ label: `Timeline ${j+1}`, data: ganttData, backgroundColor: bgColors, barPercentage: tParam, categoryPercentage: sParam });
-                        }
-                        config = { type: 'bar', data: { labels: labels, datasets: datasets }, options: chartOptions };
-                    } else if (parsedType === 'scatter' || parsedType === 'bubble') {
-                        chartOptions.scales.x.type = 'linear';
-                        chartOptions.scales.x.position = 'bottom';
-                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
-                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
-                        let ptData = rawData.map((v, i) => ({ x: i + 1, y: v, r: parsedType === 'bubble' ? Math.max(5, Math.abs(v)/10) : undefined }));
-                        config = { type: parsedType, data: { datasets: [{ label: 'Data Points', data: ptData, backgroundColor: bgColors, borderColor: '#ffffff', borderWidth: 2, pointRadius: parsedType === 'scatter' ? 8 : undefined }] }, options: chartOptions };
-                    } else if (parsedType === 'wordCloud') {
-                        chartOptions.scales = { x: {display: false}, y: {display: false} };
-                        chartOptions.plugins.datalabels.display = false;
-                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
-                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
-                        let maxV = Math.max(...rawData); if(maxV===0) maxV=1;
-                        let scaledData = rawData.map(v => (v / maxV) * 60 + 10);
-                        config = { type: 'wordCloud', data: { labels: labels, datasets: [{ label: 'Word Cloud', data: scaledData, color: bgColors }] }, options: chartOptions };
-                    }
-                } else {
-                    let chartOptions = { 
-                        responsive: true, maintainAspectRatio: false, layout: { padding: { right: (isHorizontal) ? 60 : 10, top: 20 } }, 
-                        plugins: { legend: { display: appState.showLegend, position: appState.legendPosition, labels: { color: appState.typography.legendColor, font: { family: appState.typography.family, size: appState.legendFontSize } } }, datalabels: dLabelsConfig },
-                        scales: {} 
-                    };
-                    
-                    if (isHorizontal) { parsedType = 'bar'; chartOptions.indexAxis = 'y'; } 
-                    else if (parsedType === 'bar-vertical') { parsedType = 'bar'; }
-                    else if (parsedType === 'line' || parsedType === 'area') { parsedType = 'line'; }
-
-                    const tParam = appState.chartThickness / 100;
-                    const sParam = 1 - (appState.chartSpacing / 100);
-                    let datasets = [];
-                    let hasY = false; let hasY2 = false;
-
-                    if(isMulti) {
-                        let primaryIsFill = appState.chartType === 'area';
-                        let primaryIsLine = appState.chartType === 'line' || appState.chartType === 'area';
-                        
-                        appState.series.forEach((s) => {
-                            let activeYAxis = isHorizontal ? (s.yAxis === 'y2' ? 'x2' : 'x') : s.yAxis;
-                            if (activeYAxis === 'y') hasY = true;
-                            if (activeYAxis === 'x') hasY = true;
-                            if (s.yAxis === 'y2') hasY2 = true;
-
-                            if (s.id === 'primary') {
-                                for (let j = 0; j < maxStacks; j++) {
-                                    let dArr = appState.items.map(item => {
-                                        if (!item.primaryStacks[j]) return 0;
-                                        let val = item.primaryStacks[j].value;
-                                        
-                                        // Logika Include: Sisa nilai dikurangi sub-data
-                                        if (appState.stackMode === 'include' && parsedType !== 'gantt' && parsedType !== 'waterfall' && j === 0) {
-                                            let sumSubs = 0;
-                                            for (let k = 1; k < item.primaryStacks.length; k++) {
-                                                sumSubs += (item.primaryStacks[k].value || 0);
-                                            }
-                                            val = Math.max(0, val - sumSubs);
-                                        }
-                                        return val;
-                                    });
-                                    let lblArr = appState.items.map(item => item.primaryStacks[j] ? item.primaryStacks[j].name : '');
-                                    let primaryLabel = lblArr.find(l => l !== '') || `Data Utama ${j+1}`;
-
-                                    let bColor = appState.items.map((item, i) => {
-                                        let stack = item.primaryStacks[j];
-                                        if(stack && stack.color) return (parsedType === 'bar' || !primaryIsFill) ? stack.color : stack.color+'60';
-                                        return activePalette[(i + j) % activePalette.length];
-                                    });
-                                    
-                                    let isSingleStack = maxStacks === 1;
-                                    let hasOverlays = appState.series.length > 1;
-
-                                    if(primaryIsLine) {
-                                        let strokeCol = appState.items[0].primaryStacks[j]?.color || activePalette[j % activePalette.length];
-                                        bColor = primaryIsFill ? strokeCol+'60' : strokeCol;
-                                    } else if (!isSingleStack || hasOverlays) {
-                                        bColor = appState.items[0].primaryStacks[j]?.color || activePalette[j % activePalette.length];
-                                    }
-
-                                    let boColor = primaryIsLine ? bColor : 'transparent';
-                                    if(primaryIsFill) boColor = appState.items[0].primaryStacks[j]?.color || activePalette[j % activePalette.length];
-
-                                    let datasetObj = {
-                                        type: primaryIsFill ? 'line' : parsedType, 
-                                        label: primaryLabel, data: dArr, backgroundColor: bColor, borderColor: boColor,
-                                        borderWidth: parsedType === 'bar' ? 0 : 3, borderRadius: parsedType === 'bar' ? 8 : 0, fill: primaryIsFill,
-                                        tension: primaryIsLine ? (tParam/2) : 0, order: s.order, stack: 'primaryStack'
-                                    };
-
-                                    if (isHorizontal) { datasetObj.xAxisID = activeYAxis; } else { datasetObj.yAxisID = activeYAxis; }
-                                    if (parsedType === 'bar') { datasetObj.barPercentage = tParam; datasetObj.categoryPercentage = sParam; }
-                                    
-                                    datasets.push(datasetObj);
-                                }
-                            } else {
-                                let isLine = s.type === 'line' || s.type === 'area';
-                                let isFill = s.type === 'area'; 
-                                let dArr = appState.items.map(item => item.values[s.id] || 0);
-                                
-                                let layerColor = s.color || activePalette[0];
-                                let bColor = (s.type === 'bar') ? layerColor : (isFill ? layerColor+'60' : layerColor);
-                                let boColor = (s.type === 'bar') ? 'transparent' : layerColor;
-
-                                let datasetObj = {
-                                    type: s.type === 'area' ? 'line' : s.type, 
-                                    label: s.name, data: dArr, backgroundColor: bColor, borderColor: boColor,
-                                    borderWidth: s.type === 'bar' ? 0 : 3, borderRadius: s.type === 'bar' ? 8 : 0, fill: isFill,
-                                    tension: isLine ? (tParam/2) : 0, order: s.order, stack: s.id
-                                };
-
-                                if (isHorizontal) { datasetObj.xAxisID = activeYAxis; } else { datasetObj.yAxisID = activeYAxis; }
-                                if (s.type === 'bar') { datasetObj.barPercentage = tParam; datasetObj.categoryPercentage = sParam; }
-                                
-                                datasets.push(datasetObj);
-                            }
-                        });
-
-                        // Always set stacked true in multi mode to support primaryStack grouping properly
-                        let isStacked = true;
-                        
-                        if (isHorizontal) {
-                            chartOptions.scales.y = { type: 'category', display: appState.showAxisY, border: {display: false}, grid: { display: false }, ticks: axisTickConfig, stacked: isStacked }; 
-                            chartOptions.scales.x = { type: 'linear', display: appState.showAxisX, position: 'bottom', grid: { color: '#f1f5f9' }, ticks: axisTickConfig, beginAtZero: true, stacked: isStacked };
-                            if(hasY2) { chartOptions.scales.x2 = { type: 'linear', display: appState.showAxisYRight, position: 'top', border: {display: false}, grid: { drawOnChartArea: false }, beginAtZero: true, ticks: axisTickConfig, stacked: isStacked }; }
-                        } else {
-                            chartOptions.scales.x = { type: 'category', display: appState.showAxisX, grid: { display: false }, ticks: axisTickConfig, stacked: isStacked };
-                            if(hasY) chartOptions.scales.y = { type: 'linear', display: appState.showAxisY, position: 'left', border: {display: false}, grid: { color: '#f1f5f9' }, beginAtZero: true, ticks: axisTickConfig, stacked: isStacked };
-                            if(hasY2) chartOptions.scales.y2 = { type: 'linear', display: appState.showAxisYRight, position: 'right', border: {display: false}, grid: { drawOnChartArea: false }, beginAtZero: true, ticks: axisTickConfig, stacked: isStacked };
-                        }
-                    } else { 
-                        let rawData = appState.items.map(i => i.primaryStacks[0]?.value || 0);
-                        let bgColors = appState.items.map((item, i) => item.primaryStacks[0]?.color || activePalette[i % activePalette.length]);
-                        datasets = [{ label: 'Data', data: rawData, backgroundColor: bgColors, borderColor: '#ffffff', borderWidth: (parsedType === 'pie' || parsedType === 'doughnut') ? 0 : 3, tension: parsedType === 'radar' ? (tParam/2) : 0 }];
-                        if (parsedType === 'doughnut') datasets[0].cutout = `${appState.donutCutout}%`;
-                        if (parsedType === 'radar') chartOptions.scales = { r: { angleLines: { color: '#f1f5f9' }, grid: { color: '#f1f5f9' }, ticks: axisTickConfig, pointLabels: axisTickConfig } };
-                    }
-                    config = { type: parsedType, data: { labels: labels, datasets: datasets }, options: chartOptions };
+        function updateSeriesProp(index, prop, val) { 
+            if(appState.series[index]) { 
+                appState.series[index][prop] = val; 
+                // Auto force overall chartType update to Series[0] if auto selected
+                if (index === 0 && prop === 'type' && val !== 'auto') {
+                    appState.chartType = (val === 'bar') ? 'bar-vertical' : val;
+                    els.chartType.value = appState.chartType;
                 }
-
-                els.canvasWrapper.style.width = `${appState.chartWidth}%`;
-                els.canvasWrapper.style.height = `${appState.chartHeight}px`;
-                myChart = new Chart(ctx, config);
-            } catch (err) { els.canvasWrapper.innerHTML = `<div class="text-red-500 font-bold text-center mt-20">Error Rendering Chart. Terjadi tabrakan parameter. Ubah tipe grafik untuk me-reset.</div><canvas id="mainCanvas"></canvas>`; els.mainCanvas = document.getElementById('mainCanvas'); console.error(err); }
+                updateVisualizations(); 
+            } 
+        }
+        
+        function updateSeriesName(index, val) { if(appState.series[index]) { appState.series[index].name = val; renderDataInputs(); updateVisualizations(); } }
+        
+        function moveSeries(index, dir) {
+            if(index + dir < 0 || index + dir >= appState.series.length) return;
+            const temp = appState.series[index];
+            appState.series[index] = appState.series[index + dir];
+            appState.series[index + dir] = temp;
+            
+            appState.rows.forEach(r => {
+                const tempVal = r.values[index];
+                r.values[index] = r.values[index + dir];
+                r.values[index + dir] = tempVal;
+            });
+            syncUIToState();
         }
 
-        function renderPercentageWidgets() {
-            const activePalette = palettes[appState.colorTheme];
-            let total = 0;
-            
-            // Hitung grand total berdasarkan mode
-            appState.items.forEach(item => {
-                if (appState.stackMode === 'include') {
-                    total += (item.primaryStacks[0]?.value || 0);
-                } else {
-                    item.primaryStacks.forEach(ps => total += (ps.value || 0));
-                }
-            });
-
-            els.totalSumDisplay.innerText = total.toLocaleString();
-            els.percentageContainer.innerHTML = '';
-            
-            appState.items.forEach((item, index) => {
-                let itemTotal = 0;
-                if (appState.stackMode === 'include') {
-                    itemTotal = (item.primaryStacks[0]?.value || 0);
-                } else {
-                    item.primaryStacks.forEach(ps => itemTotal += (ps.value || 0));
-                }
-
-                const percentage = total === 0 ? 0 : ((itemTotal / total) * 100).toFixed(1);
-                const colorHex = item.primaryStacks[0]?.color || activePalette[index % activePalette.length];
-                els.percentageContainer.insertAdjacentHTML('beforeend', `
-                    <div class="bg-slate-50 border border-slate-100 p-5 rounded-[24px] relative overflow-hidden group hover:shadow-md transition-shadow">
-                        <div class="absolute top-0 left-0 w-2.5 h-full" style="background-color: ${colorHex};"></div>
-                        <div class="pl-4">
-                            <div class="flex justify-between items-end mb-2">
-                                <span class="font-bold text-sm text-slate-800 flex items-center gap-2"><span class="text-xl">${item.icon||''}</span> <span class="truncate max-w-[100px]">${item.label}</span></span>
-                                <span class="text-[11px] font-bold bg-white px-2.5 py-1 rounded-full shadow-sm border border-slate-100 text-slate-600">${itemTotal.toLocaleString()}</span>
-                            </div>
-                            <div class="flex items-end gap-2"><span class="text-3xl font-black tracking-tighter text-black">${percentage}%</span></div>
-                        </div>
-                    </div>
-                `);
-            });
+        function removeSeries(index) { 
+            appState.series.splice(index, 1);
+            appState.rows.forEach(r => r.values.splice(index, 1));
+            forceRecolor(appState.colorTheme); 
+            syncUIToState(); 
+        }
+        
+        function updateRowLabel(id, val) { const r = appState.rows.find(x => x.id === id); if(r) { r.label = val; updateVisualizations(); } }
+        function updateRowValue(rowId, sIdx, prop, val) {
+            const r = appState.rows.find(x => x.id === rowId);
+            if(r && r.values[sIdx]) {
+                r.values[sIdx][prop] = (prop==='val'||prop==='val2') ? Number(val) : val;
+                updateVisualizations();
+            }
         }
 
-        function updateVisualizations() { els.exportTarget.style.transform = `scale(${appState.chartScale / 100})`; renderMainChart(); renderPercentageWidgets(); saveState(); }
-
-        els.toggleSidebarBtn.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; isSidebarOpen ? els.sidebar.classList.remove('sidebar-collapsed') : els.sidebar.classList.add('sidebar-collapsed'); setTimeout(() => { if(myChart) myChart.resize(); }, 500); });
-        window.addEventListener('resize', () => { if(myChart) myChart.resize(); });
+        els.langToggle.addEventListener('change', (e) => { appState.language = e.target.checked ? 'en' : 'id'; translatePage(); saveState(); });
         
         els.chartType.addEventListener('change', (e) => { 
             appState.chartType = e.target.value; 
-            renderSeriesManager(); renderInputFields(); updateVisualizations(); 
+            if (appState.series[0]) appState.series[0].type = 'auto'; 
+            syncUIToState(); 
         });
         
-        document.getElementById('stackMode').addEventListener('change', (e) => { 
-            appState.stackMode = e.target.value; 
-            updateVisualizations(); 
-        });
-
         els.colorTheme.addEventListener('change', (e) => { 
-            appState.colorTheme = e.target.value; 
-            const activePalette = palettes[appState.colorTheme];
-            appState.series.forEach((s, index) => { if(s.id !== 'primary') s.color = activePalette[(index + 2) % activePalette.length]; });
-            appState.items.forEach(i => i.primaryStacks.forEach(ps => ps.color = null)); 
-            renderSeriesManager(); renderInputFields(); updateVisualizations(); 
+            appState.colorTheme = e.target.value;
+            forceRecolor(appState.colorTheme);
+            syncUIToState(); 
         });
         
-        els.dataCountSlider.addEventListener('input', (e) => {
-            const newCount = parseInt(e.target.value); els.dataCountDisplay.innerText = newCount;
-            while(appState.items.length < newCount) {
-                let newItem = { id: Date.now()+Math.random(), label: `Data ${appState.items.length+1}`, icon: '', primaryStacks: [{ id: 'ps_'+Date.now(), name: 'Data Utama', value: Math.floor(Math.random() * 200) + 50, color: null, ganttEnd: Math.floor(Math.random() * 300) + 250 }], values: {} };
-                appState.series.forEach(s => { if(s.id !== 'primary') newItem.values[s.id] = Math.floor(Math.random() * 200) + 50; });
-                appState.items.push(newItem);
-            }
-            if(appState.items.length > newCount) appState.items.length = newCount;
-            renderInputFields(); updateVisualizations();
+        els.stackMode.addEventListener('change', (e) => { appState.stackMode = e.target.value; updateVisualizations(); });
+        
+        els.btnAddOverlay.addEventListener('click', () => {
+            const newIndex = appState.series.length;
+            appState.series.push({ id: 's_' + Date.now(), name: 'Overlay ' + (newIndex), type: 'line', axis: 'y', zIndex: 'front' });
+            appState.rows.forEach(r => r.values.push({ val: Math.floor(Math.random()*50)+10, val2: 0, color: '#000000' }));
+            forceRecolor(appState.colorTheme); 
+            syncUIToState();
         });
 
-        els.chartScaleSlider.addEventListener('input', (e) => { els.chartScaleDisplay.innerText = e.target.value + '%'; appState.chartScale = e.target.value; updateVisualizations(); });
-        els.canvasWidthSlider.addEventListener('input', (e) => { els.canvasWidthDisplay.innerText = e.target.value + '%'; appState.chartWidth = e.target.value; updateVisualizations(); });
-        els.canvasHeightSlider.addEventListener('input', (e) => { els.canvasHeightDisplay.innerText = e.target.value + 'px'; appState.chartHeight = e.target.value; updateVisualizations(); });
-        els.donutCutoutSlider.addEventListener('input', (e) => { els.donutCutoutDisplay.innerText = e.target.value + '%'; appState.donutCutout = e.target.value; updateVisualizations(); });
-        els.chartThicknessSlider.addEventListener('input', (e) => { els.chartThicknessDisplay.innerText = e.target.value + '%'; appState.chartThickness = e.target.value; updateVisualizations(); });
-        els.chartSpacingSlider.addEventListener('input', (e) => { els.chartSpacingDisplay.innerText = e.target.value + '%'; appState.chartSpacing = parseInt(e.target.value); updateVisualizations(); });
-        
-        els.fontFamily.addEventListener('change', (e) => { appState.typography.family = e.target.value; updateVisualizations(); });
-        els.dataLabelPosition.addEventListener('change', (e) => { appState.dataLabelPosition = e.target.value; updateVisualizations(); });
-        els.fontSizeSlider.addEventListener('input', (e) => { els.fontSizeDisplay.innerText = e.target.value + 'px'; appState.typography.size = e.target.value; updateVisualizations(); });
-        els.fontColor.addEventListener('input', (e) => { appState.typography.color = e.target.value; updateVisualizations(); });
-        els.strokeColor.addEventListener('input', (e) => { appState.typography.strokeColor = e.target.value; updateVisualizations(); });
-        els.strokeWidthSlider.addEventListener('input', (e) => { els.strokeWidthDisplay.innerText = e.target.value + 'px'; appState.typography.strokeWidth = e.target.value; updateVisualizations(); });
-        
-        els.toggleLegend.addEventListener('change', (e) => { appState.showLegend = e.target.checked; updateVisualizations(); });
+        els.btnAddRow.addEventListener('click', () => {
+            const newRow = { id: 'r_' + Date.now(), label: 'Data Baru', icon: '✨', values: [] };
+            appState.series.forEach(() => newRow.values.push({ val: 50, val2: 100, color: '#000' }));
+            appState.rows.push(newRow);
+            forceRecolor(appState.colorTheme);
+            syncUIToState();
+        });
+        els.btnRemoveRow.addEventListener('click', () => { if(appState.rows.length > 1) { appState.rows.pop(); forceRecolor(appState.colorTheme); syncUIToState(); } });
+
+        const sliderBinds = [
+            { el: els.chartScale, prop: 'chartScale', disp: els.chartScaleDisplay, unit: '%' },
+            { el: els.chartWidth, prop: 'chartWidth', disp: els.chartWidthDisplay, unit: '%' },
+            { el: els.chartHeight, prop: 'chartHeight', disp: els.chartHeightDisplay, unit: 'px' },
+            { el: els.donutCutout, prop: 'donutCutout', disp: els.donutCutoutDisplay, unit: '%' },
+            { el: els.chartThickness, prop: 'chartThickness', disp: els.chartThicknessDisplay, unit: '%' },
+            { el: els.chartSpacing, prop: 'chartSpacing', disp: els.chartSpacingDisplay, unit: 'px' },
+            { el: els.borderRadiusSlider, prop: 'borderRadius', disp: els.borderRadiusDisplay, unit: 'px' },
+            { el: els.legendFontSizeSlider, prop: 'legendFontSize', disp: els.legendFontSizeDisplay, unit: 'px' },
+            { el: els.axisFontSizeSlider, prop: 'axisFontSize', disp: els.axisFontSizeDisplay, unit: 'px' },
+            { el: els.bgOpacitySlider, prop: 'bgOpacity', disp: els.bgOpacityDisplay, unit: '%' },
+            { el: els.bgRadiusSlider, prop: 'bgRadius', disp: els.bgRadiusDisplay, unit: 'px' },
+            { el: els.bgPaddingSlider, prop: 'bgPadding', disp: els.bgPaddingDisplay, unit: 'px' }
+        ];
+        sliderBinds.forEach(bind => {
+            bind.el.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                bind.disp.innerText = val + bind.unit;
+                appState[bind.prop] = val;
+                updateVisualizations();
+            });
+        });
+
+        els.lineStyleSelect.addEventListener('change', (e) => { appState.lineStyle = e.target.value; updateVisualizations(); });
         els.legendPosition.addEventListener('change', (e) => { appState.legendPosition = e.target.value; updateVisualizations(); });
-        els.legendFontColor.addEventListener('input', (e) => { appState.typography.legendColor = e.target.value; updateVisualizations(); });
-        els.legendFontSizeSlider.addEventListener('input', (e) => { els.legendFontSizeDisplay.innerText = e.target.value + 'px'; appState.legendFontSize = parseInt(e.target.value); updateVisualizations(); });
+        els.legendAlign.addEventListener('change', (e) => { appState.legendAlign = e.target.value; updateVisualizations(); });
+        els.datalabelPositionSelect.addEventListener('change', (e) => { appState.datalabelPosition = e.target.value; updateVisualizations(); });
         
-        els.toggleAxisX.addEventListener('change', (e) => { appState.showAxisX = e.target.checked; updateVisualizations(); });
-        els.toggleAxisY.addEventListener('change', (e) => { appState.showAxisY = e.target.checked; updateVisualizations(); });
-        els.toggleAxisYRight.addEventListener('change', (e) => { appState.showAxisYRight = e.target.checked; updateVisualizations(); });
-        els.axisFontSizeSlider.addEventListener('input', (e) => { els.axisFontSizeDisplay.innerText = e.target.value + 'px'; appState.axisFontSize = parseInt(e.target.value); updateVisualizations(); });
+        // MAPPING TOGGLE YANG BENAR AGAR SESUAI DENGAN APPSTATE
+        const toggleMap = {
+            'toggleLegend': 'showLegend',
+            'toggleAxisX': 'showAxisX',
+            'toggleAxisY': 'showAxisY',
+            'toggleAxisYRight': 'showAxisYRight',
+            'toggleGridX': 'showGridX',
+            'toggleGridY': 'showGridY'
+        };
+        Object.keys(toggleMap).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', (e) => {
+                    appState[toggleMap[id]] = e.target.checked;
+                    updateVisualizations();
+                });
+            }
+        });
+
+        els.bgColor.addEventListener('input', (e) => { els.bgColorText.innerText = e.target.value; appState.bgColor = e.target.value; updateVisualizations(); });
+        els.gridColor.addEventListener('input', (e) => { els.gridColorText.innerText = e.target.value; appState.gridColor = e.target.value; updateVisualizations(); });
+
+
+        function updateVisualizations() {
+            els.exportTarget.style.transform = `scale(${appState.chartScale / 100})`;
+            els.exportTarget.style.width = appState.chartWidth + '%';
+            els.exportTarget.style.height = appState.chartHeight + 'px';
+            
+            els.canvasWrapper.style.backgroundColor = hexToRgba(appState.bgColor || '#ffffff', appState.bgOpacity || 0);
+            els.canvasWrapper.style.borderRadius = (appState.bgRadius || 0) + 'px';
+            els.canvasWrapper.style.padding = (appState.bgPadding || 0) + 'px';
+
+            renderMainChart();
+            renderPercentageWidgets();
+            saveState();
+        }
+
+        function renderMainChart() {
+            els.errorDisplay.classList.add('hidden');
+            try {
+                if (mainChart) { mainChart.destroy(); }
+                const ctx = els.mainCanvas.getContext('2d');
+
+                let isHorizontal = appState.chartType === 'bar-horizontal' || appState.chartType === 'gantt';
+                let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(appState.chartType);
+                let isScatterBubble = ['scatter', 'bubble'].includes(appState.chartType);
+                let isWaterfall = appState.chartType === 'waterfall';
+                let isWordCloud = appState.chartType === 'wordCloud';
+                
+                let labels = appState.rows.map(r => r.icon + ' ' + r.label);
+                let datasets = [];
+
+                let stackLogic = appState.stackMode || 'accumulate';
+                let lineTension = appState.lineStyle === 'smooth' ? 0.4 : 0;
+                let lineStepped = appState.lineStyle === 'stepped';
+
+                function getDatalabelAlignPos() {
+                    switch(appState.datalabelPosition) {
+                        case 'end': return { anchor: 'end', align: 'start' };
+                        case 'start': return { anchor: 'start', align: 'end' };
+                        case 'outside': return { anchor: 'end', align: 'end' };
+                        default: return { anchor: 'center', align: 'center' };
+                    }
+                }
+                let dlPos = getDatalabelAlignPos();
+
+                let globalBaseType = 'bar';
+                if (isWordCloud) globalBaseType = 'wordCloud';
+                else if (isRadial || isScatterBubble) globalBaseType = appState.chartType;
+                else if (appState.chartType === 'line' || appState.chartType === 'area') globalBaseType = 'line';
+
+                if (isWordCloud) {
+                    let dataPoints = appState.rows.map(r => ({ text: r.label, size: (r.values[0]?.val || 10) * 2, color: r.values[0]?.color }));
+                    datasets = [{ label: 'Word Cloud', data: dataPoints.map(d=>d.size), labels: dataPoints.map(d=>d.text), backgroundColor: dataPoints.map(d=>d.color) }];
+                } 
+                else if (isScatterBubble) {
+                    datasets = [{
+                        label: appState.series[0]?.name || 'Dataset Utama',
+                        data: appState.rows.map((r, i) => ({ x: i * 10, y: r.values[0]?.val||0, r: appState.chartType === 'bubble' ? ((r.values[0]?.val||0)/10 + 5) : 5 })),
+                        backgroundColor: appState.rows.map(r => r.values[0]?.color),
+                        borderColor: '#111827', borderWidth: 2,
+                        pointRadius: appState.chartType === 'scatter' ? 8 : undefined
+                    }];
+                }
+                else {
+                    let sortedIndices = appState.series.map((s, i) => i).sort((a,b) => {
+                        return (appState.series[a].zIndex === 'back' ? -1 : 1) - (appState.series[b].zIndex === 'back' ? -1 : 1);
+                    });
+
+                    sortedIndices.forEach((sIdx) => {
+                        let s = appState.series[sIdx];
+                        if(!s) return;
+
+                        let parsedType = s.type === 'auto' ? globalBaseType : s.type;
+                        if (parsedType === 'bar-vertical' || parsedType === 'bar-horizontal') parsedType = 'bar';
+                        else if (parsedType === 'line' || parsedType === 'area') parsedType = 'line';
+                        
+                        let isFillArea = (s.type === 'area') || (s.type === 'auto' && appState.chartType === 'area');
+
+                        let dataArr = []; let colorArr = [];
+                        let waterfallSum = 0;
+
+                        appState.rows.forEach(r => {
+                            let v = r.values[sIdx];
+                            if (v) {
+                                if (appState.chartType === 'gantt') { dataArr.push([v.val, v.val2]); }
+                                else if (isWaterfall) {
+                                    let start = waterfallSum; waterfallSum += v.val;
+                                    dataArr.push([start, waterfallSum]);
+                                }
+                                else { dataArr.push(v.val); }
+                                colorArr.push(v.color);
+                            } else {
+                                dataArr.push(null); colorArr.push('transparent');
+                            }
+                        });
+
+                        let isLine = parsedType === 'line';
+                        let borderColor = isLine ? colorArr[0] : (appState.chartSpacing > 0 ? '#ffffff' : 'transparent');
+                        let bgColor = isLine && !isFillArea ? 'transparent' : colorArr;
+                        if (isFillArea) bgColor = hexToRgba(colorArr[0], 20);
+
+                        // VIRTUAL AXIS MAPPING UNTUK MENCEGAH CRASH SAAT HORIZONTAL
+                        let reqAxis = s.axis === 'y2' ? 'Right' : 'Primary';
+                        let useX, useY;
+                        if (isHorizontal) {
+                            useY = 'y'; // Sumbu Kategori dipaksa ke Y
+                            useX = reqAxis === 'Right' ? 'xRight' : 'x'; // Sumbu Nilai pindah ke X
+                        } else {
+                            useX = 'x'; 
+                            useY = reqAxis === 'Right' ? 'yRight' : 'y';
+                        }
+
+                        datasets.push({
+                            label: s.name,
+                            type: parsedType,
+                            data: dataArr,
+                            backgroundColor: bgColor,
+                            borderColor: borderColor,
+                            borderWidth: isLine ? 3 : (appState.chartSpacing > 0 ? 1 : 0),
+                            fill: isFillArea,
+                            tension: lineTension,
+                            stepped: lineStepped,
+                            borderRadius: appState.borderRadius,
+                            grouped: stackLogic !== 'include', 
+                            stack: stackLogic === 'accumulate' ? 'Stack 0' : undefined,
+                            yAxisID: useY,
+                            xAxisID: useX,
+                            order: s.zIndex === 'front' ? 0 : 2
+                        });
+                    });
+                }
+
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: isHorizontal ? 'y' : 'x',
+                    layout: { padding: { top: 20, bottom: 10 } },
+                    interaction: { mode: stackLogic === 'include' ? 'index' : 'nearest', intersect: false },
+                    plugins: {
+                        legend: {
+                            display: appState.showLegend, position: appState.legendPosition, align: appState.legendAlign || 'center',
+                            labels: { font: { family: 'Inter', size: appState.legendFontSize, weight: 'bold' }, color: '#334155', usePointStyle: true, padding: 20 }
+                        },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
+                        datalabels: {
+                            display: !isRadial && !isWordCloud && !isScatterBubble, 
+                            anchor: dlPos.anchor, align: dlPos.align,
+                            color: appState.datalabelPosition === 'outside' ? '#111827' : '#111827',
+                            font: { family: 'Inter', weight: '900', size: 14 },
+                            formatter: (v) => Array.isArray(v) ? (v[1] - v[0]) : Math.round(v),
+                            textStrokeColor: appState.datalabelPosition === 'outside' ? 'transparent' : 'rgba(255,255,255,0.7)',
+                            textStrokeWidth: appState.datalabelPosition === 'outside' ? 0 : 4
+                        }
+                    },
+                    scales: {}
+                };
+
+                if (!isRadial && !isWordCloud) {
+                    let hasSecondaryAxis = appState.series.some(s => s.axis === 'y2');
+                    
+                    if (isHorizontal) {
+                        chartOptions.scales.y = { display: appState.showAxisY, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        chartOptions.scales.x = { display: appState.showAxisX, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        if (appState.showAxisYRight || hasSecondaryAxis) {
+                            chartOptions.scales.xRight = { display: appState.showAxisYRight, position: 'top', stacked: stackLogic === 'accumulate', grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
+                        }
+                    } else {
+                        chartOptions.scales.x = { display: appState.showAxisX, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        chartOptions.scales.y = { display: appState.showAxisY, position: 'left', stacked: stackLogic === 'accumulate', grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        if (appState.showAxisYRight || hasSecondaryAxis) {
+                            chartOptions.scales.yRight = { display: appState.showAxisYRight, position: 'right', stacked: stackLogic === 'accumulate', grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
+                        }
+                    }
+                } else if (isRadial) {
+                    chartOptions.cutout = appState.chartType === 'doughnut' ? appState.donutCutout + '%' : 0;
+                    chartOptions.elements = { arc: { borderRadius: appState.borderRadius } };
+                    chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => { let sum=0; ctx.chart.data.datasets[0].data.map(d=>sum+=d); return Math.round((value/sum)*100)+'%'; } };
+                }
+                
+                chartOptions.barPercentage = appState.chartThickness / 100;
+                chartOptions.categoryPercentage = 0.8;
+
+                mainChart = new Chart(ctx, {
+                    type: globalBaseType,
+                    data: { labels: labels, datasets: datasets },
+                    options: chartOptions,
+                    plugins: [ChartDataLabels]
+                });
+
+            } catch (err) {
+                console.error("Critical Render Failure:", err);
+                els.errorDisplay.classList.remove('hidden');
+            }
+        }
+
+        function renderPercentageWidgets() {
+            let total = 0;
+            appState.rows.forEach(r => { if(r.values[0]) total += (r.values[0].val || 0); });
+            els.totalSumDisplay.innerText = total.toLocaleString();
+
+            els.percentageContainer.innerHTML = '';
+            appState.rows.forEach(r => {
+                let val = r.values[0] ? (r.values[0].val || 0) : 0;
+                let perc = total > 0 ? Math.round((val / total) * 100) : 0;
+                let color = r.values[0] ? r.values[0].color : '#ccc';
+                
+                els.percentageContainer.innerHTML += `
+                    <div class="flex items-center gap-2 bg-white/50 px-3 py-1.5 rounded-xl border border-white shrink-0 shadow-sm">
+                        <div class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></div>
+                        <span class="text-xs font-bold text-slate-700">${r.icon} ${r.label}</span>
+                        <span class="text-xs font-black text-slate-900 ml-1">${perc}%</span>
+                    </div>
+                `;
+            });
+        }
 
         els.btnExport.addEventListener('click', () => {
-            const originalScale = els.exportTarget.style.transform; els.exportTarget.style.transform = 'scale(1)'; 
-            setTimeout(() => { html2canvas(els.canvasWrapper, { scale: 3, backgroundColor: null, logging: false }).then(canvas => { els.exportTarget.style.transform = originalScale; const link = document.createElement('a'); link.download = `ProChart_HD_${Date.now()}.png`; link.href = canvas.toDataURL("image/png", 1.0); link.click(); }); }, 100);
+            els.loadingOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                const canvas = els.mainCanvas;
+                const wrapper = els.canvasWrapper;
+                
+                // Get the actual computed styles of the wrapper to capture padding and rounded corners
+                const wrapperStyle = window.getComputedStyle(wrapper);
+                const paddingTop = parseInt(wrapperStyle.paddingTop) || 0;
+                const paddingRight = parseInt(wrapperStyle.paddingRight) || 0;
+                const paddingBottom = parseInt(wrapperStyle.paddingBottom) || 0;
+                const paddingLeft = parseInt(wrapperStyle.paddingLeft) || 0;
+                const borderRadius = parseInt(wrapperStyle.borderRadius) || 0;
+
+                // Create a temporary canvas that is larger to accommodate the padding
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width + paddingLeft + paddingRight;
+                tempCanvas.height = canvas.height + paddingTop + paddingBottom;
+                const tCtx = tempCanvas.getContext('2d');
+                
+                // 1. Fill the entire background with a solid color first (usually white or light gray)
+                // This prevents the transparent areas from turning black when exported to PNG/JPEG
+                tCtx.fillStyle = '#f8fafc'; // Match the workspace background color
+                tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+                // 2. Draw the custom background with rounded corners and opacity
+                if(appState.bgOpacity > 0) {
+                    tCtx.fillStyle = hexToRgba(appState.bgColor, appState.bgOpacity);
+                    
+                    // Function to draw a rounded rectangle
+                    tCtx.beginPath();
+                    tCtx.moveTo(borderRadius, 0);
+                    tCtx.lineTo(tempCanvas.width - borderRadius, 0);
+                    tCtx.quadraticCurveTo(tempCanvas.width, 0, tempCanvas.width, borderRadius);
+                    tCtx.lineTo(tempCanvas.width, tempCanvas.height - borderRadius);
+                    tCtx.quadraticCurveTo(tempCanvas.width, tempCanvas.height, tempCanvas.width - borderRadius, tempCanvas.height);
+                    tCtx.lineTo(borderRadius, tempCanvas.height);
+                    tCtx.quadraticCurveTo(0, tempCanvas.height, 0, tempCanvas.height - borderRadius);
+                    tCtx.lineTo(0, borderRadius);
+                    tCtx.quadraticCurveTo(0, 0, borderRadius, 0);
+                    tCtx.closePath();
+                    tCtx.fill();
+                }
+                
+                // 3. Draw the actual chart canvas on top, offset by the padding
+                tCtx.drawImage(canvas, paddingLeft, paddingTop);
+                
+                const link = document.createElement('a');
+                link.download = `ProChart_${Date.now()}.png`;
+                link.href = tempCanvas.toDataURL('image/png', 1.0);
+                link.click();
+                els.loadingOverlay.classList.add('hidden');
+            }, 800);
         });
 
-        const iconCats = { 'Bisnis & Kantor': ['💼','🏢','🏭','📈','📉','📊','💰','💳','💻','📱','🛒'], 'Demografi & Orang': ['👨‍💼','👩‍💼','👨‍🎓','👩‍🎓','👨‍🔧','👩‍‍🔧','👨‍🌾','👮‍♂️','👨‍⚕️','👥','👤'], 'Lokasi & Alam': ['📍','🗺','🌍','🌴','🌳','🌲','🏜️','⛰️','🏖️','🏙️','🏡'], 'Medis & Edukasi': ['⚕','🏥','💊','🧬','🎓','🏫','📚','🔬','🧠','🩺'], 'Transportasi': ['🚗','🚕','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛴','🚲','🛵','🏍'] };
-        const modal = document.getElementById('iconLibraryModal'); const iconContainer = document.getElementById('iconContainer');
-        document.getElementById('btnOpenLibrary').addEventListener('click', (e) => {
-            e.preventDefault(); iconContainer.innerHTML = ''; 
-            for (const [cat, icons] of Object.entries(iconCats)) {
-                const catDiv = document.createElement('div'); catDiv.innerHTML = `<h4 class="text-xs font-bold text-slate-400 mb-2 uppercase">${cat}</h4>`;
-                const grid = document.createElement('div'); grid.className = 'icon-grid mb-4';
-                icons.forEach(i => { const btn = document.createElement('button'); btn.className = 'icon-btn'; btn.innerText = i; btn.onclick = () => { const tempInput = document.createElement("input"); tempInput.value = i; document.body.appendChild(tempInput); tempInput.select(); document.execCommand("copy"); document.body.removeChild(tempInput); showToast('toastCopied'); modal.classList.add('opacity-0'); modal.classList.add('pointer-events-none'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => modal.style.display = 'none', 300); }; grid.appendChild(btn); });
-                catDiv.appendChild(grid); iconContainer.appendChild(catDiv);
+        const emojiList = ['📍','🏢','🌴','🌳','🚗','💻','📱','🍔','⚽','🏥','⚡','🔥','💧','☀️','🌟','💰','📈','📦'];
+        function openIconFor(rowId) {
+            activeIconInput = rowId;
+            const grid = document.getElementById('iconGrid');
+            grid.innerHTML = emojiList.map(e => `<button onclick="selectIcon('${e}')" class="text-2xl p-2 hover:bg-slate-100 rounded-xl transition">${e}</button>`).join('');
+            document.getElementById('iconModal').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('iconModal').classList.remove('opacity-0'); document.getElementById('iconModalContent').classList.remove('scale-95'); }, 10);
+        }
+        function closeIconModal() {
+            document.getElementById('iconModal').classList.add('opacity-0'); document.getElementById('iconModalContent').classList.add('scale-95');
+            setTimeout(() => document.getElementById('iconModal').classList.add('hidden'), 300);
+        }
+        function selectIcon(icon) {
+            if(activeIconInput) {
+                const r = appState.rows.find(x => x.id === activeIconInput);
+                if(r) { r.icon = icon; updateVisualizations(); renderDataInputs(); }
             }
-            modal.style.display = 'flex'; modal.classList.remove('pointer-events-none'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10);
-        });
-        document.getElementById('btnCloseLibrary').addEventListener('click', () => { modal.classList.add('opacity-0'); modal.classList.add('pointer-events-none'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => modal.style.display = 'none', 300); });
+            closeIconModal();
+        }
 
-        function initPWA() { document.getElementById('pwa-manifest').href = URL.createObjectURL(new Blob([JSON.stringify({ name: "Pro Chart Vision V3", short_name: "ProChart", start_url: "./", display: "standalone", background_color: "#f8fafc", theme_color: "#111111", icons: [{ src: "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%231b2609'/%3E%3Cpath fill='%23c4f033' d='M46 25 h10 v16 h14 v5 L52 75 h-7 v-16 h-15 v-6 L46 25 z'/%3E%3C/svg%3E", sizes: "192x192", type: "image/svg+xml" }] })], {type: 'application/json'})); if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(new Blob(["self.addEventListener('install', (e) => self.skipWaiting());"], {type: 'application/javascript'}))).catch(()=>{}); }
-        
-        window.onload = () => { loadState(); initPWA(); renderSeriesManager(); renderInputFields(); updateVisualizations(); };
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('resetModal').classList.remove('opacity-0'); document.getElementById('resetModalContent').classList.remove('scale-95'); }, 10);
+        }
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('opacity-0'); document.getElementById('resetModalContent').classList.add('scale-95');
+            setTimeout(() => document.getElementById('resetModal').classList.add('hidden'), 300);
+        }
+        function executeResetData() {
+            localStorage.removeItem(STORAGE_KEY);
+            appState = JSON.parse(JSON.stringify(defaultAppState));
+            syncUIToState();
+            closeResetModal();
+        }
+
+        window.onload = () => {
+            loadState();
+            syncUIToState();
+            translatePage();
+        };
     </script>
 </body>
 </html>
