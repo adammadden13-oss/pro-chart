@@ -1,117 +1,234 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pro Chart Vision 3.0</title>
-    
+
     <!-- SVG Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23CAFC03'/><path d='M45 20L25 60h20l-5 20 25-40H45z' fill='%23111827'/></svg>">
-    
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23CAFC03'/><path d='M45 20L25 60h20l-5 20 25-40H45z' fill='%23111827'/></svg>">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <!-- Chart.js & Plugins -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://unpkg.com/chartjs-chart-wordcloud@4"></script>
-    
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #cafc03; cursor: pointer; border: 2px solid #111827; margin-top: -6px; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
-        
-        /* PENGHANCUR PANAH (SPIN BUTTON) PADA INPUT ANGKA MUTLAK */
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { 
-            -webkit-appearance: none !important; 
-            margin: 0 !important; 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
         }
-        input[type="number"] {
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #cafc03;
+            cursor: pointer;
+            border: 2px solid #111827;
+            margin-top: -6px;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+
+        /* KUNCI MUTLAK PENGHAPUS PANAH ANGKA (SPINNERS) */
+        .no-spinners::-webkit-outer-spin-button,
+        .no-spinners::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            display: none !important;
+            margin: 0 !important;
+        }
+
+        .no-spinners {
             -moz-appearance: textfield !important;
+            appearance: none !important;
         }
-        
-        .toggle-checkbox:checked + .toggle-label { background-color: #111827; }
-        .toggle-checkbox:checked + .toggle-label::after { transform: translateX(100%); border-color: white; }
-        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
-        .chart-wrapper-transition { transition: all 0.3s ease; }
-        .modal-bg-blur { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #111827;
+        }
+
+        .toggle-checkbox:checked+.toggle-label::after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-wrapper-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-bg-blur {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        /* HEADER SCROLL INTERACTION STYLES */
+        #sidebarHeader.scrolled {
+            padding-top: 16px;
+            padding-bottom: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            border-bottom-color: transparent;
+        }
+
+        #sidebarHeader.scrolled #logoIcon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+
+        #sidebarHeader.scrolled #logoIcon i {
+            font-size: 16px;
+        }
+
+        #sidebarHeader.scrolled #logoTitle {
+            font-size: 16px;
+        }
+
+        #sidebarHeader.scrolled #logoSubtitle {
+            font-size: 8px;
+            margin-top: 2px;
+        }
     </style>
 </head>
+
 <body class="h-screen flex overflow-hidden selection:bg-lime-300 selection:text-slate-900">
 
     <!-- MODAL KOLEKSI IKON -->
-    <div id="iconModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300" id="iconModalContent">
+    <div id="iconModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300"
+            id="iconModalContent">
             <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 class="font-bold text-slate-800" data-i18n="iconLibrary">Koleksi Ikon</h3>
-                <button onclick="closeIconModal()" class="text-slate-400 hover:text-red-500 transition"><i class="ph ph-x text-xl"></i></button>
+                <button onclick="closeIconModal()" class="text-slate-400 hover:text-red-500 transition"><i
+                        class="ph ph-x text-xl"></i></button>
             </div>
             <div class="p-4">
-                <input type="text" id="iconSearch" data-i18n-placeholder="searchIcon" placeholder="Cari ikon..." class="w-full bg-slate-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-lime-400 mb-4">
+                <input type="text" id="iconSearch" data-i18n-placeholder="searchIcon" placeholder="Cari ikon..."
+                    class="w-full bg-slate-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-lime-400 mb-4 outline-none">
                 <div class="grid grid-cols-6 gap-2 max-h-64 overflow-y-auto p-1" id="iconGrid"></div>
             </div>
         </div>
     </div>
 
     <!-- MODAL RESET DATA KUSTOM -->
-    <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300">
-        <div class="bg-slate-900 text-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 border border-slate-700" id="resetModalContent">
+    <div id="resetModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300">
+        <div class="bg-white text-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 border border-slate-100"
+            id="resetModalContent">
             <div class="p-8 text-center">
-                <div class="w-16 h-16 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-500/30">
+                <div
+                    class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-100 shadow-sm">
                     <i class="ph ph-warning-circle text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3" data-i18n="resetConfirmTitle">Reset Semua Pengaturan?</h3>
-                <p class="text-slate-400 text-sm mb-8 leading-relaxed" data-i18n="resetConfirmDesc">Aksi ini akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.</p>
+                <h3 class="text-xl font-bold mb-3 text-slate-900" data-i18n="resetConfirmTitle">Reset Semua Pengaturan?
+                </h3>
+                <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium" data-i18n="resetConfirmDesc">Aksi ini
+                    akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.
+                </p>
                 <div class="flex gap-3 justify-center">
-                    <button onclick="closeResetModal()" class="flex-1 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold transition text-slate-300" data-i18n="cancel">Batal</button>
-                    <button onclick="executeResetData()" class="flex-1 px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition text-white shadow-lg shadow-red-500/30" data-i18n="yesReset">Ya, Reset</button>
+                    <button onclick="closeResetModal()"
+                        class="flex-1 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-bold transition text-slate-600"
+                        data-i18n="cancel">Batal</button>
+                    <button onclick="executeResetData()"
+                        class="flex-1 px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition text-white shadow-lg shadow-red-500/20"
+                        data-i18n="yesReset">Ya, Reset</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- LEFT PANEL: SETTINGS -->
-    <div class="w-[420px] bg-white border-r border-slate-200 flex flex-col h-full shrink-0 relative z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        
-        <div class="p-6 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-white">
-            <div class="w-10 h-10 bg-[#cafc03] rounded-xl flex items-center justify-center text-slate-900 shadow-sm border border-[#b5e003]">
-                <i class="ph-fill ph-lightning text-xl"></i>
+    <div id="leftPanel"
+        class="w-[420px] bg-white border-r border-slate-200 flex flex-col h-full shrink-0 relative z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-500 ease-in-out">
+
+        <div id="sidebarHeader"
+            class="p-6 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-white transition-all duration-300 relative z-30">
+            <div id="logoIcon"
+                class="w-10 h-10 bg-[#cafc03] rounded-xl flex items-center justify-center text-slate-900 shadow-sm border border-[#b5e003] transition-all duration-300">
+                <i class="ph-fill ph-lightning text-xl transition-all duration-300"></i>
             </div>
-            <div>
-                <h1 class="font-black text-xl text-slate-900 tracking-tight leading-none">Pro Chart</h1>
-                <p class="text-[10px] font-bold text-slate-400 tracking-widest mt-1 uppercase">Vision V3.0</p>
+            <div class="transition-all duration-300">
+                <h1 id="logoTitle"
+                    class="font-black text-xl text-slate-900 tracking-tight leading-none transition-all duration-300">
+                    Pro Chart</h1>
+                <p id="logoSubtitle"
+                    class="text-[10px] font-bold text-slate-400 tracking-widest mt-1 uppercase transition-all duration-300">
+                    Vision V3.0</p>
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-6 space-y-8 pb-32 relative">
-            
+        <div id="settingsScrollArea" class="flex-1 overflow-y-auto p-6 space-y-8 pb-32 relative">
+
             <!-- PENGATURAN UTAMA -->
             <div class="bg-slate-50 border border-slate-100 rounded-3xl p-5 shadow-sm relative">
                 <div class="flex items-center justify-between mb-5">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-[#cafc03]"></div>
-                        <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="coreSettings">Pengaturan Utama</h2>
+                        <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="coreSettings">
+                            Pengaturan Utama</h2>
                     </div>
-                    <button onclick="openResetModal()" class="text-[10px] font-bold text-red-500 uppercase border border-red-200 hover:bg-red-50 hover:border-red-300 bg-white px-3 py-1.5 rounded-lg transition shadow-sm" data-i18n="resetData">Reset Data</button>
+                    <button onclick="openResetModal()"
+                        class="text-[9px] font-black text-red-500 uppercase border border-red-200 hover:bg-red-50 bg-white px-3 py-1.5 rounded-lg transition shadow-sm"
+                        data-i18n="resetData">Reset Data</button>
                 </div>
-                
+
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="graphicType">Tipe Grafik Utama</label>
-                        <select id="chartType" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2"
+                            data-i18n="graphicType">Tipe Grafik Utama</label>
+                        <select id="chartType"
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
                             <option value="bar-vertical">Bar Vertical (Batang Vertikal)</option>
                             <option value="bar-horizontal">Bar Horizontal (Batang Mendatar)</option>
                             <option value="line">Line Chart (Garis Tren)</option>
@@ -128,8 +245,10 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="themeColor">Tema Warna</label>
-                        <select id="colorTheme" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2"
+                            data-i18n="themeColor">Tema Warna</label>
+                        <select id="colorTheme"
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
                             <option value="lime">Neon Lime (AI Theme)</option>
                             <option value="default">Modern Minimalist (Default)</option>
                             <option value="corporate">Corporate Blue</option>
@@ -138,9 +257,12 @@
                             <option value="monochrome">Monochrome Elegant</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="subDataLogic">Logika Sub-Data (Tumpukan)</label>
-                        <select id="stackMode" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
+                    <div id="stackModeContainer">
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2 flex justify-between">
+                            <span data-i18n="subDataLogic">Logika Sub-Data (Tumpukan)</span>
+                        </label>
+                        <select id="stackMode"
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
                             <option value="accumulate" data-i18n="accumulate">Akumulasi (Tambah Tinggi)</option>
                             <option value="include" data-i18n="include">Include (Masuk ke Data Utama)</option>
                         </select>
@@ -152,35 +274,45 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-slate-800"></div>
-                            <h3 class="text-[11px] font-black text-slate-800 tracking-wider uppercase" data-i18n="multiLayerEngine">Mesin Multi-Lapis (Overlay)</h3>
+                            <h3 class="text-[11px] font-black text-slate-800 tracking-wider uppercase"
+                                data-i18n="multiLayerEngine">Mesin Multi-Lapis (Overlay)</h3>
                         </div>
-                        <button id="btnAddOverlay" class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-[10px] font-bold px-3 py-1.5 rounded-xl transition uppercase flex items-center gap-1 shadow-md">
+                        <button id="btnAddOverlay"
+                            class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-[10px] font-bold px-3 py-1.5 rounded-xl transition uppercase flex items-center gap-1 shadow-md">
                             <span>+</span> <span data-i18n="addChart">Tambah Grafik</span>
                         </button>
                     </div>
-                    <p class="text-[10px] text-slate-500 mb-4 leading-relaxed" data-i18n="multiLayerDesc">Tambahkan grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.</p>
-                    
+                    <p class="text-[10px] text-slate-500 mb-4 leading-relaxed" data-i18n="multiLayerDesc">Tambahkan
+                        grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.</p>
+
                     <div id="seriesContainer" class="space-y-3">
                         <!-- Series layers generated here -->
                     </div>
                 </div>
             </div>
 
-            <!-- INPUT DATA LANGSUNG (Matriks Sempurna 1:1) -->
+            <!-- INPUT DATA LANGSUNG -->
             <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xs font-bold text-slate-800 tracking-widest uppercase" data-i18n="liveDataInput">Input Data Langsung</h2>
-                    <button onclick="openIconModal()" class="bg-slate-900 text-[#cafc03] text-[10px] font-bold px-3 py-1.5 rounded-xl transition uppercase flex items-center gap-1 hover:bg-slate-800 shadow-md">
+                    <h2 class="text-xs font-bold text-slate-800 tracking-widest uppercase" data-i18n="liveDataInput">
+                        Input Data Langsung</h2>
+                    <button onclick="openIconModal()"
+                        class="bg-slate-900 text-[#cafc03] text-[10px] font-bold px-3 py-1.5 rounded-xl transition uppercase flex items-center gap-1 hover:bg-slate-800 shadow-md">
                         <i class="ph ph-squares-four"></i> <span data-i18n="iconLibrary">Koleksi Ikon</span>
                     </button>
                 </div>
 
                 <div class="flex justify-between items-center mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <span class="text-[10px] font-bold text-slate-500 uppercase" data-i18n="dataRowCount">Jumlah Baris Label (Kategori)</span>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase" data-i18n="dataRowCount">Jumlah Baris
+                        Label (Kategori)</span>
                     <div class="flex items-center bg-white rounded-lg border border-slate-200 p-0.5 shadow-sm">
-                        <button id="btnRemoveRow" class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-md transition"><i class="ph ph-minus"></i></button>
+                        <button id="btnRemoveRow"
+                            class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-md transition"><i
+                                class="ph ph-minus"></i></button>
                         <span id="rowCountDisplay" class="w-8 text-center text-xs font-bold text-slate-800">4</span>
-                        <button id="btnAddRow" class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-[#cafc03] hover:bg-slate-900 rounded-md transition"><i class="ph ph-plus"></i></button>
+                        <button id="btnAddRow"
+                            class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-[#cafc03] hover:bg-slate-900 rounded-md transition"><i
+                                class="ph ph-plus"></i></button>
                     </div>
                 </div>
 
@@ -193,50 +325,72 @@
             <div class="bg-slate-50 border border-slate-100 rounded-3xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-slate-800"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="dimensionLayout">Dimensi & Tata Letak</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="dimensionLayout">
+                        Dimensi & Tata Letak</h2>
                 </div>
-                
+
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="visualScale">Skala Visual (Zoom Canvas)</span><span id="chartScaleDisplay">100%</span></label>
+                        <label
+                            class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                data-i18n="visualScale">Skala Visual (Zoom Canvas)</span><span
+                                id="chartScaleDisplay">100%</span></label>
                         <input type="range" id="chartScale" min="50" max="150" value="100">
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="width">Lebar</span><span id="chartWidthDisplay">100%</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                    data-i18n="width">Lebar</span><span id="chartWidthDisplay">100%</span></label>
                             <input type="range" id="chartWidth" min="30" max="100" value="100">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="height">Tinggi</span><span id="chartHeightDisplay">500px</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                    data-i18n="height">Tinggi</span><span id="chartHeightDisplay">500px</span></label>
                             <input type="range" id="chartHeight" min="300" max="1000" step="50" value="500">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="thickness">Ketebalan Elemen</span><span id="chartThicknessDisplay">100%</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                    data-i18n="thickness">Ketebalan Elemen</span><span
+                                    id="chartThicknessDisplay">100%</span></label>
                             <input type="range" id="chartThickness" min="10" max="150" value="100">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="spacing">Jarak Antar Elemen</span><span id="chartSpacingDisplay">10px</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                    data-i18n="spacing">Jarak Antar Elemen</span><span
+                                    id="chartSpacingDisplay">10px</span></label>
                             <input type="range" id="chartSpacing" min="0" max="50" value="10">
                         </div>
                     </div>
 
                     <div id="donutCutoutContainer">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="donutHole">Lubang Donut</span><span id="donutCutoutDisplay">60%</span></label>
+                        <label
+                            class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                data-i18n="donutHole">Lubang Donut</span><span
+                                id="donutCutoutDisplay">60%</span></label>
                         <input type="range" id="donutCutout" min="0" max="90" value="60">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="borderRadius">Sudut Melengkung</span><span id="borderRadiusDisplay">8px</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                    data-i18n="borderRadius">Sudut Melengkung</span><span
+                                    id="borderRadiusDisplay">8px</span></label>
                             <input type="range" id="borderRadiusSlider" min="0" max="50" value="8">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="lineStyle">Gaya Garis</label>
-                            <select id="lineStyleSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2"
+                                data-i18n="lineStyle">Gaya Garis</label>
+                            <select id="lineStyleSelect"
+                                class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
                                 <option value="smooth" data-i18n="smooth">Melengkung (Smooth)</option>
                                 <option value="straight" data-i18n="straight">Lurus (Straight)</option>
                                 <option value="stepped" data-i18n="stepped">Tangga (Stepped)</option>
@@ -250,22 +404,28 @@
             <div class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="typographyEst">Tipografi & Estetika</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="typographyEst">
+                        Tipografi & Estetika</h2>
                 </div>
-                
+
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-bold text-slate-700" data-i18n="showLegend">Tampilkan Legenda</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleLegend" class="sr-only peer" checked>
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            <div
+                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                            </div>
                         </label>
                     </div>
-                    
-                    <div id="legendControls" class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
+
+                    <div id="legendControls"
+                        class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" data-i18n="legendPosition">Posisi</label>
-                            <select id="legendPosition" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1"
+                                data-i18n="legendPosition">Posisi</label>
+                            <select id="legendPosition"
+                                class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-medium focus:ring-1 focus:ring-[#cafc03] outline-none">
                                 <option value="top">Atas (Horizontal)</option>
                                 <option value="bottom">Bawah (Horizontal)</option>
                                 <option value="left">Kiri (Vertikal)</option>
@@ -273,22 +433,29 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" data-i18n="legendAlign">Perataan</label>
-                            <select id="legendAlign" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1"
+                                data-i18n="legendAlign">Perataan</label>
+                            <select id="legendAlign"
+                                class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[11px] font-medium focus:ring-1 focus:ring-[#cafc03] outline-none">
                                 <option value="center" data-i18n="alignCenter">Tengah</option>
                                 <option value="start" data-i18n="alignStart">Kiri/Atas (Mulai)</option>
                                 <option value="end" data-i18n="alignEnd">Kanan/Bawah (Akhir)</option>
                             </select>
                         </div>
                         <div class="col-span-2 mt-2">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex justify-between"><span data-i18n="legendSize">Ukuran Legenda</span><span id="legendFontSizeDisplay">14px</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex justify-between"><span
+                                    data-i18n="legendSize">Ukuran Legenda</span><span
+                                    id="legendFontSizeDisplay">14px</span></label>
                             <input type="range" id="legendFontSizeSlider" min="8" max="24" value="14">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" data-i18n="datalabelPos">Posisi Angka (Datalabels)</label>
-                        <select id="datalabelPositionSelect" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1"
+                            data-i18n="datalabelPos">Posisi Angka (Datalabels)</label>
+                        <select id="datalabelPositionSelect"
+                            class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
                             <option value="center" data-i18n="posCenter">Tengah Batang (Default)</option>
                             <option value="end" data-i18n="posInsideTop">Dalam - Ujung Atas/Kanan</option>
                             <option value="start" data-i18n="posInsideBottom">Dalam - Pangkal Bawah/Kiri</option>
@@ -302,28 +469,42 @@
             <div class="bg-slate-50 border border-slate-100 rounded-3xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="bgAreaTitle">Latar Belakang & Kisi</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="bgAreaTitle">Latar
+                        Belakang & Kisi</h2>
                 </div>
-                
+
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="bgColorTitle">Warna Latar Belakang</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2"
+                            data-i18n="bgColorTitle">Warna Latar Belakang</label>
                         <div class="flex h-10 overflow-hidden rounded-xl border border-slate-200 shadow-sm">
-                            <input type="color" id="bgColor" value="#ffffff" class="w-12 h-14 -mt-2 -ml-2 cursor-pointer">
-                            <div class="flex-1 bg-white flex items-center px-3 text-xs font-mono text-slate-500" id="bgColorText">#ffffff</div>
+                            <input type="color" id="bgColor" value="#f8fafc"
+                                class="w-12 h-14 -mt-2 -ml-2 cursor-pointer">
+                            <div class="flex-1 bg-white flex items-center px-3 text-xs font-mono text-slate-500"
+                                id="bgColorText">#f8fafc</div>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="opacity">Transparansi (Opasitas)</span><span id="bgOpacityDisplay">0%</span></label>
+                        <label
+                            class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                data-i18n="opacity">Transparansi (Opasitas)</span><span
+                                id="bgOpacityDisplay">0%</span></label>
                         <input type="range" id="bgOpacitySlider" min="0" max="100" value="0">
                     </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="borderRadius">Sudut Melengkung</span><span id="bgRadiusDisplay">0px</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                    data-i18n="borderRadius">Sudut Melengkung</span><span
+                                    id="bgRadiusDisplay">0px</span></label>
                             <input type="range" id="bgRadiusSlider" min="0" max="100" value="0">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="bgPaddingTitle">Jarak (Padding)</span><span id="bgPaddingDisplay">0px</span></label>
+                            <label
+                                class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                    data-i18n="bgPaddingTitle">Jarak (Padding)</span><span
+                                    id="bgPaddingDisplay">0px</span></label>
                             <input type="range" id="bgPaddingSlider" min="0" max="100" value="0">
                         </div>
                     </div>
@@ -334,21 +515,29 @@
                         <label class="text-xs font-bold text-slate-700" data-i18n="showGridX">Kisi Vertikal (X)</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleGridX" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            <div
+                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                            </div>
                         </label>
                     </div>
                     <div class="flex items-center justify-between">
-                        <label class="text-xs font-bold text-slate-700" data-i18n="showGridY">Kisi Horizontal (Y)</label>
+                        <label class="text-xs font-bold text-slate-700" data-i18n="showGridY">Kisi Horizontal
+                            (Y)</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleGridY" class="sr-only peer" checked>
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            <div
+                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                            </div>
                         </label>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="gridColor">Warna Garis Kisi</label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2"
+                            data-i18n="gridColor">Warna Garis Kisi</label>
                         <div class="flex h-8 overflow-hidden rounded-lg border border-slate-200 w-full">
-                            <input type="color" id="gridColor" value="#e2e8f0" class="w-8 h-10 -mt-1 -ml-1 cursor-pointer">
-                            <div class="flex-1 bg-white flex items-center px-2 text-[10px] font-mono text-slate-500" id="gridColorText">#e2e8f0</div>
+                            <input type="color" id="gridColor" value="#e2e8f0"
+                                class="w-8 h-10 -mt-1 -ml-1 cursor-pointer">
+                            <div class="flex-1 bg-white flex items-center px-2 text-[10px] font-mono text-slate-500"
+                                id="gridColorText">#e2e8f0</div>
                         </div>
                     </div>
                 </div>
@@ -358,34 +547,44 @@
             <div id="axesControlPanel" class="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-orange-500"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="axisGrid">Sumbu Angka</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="axisGrid">Sumbu
+                        Angka</h2>
                 </div>
-                
+
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-bold text-slate-700" data-i18n="axisX">Sumbu Utama</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleAxisX" class="sr-only peer" checked>
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                            <div
+                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]">
+                            </div>
                         </label>
                     </div>
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-bold text-slate-700" data-i18n="axisYLeft">Sumbu Kategori</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleAxisY" class="sr-only peer" checked>
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                            <div
+                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]">
+                            </div>
                         </label>
                     </div>
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-bold text-slate-700" data-i18n="axisYRight">Sumbu Sekunder</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="toggleAxisYRight" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                            <div
+                                class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]">
+                            </div>
                         </label>
                     </div>
 
                     <div class="pt-3 border-t border-slate-100">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="axisSize">Ukuran Font Sumbu</span><span id="axisFontSizeDisplay">12px</span></label>
+                        <label
+                            class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span
+                                data-i18n="axisSize">Ukuran Font Sumbu</span><span
+                                id="axisFontSizeDisplay">12px</span></label>
                         <input type="range" id="axisFontSizeSlider" min="8" max="24" value="12">
                     </div>
                 </div>
@@ -393,12 +592,13 @@
 
             <!-- WATERMARK FOOTER -->
             <div class="text-center pt-2 pb-8 opacity-60">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400 bg-slate-50 border border-slate-100">
+                <div
+                    class="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400 bg-slate-50 border border-slate-100">
                     <i class="ph ph-buildings text-xl"></i>
                 </div>
-                <p class="text-[9px] text-slate-400 tracking-widest uppercase mb-0.5 font-bold">Official Asset</p>
-                <h3 class="text-sm font-bold text-slate-700">MNC Channels</h3>
-                <p class="text-[10px] text-slate-400">Research & Development Departement</p>
+                <p class="text-[9px] text-slate-400 tracking-widest uppercase mb-0.5 font-medium">Official Asset</p>
+                <h3 class="text-sm font-medium text-slate-500">MNC Channels</h3>
+                <p class="text-[10px] text-slate-400 font-medium">Research & Development Department</p>
             </div>
         </div>
     </div>
@@ -406,10 +606,12 @@
     <!-- RIGHT PANEL: CANVAS WORKSPACE -->
     <div class="flex-1 bg-[#f8fafc] flex flex-col relative overflow-hidden" id="workspaceArea">
         <!-- HEADER KANAN -->
-        <div class="h-20 px-8 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/50 bg-white/50 backdrop-blur-md">
+        <div
+            class="h-20 px-8 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/50 bg-white/50 backdrop-blur-md">
             <div class="flex items-center gap-4">
-                <button class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 transition border border-slate-200">
-                    <i class="ph ph-list text-lg"></i>
+                <button id="btnToggleSidebar"
+                    class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition border border-slate-200 z-50">
+                    <i id="burgerIcon" class="ph ph-list text-lg transition-transform duration-300"></i>
                 </button>
                 <div class="glass-panel px-5 py-2.5 rounded-full flex items-center gap-2 shadow-sm">
                     <div class="w-2.5 h-2.5 rounded-full bg-[#cafc03] animate-pulse"></div>
@@ -417,17 +619,20 @@
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <!-- SAKELAR BAHASA -->
-                <div class="glass-panel px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-slate-200">
+                <div
+                    class="glass-panel px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-slate-200">
                     <span class="text-[10px] font-black text-slate-800">ID</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="langToggle" class="sr-only peer">
-                        <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[16px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-800"></div>
+                        <div
+                            class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[16px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-800">
+                        </div>
                     </label>
                     <span class="text-[10px] font-black text-slate-400">EN</span>
                 </div>
 
-                <button id="btnExport" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 border border-slate-700">
+                <button id="btnExport"
+                    class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 border border-slate-700">
                     <i class="ph ph-download-simple"></i> <span data-i18n="exportImage">Ekspor Gambar HD</span>
                 </button>
             </div>
@@ -435,27 +640,31 @@
 
         <!-- AREA CANVAS UTAMA -->
         <div class="flex-1 overflow-auto flex items-center justify-center p-8 pb-32">
-            <div id="exportTarget" class="relative chart-wrapper-transition origin-center" style="width: 100%; height: 500px;">
-                <div id="canvasWrapper" class="w-full h-full relative transition-all duration-300 overflow-hidden box-border flex items-center justify-center">
-                    <!-- Error fallback text -->
-                    <div id="errorDisplay" class="absolute inset-0 bg-red-50 flex flex-col items-center justify-center hidden z-50 text-red-500 rounded-xl border border-red-200 p-6 text-center">
+            <div id="exportTarget" class="relative chart-wrapper-transition origin-center"
+                style="width: 100%; height: 500px;">
+                <div id="canvasWrapper"
+                    class="w-full h-full relative transition-all duration-300 overflow-hidden box-border flex items-center justify-center">
+                    <div id="errorDisplay"
+                        class="absolute inset-0 bg-red-50 flex flex-col items-center justify-center hidden z-50 text-red-500 rounded-xl border border-red-200 p-6 text-center">
                         <i class="ph ph-warning-octagon text-4xl mb-2"></i>
-                        <h3 class="font-bold text-lg mb-1">Menyesuaikan Layout...</h3>
-                        <p class="text-sm">Sistem sedang mereset konfigurasi yang tidak valid.</p>
+                        <h3 class="font-bold text-lg mb-1">Mengkoreksi Tampilan...</h3>
+                        <p class="text-sm">Sistem sedang mereset konflik susunan grafik Anda secara otomatis.</p>
                     </div>
                     <canvas id="mainCanvas"></canvas>
                 </div>
             </div>
         </div>
-        
+
         <!-- PANEL ANALITIK BAWAH -->
-        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-6 py-4 shadow-xl flex items-center gap-6 z-10 w-[80%] max-w-4xl border border-white/40">
+        <div
+            class="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-6 py-4 shadow-xl flex items-center gap-6 z-10 w-[80%] max-w-4xl border border-white/40">
             <div class="flex items-center gap-3 pr-6 border-r border-slate-200 shrink-0">
                 <div class="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03]">
                     <i class="ph ph-sigma text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase" data-i18n="totalData">Total Keseluruhan</p>
+                    <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase" data-i18n="totalData">
+                        Total Keseluruhan</p>
                     <h4 class="text-xl font-black text-slate-800" id="totalSumDisplay">0</h4>
                 </div>
             </div>
@@ -464,10 +673,12 @@
             </div>
         </div>
 
-        <div id="loadingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div id="loadingOverlay"
+            class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
             <div class="flex flex-col items-center gap-3">
                 <i class="ph ph-spinner-gap text-4xl text-[#cafc03] animate-spin"></i>
-                <p class="text-sm font-bold text-slate-600 tracking-widest uppercase" data-i18n="rendering">Memproses HD...</p>
+                <p class="text-sm font-bold text-slate-600 tracking-widest uppercase" data-i18n="rendering">Memproses
+                    HD...</p>
             </div>
         </div>
     </div>
@@ -514,59 +725,83 @@
 
         let mainChart = null;
         let activeIconInput = null;
-        
-        // CLEAN SLATE MEMORY KEY - FORCING CACHE REFRESH
-        const STORAGE_KEY = 'proChartVision_Gold_V5'; 
-        
+
+        // Kunci penyimpanan baru untuk menghindari konflik dengan data lawas yang rusak
+        const STORAGE_KEY = 'proChartVision_Gold_Final_V4_Clean';
+
         const defaultAppState = {
-            language: 'id', 
+            language: 'id',
             chartType: 'bar-vertical', colorTheme: 'lime', stackMode: 'accumulate',
-            showAxisX: true, showAxisY: true, showAxisYRight: false, axisFontSize: 12, 
-            chartScale: 100, chartWidth: 100, chartHeight: 500, 
-            donutCutout: 60, chartThickness: 100, chartSpacing: 10,
-            borderRadius: 8, lineStyle: 'smooth', 
-            bgColor: '#ffffff', bgOpacity: 0, bgRadius: 0, bgPadding: 0, showGridX: false, showGridY: true, gridColor: '#e2e8f0',
+            showAxisX: true, showAxisY: true, showAxisYRight: false, axisFontSize: 12,
+            chartScale: 100, chartWidth: 100, chartHeight: 500,
+            donutCutout: 60, chartThickness: 100, chartSpacing: 10, borderRadius: 8, lineStyle: 'smooth',
+            bgColor: '#f8fafc', bgOpacity: 0, bgRadius: 0, bgPadding: 0, showGridX: false, showGridY: true, gridColor: '#e2e8f0',
             showLegend: true, legendFontSize: 14, legendPosition: 'top', legendAlign: 'center', datalabelPosition: 'center',
-            
-            // Core Matriks Data
             series: [
-                { id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' },
-                { id: 's_over1', name: 'Overlay 1', type: 'line', axis: 'y', zIndex: 'front' }
+                { id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }
             ],
             rows: [
-                { id: 'r_1', label: 'Jawa Barat', icon: '📍', values: [ { val: 450, val2: 500, color: '#cafc03' }, { val: 36, val2: 50, color: '#111827' } ] },
-                { id: 'r_2', label: 'DKI Jakarta', icon: '🏢', values: [ { val: 320, val2: 380, color: '#cafc03' }, { val: 61, val2: 80, color: '#111827' } ] },
-                { id: 'r_3', label: 'Sumatera Utara', icon: '🌴', values: [ { val: 150, val2: 200, color: '#cafc03' }, { val: 46, val2: 60, color: '#111827' } ] },
-                { id: 'r_4', label: 'Kalimantan', icon: '🌳', values: [ { val: 80, val2: 120, color: '#cafc03' }, { val: 24, val2: 30, color: '#111827' } ] }
+                { id: 'r_1', label: 'Jawa Barat', icon: '📍', values: [{ val: 450, val2: 500, color: '#cafc03' }] },
+                { id: 'r_2', label: 'DKI Jakarta', icon: '🏢', values: [{ val: 320, val2: 380, color: '#111827' }] },
+                { id: 'r_3', label: 'Sumatera Utara', icon: '🌴', values: [{ val: 150, val2: 200, color: '#94a3b8' }] },
+                { id: 'r_4', label: 'Kalimantan', icon: '🌳', values: [{ val: 80, val2: 120, color: '#e2e8f0' }] }
             ]
         };
 
-        let appState = JSON.parse(JSON.stringify(defaultAppState)); // Deep copy
+        let appState = JSON.parse(JSON.stringify(defaultAppState));
 
         const els = {
             langToggle: document.getElementById('langToggle'), errorDisplay: document.getElementById('errorDisplay'),
-            chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'), stackMode: document.getElementById('stackMode'),
+            chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'), stackMode: document.getElementById('stackMode'), stackModeContainer: document.getElementById('stackModeContainer'),
             seriesContainer: document.getElementById('seriesContainer'), btnAddOverlay: document.getElementById('btnAddOverlay'),
             dataRowsContainer: document.getElementById('dataRowsContainer'), btnAddRow: document.getElementById('btnAddRow'), btnRemoveRow: document.getElementById('btnRemoveRow'), rowCountDisplay: document.getElementById('rowCountDisplay'),
             chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), chartSpacing: document.getElementById('chartSpacing'), chartSpacingDisplay: document.getElementById('chartSpacingDisplay'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'), lineStyleSelect: document.getElementById('lineStyleSelect'), donutCutoutContainer: document.getElementById('donutCutoutContainer'),
             toggleLegend: document.getElementById('toggleLegend'), legendPosition: document.getElementById('legendPosition'), legendAlign: document.getElementById('legendAlign'), legendFontSizeSlider: document.getElementById('legendFontSizeSlider'), legendFontSizeDisplay: document.getElementById('legendFontSizeDisplay'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'),
             toggleAxisX: document.getElementById('toggleAxisX'), toggleAxisY: document.getElementById('toggleAxisY'), toggleAxisYRight: document.getElementById('toggleAxisYRight'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
             bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), bgRadiusSlider: document.getElementById('bgRadiusSlider'), bgRadiusDisplay: document.getElementById('bgRadiusDisplay'), bgPaddingSlider: document.getElementById('bgPaddingSlider'), bgPaddingDisplay: document.getElementById('bgPaddingDisplay'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'), gridColor: document.getElementById('gridColor'), gridColorText: document.getElementById('gridColorText'),
-            exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), mainCanvas: document.getElementById('mainCanvas'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), loadingOverlay: document.getElementById('loadingOverlay')
+            exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), mainCanvas: document.getElementById('mainCanvas'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), loadingOverlay: document.getElementById('loadingOverlay'),
+
+            // Interaction Elements
+            leftPanel: document.getElementById('leftPanel'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), burgerIcon: document.getElementById('burgerIcon'),
+            settingsScrollArea: document.getElementById('settingsScrollArea'), sidebarHeader: document.getElementById('sidebarHeader')
         };
 
-        function saveState() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-        }
+        let isSidebarOpen = true;
+        els.btnToggleSidebar.addEventListener('click', () => {
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                els.leftPanel.style.marginLeft = '0px';
+                els.burgerIcon.style.transform = 'rotate(0deg)';
+            } else {
+                els.leftPanel.style.marginLeft = '-420px';
+                els.burgerIcon.style.transform = 'rotate(180deg)';
+            }
+            setTimeout(() => { if (mainChart) mainChart.resize(); }, 400);
+        });
+
+        els.settingsScrollArea.addEventListener('scroll', () => {
+            if (els.settingsScrollArea.scrollTop > 10) {
+                els.sidebarHeader.classList.add('scrolled');
+            } else {
+                els.sidebarHeader.classList.remove('scrolled');
+            }
+        });
+
+        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); }
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if(saved) {
+            if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     appState = { ...defaultAppState, ...parsed };
-                    if(!appState.series || appState.series.length === 0) appState.series = defaultAppState.series;
-                    if(!appState.rows || appState.rows.length === 0) appState.rows = defaultAppState.rows;
-                } catch(e) { console.error("Error loading state", e); executeResetData(); }
+
+                    // Verifikasi Matriks Data Kuat (1-to-1)
+                    if (!appState.series || appState.series.length === 0) appState.series = defaultAppState.series;
+                    appState.rows.forEach(r => {
+                        while (r.values.length < appState.series.length) r.values.push({ val: 0, val2: 0, color: '#ccc' });
+                        if (r.values.length > appState.series.length) r.values.length = appState.series.length;
+                    });
+                } catch (e) { console.error("Error loading state", e); executeResetData(); }
             }
         }
 
@@ -574,61 +809,62 @@
             const lang = appState.language;
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if(translations[lang][key]) el.innerText = translations[lang][key];
+                if (translations[lang][key]) el.innerText = translations[lang][key];
             });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
-                if(translations[lang][key]) el.placeholder = translations[lang][key];
+                if (translations[lang][key]) el.placeholder = translations[lang][key];
             });
-            if(els.langToggle) els.langToggle.checked = (lang === 'en');
+            if (els.langToggle) els.langToggle.checked = (lang === 'en');
         }
 
         function forceRecolor(theme) {
             const palette = themes[theme] || themes['lime'];
             let isSingleLayer = appState.series.length === 1;
             appState.rows.forEach((r, rIdx) => {
-                r.values.forEach((v, sIdx) => { 
-                    if (isSingleLayer) v.color = palette[rIdx % palette.length]; 
-                    else v.color = palette[sIdx % palette.length]; 
+                r.values.forEach((v, sIdx) => {
+                    if (isSingleLayer) v.color = palette[rIdx % palette.length];
+                    else v.color = palette[sIdx % palette.length];
                 });
             });
         }
 
         function syncUIToState() {
-            els.chartType.value = appState.chartType; 
-            els.colorTheme.value = appState.colorTheme; 
+            els.chartType.value = appState.chartType;
+            els.colorTheme.value = appState.colorTheme;
             els.stackMode.value = appState.stackMode || 'accumulate';
-            
+
             els.chartScale.value = appState.chartScale; els.chartScaleDisplay.innerText = appState.chartScale + '%';
             els.chartWidth.value = appState.chartWidth; els.chartWidthDisplay.innerText = appState.chartWidth + '%';
             els.chartHeight.value = appState.chartHeight; els.chartHeightDisplay.innerText = appState.chartHeight + 'px';
             els.donutCutout.value = appState.donutCutout; els.donutCutoutDisplay.innerText = appState.donutCutout + '%';
             els.chartThickness.value = appState.chartThickness; els.chartThicknessDisplay.innerText = appState.chartThickness + '%';
             els.chartSpacing.value = appState.chartSpacing; els.chartSpacingDisplay.innerText = appState.chartSpacing + 'px';
-            els.borderRadiusSlider.value = appState.borderRadius !== undefined ? appState.borderRadius : 8; els.borderRadiusDisplay.innerText = (appState.borderRadius !== undefined ? appState.borderRadius : 8) + 'px';
+            els.borderRadiusSlider.value = appState.borderRadius; els.borderRadiusDisplay.innerText = appState.borderRadius + 'px';
             els.lineStyleSelect.value = appState.lineStyle || 'smooth';
-            
+
             els.toggleLegend.checked = appState.showLegend; els.legendPosition.value = appState.legendPosition; els.legendAlign.value = appState.legendAlign || 'center';
             els.legendFontSizeSlider.value = appState.legendFontSize; els.legendFontSizeDisplay.innerText = appState.legendFontSize + 'px';
             els.datalabelPositionSelect.value = appState.datalabelPosition || 'center';
-            
+
             els.toggleAxisX.checked = appState.showAxisX; els.toggleAxisY.checked = appState.showAxisY; els.toggleAxisYRight.checked = appState.showAxisYRight;
             els.axisFontSizeSlider.value = appState.axisFontSize; els.axisFontSizeDisplay.innerText = appState.axisFontSize + 'px';
-            
-            els.bgColor.value = appState.bgColor || '#ffffff'; els.bgColorText.innerText = appState.bgColor || '#ffffff';
+
+            els.bgColor.value = appState.bgColor || '#f8fafc'; els.bgColorText.innerText = appState.bgColor || '#f8fafc';
             els.bgOpacitySlider.value = appState.bgOpacity || 0; els.bgOpacityDisplay.innerText = (appState.bgOpacity || 0) + '%';
             els.bgRadiusSlider.value = appState.bgRadius || 0; els.bgRadiusDisplay.innerText = (appState.bgRadius || 0) + 'px';
             els.bgPaddingSlider.value = appState.bgPadding || 0; els.bgPaddingDisplay.innerText = (appState.bgPadding || 0) + 'px';
-            
-            els.toggleGridX.checked = appState.showGridX; els.toggleGridY.checked = appState.showGridY; 
+
+            els.toggleGridX.checked = appState.showGridX; els.toggleGridY.checked = appState.showGridY;
             els.gridColor.value = appState.gridColor || '#e2e8f0'; els.gridColorText.innerText = appState.gridColor || '#e2e8f0';
 
             els.rowCountDisplay.innerText = appState.rows.length;
-            
+
             let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(appState.chartType);
             els.donutCutoutContainer.style.display = appState.chartType === 'doughnut' ? 'block' : 'none';
-            els.axesControlPanel.style.display = isRadial ? 'none' : 'block';
+            els.axesControlPanel.style.display = (isRadial || appState.chartType === 'wordCloud') ? 'none' : 'block';
             els.gridControlPanel.style.display = (isRadial || appState.chartType === 'pie' || appState.chartType === 'wordCloud') ? 'none' : 'block';
+            els.stackModeContainer.style.display = (appState.chartType === 'gantt' || isRadial || appState.chartType === 'wordCloud') ? 'none' : 'block';
 
             renderMultiLayerEngine();
             renderDataInputs();
@@ -640,9 +876,9 @@
             appState.series.forEach((s, index) => {
                 const div = document.createElement('div');
                 div.className = "bg-white p-3 rounded-2xl border border-slate-200 flex flex-col gap-2 shadow-sm relative transition-all hover:border-slate-300";
-                
+
                 let isMain = index === 0;
-                let typeOptions = isMain ? `<option value="auto">SESUAI TIPE UTAMA</option><option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>` : `<option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>`;
+                let typeOptions = `<option value="auto">SESUAI TIPE UTAMA</option><option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>`;
                 let deleteBtn = isMain ? `` : `<button class="w-8 h-8 flex items-center justify-center rounded-xl border border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 transition" onclick="removeSeries(${index})"><i class="ph ph-x text-lg"></i></button>`;
 
                 div.innerHTML = `
@@ -656,16 +892,16 @@
                         ${deleteBtn}
                     </div>
                     <div class="grid grid-cols-3 gap-2 mt-2 pl-12">
-                        <select onchange="updateSeriesProp(${index}, 'type', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
+                        <select onchange="updateSeriesProp(${index}, 'type', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
                             ${typeOptions.replace(`value="${s.type}"`, `value="${s.type}" selected`)}
                         </select>
-                        <select onchange="updateSeriesProp(${index}, 'zIndex', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
-                            <option value="front" ${s.zIndex==='front'?'selected':''}>DEPAN</option>
-                            <option value="back" ${s.zIndex==='back'?'selected':''}>BELAKANG</option>
+                        <select onchange="updateSeriesProp(${index}, 'zIndex', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <option value="front" ${s.zIndex === 'front' ? 'selected' : ''}>DEPAN</option>
+                            <option value="back" ${s.zIndex === 'back' ? 'selected' : ''}>BELAKANG</option>
                         </select>
-                        <select onchange="updateSeriesProp(${index}, 'axis', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
-                            <option value="y" ${s.axis==='y'?'selected':''}>KIRI/BAWAH</option>
-                            <option value="y2" ${s.axis==='y2'?'selected':''}>KANAN/ATAS</option>
+                        <select onchange="updateSeriesProp(${index}, 'axis', this.value)" class="bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[9px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <option value="y" ${s.axis === 'y' ? 'selected' : ''}>KIRI/BAWAH</option>
+                            <option value="y2" ${s.axis === 'y2' ? 'selected' : ''}>KANAN/ATAS</option>
                         </select>
                     </div>
                 `;
@@ -680,7 +916,7 @@
             appState.rows.forEach((row, rowIndex) => {
                 const div = document.createElement('div');
                 div.className = "bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col gap-3 shadow-sm";
-                
+
                 div.innerHTML = `
                     <div class="flex items-center gap-3">
                         <button onclick="openIconFor('${row.id}')" class="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-xl hover:border-[#cafc03] hover:shadow-md transition shadow-sm">${row.icon}</button>
@@ -692,27 +928,28 @@
                 valsContainer.className = "flex gap-2 overflow-x-auto pb-2 border-t border-slate-200 pt-3 mt-1";
 
                 appState.series.forEach((s, sIdx) => {
-                    if (!row.values[sIdx]) {
-                        const palette = themes[appState.colorTheme] || themes['lime'];
-                        row.values[sIdx] = { val: 0, val2: 0, color: palette[(rowIndex + sIdx) % palette.length] };
-                    }
                     let v = row.values[sIdx];
+                    if (!v) return;
 
                     const vDiv = document.createElement('div');
                     vDiv.className = "flex flex-col gap-1 flex-1 min-w-[80px]";
-                    
+
                     let seriesName = s.name.length > 12 ? s.name.substring(0, 10) + '..' : s.name;
-                    
-                    let valInputHTML = isGantt ? 
+
+                    // Added .no-spinners class AND inline style to forcefully remove arrows
+                    let valInputHTML = isGantt ?
                         `<div class="flex flex-col gap-1">
-                            <input type="number" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" placeholder="Mulai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
-                            <input type="number" value="${v.val2}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val2', this.value)" placeholder="Selesai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
-                         </div>` 
-                        : 
-                        `<input type="number" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm font-black text-center focus:ring-2 focus:ring-slate-900 outline-none shadow-sm">`;
+                            <input type="number" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" style="-moz-appearance: textfield; appearance: none;" placeholder="Mulai" class="no-spinners w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
+                            <input type="number" value="${v.val2}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val2', this.value)" style="-moz-appearance: textfield; appearance: none;" placeholder="Selesai" class="no-spinners w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
+                         </div>`
+                        :
+                        `<input type="number" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" style="-moz-appearance: textfield; appearance: none;" class="no-spinners w-full bg-white border border-slate-200 rounded-lg px-2 py-2 text-sm font-black text-center focus:ring-2 focus:ring-slate-900 outline-none shadow-sm">`;
 
                     vDiv.innerHTML = `
-                        <div class="text-[9px] font-black text-slate-400 uppercase tracking-wider text-center truncate mb-1">${seriesName}</div>
+                        <div class="text-[8px] font-black text-slate-400 uppercase tracking-wider text-center truncate mb-1 flex items-center justify-center gap-1">
+                            ${sIdx === 0 ? `<div class="w-1.5 h-1.5 rounded-full bg-[#cafc03]"></div>` : `<div class="w-1.5 h-1.5 rounded-full bg-slate-500"></div>`}
+                            ${seriesName}
+                        </div>
                         <div class="relative group">
                             ${valInputHTML}
                             <div class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border border-white overflow-hidden shadow-sm cursor-pointer hover:scale-125 transition-transform opacity-60 group-hover:opacity-100 z-10">
@@ -729,26 +966,15 @@
             translatePage();
         }
 
-        function updateSeriesProp(index, prop, val) { 
-            if(appState.series[index]) { 
-                appState.series[index][prop] = val; 
-                // Auto force overall chartType update to Series[0] if auto selected
-                if (index === 0 && prop === 'type' && val !== 'auto') {
-                    appState.chartType = (val === 'bar') ? 'bar-vertical' : val;
-                    els.chartType.value = appState.chartType;
-                }
-                updateVisualizations(); 
-            } 
-        }
-        
-        function updateSeriesName(index, val) { if(appState.series[index]) { appState.series[index].name = val; renderDataInputs(); updateVisualizations(); } }
-        
+        function updateSeriesProp(index, prop, val) { if (appState.series[index]) { appState.series[index][prop] = val; updateVisualizations(); } }
+        function updateSeriesName(index, val) { if (appState.series[index]) { appState.series[index].name = val; renderDataInputs(); updateVisualizations(); } }
+
         function moveSeries(index, dir) {
-            if(index + dir < 0 || index + dir >= appState.series.length) return;
+            if (index + dir < 0 || index + dir >= appState.series.length) return;
             const temp = appState.series[index];
             appState.series[index] = appState.series[index + dir];
             appState.series[index + dir] = temp;
-            
+
             appState.rows.forEach(r => {
                 const tempVal = r.values[index];
                 r.values[index] = r.values[index + dir];
@@ -757,54 +983,54 @@
             syncUIToState();
         }
 
-        function removeSeries(index) { 
+        function removeSeries(index) {
             appState.series.splice(index, 1);
             appState.rows.forEach(r => r.values.splice(index, 1));
-            forceRecolor(appState.colorTheme); 
-            syncUIToState(); 
+            forceRecolor(appState.colorTheme);
+            syncUIToState();
         }
-        
-        function updateRowLabel(id, val) { const r = appState.rows.find(x => x.id === id); if(r) { r.label = val; updateVisualizations(); } }
+
+        function updateRowLabel(id, val) { const r = appState.rows.find(x => x.id === id); if (r) { r.label = val; updateVisualizations(); } }
         function updateRowValue(rowId, sIdx, prop, val) {
             const r = appState.rows.find(x => x.id === rowId);
-            if(r && r.values[sIdx]) {
-                r.values[sIdx][prop] = (prop==='val'||prop==='val2') ? Number(val) : val;
+            if (r && r.values[sIdx]) {
+                r.values[sIdx][prop] = (prop === 'val' || prop === 'val2') ? Number(val) : val;
                 updateVisualizations();
             }
         }
 
         els.langToggle.addEventListener('change', (e) => { appState.language = e.target.checked ? 'en' : 'id'; translatePage(); saveState(); });
-        
-        els.chartType.addEventListener('change', (e) => { 
-            appState.chartType = e.target.value; 
-            if (appState.series[0]) appState.series[0].type = 'auto'; 
-            syncUIToState(); 
+
+        els.chartType.addEventListener('change', (e) => {
+            appState.chartType = e.target.value;
+            appState.series.forEach(s => s.type = 'auto'); // Paksa semua seri mengikuti global
+            syncUIToState();
         });
-        
-        els.colorTheme.addEventListener('change', (e) => { 
-            appState.colorTheme = e.target.value;
-            forceRecolor(appState.colorTheme);
-            syncUIToState(); 
-        });
-        
+        els.colorTheme.addEventListener('change', (e) => { appState.colorTheme = e.target.value; forceRecolor(appState.colorTheme); syncUIToState(); });
         els.stackMode.addEventListener('change', (e) => { appState.stackMode = e.target.value; updateVisualizations(); });
-        
+
         els.btnAddOverlay.addEventListener('click', () => {
             const newIndex = appState.series.length;
-            appState.series.push({ id: 's_' + Date.now(), name: 'Overlay ' + (newIndex), type: 'line', axis: 'y', zIndex: 'front' });
-            appState.rows.forEach(r => r.values.push({ val: Math.floor(Math.random()*50)+10, val2: 0, color: '#000000' }));
-            forceRecolor(appState.colorTheme); 
+            appState.series.push({ id: 's_' + Date.now(), name: 'Overlay ' + (newIndex), type: 'auto', axis: 'y', zIndex: 'front' });
+            appState.rows.forEach((r, idx) => {
+                const palette = themes[appState.colorTheme] || themes['lime'];
+                r.values.push({ val: Math.floor(Math.random() * 50) + 10, val2: 0, color: palette[newIndex % palette.length] });
+            });
+            forceRecolor(appState.colorTheme);
             syncUIToState();
         });
 
         els.btnAddRow.addEventListener('click', () => {
             const newRow = { id: 'r_' + Date.now(), label: 'Data Baru', icon: '✨', values: [] };
-            appState.series.forEach(() => newRow.values.push({ val: 50, val2: 100, color: '#000' }));
+            appState.series.forEach((s, sIdx) => {
+                const palette = themes[appState.colorTheme] || themes['lime'];
+                newRow.values.push({ val: 50, val2: 100, color: palette[sIdx % palette.length] });
+            });
             appState.rows.push(newRow);
             forceRecolor(appState.colorTheme);
             syncUIToState();
         });
-        els.btnRemoveRow.addEventListener('click', () => { if(appState.rows.length > 1) { appState.rows.pop(); forceRecolor(appState.colorTheme); syncUIToState(); } });
+        els.btnRemoveRow.addEventListener('click', () => { if (appState.rows.length > 1) { appState.rows.pop(); forceRecolor(appState.colorTheme); syncUIToState(); } });
 
         const sliderBinds = [
             { el: els.chartScale, prop: 'chartScale', disp: els.chartScaleDisplay, unit: '%' },
@@ -833,8 +1059,7 @@
         els.legendPosition.addEventListener('change', (e) => { appState.legendPosition = e.target.value; updateVisualizations(); });
         els.legendAlign.addEventListener('change', (e) => { appState.legendAlign = e.target.value; updateVisualizations(); });
         els.datalabelPositionSelect.addEventListener('change', (e) => { appState.datalabelPosition = e.target.value; updateVisualizations(); });
-        
-        // MAPPING TOGGLE YANG BENAR AGAR SESUAI DENGAN APPSTATE
+
         const toggleMap = {
             'toggleLegend': 'showLegend',
             'toggleAxisX': 'showAxisX',
@@ -856,15 +1081,14 @@
         els.bgColor.addEventListener('input', (e) => { els.bgColorText.innerText = e.target.value; appState.bgColor = e.target.value; updateVisualizations(); });
         els.gridColor.addEventListener('input', (e) => { els.gridColorText.innerText = e.target.value; appState.gridColor = e.target.value; updateVisualizations(); });
 
-
         function updateVisualizations() {
             els.exportTarget.style.transform = `scale(${appState.chartScale / 100})`;
             els.exportTarget.style.width = appState.chartWidth + '%';
             els.exportTarget.style.height = appState.chartHeight + 'px';
-            
-            els.canvasWrapper.style.backgroundColor = hexToRgba(appState.bgColor || '#ffffff', appState.bgOpacity || 0);
+
+            els.canvasWrapper.style.backgroundColor = hexToRgba(appState.bgColor || '#f8fafc', appState.bgOpacity || 0);
             els.canvasWrapper.style.borderRadius = (appState.bgRadius || 0) + 'px';
-            els.canvasWrapper.style.padding = (appState.bgPadding || 0) + 'px';
+            els.canvasWrapper.style.padding = appState.bgOpacity > 0 ? (appState.bgPadding || 0) + 'px' : '0px';
 
             renderMainChart();
             renderPercentageWidgets();
@@ -882,7 +1106,7 @@
                 let isScatterBubble = ['scatter', 'bubble'].includes(appState.chartType);
                 let isWaterfall = appState.chartType === 'waterfall';
                 let isWordCloud = appState.chartType === 'wordCloud';
-                
+
                 let labels = appState.rows.map(r => r.icon + ' ' + r.label);
                 let datasets = [];
 
@@ -891,7 +1115,7 @@
                 let lineStepped = appState.lineStyle === 'stepped';
 
                 function getDatalabelAlignPos() {
-                    switch(appState.datalabelPosition) {
+                    switch (appState.datalabelPosition) {
                         case 'end': return { anchor: 'end', align: 'start' };
                         case 'start': return { anchor: 'start', align: 'end' };
                         case 'outside': return { anchor: 'end', align: 'end' };
@@ -904,33 +1128,56 @@
                 if (isWordCloud) globalBaseType = 'wordCloud';
                 else if (isRadial || isScatterBubble) globalBaseType = appState.chartType;
                 else if (appState.chartType === 'line' || appState.chartType === 'area') globalBaseType = 'line';
+                else if (appState.chartType === 'bar-horizontal') globalBaseType = 'bar';
 
+                // BYPASS KHUSUS UNTUK WORD CLOUD AGAR TIDAK CRASH
                 if (isWordCloud) {
-                    let dataPoints = appState.rows.map(r => ({ text: r.label, size: (r.values[0]?.val || 10) * 2, color: r.values[0]?.color }));
-                    datasets = [{ label: 'Word Cloud', data: dataPoints.map(d=>d.size), labels: dataPoints.map(d=>d.text), backgroundColor: dataPoints.map(d=>d.color) }];
-                } 
+                    let wLabels = appState.rows.map(r => r.label);
+                    let wSizes = appState.rows.map(r => Math.max((r.values[0]?.val || 10), 1));
+                    let wColors = appState.rows.map(r => r.values[0]?.color || '#111827');
+
+                    datasets = [{
+                        label: 'Word Cloud',
+                        data: wSizes,
+                        color: wColors, // WordCloud v4 menggunakan "color" untuk teks
+                        backgroundColor: wColors // Fallback aman
+                    }];
+
+                    mainChart = new Chart(ctx, {
+                        type: 'wordCloud',
+                        data: { labels: wLabels, datasets: datasets },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                datalabels: { display: false }
+                            }
+                        }
+                    });
+                    return; // Hentikan fungsi di sini khusus untuk wordcloud
+                }
                 else if (isScatterBubble) {
                     datasets = [{
                         label: appState.series[0]?.name || 'Dataset Utama',
-                        data: appState.rows.map((r, i) => ({ x: i * 10, y: r.values[0]?.val||0, r: appState.chartType === 'bubble' ? ((r.values[0]?.val||0)/10 + 5) : 5 })),
+                        data: appState.rows.map((r, i) => ({ x: i * 10, y: r.values[0]?.val || 0, r: appState.chartType === 'bubble' ? ((r.values[0]?.val || 0) / 10 + 5) : 5 })),
                         backgroundColor: appState.rows.map(r => r.values[0]?.color),
                         borderColor: '#111827', borderWidth: 2,
                         pointRadius: appState.chartType === 'scatter' ? 8 : undefined
                     }];
                 }
                 else {
-                    let sortedIndices = appState.series.map((s, i) => i).sort((a,b) => {
+                    let sortedIndices = appState.series.map((s, i) => i).sort((a, b) => {
                         return (appState.series[a].zIndex === 'back' ? -1 : 1) - (appState.series[b].zIndex === 'back' ? -1 : 1);
                     });
 
                     sortedIndices.forEach((sIdx) => {
                         let s = appState.series[sIdx];
-                        if(!s) return;
+                        if (!s) return;
 
                         let parsedType = s.type === 'auto' ? globalBaseType : s.type;
                         if (parsedType === 'bar-vertical' || parsedType === 'bar-horizontal') parsedType = 'bar';
                         else if (parsedType === 'line' || parsedType === 'area') parsedType = 'line';
-                        
+
                         let isFillArea = (s.type === 'area') || (s.type === 'auto' && appState.chartType === 'area');
 
                         let dataArr = []; let colorArr = [];
@@ -956,18 +1203,19 @@
                         let bgColor = isLine && !isFillArea ? 'transparent' : colorArr;
                         if (isFillArea) bgColor = hexToRgba(colorArr[0], 20);
 
-                        // VIRTUAL AXIS MAPPING UNTUK MENCEGAH CRASH SAAT HORIZONTAL
+                        // SUMBU BAYANGAN (VIRTUAL AXIS) ANTI-CRASH
                         let reqAxis = s.axis === 'y2' ? 'Right' : 'Primary';
                         let useX, useY;
+
                         if (isHorizontal) {
-                            useY = 'y'; // Sumbu Kategori dipaksa ke Y
-                            useX = reqAxis === 'Right' ? 'xRight' : 'x'; // Sumbu Nilai pindah ke X
+                            useY = 'y';
+                            useX = reqAxis === 'Right' ? 'xRight' : 'x';
                         } else {
-                            useX = 'x'; 
+                            useX = 'x';
                             useY = reqAxis === 'Right' ? 'yRight' : 'y';
                         }
 
-                        datasets.push({
+                        let datasetConfig = {
                             label: s.name,
                             type: parsedType,
                             data: dataArr,
@@ -978,12 +1226,17 @@
                             tension: lineTension,
                             stepped: lineStepped,
                             borderRadius: appState.borderRadius,
-                            grouped: stackLogic !== 'include', 
+                            grouped: stackLogic !== 'include',
                             stack: stackLogic === 'accumulate' ? 'Stack 0' : undefined,
-                            yAxisID: useY,
-                            xAxisID: useX,
                             order: s.zIndex === 'front' ? 0 : 2
-                        });
+                        };
+
+                        if (!isRadial) {
+                            datasetConfig.yAxisID = useY;
+                            datasetConfig.xAxisID = useX;
+                        }
+
+                        datasets.push(datasetConfig);
                     });
                 }
 
@@ -1000,7 +1253,7 @@
                         },
                         tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
                         datalabels: {
-                            display: !isRadial && !isWordCloud && !isScatterBubble, 
+                            display: !isRadial && !isScatterBubble,
                             anchor: dlPos.anchor, align: dlPos.align,
                             color: appState.datalabelPosition === 'outside' ? '#111827' : '#111827',
                             font: { family: 'Inter', weight: '900', size: 14 },
@@ -1012,9 +1265,9 @@
                     scales: {}
                 };
 
-                if (!isRadial && !isWordCloud) {
+                if (!isRadial) {
                     let hasSecondaryAxis = appState.series.some(s => s.axis === 'y2');
-                    
+
                     if (isHorizontal) {
                         chartOptions.scales.y = { display: appState.showAxisY, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
                         chartOptions.scales.x = { display: appState.showAxisX, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
@@ -1030,10 +1283,10 @@
                     }
                 } else if (isRadial) {
                     chartOptions.cutout = appState.chartType === 'doughnut' ? appState.donutCutout + '%' : 0;
-                    chartOptions.elements = { arc: { borderRadius: appState.borderRadius } };
-                    chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => { let sum=0; ctx.chart.data.datasets[0].data.map(d=>sum+=d); return Math.round((value/sum)*100)+'%'; } };
+                    chartOptions.elements = { arc: { borderRadius: appState.borderRadius, borderWidth: appState.chartSpacing > 0 ? 2 : 0, borderColor: '#fff' } };
+                    chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => { let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += d); return Math.round((value / sum) * 100) + '%'; } };
                 }
-                
+
                 chartOptions.barPercentage = appState.chartThickness / 100;
                 chartOptions.categoryPercentage = 0.8;
 
@@ -1052,7 +1305,7 @@
 
         function renderPercentageWidgets() {
             let total = 0;
-            appState.rows.forEach(r => { if(r.values[0]) total += (r.values[0].val || 0); });
+            appState.rows.forEach(r => { if (r.values[0]) total += (r.values[0].val || 0); });
             els.totalSumDisplay.innerText = total.toLocaleString();
 
             els.percentageContainer.innerHTML = '';
@@ -1060,7 +1313,7 @@
                 let val = r.values[0] ? (r.values[0].val || 0) : 0;
                 let perc = total > 0 ? Math.round((val / total) * 100) : 0;
                 let color = r.values[0] ? r.values[0].color : '#ccc';
-                
+
                 els.percentageContainer.innerHTML += `
                     <div class="flex items-center gap-2 bg-white/50 px-3 py-1.5 rounded-xl border border-white shrink-0 shadow-sm">
                         <div class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></div>
@@ -1075,32 +1328,21 @@
             els.loadingOverlay.classList.remove('hidden');
             setTimeout(() => {
                 const canvas = els.mainCanvas;
-                const wrapper = els.canvasWrapper;
-                
-                // Get the actual computed styles of the wrapper to capture padding and rounded corners
-                const wrapperStyle = window.getComputedStyle(wrapper);
-                const paddingTop = parseInt(wrapperStyle.paddingTop) || 0;
-                const paddingRight = parseInt(wrapperStyle.paddingRight) || 0;
-                const paddingBottom = parseInt(wrapperStyle.paddingBottom) || 0;
-                const paddingLeft = parseInt(wrapperStyle.paddingLeft) || 0;
-                const borderRadius = parseInt(wrapperStyle.borderRadius) || 0;
+                const padding = appState.bgOpacity > 0 ? (appState.bgPadding || 0) : 0;
+                const borderRadius = appState.bgOpacity > 0 ? (appState.bgRadius || 0) : 0;
 
-                // Create a temporary canvas that is larger to accommodate the padding
                 const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = canvas.width + paddingLeft + paddingRight;
-                tempCanvas.height = canvas.height + paddingTop + paddingBottom;
+                tempCanvas.width = canvas.width + (padding * 2);
+                tempCanvas.height = canvas.height + (padding * 2);
                 const tCtx = tempCanvas.getContext('2d');
-                
-                // 1. Fill the entire background with a solid color first (usually white or light gray)
-                // This prevents the transparent areas from turning black when exported to PNG/JPEG
-                tCtx.fillStyle = '#f8fafc'; // Match the workspace background color
+
+                // Base white fill to prevent alpha transparency bleeding
+                tCtx.fillStyle = '#f8fafc';
                 tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
 
-                // 2. Draw the custom background with rounded corners and opacity
-                if(appState.bgOpacity > 0) {
+                // Draw exact visual representation of the background Wrapper
+                if (appState.bgOpacity > 0) {
                     tCtx.fillStyle = hexToRgba(appState.bgColor, appState.bgOpacity);
-                    
-                    // Function to draw a rounded rectangle
                     tCtx.beginPath();
                     tCtx.moveTo(borderRadius, 0);
                     tCtx.lineTo(tempCanvas.width - borderRadius, 0);
@@ -1114,10 +1356,9 @@
                     tCtx.closePath();
                     tCtx.fill();
                 }
-                
-                // 3. Draw the actual chart canvas on top, offset by the padding
-                tCtx.drawImage(canvas, paddingLeft, paddingTop);
-                
+
+                tCtx.drawImage(canvas, padding, padding);
+
                 const link = document.createElement('a');
                 link.download = `ProChart_${Date.now()}.png`;
                 link.href = tempCanvas.toDataURL('image/png', 1.0);
@@ -1126,7 +1367,7 @@
             }, 800);
         });
 
-        const emojiList = ['📍','🏢','🌴','🌳','🚗','💻','📱','🍔','⚽','🏥','⚡','🔥','💧','☀️','🌟','💰','📈','📦'];
+        const emojiList = ['📍', '🏢', '🌴', '🌳', '🚗', '💻', '📱', '🍔', '⚽', '🏥', '⚡', '🔥', '💧', '☀️', '🌟', '💰', '📈', '📦'];
         function openIconFor(rowId) {
             activeIconInput = rowId;
             const grid = document.getElementById('iconGrid');
@@ -1139,9 +1380,9 @@
             setTimeout(() => document.getElementById('iconModal').classList.add('hidden'), 300);
         }
         function selectIcon(icon) {
-            if(activeIconInput) {
+            if (activeIconInput) {
                 const r = appState.rows.find(x => x.id === activeIconInput);
-                if(r) { r.icon = icon; updateVisualizations(); renderDataInputs(); }
+                if (r) { r.icon = icon; updateVisualizations(); renderDataInputs(); }
             }
             closeIconModal();
         }
@@ -1168,4 +1409,5 @@
         };
     </script>
 </body>
+
 </html>
