@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Chart Vision 3.0</title>
+    <title>Pro Chart Vision 4.0 - Platinum Edition</title>
     
     <!-- SVG Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23CAFC03'/><path d='M45 20L25 60h20l-5 20 25-40H45z' fill='%23111827'/></svg>">
@@ -19,6 +19,9 @@
     
     <!-- Chart.js & Plugins -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PLUGIN GEOSPASIAL -->
+    <script src="https://unpkg.com/chartjs-chart-geo@4.2.8/build/index.umd.min.js"></script>
+    <!-- PLUGIN LAINNYA -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://unpkg.com/chartjs-chart-wordcloud@4"></script>
     
@@ -33,17 +36,19 @@
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #cafc03; cursor: pointer; border: 2px solid #111827; margin-top: -6px; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
         
-        /* PEMUSNAHAN MUTLAK PANAH SPINNER DI BROWSER APAPUN */
+        /* OPSI NUKLIR: PEMUSNAHAN MUTLAK PANAH SPINNER */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button,
         .no-spinners::-webkit-outer-spin-button,
-        .no-spinners::-webkit-inner-spin-button {
+        .no-spinners::-webkit-inner-spin-button,
+        input[inputmode="numeric"]::-webkit-outer-spin-button,
+        input[inputmode="numeric"]::-webkit-inner-spin-button {
             -webkit-appearance: none !important;
             appearance: none !important;
             margin: 0 !important;
             display: none !important;
         }
-        input[type="number"], .no-spinners {
+        input[type="number"], .no-spinners, input[inputmode="numeric"] {
             -moz-appearance: textfield !important;
             appearance: textfield !important;
         }
@@ -59,20 +64,37 @@
         #sidebarHeader.scrolled #logoIcon i { font-size: 16px; }
         #sidebarHeader.scrolled #logoTitle { font-size: 16px; }
         #sidebarHeader.scrolled #logoSubtitle { font-size: 8px; margin-top: 2px; }
+
+        /* KIOSK / FULLSCREEN MODE CSS */
+        #workspaceArea:fullscreen .hide-on-fullscreen { display: none !important; }
+        #workspaceArea:fullscreen { background: #f8fafc; padding: 2rem; }
+        #workspaceArea:fullscreen #exportTarget { max-width: 95vw; max-height: 95vh; }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden selection:bg-lime-300 selection:text-slate-900">
 
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-[150] transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl">
+        <div id="toastIcon" class="text-lime-400 text-xl"><i class="ph-fill ph-check-circle"></i></div>
+        <div id="toastMessage" class="text-sm font-medium">Berhasil!</div>
+    </div>
+
     <!-- MODAL KOLEKSI IKON -->
     <div id="iconModal" class="fixed inset-0 z-[100] hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300 px-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300" id="iconModalContent">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[85vh]" id="iconModalContent">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
                 <h3 class="font-bold text-slate-800" data-i18n="iconLibrary">Koleksi Ikon</h3>
                 <button onclick="closeIconModal()" class="text-slate-400 hover:text-red-500 transition"><i class="ph ph-x text-xl"></i></button>
             </div>
-            <div class="p-4">
-                <input type="text" id="iconSearch" data-i18n-placeholder="searchIcon" placeholder="Cari ikon..." class="w-full bg-slate-100 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-lime-400 mb-4 outline-none">
-                <div class="grid grid-cols-5 sm:grid-cols-6 gap-2 max-h-64 overflow-y-auto p-1" id="iconGrid"></div>
+            <div class="p-4 border-b border-slate-100 bg-white shrink-0">
+                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Atau Paste Ikon / Emoji Kustom</label>
+                <div class="flex gap-2">
+                    <input type="text" id="customIconInput" placeholder="Paste di sini (contoh: 👨‍👩‍‍👧‍👦 atau 🍕)" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-[#cafc03] outline-none transition">
+                    <button onclick="applyCustomIcon()" class="bg-slate-900 text-[#cafc03] px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-sm">Terapkan</button>
+                </div>
+            </div>
+            <div class="p-4 overflow-y-auto custom-scrollbar">
+                <div class="grid grid-cols-5 sm:grid-cols-6 gap-2 p-1" id="iconGrid"></div>
             </div>
         </div>
     </div>
@@ -98,7 +120,7 @@
     <div id="mobileOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
     <!-- LEFT PANEL: SETTINGS -->
-    <div id="leftPanel" class="fixed md:relative z-50 md:z-20 w-[85%] sm:w-[380px] md:w-[420px] h-full bg-white border-r border-slate-200 flex flex-col shrink-0 transition-all duration-400 ease-in-out transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+    <div id="leftPanel" class="absolute md:relative z-50 md:z-20 w-[85%] sm:w-[380px] md:w-[420px] h-full bg-white border-r border-slate-200 flex flex-col shrink-0 transition-all duration-400 ease-in-out transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         
         <div id="sidebarHeader" class="p-5 md:p-6 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-white transition-all duration-300 relative z-30 justify-between md:justify-start">
             <div class="flex items-center gap-3">
@@ -107,10 +129,9 @@
                 </div>
                 <div class="transition-all duration-300">
                     <h1 id="logoTitle" class="font-black text-xl text-slate-900 tracking-tight leading-none transition-all duration-300">Pro Chart</h1>
-                    <p id="logoSubtitle" class="text-[10px] font-bold text-slate-400 tracking-widest mt-1 uppercase transition-all duration-300">Vision V3.0</p>
+                    <p id="logoSubtitle" class="text-[10px] font-bold text-slate-400 tracking-widest mt-1 uppercase transition-all duration-300">Vision V4.0 (Platinum)</p>
                 </div>
             </div>
-            <!-- Tombol Tutup Khusus Mobile -->
             <button id="btnCloseMobile" class="w-8 h-8 flex md:hidden items-center justify-center text-slate-400 hover:bg-slate-100 rounded-lg">
                 <i class="ph ph-x text-lg"></i>
             </button>
@@ -118,6 +139,29 @@
 
         <div id="settingsScrollArea" class="flex-1 overflow-y-auto p-5 md:p-6 space-y-8 pb-32 relative">
             
+            <!-- JUDUL & BRANDING -->
+            <div class="bg-gradient-to-br from-slate-50 to-white border border-slate-100 rounded-3xl p-4 md:p-5 shadow-sm">
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="brandingTitle">Judul & Branding</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="chartTitleInput">Judul Utama Grafik</label>
+                        <input type="text" id="chartTitleInput" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition shadow-sm" placeholder="Contoh: Laporan Penjualan">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="chartSubtitleInput">Sub-Judul (Deskripsi)</label>
+                        <input type="text" id="chartSubtitleInput" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium text-slate-600 focus:ring-2 focus:ring-[#cafc03] outline-none transition shadow-sm" placeholder="Contoh: Kuartal 3 Tahun 2026">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="watermarkInput">Teks Watermark (Sudut Kanan Bawah)</label>
+                        <input type="text" id="watermarkInput" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:ring-2 focus:ring-[#cafc03] outline-none transition shadow-sm" placeholder="Contoh: MNC Channels">
+                    </div>
+                </div>
+            </div>
+
             <!-- PENGATURAN UTAMA -->
             <div class="bg-slate-50 border border-slate-100 rounded-3xl p-4 md:p-5 shadow-sm relative">
                 <div class="flex items-center justify-between mb-5">
@@ -145,6 +189,8 @@
                             <option value="bubble">Bubble Chart (Gelembung)</option>
                             <option value="gantt">Gantt Chart (Timeline)</option>
                             <option value="wordCloud">Word Cloud (Awan Teks)</option>
+                            <option value="choropleth-world">Peta Dunia (Geospasial)</option>
+                            <option value="choropleth-indo">Peta Indonesia (Geospasial)</option>
                         </select>
                     </div>
                     <div>
@@ -152,7 +198,7 @@
                         <select id="colorTheme" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
                             <option value="lime">Neon Lime (AI Theme)</option>
                             <option value="default">Modern Minimalist (Default)</option>
-                            <option value="corporate">Corporate Blue</option>
+                            <option value="corporate">Corporate Blue (Professional)</option>
                             <option value="earth">Earthy Nature</option>
                             <option value="sunset">Sunset Vibes</option>
                             <option value="monochrome">Monochrome Elegant</option>
@@ -164,14 +210,14 @@
                         </label>
                         <select id="stackMode" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
                             <option value="accumulate" data-i18n="accumulate">Akumulasi (Tambah Tinggi)</option>
-                            <option value="grouped" data-i18n="grouped">Berdampingan (Versus)</option>
                             <option value="include" data-i18n="include">Include (Masuk ke Data Utama)</option>
+                            <option value="grouped" data-i18n="grouped">Berdampingan (Versus)</option>
                         </select>
                     </div>
                 </div>
 
                 <!-- OVERLAY ENGINE -->
-                <div class="mt-6 pt-5 border-t border-slate-200">
+                <div class="mt-6 pt-5 border-t border-slate-200" id="overlayEnginePanel">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-slate-800"></div>
@@ -190,16 +236,18 @@
             </div>
 
             <!-- INPUT DATA LANGSUNG -->
-            <div class="bg-white border border-slate-200 rounded-3xl p-4 md:p-5 shadow-sm">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div class="bg-white border border-slate-200 rounded-3xl p-4 md:p-5 shadow-sm relative">
+                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-6">
                     <h2 class="text-xs font-bold text-slate-800 tracking-widest uppercase" data-i18n="liveDataInput">Input Data Langsung</h2>
-                    <button onclick="openIconModal()" class="bg-slate-900 text-[#cafc03] text-[10px] font-bold px-3 py-2 rounded-xl transition uppercase flex items-center justify-center gap-1 hover:bg-slate-800 shadow-md">
-                        <i class="ph ph-squares-four"></i> <span data-i18n="iconLibrary">Koleksi Ikon</span>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="handlePasteExcel()" class="bg-green-100 text-green-700 text-[9px] font-bold px-3 py-2 rounded-xl transition uppercase flex items-center justify-center gap-1 hover:bg-green-200 border border-green-200 shadow-sm flex-1 xl:flex-none">
+                            <i class="ph ph-clipboard-text"></i> <span data-i18n="pasteExcel">Paste Data</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex justify-between items-center mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase" data-i18n="dataRowCount">Jumlah Baris Label (Kategori)</span>
+                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase" data-i18n="dataRowCount">Jumlah Baris Label</span>
                     <div class="flex items-center bg-white rounded-lg border border-slate-200 p-0.5 shadow-sm">
                         <button id="btnRemoveRow" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-md transition"><i class="ph ph-minus"></i></button>
                         <span id="rowCountDisplay" class="w-8 sm:w-10 text-center text-xs font-bold text-slate-800">4</span>
@@ -252,14 +300,19 @@
                         <input type="range" id="donutCutout" min="0" max="90" value="60">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="pt-2 border-t border-slate-200">
+                        <label class="block text-[10px] font-bold text-indigo-500 uppercase mb-2 flex justify-between"><span data-i18n="shadowEffect">Efek Bayangan 3D (Shadow)</span><span id="elementShadowDisplay">0px</span></label>
+                        <input type="range" id="elementShadowSlider" min="0" max="25" value="0">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200">
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="borderRadius">Sudut Melengkung</span><span id="borderRadiusDisplay">8px</span></label>
                             <input type="range" id="borderRadiusSlider" min="0" max="50" value="8">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="lineStyle">Gaya Garis</label>
-                            <select id="lineStyleSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] sm:text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <select id="lineStyleSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] sm:text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer shadow-sm">
                                 <option value="smooth" data-i18n="smooth">Melengkung (Smooth)</option>
                                 <option value="straight" data-i18n="straight">Lurus (Straight)</option>
                                 <option value="stepped" data-i18n="stepped">Tangga (Stepped)</option>
@@ -331,8 +384,8 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="bgColorTitle">Warna Latar Belakang</label>
-                        <div class="flex h-10 overflow-hidden rounded-xl border border-slate-200 shadow-sm w-full">
-                            <input type="color" id="bgColor" value="#f8fafc" class="w-12 h-14 -mt-2 -ml-2 cursor-pointer shrink-0">
+                        <div class="flex h-10 overflow-hidden rounded-xl border border-slate-200 shadow-sm w-full bg-white">
+                            <input type="color" id="bgColor" value="#f8fafc" class="w-12 h-14 -mt-2 -ml-2 cursor-pointer shrink-0 border-none">
                             <div class="flex-1 bg-white flex items-center px-3 text-xs font-mono text-slate-500" id="bgColorText">#f8fafc</div>
                         </div>
                     </div>
@@ -370,8 +423,8 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="gridColor">Warna Garis Kisi</label>
-                        <div class="flex h-8 overflow-hidden rounded-lg border border-slate-200 w-full">
-                            <input type="color" id="gridColor" value="#e2e8f0" class="w-8 h-10 -mt-1 -ml-1 cursor-pointer shrink-0">
+                        <div class="flex h-8 overflow-hidden rounded-lg border border-slate-200 w-full bg-white">
+                            <input type="color" id="gridColor" value="#e2e8f0" class="w-8 h-10 -mt-1 -ml-1 cursor-pointer shrink-0 border-none">
                             <div class="flex-1 bg-white flex items-center px-2 text-[10px] font-mono text-slate-500" id="gridColorText">#e2e8f0</div>
                         </div>
                     </div>
@@ -414,12 +467,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- WATERMARK FOOTER -->
-            <div class="text-center pt-2 pb-8 opacity-40">
-                <h3 class="text-xs font-medium text-slate-500 tracking-widest mb-1">MNC Channels</h3>
-                <p class="text-[9px] text-slate-400 font-normal">Data & Analytics Division</p>
-            </div>
         </div>
     </div>
 
@@ -427,7 +474,7 @@
     <div class="flex-1 min-w-0 bg-[#f8fafc] flex flex-col relative overflow-hidden" id="workspaceArea">
         
         <!-- HEADER KANAN -->
-        <div class="h-16 md:h-20 px-4 md:px-8 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/50 bg-white/70 backdrop-blur-md shadow-sm">
+        <div class="hide-on-fullscreen h-16 md:h-20 px-4 md:px-8 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/50 bg-white/70 backdrop-blur-md shadow-sm">
             <div class="flex items-center gap-3 md:gap-4">
                 <button id="btnToggleSidebar" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition border border-slate-200 z-50">
                     <i id="burgerIcon" class="ph ph-list text-lg transition-transform duration-300"></i>
@@ -438,7 +485,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-2 sm:gap-4">
-                <div class="glass-panel px-2 sm:px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm border border-slate-200">
+                <div class="glass-panel px-2 sm:px-3 py-1.5 rounded-full hidden sm:flex items-center gap-2 shadow-sm border border-slate-200">
                     <span class="text-[9px] sm:text-[10px] font-black text-slate-800">ID</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="langToggle" class="sr-only peer">
@@ -446,19 +493,22 @@
                     </label>
                     <span class="text-[9px] sm:text-[10px] font-black text-slate-400">EN</span>
                 </div>
+                
+                <button id="btnFullscreen" class="bg-white hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shadow-sm transition border border-slate-200 whitespace-nowrap">
+                    <i class="ph ph-presentation-chart text-sm sm:text-base"></i> <span class="hidden lg:inline" data-i18n="presentationMode">Mode Presentasi</span>
+                </button>
 
                 <button id="btnExport" class="bg-slate-900 hover:bg-slate-800 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 border border-slate-700 whitespace-nowrap">
-                    <i class="ph ph-download-simple text-sm sm:text-base"></i> <span data-i18n="exportImage" class="hidden sm:inline">Ekspor Gambar HD</span><span class="sm:hidden">Ekspor</span>
+                    <i class="ph ph-download-simple text-sm sm:text-base"></i> <span data-i18n="exportImage" class="hidden sm:inline">Ekspor HD</span><span class="sm:hidden">Ekspor</span>
                 </button>
             </div>
         </div>
 
         <!-- AREA CANVAS UTAMA (BULLETPROOF CONTAINER) -->
-        <div class="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 pb-40 md:pb-32">
-            <div id="exportTarget" class="relative chart-wrapper-transition origin-center flex items-center justify-center" style="width: 100%; height: 500px;">
+        <div class="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 pb-40 md:pb-32 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
+            <div id="exportTarget" class="relative chart-wrapper-transition origin-center flex items-center justify-center bg-transparent" style="width: 100%; height: 500px;">
                 <div id="canvasWrapper" class="w-full h-full relative transition-all duration-300 box-border flex items-center justify-center overflow-hidden">
-                    <!-- DOM Canvas untuk destruksi fisik tingkat tinggi -->
-                    <div id="canvasContainer" class="w-full h-full absolute inset-0 p-[inherit] box-border">
+                    <div id="canvasContainer" class="w-full h-full absolute inset-0 p-[inherit] box-border relative">
                         <!-- Canvas di-inject via JS -->
                     </div>
                 </div>
@@ -466,7 +516,7 @@
         </div>
         
         <!-- PANEL ANALITIK BAWAH -->
-        <div class="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-4 md:px-6 py-3 md:py-4 shadow-xl flex flex-col md:flex-row items-center gap-3 md:gap-6 z-10 w-[92%] md:w-[80%] max-w-4xl border border-white/40">
+        <div class="hide-on-fullscreen absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-4 md:px-6 py-3 md:py-4 shadow-xl flex flex-col md:flex-row items-center gap-3 md:gap-6 z-10 w-[92%] md:w-[80%] max-w-4xl border border-white/40">
             <div class="flex items-center gap-3 md:pr-6 md:border-r border-slate-200 shrink-0 w-full md:w-auto justify-center md:justify-start border-b md:border-b-0 pb-2 md:pb-0">
                 <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03] shrink-0">
                     <i class="ph ph-sigma text-lg md:text-xl"></i>
@@ -488,13 +538,13 @@
                 <p class="text-sm font-bold text-slate-600 tracking-widest uppercase" data-i18n="rendering">Memproses HD...</p>
             </div>
             <div id="errorRescueContent" class="flex flex-col items-center gap-4 hidden max-w-sm text-center px-6">
-                <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 mb-2">
+                <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 mb-2 shadow-sm">
                     <i class="ph ph-warning-circle text-3xl"></i>
                 </div>
                 <h3 class="text-lg font-black text-slate-800" data-i18n="errorTitle">Mengkoreksi Tampilan...</h3>
                 <p class="text-xs text-slate-500 font-medium mb-4" data-i18n="errorDesc">Sistem sedang mereset konflik susunan grafik Anda secara otomatis.</p>
-                <button onclick="executeResetData()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full text-xs font-bold transition flex items-center gap-2" data-i18n="forceReset">
-                    <i class="ph ph-arrows-clockwise"></i> Reset Paksa (Force Reset)
+                <button onclick="executeResetData()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full text-xs font-bold transition flex items-center gap-2 shadow-md">
+                    Reset Paksa (Force Reset)
                 </button>
             </div>
         </div>
@@ -503,35 +553,37 @@
     <script>
         const translations = {
             id: {
+                brandingTitle: "Judul & Branding", chartTitleInput: "Judul Utama Grafik", chartSubtitleInput: "Sub-Judul (Deskripsi)", watermarkInput: "Teks Watermark (Sudut Kanan Bawah)",
                 coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik Utama", themeColor: "Tema Warna", subDataLogic: "Logika Sub-Data (Tumpukan)", accumulate: "Akumulasi (Tambah Tinggi)", include: "Include (Masuk ke Data Utama)", grouped: "Berdampingan (Versus)",
                 resetData: "Reset Data", resetConfirmTitle: "Reset Semua Pengaturan?", resetConfirmDesc: "Aksi ini akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.", cancel: "Batal", yesReset: "Ya, Reset",
                 multiLayerEngine: "Mesin Multi-Lapis (Overlay)", addChart: "Tambah Grafik", multiLayerDesc: "Tambahkan grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.",
-                liveDataInput: "Input Data Langsung", iconLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Label (Kategori)", searchIcon: "Cari ikon...",
-                dimensionLayout: "Dimensi & Tata Letak", visualScale: "Skala Visual (Zoom)", width: "Lebar", height: "Tinggi", donutHole: "Lubang Donut", thickness: "Ketebalan Elemen", spacing: "Jarak Antar Elemen", borderRadius: "Sudut Melengkung", lineStyle: "Gaya Garis", smooth: "Melengkung (Smooth)", straight: "Lurus (Straight)", stepped: "Tangga (Stepped)",
+                liveDataInput: "Input Data Langsung", pasteExcel: "Paste Data", iconLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Label",
+                dimensionLayout: "Dimensi & Tata Letak", visualScale: "Skala Visual (Zoom)", width: "Lebar", height: "Tinggi", donutHole: "Lubang Donut", shadowEffect: "Efek Bayangan 3D (Shadow)", thickness: "Ketebalan Elemen", spacing: "Jarak Antar Elemen", borderRadius: "Sudut Melengkung", lineStyle: "Gaya Garis", smooth: "Melengkung (Smooth)", straight: "Lurus (Straight)", stepped: "Tangga (Stepped)",
                 typographyEst: "Tipografi & Estetika", showLegend: "Tampilkan Legenda", legendPosition: "Posisi", legendAlign: "Perataan", alignCenter: "Tengah", alignStart: "Kiri/Atas (Mulai)", alignEnd: "Kanan/Bawah (Akhir)", legendSize: "Ukuran Legenda", datalabelPos: "Posisi Angka (Datalabels)", posCenter: "Tengah Batang (Default)", posInsideTop: "Dalam - Ujung Atas/Kanan", posInsideBottom: "Dalam - Pangkal Bawah/Kiri", posOutside: "Luar Grafik (Melayang)",
                 bgAreaTitle: "Latar Belakang & Kisi", bgColorTitle: "Warna Latar Belakang", opacity: "Transparansi (Opasitas)", showGridX: "Kisi Vertikal (X)", showGridY: "Kisi Horizontal (Y)", gridColor: "Warna Garis Kisi", bgRadiusTitle: "Sudut Melengkung", bgPaddingTitle: "Jarak (Padding)",
                 axisGrid: "Sumbu Angka", axisX: "Sumbu Utama", axisYLeft: "Sumbu Kategori", axisYRight: "Sumbu Sekunder", axisSize: "Ukuran Font Sumbu",
-                visualWorkspace: "Ruang Kerja Visual", exportImage: "Ekspor Gambar HD", totalData: "Total Keseluruhan", rendering: "Memproses HD...",
-                errorTitle: "Mengkoreksi Tampilan...", errorDesc: "Sistem sedang mereset konflik susunan grafik Anda secara otomatis.", forceReset: "Reset Paksa (Force Reset)"
+                visualWorkspace: "Ruang Kerja Visual", presentationMode: "Mode Presentasi", exportImage: "Ekspor HD", totalData: "Total Keseluruhan", rendering: "Memproses HD...",
+                errorTitle: "Mengkoreksi Tampilan...", errorDesc: "Sistem sedang mereset konflik susunan grafik Anda secara otomatis."
             },
             en: {
+                brandingTitle: "Title & Branding", chartTitleInput: "Main Chart Title", chartSubtitleInput: "Subtitle (Description)", watermarkInput: "Watermark Text (Bottom Right)",
                 coreSettings: "Core Settings", graphicType: "Main Graphic Type", themeColor: "Theme Color", subDataLogic: "Sub-Data Logic (Stack)", accumulate: "Accumulate (Increase Height)", include: "Include (Inside Main Data)", grouped: "Side-by-side (Versus)",
                 resetData: "Reset Data", resetConfirmTitle: "Reset All Settings?", resetConfirmDesc: "This action will clear all your data, layers, and colors, reverting to the factory defaults.", cancel: "Cancel", yesReset: "Yes, Reset",
                 multiLayerEngine: "Multi-Layer Engine (Overlay)", addChart: "Add Chart", multiLayerDesc: "Add overlay charts on top of your main data. Input matrix will adapt.",
-                liveDataInput: "Live Data Input", iconLibrary: "Icon Library", dataRowCount: "Label Row Count (Categories)", searchIcon: "Search icon...",
-                dimensionLayout: "Dimension & Layout", visualScale: "Visual Scale (Zoom)", width: "Width", height: "Height", donutHole: "Donut Hole", thickness: "Element Thickness", spacing: "Element Spacing", borderRadius: "Border Radius", lineStyle: "Line Style", smooth: "Smooth", straight: "Straight", stepped: "Stepped",
+                liveDataInput: "Live Data Input", pasteExcel: "Paste Data", iconLibrary: "Icon Library", dataRowCount: "Label Row Count",
+                dimensionLayout: "Dimension & Layout", visualScale: "Visual Scale (Zoom)", width: "Width", height: "Height", donutHole: "Donut Hole", shadowEffect: "3D Shadow Effect", thickness: "Element Thickness", spacing: "Element Spacing", borderRadius: "Border Radius", lineStyle: "Line Style", smooth: "Smooth", straight: "Straight", stepped: "Stepped",
                 typographyEst: "Typography & Aesthetics", showLegend: "Show Legend", legendPosition: "Position", legendAlign: "Alignment", alignCenter: "Center", alignStart: "Left/Top (Start)", alignEnd: "Right/Bottom (End)", legendSize: "Legend Size", datalabelPos: "Number Position (Datalabels)", posCenter: "Center (Default)", posInsideTop: "Inside - Top/Right End", posInsideBottom: "Inside - Bottom/Left Base", posOutside: "Outside Chart (Floating)",
                 bgAreaTitle: "Background & Grid", bgColorTitle: "Background Color", opacity: "Opacity", showGridX: "Vertical Grid (X)", showGridY: "Horizontal Grid (Y)", gridColor: "Grid Line Color", bgRadiusTitle: "Border Radius", bgPaddingTitle: "Background Padding",
                 axisGrid: "Number Axes", axisX: "Primary Axis", axisYLeft: "Category Axis", axisYRight: "Secondary Axis", axisSize: "Axis Font Size",
-                visualWorkspace: "Visual Workspace", exportImage: "Export HD Image", totalData: "Grand Total", rendering: "Processing HD...",
-                errorTitle: "Correcting Display...", errorDesc: "System is resolving chart layer conflicts automatically.", forceReset: "Force Reset"
+                visualWorkspace: "Visual Workspace", presentationMode: "Presentation Mode", exportImage: "Export HD", totalData: "Grand Total", rendering: "Processing HD...",
+                errorTitle: "Correcting Display...", errorDesc: "System is resolving chart layer conflicts automatically."
             }
         };
 
         const themes = {
             lime: ['#cafc03', '#111827', '#94a3b8', '#e2e8f0', '#334155'],
             default: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-            corporate: ['#1e3a8a', '#2563eb', '#0ea5e9', '#3b82f6', '#60a5fa'], // Biru Korporat Sejati
+            corporate: ['#0f172a', '#1e3a8a', '#1d4ed8', '#3b82f6', '#93c5fd'],
             earth: ['#064e3b', '#047857', '#059669', '#10b981', '#34d399'],
             sunset: ['#991b1b', '#b91c1c', '#dc2626', '#ef4444', '#f87171'],
             monochrome: ['#171717', '#404040', '#737373', '#a3a3a3', '#d4d4d4']
@@ -545,16 +597,18 @@
 
         let mainChart = null;
         let activeIconInput = null;
+        let mapCache = { world: null, indo: null };
         
-        // KUNCI MEMORI SUPER BARU (V9_Grouped_Stable)
-        const STORAGE_KEY = 'ProChart_Vision_V9_Grouped_Stable'; 
+        // KUNCI MEMORI SUPER BARU
+        const STORAGE_KEY = 'ProChart_Vision_V14_GeoFix'; 
         
         const defaultAppState = {
             language: 'id', 
+            chartTitle: 'Laporan Visual Data', chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', watermarkText: 'MNC Channels',
             chartType: 'bar-vertical', colorTheme: 'lime', stackMode: 'accumulate',
             showAxisX: true, showAxisY: true, showAxisYRight: false, axisFontSize: 12, 
             chartScale: 100, chartWidth: 100, chartHeight: 500, 
-            donutCutout: 60, chartThickness: 100, chartSpacing: 10, borderRadius: 8, lineStyle: 'smooth',
+            donutCutout: 60, elementShadow: 0, chartThickness: 100, chartSpacing: 10, borderRadius: 8, lineStyle: 'smooth',
             bgColor: '#f8fafc', bgOpacity: 0, bgRadius: 0, bgPadding: 0, showGridX: false, showGridY: true, gridColor: '#e2e8f0',
             showLegend: true, legendFontSize: 14, legendPosition: 'top', legendAlign: 'center', datalabelPosition: 'center',
             series: [
@@ -572,18 +626,36 @@
 
         const els = {
             langToggle: document.getElementById('langToggle'), 
+            chartTitleInput: document.getElementById('chartTitleInput'), chartSubtitleInput: document.getElementById('chartSubtitleInput'), watermarkInput: document.getElementById('watermarkInput'),
             chartType: document.getElementById('chartType'), colorTheme: document.getElementById('colorTheme'), stackMode: document.getElementById('stackMode'), stackModeContainer: document.getElementById('stackModeContainer'),
-            seriesContainer: document.getElementById('seriesContainer'), btnAddOverlay: document.getElementById('btnAddOverlay'),
+            seriesContainer: document.getElementById('seriesContainer'), btnAddOverlay: document.getElementById('btnAddOverlay'), overlayEnginePanel: document.getElementById('overlayEnginePanel'),
             dataRowsContainer: document.getElementById('dataRowsContainer'), btnAddRow: document.getElementById('btnAddRow'), btnRemoveRow: document.getElementById('btnRemoveRow'), rowCountDisplay: document.getElementById('rowCountDisplay'),
-            chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), chartSpacing: document.getElementById('chartSpacing'), chartSpacingDisplay: document.getElementById('chartSpacingDisplay'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'), lineStyleSelect: document.getElementById('lineStyleSelect'), donutCutoutContainer: document.getElementById('donutCutoutContainer'),
+            chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), elementShadowSlider: document.getElementById('elementShadowSlider'), elementShadowDisplay: document.getElementById('elementShadowDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), chartSpacing: document.getElementById('chartSpacing'), chartSpacingDisplay: document.getElementById('chartSpacingDisplay'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'), lineStyleSelect: document.getElementById('lineStyleSelect'), donutCutoutContainer: document.getElementById('donutCutoutContainer'),
             toggleLegend: document.getElementById('toggleLegend'), legendPosition: document.getElementById('legendPosition'), legendAlign: document.getElementById('legendAlign'), legendFontSizeSlider: document.getElementById('legendFontSizeSlider'), legendFontSizeDisplay: document.getElementById('legendFontSizeDisplay'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'),
             toggleAxisX: document.getElementById('toggleAxisX'), toggleAxisY: document.getElementById('toggleAxisY'), toggleAxisYRight: document.getElementById('toggleAxisYRight'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
             bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), bgRadiusSlider: document.getElementById('bgRadiusSlider'), bgRadiusDisplay: document.getElementById('bgRadiusDisplay'), bgPaddingSlider: document.getElementById('bgPaddingSlider'), bgPaddingDisplay: document.getElementById('bgPaddingDisplay'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'), gridColor: document.getElementById('gridColor'), gridColorText: document.getElementById('gridColorText'),
-            exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), canvasContainer: document.getElementById('canvasContainer'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), loadingOverlay: document.getElementById('loadingOverlay'), loadingContent: document.getElementById('loadingContent'), errorRescueContent: document.getElementById('errorRescueContent'),
-            
+            exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), canvasContainer: document.getElementById('canvasContainer'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), btnFullscreen: document.getElementById('btnFullscreen'), loadingOverlay: document.getElementById('loadingOverlay'), loadingContent: document.getElementById('loadingContent'), errorRescueContent: document.getElementById('errorRescueContent'),
             leftPanel: document.getElementById('leftPanel'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), burgerIcon: document.getElementById('burgerIcon'),
             settingsScrollArea: document.getElementById('settingsScrollArea'), sidebarHeader: document.getElementById('sidebarHeader'), mobileOverlay: document.getElementById('mobileOverlay'), btnCloseMobile: document.getElementById('btnCloseMobile')
         };
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toastNotification');
+            const msgEl = document.getElementById('toastMessage');
+            const iconEl = document.getElementById('toastIcon');
+            
+            msgEl.innerText = msg;
+            if (isError) {
+                toast.classList.replace('bg-slate-900', 'bg-red-600');
+                iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-white"></i>';
+            } else {
+                toast.classList.replace('bg-red-600', 'bg-slate-900');
+                iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-lime-400"></i>';
+            }
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000);
+        }
 
         let isMobile = window.innerWidth < 768;
         let isSidebarOpen = !isMobile;
@@ -654,32 +726,30 @@
                 const key = el.getAttribute('data-i18n');
                 if(translations[lang][key]) el.innerText = translations[lang][key];
             });
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-                const key = el.getAttribute('data-i18n-placeholder');
-                if(translations[lang][key]) el.placeholder = translations[lang][key];
-            });
             if(els.langToggle) els.langToggle.checked = (lang === 'en');
         }
 
         function forceRecolor(theme) {
             const palette = themes[theme] || themes['lime'];
-            
-            // SMART COLOR ENGINE 
             let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'wordCloud'].includes(appState.chartType);
-            let colorByRow = isRadial || appState.series.length === 1;
+            let colorfulMode = isRadial || appState.series.length === 1;
 
             appState.rows.forEach((r, rIdx) => {
                 r.values.forEach((v, sIdx) => { 
-                    if (colorByRow) {
-                        v.color = palette[rIdx % palette.length]; // Warna-warni pelangi per baris
+                    if (colorfulMode) {
+                        v.color = palette[rIdx % palette.length];
                     } else {
-                        v.color = palette[sIdx % palette.length]; // Seragam per kolom layer
+                        v.color = palette[sIdx % palette.length]; 
                     }
                 });
             });
         }
 
         function syncUIToState() {
+            els.chartTitleInput.value = appState.chartTitle || '';
+            els.chartSubtitleInput.value = appState.chartSubtitle || '';
+            els.watermarkInput.value = appState.watermarkText || '';
+
             els.chartType.value = appState.chartType; 
             els.colorTheme.value = appState.colorTheme; 
             els.stackMode.value = appState.stackMode || 'accumulate';
@@ -688,6 +758,7 @@
             els.chartWidth.value = appState.chartWidth; els.chartWidthDisplay.innerText = appState.chartWidth + '%';
             els.chartHeight.value = appState.chartHeight; els.chartHeightDisplay.innerText = appState.chartHeight + 'px';
             els.donutCutout.value = appState.donutCutout; els.donutCutoutDisplay.innerText = appState.donutCutout + '%';
+            els.elementShadowSlider.value = appState.elementShadow || 0; els.elementShadowDisplay.innerText = (appState.elementShadow || 0) + 'px';
             els.chartThickness.value = appState.chartThickness; els.chartThicknessDisplay.innerText = appState.chartThickness + '%';
             els.chartSpacing.value = appState.chartSpacing; els.chartSpacingDisplay.innerText = appState.chartSpacing + 'px';
             els.borderRadiusSlider.value = appState.borderRadius; els.borderRadiusDisplay.innerText = appState.borderRadius + 'px';
@@ -710,11 +781,15 @@
 
             els.rowCountDisplay.innerText = appState.rows.length;
             
+            let isMap = appState.chartType === 'choropleth-world' || appState.chartType === 'choropleth-indo';
             let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(appState.chartType);
+            let isWordCloud = appState.chartType === 'wordCloud';
+            
             els.donutCutoutContainer.style.display = appState.chartType === 'doughnut' ? 'block' : 'none';
-            els.axesControlPanel.style.display = (isRadial || appState.chartType === 'wordCloud') ? 'none' : 'block';
-            els.gridControlPanel.style.display = (isRadial || appState.chartType === 'pie' || appState.chartType === 'wordCloud') ? 'none' : 'block';
-            els.stackModeContainer.style.display = (appState.chartType === 'gantt' || isRadial || appState.chartType === 'wordCloud') ? 'none' : 'block';
+            els.axesControlPanel.style.display = (isRadial || isWordCloud || isMap) ? 'none' : 'block';
+            els.gridControlPanel.style.display = (isRadial || appState.chartType === 'pie' || isWordCloud || isMap) ? 'none' : 'block';
+            els.stackModeContainer.style.display = (appState.chartType === 'gantt' || isRadial || isWordCloud || isMap) ? 'none' : 'block';
+            els.overlayEnginePanel.style.display = (isRadial || isWordCloud || isMap) ? 'none' : 'block';
 
             renderMultiLayerEngine();
             renderDataInputs();
@@ -785,14 +860,13 @@
                     vDiv.className = "flex flex-col gap-1 flex-1 min-w-[70px] sm:min-w-[80px]";
                     let seriesName = s.name.length > 10 ? s.name.substring(0, 8) + '..' : s.name;
                     
-                    // PEMUSNAHAN MUTLAK PANAH: inputmode="numeric" pada type="text" (Senjata Pemusnah Massal)
                     let valInputHTML = isGantt ? 
                         `<div class="flex flex-col gap-1">
-                            <input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" placeholder="Mulai" class="no-spinners w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
-                            <input type="text" inputmode="numeric" value="${v.val2}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val2', this.value)" placeholder="Selesai" class="no-spinners w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
+                            <input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" placeholder="Mulai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
+                            <input type="text" inputmode="numeric" value="${v.val2}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val2', this.value)" placeholder="Selesai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
                          </div>` 
                         : 
-                        `<input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" class="no-spinners w-full bg-white border border-slate-200 rounded-lg px-1 sm:px-2 py-2 text-sm font-black text-center focus:ring-2 focus:ring-slate-900 outline-none shadow-sm">`;
+                        `<input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" class="w-full bg-white border border-slate-200 rounded-lg px-1 sm:px-2 py-2 text-sm font-black text-center focus:ring-2 focus:ring-slate-900 outline-none shadow-sm">`;
 
                     vDiv.innerHTML = `
                         <div class="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-wider text-center truncate mb-1 flex items-center justify-center gap-1">
@@ -802,7 +876,7 @@
                         <div class="relative group">
                             ${valInputHTML}
                             <div class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border border-white overflow-hidden shadow-sm cursor-pointer hover:scale-125 transition-transform opacity-60 group-hover:opacity-100 z-10">
-                                <input type="color" value="${v.color}" onchange="updateRowValue('${row.id}', ${sIdx}, 'color', this.value)" class="absolute -top-2 -left-2 w-8 h-8 cursor-pointer">
+                                <input type="color" value="${v.color}" onchange="updateRowValue('${row.id}', ${sIdx}, 'color', this.value)" class="absolute -top-2 -left-2 w-8 h-8 cursor-pointer border-none">
                             </div>
                         </div>
                     `;
@@ -814,6 +888,10 @@
             });
             translatePage();
         }
+
+        els.chartTitleInput.addEventListener('input', (e) => { appState.chartTitle = e.target.value; updateVisualizations(); });
+        els.chartSubtitleInput.addEventListener('input', (e) => { appState.chartSubtitle = e.target.value; updateVisualizations(); });
+        els.watermarkInput.addEventListener('input', (e) => { appState.watermarkText = e.target.value; updateVisualizations(); });
 
         function updateSeriesProp(index, prop, val) { if(appState.series[index]) { appState.series[index][prop] = val; updateVisualizations(); } }
         function updateSeriesName(index, val) { if(appState.series[index]) { appState.series[index].name = val; renderDataInputs(); updateVisualizations(); } }
@@ -885,6 +963,7 @@
             { el: els.chartWidth, prop: 'chartWidth', disp: els.chartWidthDisplay, unit: '%' },
             { el: els.chartHeight, prop: 'chartHeight', disp: els.chartHeightDisplay, unit: 'px' },
             { el: els.donutCutout, prop: 'donutCutout', disp: els.donutCutoutDisplay, unit: '%' },
+            { el: els.elementShadowSlider, prop: 'elementShadow', disp: els.elementShadowDisplay, unit: 'px' },
             { el: els.chartThickness, prop: 'chartThickness', disp: els.chartThicknessDisplay, unit: '%' },
             { el: els.chartSpacing, prop: 'chartSpacing', disp: els.chartSpacingDisplay, unit: 'px' },
             { el: els.borderRadiusSlider, prop: 'borderRadius', disp: els.borderRadiusDisplay, unit: 'px' },
@@ -908,7 +987,6 @@
         els.legendAlign.addEventListener('change', (e) => { appState.legendAlign = e.target.value; updateVisualizations(); });
         els.datalabelPositionSelect.addEventListener('change', (e) => { appState.datalabelPosition = e.target.value; updateVisualizations(); });
         
-        // PEMETAAN TOGGLE FIXED
         const toggleMap = {
             'toggleLegend': 'showLegend', 
             'toggleAxisX': 'showAxisX', 
@@ -925,7 +1003,217 @@
         els.bgColor.addEventListener('input', (e) => { els.bgColorText.innerText = e.target.value; appState.bgColor = e.target.value; updateVisualizations(); });
         els.gridColor.addEventListener('input', (e) => { els.gridColorText.innerText = e.target.value; appState.gridColor = e.target.value; updateVisualizations(); });
 
-        function updateVisualizations() {
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
+            );
+        }
+
+        async function handlePasteExcel() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text || text.trim() === '') { showToast('Clipboard kosong!', true); return; }
+                
+                // ANTI-XSS & ANTI-CRASH VALIDATION
+                if(text.length > 50000 || !text.includes('\t') || text.includes('<html') || text.includes('<!DOCTYPE')) {
+                    showToast('Format ditolak! Harap copy dari tabel Excel/Sheets.', true);
+                    return;
+                }
+
+                const rawRows = text.trim().split('\n');
+                if (rawRows.length < 2) { showToast('Butuh minimal 2 baris data.', true); return; }
+
+                const headers = rawRows[0].split('\t');
+                appState.series = [];
+                for(let i=1; i<headers.length; i++) {
+                    let cleanHeader = escapeHTML(headers[i].trim() || 'Data '+i);
+                    appState.series.push({ id: 's_'+Date.now()+i, name: cleanHeader, type: 'auto', axis: 'y', zIndex: i===1?'back':'front' });
+                }
+
+                appState.rows = [];
+                for(let i=1; i<rawRows.length; i++) {
+                    const cols = rawRows[i].split('\t');
+                    let cleanLabel = escapeHTML(cols[0].trim() || 'Label ' + i);
+                    const values = [];
+                    for(let j=1; j<headers.length; j++) {
+                        let parsed = parseFloat(cols[j] ? cols[j].replace(/[^0-9.-]/g, '') : 0);
+                        values.push({ val: isNaN(parsed) ? 0 : parsed, val2: 0, color: '#000' });
+                    }
+                    appState.rows.push({ id: 'r_'+Date.now()+i, label: cleanLabel, icon: '📊', values: values });
+                }
+                
+                forceRecolor(appState.colorTheme);
+                syncUIToState();
+                showToast('Data Excel berhasil di-import!');
+            } catch (err) {
+                console.error("Paste failed", err);
+                showToast("Gagal membaca Clipboard. Izinkan akses di Browser Anda.", true);
+            }
+        }
+
+        els.btnFullscreen.addEventListener('click', () => {
+            const workspace = document.getElementById('workspaceArea');
+            if (!document.fullscreenElement) {
+                if (workspace.requestFullscreen) workspace.requestFullscreen();
+                else if (workspace.webkitRequestFullscreen) workspace.webkitRequestFullscreen();
+                else if (workspace.msRequestFullscreen) workspace.msRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        });
+
+        els.btnExport.addEventListener('click', () => {
+            els.loadingOverlay.classList.remove('hidden');
+            els.loadingContent.classList.remove('hidden');
+            els.errorRescueContent.classList.add('hidden');
+            
+            setTimeout(() => {
+                const canvas = document.getElementById('mainCanvas');
+                const wrapper = document.getElementById('canvasWrapper');
+                
+                // AMBIL DIMENSI CSS ASLI UNTUK MENCEGAH HASIL GEPENG
+                const cssRect = wrapper.getBoundingClientRect();
+                const renderWidth = cssRect.width;
+                const renderHeight = cssRect.height;
+                
+                // MENGHITUNG KEPADATAN PIKSEL (DPI) DARI KANVAS HD CHART.JS
+                const pixelRatio = canvas.width / renderWidth; 
+
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width; // Tetap HD 100%
+                tempCanvas.height = renderHeight * pixelRatio; // Menyesuaikan dengan DPI
+                
+                const tCtx = tempCanvas.getContext('2d');
+                
+                let finalBgColor = appState.bgOpacity > 0 ? hexToRgba(appState.bgColor, appState.bgOpacity) : 'transparent';
+                
+                if (finalBgColor !== 'transparent') {
+                    tCtx.fillStyle = finalBgColor;
+                    const rad = (appState.bgRadius || 0) * pixelRatio;
+                    if (rad > 0) {
+                        tCtx.beginPath();
+                        tCtx.moveTo(rad, 0); tCtx.lineTo(tempCanvas.width - rad, 0); tCtx.quadraticCurveTo(tempCanvas.width, 0, tempCanvas.width, rad);
+                        tCtx.lineTo(tempCanvas.width, tempCanvas.height - rad); tCtx.quadraticCurveTo(tempCanvas.width, tempCanvas.height, tempCanvas.width - rad, tempCanvas.height);
+                        tCtx.lineTo(rad, tempCanvas.height); tCtx.quadraticCurveTo(0, tempCanvas.height, 0, tempCanvas.height - rad);
+                        tCtx.lineTo(0, rad); tCtx.quadraticCurveTo(0, 0, rad, 0);
+                        tCtx.closePath(); tCtx.fill();
+                    } else {
+                        tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    }
+                }
+                
+                // Terapkan skala padding sesuai dengan kepadatan piksel
+                const pad = (appState.bgPadding || 0) * pixelRatio;
+                tCtx.drawImage(canvas, pad, pad, tempCanvas.width - (pad*2), tempCanvas.height - (pad*2));
+                
+                const link = document.createElement('a');
+                link.download = `ProChart_${Date.now()}.png`;
+                link.href = tempCanvas.toDataURL('image/png', 1.0);
+                link.click();
+                els.loadingOverlay.classList.add('hidden');
+                showToast('Gambar HD Berhasil Diekspor!');
+            }, 800);
+        });
+
+        // EKSPANSI 200+ IKON EMOTICON 
+        const emojiList = [
+            // Manusia & Keluarga
+            '👨','👩','👦','👧','👶','👵','👴','👨‍👩‍👦','👨‍👩‍👧','👨‍👩‍👧‍👦','👪','👨‍👦','👩‍👧','🤝','🙌','👏','👍','❤','✨',
+            '👮','🕵️','💂','👷','🧑‍⚕️','🧑‍‍🎓','🧑‍🏫','🧑‍⚖️','🧑‍🌾','🧑‍🍳','🧑‍🔧','🧑‍🏭','🧑‍💼','🧑‍🔬','🧑‍💻','🧑‍🎤','🧑‍🎨','🧑‍✈️','🧑‍🚀','🧑‍🚒','🦸','🦹','🧙','🧚','🧛','🧜','🧝','🧞','🧟',
+            // Binatang
+            '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜',
+            '🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️','🦔',
+            // Makanan & Minuman
+            '🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶','🌽','🥕','🧄','🧅','🥔','🍠','🥐','🍞','🥖','🥨','🧀','🥚','🍳','🥞','🥓','🥩','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥗','🥘','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🍤','🍙','🍚','🍘','🍥','🥠','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','☕','🍵','🧃','🥤','🍶','🍺','🍻','🥂','🍷','🧊',
+            // Lokasi, Objek & Bisnis
+            '📍','🏢','🏠','🏭','🚗','🚌','🚑','🚒','🚓','🚕','🚜','🚲','🛵','🏍','✈️','🚀','🛸','🚁','🛶','⛵','🚤','🛳️','⛴️️','🚢','💻','📱','⌚','📷','🎥','📞','⚽','🏀','🏈','⚾','🎾','🏐','🏉','🎱','🏥','⚡','🔥','💧','☀','🌟','💰','💳','💸','📈','📉','📊','📦','🛒','🎉','🏆','💡','⚙','📌','📎','🔔','🎵','✅','❌','❓','❗','♻','💯'
+        ];
+        
+        function openIconFor(rowId) {
+            activeIconInput = rowId;
+            const grid = document.getElementById('iconGrid');
+            grid.innerHTML = emojiList.map(e => `<button onclick="selectIcon('${e}')" class="text-2xl p-2 hover:bg-slate-100 rounded-xl transition cursor-pointer">${e}</button>`).join('');
+            document.getElementById('iconModal').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('iconModal').classList.remove('opacity-0'); document.getElementById('iconModalContent').classList.remove('scale-95'); }, 10);
+        }
+        function closeIconModal() {
+            document.getElementById('iconModal').classList.add('opacity-0'); document.getElementById('iconModalContent').classList.add('scale-95');
+            setTimeout(() => document.getElementById('iconModal').classList.add('hidden'), 300);
+        }
+        function selectIcon(icon) {
+            if(activeIconInput) {
+                const r = appState.rows.find(x => x.id === activeIconInput);
+                if(r) { r.icon = icon; updateVisualizations(); renderDataInputs(); }
+            }
+            closeIconModal();
+        }
+        
+        function applyCustomIcon() {
+            const inputEl = document.getElementById('customIconInput');
+            const val = inputEl.value.trim();
+            if (val && activeIconInput) {
+                selectIcon(val);
+                inputEl.value = ''; 
+            } else if (!val) {
+                showToast('Ketik atau Paste ikon terlebih dahulu!', true);
+            }
+        }
+
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+            setTimeout(() => { document.getElementById('resetModal').classList.remove('opacity-0'); document.getElementById('resetModalContent').classList.remove('scale-95'); }, 10);
+        }
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('opacity-0'); document.getElementById('resetModalContent').classList.add('scale-95');
+            setTimeout(() => document.getElementById('resetModal').classList.add('hidden'), 300);
+        }
+        function executeResetData() {
+            localStorage.removeItem(STORAGE_KEY);
+            appState = JSON.parse(JSON.stringify(defaultAppState));
+            forceRecolor(appState.colorTheme); 
+            syncUIToState();
+            closeResetModal();
+        }
+
+        // EVENT LISTENER: TUTUP MODAL SAAT KLIK AREA LUAR (BACKDROP)
+        document.getElementById('iconModal').addEventListener('click', function(e) {
+            if (e.target === this) closeIconModal();
+        });
+        
+        document.getElementById('resetModal').addEventListener('click', function(e) {
+            if (e.target === this) closeResetModal();
+        });
+
+        const customEnginePlugin = {
+            id: 'customEngine',
+            beforeDatasetsDraw: (chart) => {
+                if(appState.elementShadow > 0) {
+                    const ctx = chart.ctx;
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                    ctx.shadowBlur = appState.elementShadow;
+                    ctx.shadowOffsetX = appState.elementShadow / 2;
+                    ctx.shadowOffsetY = appState.elementShadow / 2;
+                }
+            },
+            afterDatasetsDraw: (chart) => {
+                if(appState.elementShadow > 0) chart.ctx.restore();
+            },
+            afterDraw: (chart) => {
+                if (appState.watermarkText) {
+                    const ctx = chart.ctx;
+                    ctx.save();
+                    ctx.font = 'bold 16px Inter';
+                    ctx.fillStyle = 'rgba(150, 150, 150, 0.5)';
+                    ctx.textAlign = 'right';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(appState.watermarkText, chart.width - 20, chart.height - 20);
+                    ctx.restore();
+                }
+            }
+        };
+
+        async function updateVisualizations() {
             els.exportTarget.style.transform = `scale(${appState.chartScale / 100})`;
             els.exportTarget.style.width = appState.chartWidth + '%';
             els.exportTarget.style.height = appState.chartHeight + 'px';
@@ -934,14 +1222,17 @@
             els.canvasWrapper.style.borderRadius = (appState.bgRadius || 0) + 'px';
             els.canvasWrapper.style.padding = (appState.bgPadding || 0) + 'px';
 
-            renderMainChart();
+            await renderMainChart();
             renderPercentageWidgets();
             saveState();
         }
 
-        function renderMainChart() {
+        async function renderMainChart() {
             try {
-                // SISTEM ANTI-CRASH: Destruksi fisik elemen Canvas di DOM
+                els.loadingOverlay.classList.remove('hidden');
+                els.errorRescueContent.classList.add('hidden');
+                els.loadingContent.classList.remove('hidden');
+
                 if (mainChart) { mainChart.destroy(); mainChart = null; }
                 els.canvasContainer.innerHTML = ''; 
                 const canvasEl = document.createElement('canvas');
@@ -954,6 +1245,9 @@
                 let isScatterBubble = ['scatter', 'bubble'].includes(appState.chartType);
                 let isWaterfall = appState.chartType === 'waterfall';
                 let isWordCloud = appState.chartType === 'wordCloud';
+                let isMapWorld = appState.chartType === 'choropleth-world';
+                let isMapIndo = appState.chartType === 'choropleth-indo';
+                let isMap = isMapWorld || isMapIndo;
                 
                 let labels = appState.rows.map(r => r.icon + ' ' + r.label);
                 let datasets = [];
@@ -978,109 +1272,165 @@
 
                 let globalBaseType = 'bar';
                 if (isWordCloud) globalBaseType = 'wordCloud';
+                else if (isMap) globalBaseType = 'choropleth';
                 else if (isRadial || isScatterBubble) globalBaseType = appState.chartType;
                 else if (appState.chartType === 'line' || appState.chartType === 'area') globalBaseType = 'line';
                 else if (appState.chartType === 'bar-horizontal') globalBaseType = 'bar';
 
-                // BYPASS SPESIFIK WORD CLOUD
-                if (isWordCloud) {
-                    let wLabels = appState.rows.map(r => r.label);
-                    let wSizes = appState.rows.map(r => Math.max((r.values[0]?.val || 10), 1));
-                    let wColors = appState.rows.map(r => r.values[0]?.color || '#111827');
-                    
-                    datasets = [{ label: 'Word Cloud', data: wSizes, color: wColors, backgroundColor: wColors }];
-                    
-                    mainChart = new Chart(ctx, {
-                        type: 'wordCloud',
-                        data: { labels: wLabels, datasets: datasets },
-                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
+                // ==========================================
+                // BYPASS SPESIFIK MAPS (PETA GEOSPASIAL)
+                // ==========================================
+                if (isMap) {
+                    let features = [];
+                    if (isMapWorld) {
+                        if (!mapCache.world) {
+                            const res = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
+                            mapCache.world = await res.json();
+                        }
+                        features = mapCache.world.features;
+                    } else {
+                        if (!mapCache.indo) {
+                            const res = await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province.json');
+                            mapCache.indo = await res.json();
+                        }
+                        features = mapCache.indo.features;
+                    }
+
+                    // Mapping Data User dengan Geografi Peta (Pencarian Nama Pintar)
+                    let userRowDict = {};
+                    appState.rows.forEach(r => {
+                        let cleanLabel = r.label.replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim();
+                        userRowDict[cleanLabel] = r;
                     });
-                    
-                    els.loadingOverlay.classList.add('hidden');
-                    return; 
-                } 
-                else if (isScatterBubble) {
+
+                    let mapLabels = [];
+                    let mapDataArr = [];
+
+                    features.forEach(f => {
+                        let fname = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim();
+                        let matchedRow = userRowDict[fname];
+
+                        if (!matchedRow) {
+                            for (let key in userRowDict) {
+                                if ((fname && key.includes(fname)) || (fname && fname.includes(key))) {
+                                    matchedRow = userRowDict[key];
+                                    break;
+                                }
+                            }
+                        }
+
+                        mapLabels.push(f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "Unknown");
+                        
+                        // FIX SUPER PENTING: Mencegah NaN pada Peta yang menyebabkan Blank Screen
+                        let val = 0;
+                        if (matchedRow && matchedRow.values[0] && matchedRow.values[0].val !== undefined) {
+                            val = Number(matchedRow.values[0].val);
+                            if (isNaN(val)) val = 0;
+                        }
+                        mapDataArr.push({ feature: f, value: val });
+                    });
+
+                    labels = mapLabels;
                     datasets = [{
-                        label: appState.series[0]?.name || 'Dataset Utama',
-                        data: appState.rows.map((r, i) => ({ x: i * 10, y: r.values[0]?.val||0, r: appState.chartType === 'bubble' ? ((r.values[0]?.val||0)/10 + 5) : 5 })),
-                        backgroundColor: appState.rows.map(r => r.values[0]?.color),
-                        borderColor: '#111827', borderWidth: 2,
-                        pointRadius: appState.chartType === 'scatter' ? 8 : undefined
+                        label: appState.series[0]?.name || 'Data Utama',
+                        outline: features, // FIX PENTING: Memaksa batas (bounding box) peta tampil sempurna 100%
+                        data: mapDataArr,
+                        backgroundColor: (context) => {
+                            if (context.raw && context.raw.feature) {
+                                let f = context.raw.feature;
+                                let fname = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim();
+                                let matchedRow = userRowDict[fname];
+                                if (!matchedRow) {
+                                    for (let key in userRowDict) {
+                                        if ((fname && key.includes(fname)) || (fname && fname.includes(key))) {
+                                            matchedRow = userRowDict[key]; break;
+                                        }
+                                    }
+                                }
+                                return matchedRow && matchedRow.values[0] ? matchedRow.values[0].color : 'rgba(200, 200, 200, 0.15)'; // Warna abu-abu jika kosong
+                            }
+                            return 'rgba(200, 200, 200, 0.15)'; 
+                        },
+                        borderColor: appState.chartSpacing > 0 ? '#ffffff' : 'rgba(0,0,0,0.1)',
+                        borderWidth: appState.chartSpacing > 0 ? 1 : 0.5
                     }];
                 }
+                // ==========================================
+                // BYPASS SPESIFIK WORD CLOUD
+                // ==========================================
+                else if (isWordCloud) {
+                    let wcData = appState.rows.map(r => (r.values[0]?.val || 0));
+                    let wcColors = appState.rows.map(r => r.values[0]?.color || '#000');
+                    datasets = [{
+                        label: appState.series[0]?.name || 'Word Cloud',
+                        data: wcData,
+                        color: wcColors,
+                        fontFamily: 'Inter'
+                    }];
+                }
+                // ==========================================
+                // BYPASS SPESIFIK RADIAL (PIE, DONUT, RADAR, POLAR)
+                // ==========================================
                 else if (isRadial) {
-                    // Penanganan Khusus Radial - HANYA GUNAKAN DATA PERTAMA
-                    let dataArr = [];
-                    let colorArr = [];
+                    let rData = appState.rows.map(r => (r.values[0]?.val || 0));
+                    let rColors = appState.rows.map(r => r.values[0]?.color || '#000');
                     
-                    appState.rows.forEach(r => {
-                        let v = r.values[0];
-                        if (v) {
-                            dataArr.push(v.val);
-                            colorArr.push(v.color);
-                        } else {
-                            dataArr.push(0);
-                            colorArr.push('#ccc');
-                        }
-                    });
+                    let datasetConfig = {
+                        label: appState.series[0]?.name || 'Data Utama',
+                        data: rData,
+                        backgroundColor: rColors,
+                        borderColor: appState.chartType === 'radar' ? rColors[0] : '#ffffff',
+                        borderWidth: appState.chartSpacing > 0 ? 2 : 0,
+                    };
 
                     if (appState.chartType === 'radar') {
-                        datasets = [{
-                            label: appState.series[0]?.name || 'Dataset Utama',
-                            data: dataArr,
-                            backgroundColor: hexToRgba(colorArr[0] || '#cafc03', 20),
-                            borderColor: colorArr[0] || '#cafc03',
-                            pointBackgroundColor: colorArr,
-                            borderWidth: 2,
-                            fill: true
-                        }];
-                    } else {
-                        datasets = [{
-                            label: appState.series[0]?.name || 'Dataset Utama',
-                            data: dataArr,
-                            backgroundColor: colorArr,
-                            borderColor: appState.chartSpacing > 0 ? '#ffffff' : 'transparent',
-                            borderWidth: appState.chartSpacing > 0 ? 2 : 0,
-                        }];
+                        datasetConfig.backgroundColor = hexToRgba(rColors[0], 20); // Transparan agar tidak nutupi garis
+                        datasetConfig.fill = true;
+                        datasetConfig.borderWidth = 3;
                     }
+
+                    datasets = [datasetConfig];
                 }
+                // ==========================================
+                // CHART UMUM (BAR, LINE, AREA, SCATTER, DLL)
+                // ==========================================
                 else {
-                    let sortedIndices = appState.series.map((s, i) => i).sort((a,b) => {
-                        return (appState.series[a].zIndex === 'back' ? -1 : 1) - (appState.series[b].zIndex === 'back' ? -1 : 1);
-                    });
-
-                    sortedIndices.forEach((sIdx) => {
-                        let s = appState.series[sIdx];
-                        if(!s) return;
-
+                    appState.series.forEach((s, sIdx) => {
                         let parsedType = s.type === 'auto' ? globalBaseType : s.type;
-                        if (parsedType === 'bar-vertical' || parsedType === 'bar-horizontal') parsedType = 'bar';
-                        else if (parsedType === 'line' || parsedType === 'area') parsedType = 'line';
+                        if (parsedType === 'area') parsedType = 'line';
                         
-                        let isFillArea = (s.type === 'area') || (s.type === 'auto' && appState.chartType === 'area');
-                        let dataArr = []; let colorArr = []; let waterfallSum = 0;
+                        let isLine = parsedType === 'line';
+                        let isFillArea = s.type === 'area' || (s.type === 'auto' && appState.chartType === 'area');
+                        
+                        let dataArr = [];
+                        let colorArr = [];
 
-                        appState.rows.forEach(r => {
-                            let v = r.values[sIdx];
-                            if (v) {
-                                if (appState.chartType === 'gantt') dataArr.push([v.val, v.val2]);
-                                else if (isWaterfall) { let start = waterfallSum; waterfallSum += v.val; dataArr.push([start, waterfallSum]); }
-                                else dataArr.push(v.val);
-                                colorArr.push(v.color);
+                        appState.rows.forEach((r, rIdx) => {
+                            let v = r.values[sIdx] || {val:0, val2:0, color:'#000'};
+                            colorArr.push(v.color);
+                            
+                            if (isScatterBubble) {
+                                dataArr.push({ x: rIdx+1, y: v.val, r: (v.val2 || 10) / 5 });
+                            } else if (appState.chartType === 'gantt' || isWaterfall) {
+                                dataArr.push([v.val, v.val2]);
                             } else {
-                                dataArr.push(null); colorArr.push('transparent');
+                                dataArr.push(v.val);
                             }
                         });
 
-                        let isLine = parsedType === 'line';
-                        let borderColor = isLine ? colorArr[0] : (appState.chartSpacing > 0 ? '#ffffff' : 'transparent');
                         let bgColor = isLine && !isFillArea ? 'transparent' : colorArr;
+                        let borderColor = isLine ? colorArr[0] : (appState.chartSpacing > 0 ? '#ffffff' : 'transparent');
+                        
+                        // Jika 1 series colorful
+                        if(appState.series.length === 1 && !isLine) {
+                            borderColor = appState.chartSpacing > 0 ? '#ffffff' : 'transparent';
+                        }
+
                         if (isFillArea) bgColor = hexToRgba(colorArr[0], 20);
 
                         let reqAxis = s.axis === 'y2' ? 'Right' : 'Primary';
                         let useX, useY;
                         
-                        // SUMBU BAYANGAN (VIRTUAL AXIS)
                         if (isHorizontal) { useY = 'y'; useX = reqAxis === 'Right' ? 'xRight' : 'x'; } 
                         else { useX = 'x'; useY = reqAxis === 'Right' ? 'yRight' : 'y'; }
 
@@ -1089,12 +1439,13 @@
                             data: dataArr, backgroundColor: bgColor, borderColor: borderColor,
                             borderWidth: isLine ? 3 : (appState.chartSpacing > 0 ? 2 : 0),
                             fill: isFillArea, tension: lineTension, stepped: lineStepped, borderRadius: appState.borderRadius,
-                            grouped: !isInclude, 
+                            grouped: isGrouped, 
                             stack: isStacked ? 'Stack 0' : undefined,
                             order: s.zIndex === 'front' ? 0 : 2
                         };
 
-                        if (!isRadial) { datasetConfig.yAxisID = useY; datasetConfig.xAxisID = useX; }
+                        datasetConfig.yAxisID = useY; 
+                        datasetConfig.xAxisID = useX;
                         datasets.push(datasetConfig);
                     });
                 }
@@ -1102,28 +1453,32 @@
                 const chartOptions = {
                     responsive: true, maintainAspectRatio: false,
                     indexAxis: isHorizontal ? 'y' : 'x',
-                    layout: { padding: { top: 20, bottom: 10 } },
+                    layout: { padding: { top: 20, bottom: 20, left: 20, right: 20 } },
                     interaction: { mode: isInclude ? 'index' : 'nearest', intersect: false },
                     plugins: {
-                        legend: {
-                            display: appState.showLegend, position: appState.legendPosition, align: appState.legendAlign || 'center',
-                            labels: { font: { family: 'Inter', size: appState.legendFontSize, weight: 'bold' }, color: '#334155', usePointStyle: true, padding: 20 }
-                        },
+                        title: { display: !!appState.chartTitle, text: appState.chartTitle, font: { family:'Inter', size:24, weight:'900' }, color: '#0f172a', padding:{bottom: 10} },
+                        subtitle: { display: !!appState.chartSubtitle, text: appState.chartSubtitle, font: { family:'Inter', size:14, weight:'500' }, color: '#64748b', padding:{bottom: 24} },
+                        legend: { display: appState.showLegend, position: appState.legendPosition, align: appState.legendAlign || 'center', labels: { font: { family: 'Inter', size: appState.legendFontSize, weight: 'bold' }, color: '#334155', usePointStyle: true, padding: 20 } },
                         tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
                         datalabels: {
-                            display: !isRadial && !isScatterBubble, 
-                            anchor: dlPos.anchor, align: dlPos.align,
-                            color: appState.datalabelPosition === 'outside' ? '#111827' : '#111827',
+                            display: !isRadial && !isScatterBubble && !isMap, anchor: dlPos.anchor, align: dlPos.align, color: appState.datalabelPosition === 'outside' ? '#111827' : '#fff',
                             font: { family: 'Inter', weight: '900', size: 14 },
                             formatter: (v) => Array.isArray(v) ? (v[1] - v[0]) : Math.round(v),
-                            textStrokeColor: appState.datalabelPosition === 'outside' ? 'transparent' : 'rgba(255,255,255,0.7)',
-                            textStrokeWidth: appState.datalabelPosition === 'outside' ? 0 : 4
+                            textStrokeColor: appState.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: appState.datalabelPosition === 'outside' ? 0 : 3
                         }
                     },
                     scales: {}
                 };
 
-                if (!isRadial && !isWordCloud) {
+                if (isMap) {
+                    chartOptions.scales = {
+                        projection: {
+                            axis: 'x',
+                            projection: isMapIndo ? 'mercator' : 'equirectangular'
+                        }
+                    };
+                    chartOptions.plugins.legend.display = false; // Legend peta seringkali berantakan
+                } else if (!isRadial && !isWordCloud) {
                     let hasSecondaryAxis = appState.series.some(s => s.axis === 'y2');
                     if (isHorizontal) {
                         chartOptions.scales.y = { display: appState.showAxisY, stacked: isStacked, grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
@@ -1135,28 +1490,22 @@
                         if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.yRight = { display: appState.showAxisYRight, position: 'right', stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
                     }
                 } else if (isRadial) {
-                    // Pembersihan scales mutlak untuk menghindari crash radial
-                    if (appState.chartType !== 'radar' && appState.chartType !== 'polarArea') {
-                        delete chartOptions.scales; 
+                    if (appState.chartType !== 'radar' && appState.chartType !== 'polarArea') { 
+                        delete chartOptions.scales; // HAPUS SCALES MUTLAK UNTUK PIE & DONUT AGAR TIDAK CRASH
                     }
-                    
                     chartOptions.cutout = appState.chartType === 'doughnut' ? appState.donutCutout + '%' : 0;
-                    if (appState.chartType !== 'radar') {
-                        chartOptions.elements = { arc: { borderRadius: appState.borderRadius, borderWidth: appState.chartSpacing > 0 ? 2 : 0, borderColor: '#fff' } };
+                    if (appState.chartType !== 'radar') { 
+                        chartOptions.elements = { arc: { borderRadius: appState.borderRadius, borderWidth: appState.chartSpacing > 0 ? 2 : 0, borderColor: '#fff' } }; 
                     }
-                    
                     chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => { 
                         let sum=0; ctx.chart.data.datasets[0].data.map(d=>sum+=(d||0)); 
                         if(sum===0) return '0%'; return Math.round((value/sum)*100)+'%'; 
-                    } };
+                    }};
                 }
                 
-                if (!isRadial) {
-                    chartOptions.barPercentage = appState.chartThickness / 100;
-                    chartOptions.categoryPercentage = 0.8;
-                }
+                if (!isRadial && !isMap) { chartOptions.barPercentage = appState.chartThickness / 100; chartOptions.categoryPercentage = 0.8; }
 
-                let activePlugins = [];
+                let activePlugins = [customEnginePlugin];
                 if (typeof ChartDataLabels !== 'undefined') activePlugins.push(ChartDataLabels);
 
                 mainChart = new Chart(ctx, { type: globalBaseType, data: { labels: labels, datasets: datasets }, options: chartOptions, plugins: activePlugins });
@@ -1192,108 +1541,6 @@
                     </div>
                 `;
             });
-        }
-
-        // ALGORITMA EKSPOR HD PRESISI TINGGI
-        els.btnExport.addEventListener('click', () => {
-            els.loadingOverlay.classList.remove('hidden');
-            els.loadingContent.classList.remove('hidden');
-            els.errorRescueContent.classList.add('hidden');
-            
-            setTimeout(() => {
-                const canvas = document.getElementById('mainCanvas');
-                const wrapper = document.getElementById('canvasWrapper');
-                
-                // Ambil ukuran CSS Aktual
-                const cssWidth = canvas.clientWidth;
-                const cssHeight = canvas.clientHeight;
-                
-                // Ambil ukuran Pixel Fisik (HD/Retina)
-                const intrinsicWidth = canvas.width;
-                const intrinsicHeight = canvas.height;
-                
-                // Hitung Rasio DPI
-                const ratioX = intrinsicWidth / cssWidth;
-                const ratioY = intrinsicHeight / cssHeight;
-                
-                // Skalakan Padding sesuai DPI Layar
-                const scaledPaddingX = (appState.bgPadding || 0) * ratioX;
-                const scaledPaddingY = (appState.bgPadding || 0) * ratioY;
-                const scaledRadius = (appState.bgRadius || 0) * Math.max(ratioX, ratioY);
-
-                const tempCanvas = document.createElement('canvas');
-                // Terapkan Proporsi Sempurna
-                tempCanvas.width = intrinsicWidth + (scaledPaddingX * 2);
-                tempCanvas.height = intrinsicHeight + (scaledPaddingY * 2);
-                const tCtx = tempCanvas.getContext('2d');
-                
-                let finalBgColor = appState.bgOpacity > 0 ? hexToRgba(appState.bgColor, appState.bgOpacity) : 'transparent';
-                
-                if (finalBgColor !== 'transparent') {
-                    tCtx.fillStyle = finalBgColor;
-                    if (scaledRadius > 0) {
-                        tCtx.beginPath();
-                        tCtx.moveTo(scaledRadius, 0); 
-                        tCtx.lineTo(tempCanvas.width - scaledRadius, 0); 
-                        tCtx.quadraticCurveTo(tempCanvas.width, 0, tempCanvas.width, scaledRadius);
-                        tCtx.lineTo(tempCanvas.width, tempCanvas.height - scaledRadius); 
-                        tCtx.quadraticCurveTo(tempCanvas.width, tempCanvas.height, tempCanvas.width - scaledRadius, tempCanvas.height);
-                        tCtx.lineTo(scaledRadius, tempCanvas.height); 
-                        tCtx.quadraticCurveTo(0, tempCanvas.height, 0, tempCanvas.height - scaledRadius);
-                        tCtx.lineTo(0, scaledRadius); 
-                        tCtx.quadraticCurveTo(0, 0, scaledRadius, 0);
-                        tCtx.closePath(); 
-                        tCtx.fill();
-                    } else {
-                        tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                    }
-                }
-                
-                // Gambar Kanvas Utama ke Tengah
-                tCtx.drawImage(canvas, scaledPaddingX, scaledPaddingY, intrinsicWidth, intrinsicHeight);
-                
-                const link = document.createElement('a');
-                link.download = `ProChart_${Date.now()}.png`;
-                link.href = tempCanvas.toDataURL('image/png', 1.0);
-                link.click();
-                els.loadingOverlay.classList.add('hidden');
-            }, 800);
-        });
-
-        const emojiList = ['📍','🏢','🌴','🌳','🚗','💻','📱','🍔','⚽','🏥','⚡','🔥','💧','☀️️','🌟','💰','📈','📦'];
-        function openIconFor(rowId) {
-            activeIconInput = rowId;
-            const grid = document.getElementById('iconGrid');
-            grid.innerHTML = emojiList.map(e => `<button onclick="selectIcon('${e}')" class="text-2xl p-2 hover:bg-slate-100 rounded-xl transition">${e}</button>`).join('');
-            document.getElementById('iconModal').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('iconModal').classList.remove('opacity-0'); document.getElementById('iconModalContent').classList.remove('scale-95'); }, 10);
-        }
-        function closeIconModal() {
-            document.getElementById('iconModal').classList.add('opacity-0'); document.getElementById('iconModalContent').classList.add('scale-95');
-            setTimeout(() => document.getElementById('iconModal').classList.add('hidden'), 300);
-        }
-        function selectIcon(icon) {
-            if(activeIconInput) {
-                const r = appState.rows.find(x => x.id === activeIconInput);
-                if(r) { r.icon = icon; updateVisualizations(); renderDataInputs(); }
-            }
-            closeIconModal();
-        }
-
-        function openResetModal() {
-            document.getElementById('resetModal').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('resetModal').classList.remove('opacity-0'); document.getElementById('resetModalContent').classList.remove('scale-95'); }, 10);
-        }
-        function closeResetModal() {
-            document.getElementById('resetModal').classList.add('opacity-0'); document.getElementById('resetModalContent').classList.add('scale-95');
-            setTimeout(() => document.getElementById('resetModal').classList.add('hidden'), 300);
-        }
-        function executeResetData() {
-            localStorage.removeItem(STORAGE_KEY);
-            appState = JSON.parse(JSON.stringify(defaultAppState));
-            forceRecolor(appState.colorTheme); 
-            syncUIToState();
-            closeResetModal();
         }
 
         window.onload = () => {
