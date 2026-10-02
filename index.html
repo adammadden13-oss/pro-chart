@@ -164,6 +164,7 @@
                         </label>
                         <select id="stackMode" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
                             <option value="accumulate" data-i18n="accumulate">Akumulasi (Tambah Tinggi)</option>
+                            <option value="grouped" data-i18n="grouped">Berdampingan (Versus)</option>
                             <option value="include" data-i18n="include">Include (Masuk ke Data Utama)</option>
                         </select>
                     </div>
@@ -502,7 +503,7 @@
     <script>
         const translations = {
             id: {
-                coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik Utama", themeColor: "Tema Warna", subDataLogic: "Logika Sub-Data (Tumpukan)", accumulate: "Akumulasi (Tambah Tinggi)", include: "Include (Masuk ke Data Utama)",
+                coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik Utama", themeColor: "Tema Warna", subDataLogic: "Logika Sub-Data (Tumpukan)", accumulate: "Akumulasi (Tambah Tinggi)", include: "Include (Masuk ke Data Utama)", grouped: "Berdampingan (Versus)",
                 resetData: "Reset Data", resetConfirmTitle: "Reset Semua Pengaturan?", resetConfirmDesc: "Aksi ini akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.", cancel: "Batal", yesReset: "Ya, Reset",
                 multiLayerEngine: "Mesin Multi-Lapis (Overlay)", addChart: "Tambah Grafik", multiLayerDesc: "Tambahkan grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.",
                 liveDataInput: "Input Data Langsung", iconLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Label (Kategori)", searchIcon: "Cari ikon...",
@@ -514,7 +515,7 @@
                 errorTitle: "Mengkoreksi Tampilan...", errorDesc: "Sistem sedang mereset konflik susunan grafik Anda secara otomatis.", forceReset: "Reset Paksa (Force Reset)"
             },
             en: {
-                coreSettings: "Core Settings", graphicType: "Main Graphic Type", themeColor: "Theme Color", subDataLogic: "Sub-Data Logic (Stack)", accumulate: "Accumulate (Increase Height)", include: "Include (Inside Main Data)",
+                coreSettings: "Core Settings", graphicType: "Main Graphic Type", themeColor: "Theme Color", subDataLogic: "Sub-Data Logic (Stack)", accumulate: "Accumulate (Increase Height)", include: "Include (Inside Main Data)", grouped: "Side-by-side (Versus)",
                 resetData: "Reset Data", resetConfirmTitle: "Reset All Settings?", resetConfirmDesc: "This action will clear all your data, layers, and colors, reverting to the factory defaults.", cancel: "Cancel", yesReset: "Yes, Reset",
                 multiLayerEngine: "Multi-Layer Engine (Overlay)", addChart: "Add Chart", multiLayerDesc: "Add overlay charts on top of your main data. Input matrix will adapt.",
                 liveDataInput: "Live Data Input", iconLibrary: "Icon Library", dataRowCount: "Label Row Count (Categories)", searchIcon: "Search icon...",
@@ -530,7 +531,7 @@
         const themes = {
             lime: ['#cafc03', '#111827', '#94a3b8', '#e2e8f0', '#334155'],
             default: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-            corporate: ['#1e40af', '#2563eb', '#0ea5e9', '#0284c7', '#38bdf8'],
+            corporate: ['#1e3a8a', '#2563eb', '#0ea5e9', '#3b82f6', '#60a5fa'], // Biru Korporat Sejati
             earth: ['#064e3b', '#047857', '#059669', '#10b981', '#34d399'],
             sunset: ['#991b1b', '#b91c1c', '#dc2626', '#ef4444', '#f87171'],
             monochrome: ['#171717', '#404040', '#737373', '#a3a3a3', '#d4d4d4']
@@ -545,8 +546,8 @@
         let mainChart = null;
         let activeIconInput = null;
         
-        // KUNCI MEMORI SUPER BARU (V8.5)
-        const STORAGE_KEY = 'ProChart_Vision_V8_5_Stable'; 
+        // KUNCI MEMORI SUPER BARU (V9_Grouped_Stable)
+        const STORAGE_KEY = 'ProChart_Vision_V9_Grouped_Stable'; 
         
         const defaultAppState = {
             language: 'id', 
@@ -663,16 +664,16 @@
         function forceRecolor(theme) {
             const palette = themes[theme] || themes['lime'];
             
-            // LOGIKA PEWARNAAN CERDAS
+            // SMART COLOR ENGINE 
             let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'wordCloud'].includes(appState.chartType);
             let colorByRow = isRadial || appState.series.length === 1;
 
             appState.rows.forEach((r, rIdx) => {
                 r.values.forEach((v, sIdx) => { 
                     if (colorByRow) {
-                        v.color = palette[rIdx % palette.length]; // Warna-warni per baris
+                        v.color = palette[rIdx % palette.length]; // Warna-warni pelangi per baris
                     } else {
-                        v.color = palette[sIdx % palette.length]; // Seragam per lapisan
+                        v.color = palette[sIdx % palette.length]; // Seragam per kolom layer
                     }
                 });
             });
@@ -784,7 +785,7 @@
                     vDiv.className = "flex flex-col gap-1 flex-1 min-w-[70px] sm:min-w-[80px]";
                     let seriesName = s.name.length > 10 ? s.name.substring(0, 8) + '..' : s.name;
                     
-                    // PEMUSNAHAN MUTLAK PANAH: Menggunakan inputmode="numeric" pada type="text"
+                    // PEMUSNAHAN MUTLAK PANAH: inputmode="numeric" pada type="text" (Senjata Pemusnah Massal)
                     let valInputHTML = isGantt ? 
                         `<div class="flex flex-col gap-1">
                             <input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" placeholder="Mulai" class="no-spinners w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
@@ -907,7 +908,7 @@
         els.legendAlign.addEventListener('change', (e) => { appState.legendAlign = e.target.value; updateVisualizations(); });
         els.datalabelPositionSelect.addEventListener('change', (e) => { appState.datalabelPosition = e.target.value; updateVisualizations(); });
         
-        // PEMETAAN TOGGLE YANG BENAR (BUGS FIXED)
+        // PEMETAAN TOGGLE FIXED
         const toggleMap = {
             'toggleLegend': 'showLegend', 
             'toggleAxisX': 'showAxisX', 
@@ -931,8 +932,6 @@
             
             els.canvasWrapper.style.backgroundColor = hexToRgba(appState.bgColor || '#f8fafc', appState.bgOpacity || 0);
             els.canvasWrapper.style.borderRadius = (appState.bgRadius || 0) + 'px';
-            
-            // PADDING BEBAS MUTLAK: Diluar opasitas
             els.canvasWrapper.style.padding = (appState.bgPadding || 0) + 'px';
 
             renderMainChart();
@@ -942,7 +941,7 @@
 
         function renderMainChart() {
             try {
-                // SISTEM ANTI-CRASH MUTLAK: Destruksi fisik elemen Canvas di DOM
+                // SISTEM ANTI-CRASH: Destruksi fisik elemen Canvas di DOM
                 if (mainChart) { mainChart.destroy(); mainChart = null; }
                 els.canvasContainer.innerHTML = ''; 
                 const canvasEl = document.createElement('canvas');
@@ -958,7 +957,12 @@
                 
                 let labels = appState.rows.map(r => r.icon + ' ' + r.label);
                 let datasets = [];
+                
                 let stackLogic = appState.stackMode || 'accumulate';
+                let isStacked = stackLogic === 'accumulate';
+                let isGrouped = stackLogic === 'grouped';
+                let isInclude = stackLogic === 'include';
+
                 let lineTension = appState.lineStyle === 'smooth' ? 0.4 : 0;
                 let lineStepped = appState.lineStyle === 'stepped';
 
@@ -978,7 +982,7 @@
                 else if (appState.chartType === 'line' || appState.chartType === 'area') globalBaseType = 'line';
                 else if (appState.chartType === 'bar-horizontal') globalBaseType = 'bar';
 
-                // BYPASS SPESIFIK WORD CLOUD AGAR TIDAK CRASH SUMBU
+                // BYPASS SPESIFIK WORD CLOUD
                 if (isWordCloud) {
                     let wLabels = appState.rows.map(r => r.label);
                     let wSizes = appState.rows.map(r => Math.max((r.values[0]?.val || 10), 1));
@@ -1005,12 +1009,12 @@
                     }];
                 }
                 else if (isRadial) {
-                    // Penanganan Khusus untuk Radial (Pie, Donut, dll) - HANYA GUNAKAN DATA PERTAMA
+                    // Penanganan Khusus Radial - HANYA GUNAKAN DATA PERTAMA
                     let dataArr = [];
                     let colorArr = [];
                     
                     appState.rows.forEach(r => {
-                        let v = r.values[0]; // Ambil series pertama saja
+                        let v = r.values[0];
                         if (v) {
                             dataArr.push(v.val);
                             colorArr.push(v.color);
@@ -1020,20 +1024,17 @@
                         }
                     });
 
-                    // Format dataset berbeda berdasarkan tipe radial
                     if (appState.chartType === 'radar') {
-                        // Radar butuh backgroundColor transparan dan fill
                         datasets = [{
                             label: appState.series[0]?.name || 'Dataset Utama',
                             data: dataArr,
-                            backgroundColor: hexToRgba(colorArr[0] || '#cafc03', 20), // Transparan
+                            backgroundColor: hexToRgba(colorArr[0] || '#cafc03', 20),
                             borderColor: colorArr[0] || '#cafc03',
                             pointBackgroundColor: colorArr,
                             borderWidth: 2,
                             fill: true
                         }];
                     } else {
-                        // Pie, Doughnut, Polar Area
                         datasets = [{
                             label: appState.series[0]?.name || 'Dataset Utama',
                             data: dataArr,
@@ -1079,7 +1080,7 @@
                         let reqAxis = s.axis === 'y2' ? 'Right' : 'Primary';
                         let useX, useY;
                         
-                        // SUMBU BAYANGAN (VIRTUAL AXIS) UNTUK HORIZONTAL BAR AGAR TIDAK CRASH
+                        // SUMBU BAYANGAN (VIRTUAL AXIS)
                         if (isHorizontal) { useY = 'y'; useX = reqAxis === 'Right' ? 'xRight' : 'x'; } 
                         else { useX = 'x'; useY = reqAxis === 'Right' ? 'yRight' : 'y'; }
 
@@ -1088,8 +1089,8 @@
                             data: dataArr, backgroundColor: bgColor, borderColor: borderColor,
                             borderWidth: isLine ? 3 : (appState.chartSpacing > 0 ? 2 : 0),
                             fill: isFillArea, tension: lineTension, stepped: lineStepped, borderRadius: appState.borderRadius,
-                            grouped: stackLogic !== 'include', 
-                            stack: stackLogic === 'accumulate' ? 'Stack 0' : undefined,
+                            grouped: !isInclude, 
+                            stack: isStacked ? 'Stack 0' : undefined,
                             order: s.zIndex === 'front' ? 0 : 2
                         };
 
@@ -1102,7 +1103,7 @@
                     responsive: true, maintainAspectRatio: false,
                     indexAxis: isHorizontal ? 'y' : 'x',
                     layout: { padding: { top: 20, bottom: 10 } },
-                    interaction: { mode: stackLogic === 'include' ? 'index' : 'nearest', intersect: false },
+                    interaction: { mode: isInclude ? 'index' : 'nearest', intersect: false },
                     plugins: {
                         legend: {
                             display: appState.showLegend, position: appState.legendPosition, align: appState.legendAlign || 'center',
@@ -1119,24 +1120,24 @@
                             textStrokeWidth: appState.datalabelPosition === 'outside' ? 0 : 4
                         }
                     },
-                    scales: {} // Default empty object for scales
+                    scales: {}
                 };
 
                 if (!isRadial && !isWordCloud) {
                     let hasSecondaryAxis = appState.series.some(s => s.axis === 'y2');
                     if (isHorizontal) {
-                        chartOptions.scales.y = { display: appState.showAxisY, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        chartOptions.scales.x = { display: appState.showAxisX, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.xRight = { display: appState.showAxisYRight, position: 'top', stacked: stackLogic === 'accumulate', grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
+                        chartOptions.scales.y = { display: appState.showAxisY, stacked: isStacked, grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        chartOptions.scales.x = { display: appState.showAxisX, stacked: isStacked, grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.xRight = { display: appState.showAxisYRight, position: 'top', stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
                     } else {
-                        chartOptions.scales.x = { display: appState.showAxisX, stacked: stackLogic === 'accumulate', grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        chartOptions.scales.y = { display: appState.showAxisY, position: 'left', stacked: stackLogic === 'accumulate', grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.yRight = { display: appState.showAxisYRight, position: 'right', stacked: stackLogic === 'accumulate', grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
+                        chartOptions.scales.x = { display: appState.showAxisX, stacked: isStacked, grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        chartOptions.scales.y = { display: appState.showAxisY, position: 'left', stacked: isStacked, grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.yRight = { display: appState.showAxisYRight, position: 'right', stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
                     }
                 } else if (isRadial) {
-                    // KHUSUS RADIAL: Pastikan 'scales' dibersihkan sepenuhnya untuk Pie/Donut
+                    // Pembersihan scales mutlak untuk menghindari crash radial
                     if (appState.chartType !== 'radar' && appState.chartType !== 'polarArea') {
-                        delete chartOptions.scales; // Hapus scales sepenuhnya untuk pie & doughnut
+                        delete chartOptions.scales; 
                     }
                     
                     chartOptions.cutout = appState.chartType === 'doughnut' ? appState.donutCutout + '%' : 0;
@@ -1193,6 +1194,7 @@
             });
         }
 
+        // ALGORITMA EKSPOR HD PRESISI TINGGI
         els.btnExport.addEventListener('click', () => {
             els.loadingOverlay.classList.remove('hidden');
             els.loadingContent.classList.remove('hidden');
@@ -1202,30 +1204,25 @@
                 const canvas = document.getElementById('mainCanvas');
                 const wrapper = document.getElementById('canvasWrapper');
                 
-                // Get actual dimensions of the wrapper including padding
-                const rect = wrapper.getBoundingClientRect();
+                // Ambil ukuran CSS Aktual
+                const cssWidth = canvas.clientWidth;
+                const cssHeight = canvas.clientHeight;
                 
-                // Get the padding value
-                const padding = appState.bgPadding || 0;
-                const borderRadius = appState.bgRadius || 0;
-                
-                // We must use the intrinsic size of the canvas to maintain HD resolution
+                // Ambil ukuran Pixel Fisik (HD/Retina)
                 const intrinsicWidth = canvas.width;
                 const intrinsicHeight = canvas.height;
                 
-                // Calculate the ratio between the intrinsic size and the CSS size
-                const cssWidth = canvas.clientWidth;
-                const cssHeight = canvas.clientHeight;
+                // Hitung Rasio DPI
                 const ratioX = intrinsicWidth / cssWidth;
                 const ratioY = intrinsicHeight / cssHeight;
                 
-                // Scale the padding to match the intrinsic resolution
-                const scaledPaddingX = padding * ratioX;
-                const scaledPaddingY = padding * ratioY;
-                const scaledRadius = borderRadius * Math.max(ratioX, ratioY);
+                // Skalakan Padding sesuai DPI Layar
+                const scaledPaddingX = (appState.bgPadding || 0) * ratioX;
+                const scaledPaddingY = (appState.bgPadding || 0) * ratioY;
+                const scaledRadius = (appState.bgRadius || 0) * Math.max(ratioX, ratioY);
 
                 const tempCanvas = document.createElement('canvas');
-                // The total size is the canvas intrinsic size plus the scaled padding on both sides
+                // Terapkan Proporsi Sempurna
                 tempCanvas.width = intrinsicWidth + (scaledPaddingX * 2);
                 tempCanvas.height = intrinsicHeight + (scaledPaddingY * 2);
                 const tCtx = tempCanvas.getContext('2d');
@@ -1252,7 +1249,7 @@
                     }
                 }
                 
-                // Draw the original canvas into the center of the temp canvas
+                // Gambar Kanvas Utama ke Tengah
                 tCtx.drawImage(canvas, scaledPaddingX, scaledPaddingY, intrinsicWidth, intrinsicHeight);
                 
                 const link = document.createElement('a');
@@ -1263,7 +1260,7 @@
             }, 800);
         });
 
-        const emojiList = ['📍','🏢','🌴','🌳','🚗','💻','📱','🍔','⚽','🏥','⚡','🔥','💧','☀️','🌟','💰','📈','📦'];
+        const emojiList = ['📍','🏢','🌴','🌳','🚗','💻','📱','🍔','⚽','🏥','⚡','🔥','💧','☀️️','🌟','💰','📈','📦'];
         function openIconFor(rowId) {
             activeIconInput = rowId;
             const grid = document.getElementById('iconGrid');
@@ -1294,7 +1291,7 @@
         function executeResetData() {
             localStorage.removeItem(STORAGE_KEY);
             appState = JSON.parse(JSON.stringify(defaultAppState));
-            forceRecolor(appState.colorTheme); // Panggil awal agar warna rapi
+            forceRecolor(appState.colorTheme); 
             syncUIToState();
             closeResetModal();
         }
@@ -1302,7 +1299,7 @@
         window.onload = () => {
             loadState();
             applySidebarState();
-            forceRecolor(appState.colorTheme); // Proteksi warna saat load pertama kali
+            forceRecolor(appState.colorTheme);
             syncUIToState();
             translatePage();
         };
