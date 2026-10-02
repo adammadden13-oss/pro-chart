@@ -1004,6 +1004,45 @@
                         pointRadius: appState.chartType === 'scatter' ? 8 : undefined
                     }];
                 }
+                else if (isRadial) {
+                    // Penanganan Khusus untuk Radial (Pie, Donut, dll) - HANYA GUNAKAN DATA PERTAMA
+                    let dataArr = [];
+                    let colorArr = [];
+                    
+                    appState.rows.forEach(r => {
+                        let v = r.values[0]; // Ambil series pertama saja
+                        if (v) {
+                            dataArr.push(v.val);
+                            colorArr.push(v.color);
+                        } else {
+                            dataArr.push(0);
+                            colorArr.push('#ccc');
+                        }
+                    });
+
+                    // Format dataset berbeda berdasarkan tipe radial
+                    if (appState.chartType === 'radar') {
+                        // Radar butuh backgroundColor transparan dan fill
+                        datasets = [{
+                            label: appState.series[0]?.name || 'Dataset Utama',
+                            data: dataArr,
+                            backgroundColor: hexToRgba(colorArr[0] || '#cafc03', 20), // Transparan
+                            borderColor: colorArr[0] || '#cafc03',
+                            pointBackgroundColor: colorArr,
+                            borderWidth: 2,
+                            fill: true
+                        }];
+                    } else {
+                        // Pie, Doughnut, Polar Area
+                        datasets = [{
+                            label: appState.series[0]?.name || 'Dataset Utama',
+                            data: dataArr,
+                            backgroundColor: colorArr,
+                            borderColor: appState.chartSpacing > 0 ? '#ffffff' : 'transparent',
+                            borderWidth: appState.chartSpacing > 0 ? 2 : 0,
+                        }];
+                    }
+                }
                 else {
                     let sortedIndices = appState.series.map((s, i) => i).sort((a,b) => {
                         return (appState.series[a].zIndex === 'back' ? -1 : 1) - (appState.series[b].zIndex === 'back' ? -1 : 1);
@@ -1080,7 +1119,7 @@
                             textStrokeWidth: appState.datalabelPosition === 'outside' ? 0 : 4
                         }
                     },
-                    scales: {}
+                    scales: {} // Default empty object for scales
                 };
 
                 if (!isRadial && !isWordCloud) {
@@ -1095,16 +1134,26 @@
                         if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.yRight = { display: appState.showAxisYRight, position: 'right', stacked: stackLogic === 'accumulate', grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
                     }
                 } else if (isRadial) {
+                    // KHUSUS RADIAL: Pastikan 'scales' dibersihkan sepenuhnya untuk Pie/Donut
+                    if (appState.chartType !== 'radar' && appState.chartType !== 'polarArea') {
+                        delete chartOptions.scales; // Hapus scales sepenuhnya untuk pie & doughnut
+                    }
+                    
                     chartOptions.cutout = appState.chartType === 'doughnut' ? appState.donutCutout + '%' : 0;
-                    chartOptions.elements = { arc: { borderRadius: appState.borderRadius, borderWidth: appState.chartSpacing > 0 ? 2 : 0, borderColor: '#fff' } };
+                    if (appState.chartType !== 'radar') {
+                        chartOptions.elements = { arc: { borderRadius: appState.borderRadius, borderWidth: appState.chartSpacing > 0 ? 2 : 0, borderColor: '#fff' } };
+                    }
+                    
                     chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => { 
                         let sum=0; ctx.chart.data.datasets[0].data.map(d=>sum+=(d||0)); 
                         if(sum===0) return '0%'; return Math.round((value/sum)*100)+'%'; 
                     } };
                 }
                 
-                chartOptions.barPercentage = appState.chartThickness / 100;
-                chartOptions.categoryPercentage = 0.8;
+                if (!isRadial) {
+                    chartOptions.barPercentage = appState.chartThickness / 100;
+                    chartOptions.categoryPercentage = 0.8;
+                }
 
                 let activePlugins = [];
                 if (typeof ChartDataLabels !== 'undefined') activePlugins.push(ChartDataLabels);
