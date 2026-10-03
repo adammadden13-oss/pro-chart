@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Chart Vision 4.0 - Platinum Edition</title>
+    <title>Pro Chart Vision 6.5 - Presentation Edition</title>
     
     <!-- SVG Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%23CAFC03'/><path d='M45 20L25 60h20l-5 20 25-40H45z' fill='%23111827'/></svg>">
@@ -26,7 +26,7 @@
     <script src="https://unpkg.com/chartjs-chart-wordcloud@4"></script>
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; touch-action: manipulation; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; touch-action: manipulation; overflow: hidden; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -36,42 +36,47 @@
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #cafc03; cursor: pointer; border: 2px solid #111827; margin-top: -6px; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #e2e8f0; border-radius: 2px; }
         
-        /* OPSI NUKLIR: PEMUSNAHAN MUTLAK PANAH SPINNER */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button,
-        .no-spinners::-webkit-outer-spin-button,
-        .no-spinners::-webkit-inner-spin-button,
         input[inputmode="numeric"]::-webkit-outer-spin-button,
         input[inputmode="numeric"]::-webkit-inner-spin-button {
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            margin: 0 !important;
-            display: none !important;
-        }
-        input[type="number"], .no-spinners, input[inputmode="numeric"] {
-            -moz-appearance: textfield !important;
-            appearance: textfield !important;
+            -webkit-appearance: none !important; appearance: none !important; margin: 0 !important; display: none !important;
         }
         
         .toggle-checkbox:checked + .toggle-label { background-color: #111827; }
         .toggle-checkbox:checked + .toggle-label::after { transform: translateX(100%); border-color: white; }
         .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.4); }
-        .chart-wrapper-transition { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .modal-bg-blur { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
 
         #sidebarHeader.scrolled { padding-top: 16px; padding-bottom: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); border-bottom-color: transparent; }
-        #sidebarHeader.scrolled #logoIcon { width: 32px; height: 32px; border-radius: 8px; }
-        #sidebarHeader.scrolled #logoIcon i { font-size: 16px; }
-        #sidebarHeader.scrolled #logoTitle { font-size: 16px; }
-        #sidebarHeader.scrolled #logoSubtitle { font-size: 8px; margin-top: 2px; }
 
-        /* KIOSK / FULLSCREEN MODE CSS */
-        #workspaceArea:fullscreen .hide-on-fullscreen { display: none !important; }
-        #workspaceArea:fullscreen { background: #f8fafc; padding: 2rem; }
-        #workspaceArea:fullscreen #exportTarget { max-width: 95vw; max-height: 95vh; }
+        /* KIOSK / FULLSCREEN MODE CSS (MENCEGAH GRAFIK MENGECIL/GEPENG) */
+        body.is-fullscreen #workspaceArea { background: #f8fafc; }
+        body.is-fullscreen .hide-on-fullscreen { display: none !important; }
+        body.is-fullscreen #exportTarget { 
+            width: 100% !important; 
+            height: 100% !important; 
+            max-width: 95vw; 
+            max-height: 95vh; 
+            transform: scale(1) !important; /* Paksa reset skala saat presentasi */
+            margin: auto;
+        }
+        body.is-fullscreen #canvasWrapper { 
+            padding: 2rem !important; /* Ruang lega untuk presentasi */
+        }
+        
+        /* Animasi Transisi Slide Sinematik */
+        .slide-transition-active {
+            animation: cinematicFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes cinematicFadeIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(15px); filter: blur(4px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden selection:bg-lime-300 selection:text-slate-900">
+<body class="h-screen flex selection:bg-lime-300 selection:text-slate-900">
 
     <!-- TOAST NOTIFICATION -->
     <div id="toastNotification" class="fixed bottom-5 right-5 z-[150] transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl">
@@ -99,18 +104,18 @@
         </div>
     </div>
 
-    <!-- MODAL RESET DATA KUSTOM -->
+    <!-- MODAL RESET DATA -->
     <div id="resetModal" class="fixed inset-0 z-[100] hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300 px-4">
         <div class="bg-white text-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 border border-slate-100" id="resetModalContent">
             <div class="p-8 text-center">
                 <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-5 border border-red-100 shadow-sm">
                     <i class="ph ph-warning-circle text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3 text-slate-900" data-i18n="resetConfirmTitle">Reset Semua Pengaturan?</h3>
-                <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium" data-i18n="resetConfirmDesc">Aksi ini akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.</p>
+                <h3 class="text-xl font-bold mb-3 text-slate-900" data-i18n="resetConfirmTitle">Reset Seluruh Presentasi?</h3>
+                <p class="text-slate-500 text-sm mb-8 leading-relaxed font-medium" data-i18n="resetConfirmDesc">Seluruh slide dan layer Anda akan dihapus permanen. Aksi ini tidak dapat dibatalkan.</p>
                 <div class="flex gap-3 justify-center">
                     <button onclick="closeResetModal()" class="flex-1 px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-bold transition text-slate-600" data-i18n="cancel">Batal</button>
-                    <button onclick="executeResetData()" class="flex-1 px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition text-white shadow-lg shadow-red-500/20" data-i18n="yesReset">Ya, Reset</button>
+                    <button onclick="executeResetData()" class="flex-1 px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-sm font-bold transition text-white shadow-lg shadow-red-500/20" data-i18n="yesReset">Ya, Hapus</button>
                 </div>
             </div>
         </div>
@@ -120,16 +125,17 @@
     <div id="mobileOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
     <!-- LEFT PANEL: SETTINGS -->
-    <div id="leftPanel" class="absolute md:relative z-50 md:z-20 w-[85%] sm:w-[380px] md:w-[420px] h-full bg-white border-r border-slate-200 flex flex-col shrink-0 transition-all duration-400 ease-in-out transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+    <div id="leftPanel" class="absolute md:relative z-50 md:z-20 w-[85%] sm:w-[380px] md:w-[420px] h-full bg-white border-r border-slate-200 flex flex-col shrink-0 transition-all duration-400 ease-in-out transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)] hide-on-fullscreen">
         
+        <!-- HEADER LOGO -->
         <div id="sidebarHeader" class="p-5 md:p-6 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-white transition-all duration-300 relative z-30 justify-between md:justify-start">
             <div class="flex items-center gap-3">
-                <div id="logoIcon" class="w-10 h-10 bg-[#cafc03] rounded-xl flex items-center justify-center text-slate-900 shadow-sm border border-[#b5e003] transition-all duration-300">
+                <div id="logoIcon" class="w-10 h-10 bg-[#cafc03] rounded-xl flex items-center justify-center text-slate-900 shadow-sm transition-all duration-300">
                     <i class="ph-fill ph-lightning text-xl transition-all duration-300"></i>
                 </div>
                 <div class="transition-all duration-300">
                     <h1 id="logoTitle" class="font-black text-xl text-slate-900 tracking-tight leading-none transition-all duration-300">Pro Chart</h1>
-                    <p id="logoSubtitle" class="text-[10px] font-bold text-slate-400 tracking-widest mt-1 uppercase transition-all duration-300">Vision V4.0 (Platinum)</p>
+                    <p id="logoSubtitle" class="text-[10px] font-bold text-slate-400 tracking-widest mt-1 uppercase transition-all duration-300">Vision V6.5 (Present)</p>
                 </div>
             </div>
             <button id="btnCloseMobile" class="w-8 h-8 flex md:hidden items-center justify-center text-slate-400 hover:bg-slate-100 rounded-lg">
@@ -137,13 +143,20 @@
             </button>
         </div>
 
+        <!-- INDICATOR SLIDE AKTIF -->
+        <div class="bg-indigo-50 px-5 py-2.5 border-b border-indigo-100 flex items-center justify-between shrink-0">
+            <span class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider flex items-center gap-1.5"><i class="ph-bold ph-pencil-simple"></i> Mengedit Slide:</span>
+            <span id="activeSlideNameDisplay" class="text-xs font-black text-indigo-900">Slide 1</span>
+        </div>
+
+        <!-- AREA SCROLL PENGATURAN -->
         <div id="settingsScrollArea" class="flex-1 overflow-y-auto p-5 md:p-6 space-y-8 pb-32 relative">
             
             <!-- JUDUL & BRANDING -->
             <div class="bg-gradient-to-br from-slate-50 to-white border border-slate-100 rounded-3xl p-4 md:p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="brandingTitle">Judul & Branding</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="brandingTitle">Judul & Branding (Slide Ini)</h2>
                 </div>
                 
                 <div class="space-y-4">
@@ -156,7 +169,7 @@
                         <input type="text" id="chartSubtitleInput" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium text-slate-600 focus:ring-2 focus:ring-[#cafc03] outline-none transition shadow-sm" placeholder="Contoh: Kuartal 3 Tahun 2026">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="watermarkInput">Teks Watermark (Sudut Kanan Bawah)</label>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="watermarkInput">Teks Watermark</label>
                         <input type="text" id="watermarkInput" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:ring-2 focus:ring-[#cafc03] outline-none transition shadow-sm" placeholder="Contoh: MNC Channels">
                     </div>
                 </div>
@@ -164,12 +177,9 @@
 
             <!-- PENGATURAN UTAMA -->
             <div class="bg-slate-50 border border-slate-100 rounded-3xl p-4 md:p-5 shadow-sm relative">
-                <div class="flex items-center justify-between mb-5">
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-[#cafc03]"></div>
-                        <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="coreSettings">Pengaturan Utama</h2>
-                    </div>
-                    <button onclick="openResetModal()" class="text-[9px] font-black text-red-500 uppercase border border-red-200 hover:bg-red-50 bg-white px-3 py-1.5 rounded-lg transition shadow-sm" data-i18n="resetData">Reset Data</button>
+                <div class="flex items-center gap-2 mb-5">
+                    <div class="w-2 h-2 rounded-full bg-[#cafc03]"></div>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="coreSettings">Pengaturan Utama</h2>
                 </div>
                 
                 <div class="space-y-4">
@@ -205,9 +215,7 @@
                         </select>
                     </div>
                     <div id="stackModeContainer">
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2 flex justify-between">
-                            <span data-i18n="subDataLogic">Logika Sub-Data (Tumpukan)</span>
-                        </label>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2" data-i18n="subDataLogic">Logika Sub-Data (Tumpukan)</label>
                         <select id="stackMode" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none transition appearance-none shadow-sm cursor-pointer">
                             <option value="accumulate" data-i18n="accumulate">Akumulasi (Tambah Tinggi)</option>
                             <option value="include" data-i18n="include">Include (Masuk ke Data Utama)</option>
@@ -216,21 +224,21 @@
                     </div>
                 </div>
 
-                <!-- OVERLAY ENGINE -->
+                <!-- OVERLAY ENGINE DI DALAM PANEL KIRI -->
                 <div class="mt-6 pt-5 border-t border-slate-200" id="overlayEnginePanel">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <div class="w-1.5 h-1.5 rounded-full bg-slate-800"></div>
-                            <h3 class="text-[10px] sm:text-[11px] font-black text-slate-800 tracking-wider uppercase" data-i18n="multiLayerEngine">Mesin Multi-Lapis (Overlay)</h3>
+                            <h3 class="text-[10px] sm:text-[11px] font-black text-slate-800 tracking-wider uppercase" data-i18n="multiLayerEngine">Mesin Multi-Lapis</h3>
                         </div>
                         <button id="btnAddOverlay" class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-[9px] sm:text-[10px] font-bold px-2 sm:px-3 py-1.5 rounded-xl transition uppercase flex items-center gap-1 shadow-md">
-                            <span>+</span> <span data-i18n="addChart">Tambah Grafik</span>
+                            <span>+</span> <span data-i18n="addChart">Tambah Data</span>
                         </button>
                     </div>
-                    <p class="text-[9px] sm:text-[10px] text-slate-500 mb-4 leading-relaxed" data-i18n="multiLayerDesc">Tambahkan grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.</p>
+                    <p class="text-[9px] text-slate-500 mb-4 leading-relaxed">Tambahkan layer data (overlay) ke dalam slide ini.</p>
                     
                     <div id="seriesContainer" class="space-y-3">
-                        <!-- Series layers generated here -->
+                        <!-- Layer JS -->
                     </div>
                 </div>
             </div>
@@ -239,15 +247,13 @@
             <div class="bg-white border border-slate-200 rounded-3xl p-4 md:p-5 shadow-sm relative">
                 <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-6">
                     <h2 class="text-xs font-bold text-slate-800 tracking-widest uppercase" data-i18n="liveDataInput">Input Data Langsung</h2>
-                    <div class="flex items-center gap-2">
-                        <button onclick="handlePasteExcel()" class="bg-green-100 text-green-700 text-[9px] font-bold px-3 py-2 rounded-xl transition uppercase flex items-center justify-center gap-1 hover:bg-green-200 border border-green-200 shadow-sm flex-1 xl:flex-none">
-                            <i class="ph ph-clipboard-text"></i> <span data-i18n="pasteExcel">Paste Data</span>
-                        </button>
-                    </div>
+                    <button onclick="handlePasteExcel()" class="bg-green-100 text-green-700 text-[9px] font-bold px-3 py-2 rounded-xl transition uppercase flex items-center justify-center gap-1 hover:bg-green-200 border border-green-200 shadow-sm">
+                        <i class="ph ph-clipboard-text"></i> <span data-i18n="pasteExcel">Paste Data</span>
+                    </button>
                 </div>
 
                 <div class="flex justify-between items-center mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase" data-i18n="dataRowCount">Jumlah Baris Label</span>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase" data-i18n="dataRowCount">Jumlah Baris Kategori</span>
                     <div class="flex items-center bg-white rounded-lg border border-slate-200 p-0.5 shadow-sm">
                         <button id="btnRemoveRow" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-md transition"><i class="ph ph-minus"></i></button>
                         <span id="rowCountDisplay" class="w-8 sm:w-10 text-center text-xs font-bold text-slate-800">4</span>
@@ -256,7 +262,7 @@
                 </div>
 
                 <div id="dataRowsContainer" class="space-y-4">
-                    <!-- Data rows matriks JS -->
+                    <!-- Data rows JS -->
                 </div>
             </div>
 
@@ -269,7 +275,7 @@
                 
                 <div class="space-y-6">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="visualScale">Skala Visual (Zoom Canvas)</span><span id="chartScaleDisplay">100%</span></label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="visualScale">Skala Visual (Zoom)</span><span id="chartScaleDisplay">100%</span></label>
                         <input type="range" id="chartScale" min="50" max="150" value="100">
                     </div>
                     
@@ -290,7 +296,7 @@
                             <input type="range" id="chartThickness" min="10" max="150" value="100">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="spacing">Jarak Antar Elemen</span><span id="chartSpacingDisplay">10px</span></label>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="spacing">Jarak (Padding)</span><span id="chartSpacingDisplay">10px</span></label>
                             <input type="range" id="chartSpacing" min="0" max="50" value="10">
                         </div>
                     </div>
@@ -301,21 +307,21 @@
                     </div>
 
                     <div class="pt-2 border-t border-slate-200">
-                        <label class="block text-[10px] font-bold text-indigo-500 uppercase mb-2 flex justify-between"><span data-i18n="shadowEffect">Efek Bayangan 3D (Shadow)</span><span id="elementShadowDisplay">0px</span></label>
+                        <label class="block text-[10px] font-bold text-indigo-500 uppercase mb-2 flex justify-between"><span data-i18n="shadowEffect">Efek Bayangan 3D</span><span id="elementShadowDisplay">0px</span></label>
                         <input type="range" id="elementShadowSlider" min="0" max="25" value="0">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 pt-2 border-t border-slate-200">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="borderRadius">Sudut Melengkung</span><span id="borderRadiusDisplay">8px</span></label>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="borderRadius">Melengkung</span><span id="borderRadiusDisplay">8px</span></label>
                             <input type="range" id="borderRadiusSlider" min="0" max="50" value="8">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="lineStyle">Gaya Garis</label>
-                            <select id="lineStyleSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] sm:text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer shadow-sm">
-                                <option value="smooth" data-i18n="smooth">Melengkung (Smooth)</option>
-                                <option value="straight" data-i18n="straight">Lurus (Straight)</option>
-                                <option value="stepped" data-i18n="stepped">Tangga (Stepped)</option>
+                            <select id="lineStyleSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                                <option value="smooth">Melengkung</option>
+                                <option value="straight">Lurus</option>
+                                <option value="stepped">Tangga</option>
                             </select>
                         </div>
                     </div>
@@ -326,7 +332,7 @@
             <div class="bg-white border border-slate-200 rounded-3xl p-4 md:p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="typographyEst">Tipografi & Estetika</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="typographyEst">Tipografi & Legenda</h2>
                 </div>
                 
                 <div class="space-y-4">
@@ -340,35 +346,27 @@
                     
                     <div id="legendControls" class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <div>
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1" data-i18n="legendPosition">Posisi</label>
-                            <select id="legendPosition" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
-                                <option value="top">Atas (Horizontal)</option>
-                                <option value="bottom">Bawah (Horizontal)</option>
-                                <option value="left">Kiri (Vertikal)</option>
-                                <option value="right">Kanan (Vertikal)</option>
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Posisi</label>
+                            <select id="legendPosition" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                                <option value="top">Atas</option><option value="bottom">Bawah</option><option value="left">Kiri</option><option value="right">Kanan</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1" data-i18n="legendAlign">Perataan</label>
-                            <select id="legendAlign" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
-                                <option value="center" data-i18n="alignCenter">Tengah</option>
-                                <option value="start" data-i18n="alignStart">Kiri/Atas (Mulai)</option>
-                                <option value="end" data-i18n="alignEnd">Kanan/Bawah (Akhir)</option>
+                            <label class="block text-[9px] font-bold text-slate-500 uppercase mb-1">Perataan</label>
+                            <select id="legendAlign" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                                <option value="center">Tengah</option><option value="start">Mulai</option><option value="end">Akhir</option>
                             </select>
                         </div>
                         <div class="col-span-2 mt-2">
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex justify-between"><span data-i18n="legendSize">Ukuran Legenda</span><span id="legendFontSizeDisplay">14px</span></label>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 flex justify-between"><span>Ukuran Legenda</span><span id="legendFontSizeDisplay">14px</span></label>
                             <input type="range" id="legendFontSizeSlider" min="8" max="24" value="14">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1" data-i18n="datalabelPos">Posisi Angka (Datalabels)</label>
-                        <select id="datalabelPositionSelect" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-[10px] sm:text-xs font-medium focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
-                            <option value="center" data-i18n="posCenter">Tengah Batang (Default)</option>
-                            <option value="end" data-i18n="posInsideTop">Dalam - Ujung Atas/Kanan</option>
-                            <option value="start" data-i18n="posInsideBottom">Dalam - Pangkal Bawah/Kiri</option>
-                            <option value="outside" data-i18n="posOutside">Luar Grafik (Melayang)</option>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Posisi Angka (Datalabels)</label>
+                        <select id="datalabelPositionSelect" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:ring-1 focus:ring-[#cafc03] outline-none cursor-pointer">
+                            <option value="center">Tengah Batang</option><option value="end">Dalam - Ujung</option><option value="start">Dalam - Pangkal</option><option value="outside">Luar Grafik</option>
                         </select>
                     </div>
                 </div>
@@ -378,55 +376,34 @@
             <div class="bg-slate-50 border border-slate-100 rounded-3xl p-4 md:p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="bgAreaTitle">Latar Belakang & Kisi</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase">Background Kanvas</h2>
                 </div>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="bgColorTitle">Warna Latar Belakang</label>
                         <div class="flex h-10 overflow-hidden rounded-xl border border-slate-200 shadow-sm w-full bg-white">
-                            <input type="color" id="bgColor" value="#f8fafc" class="w-12 h-14 -mt-2 -ml-2 cursor-pointer shrink-0 border-none">
+                            <input type="color" id="bgColor" value="#f8fafc" class="w-12 h-14 -mt-2 -ml-2 cursor-pointer border-none">
                             <div class="flex-1 bg-white flex items-center px-3 text-xs font-mono text-slate-500" id="bgColorText">#f8fafc</div>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="opacity">Transparansi (Opasitas)</span><span id="bgOpacityDisplay">0%</span></label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Transparansi</span><span id="bgOpacityDisplay">0%</span></label>
                         <input type="range" id="bgOpacitySlider" min="0" max="100" value="0">
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="bgRadiusTitle">Sudut Melengkung</span><span id="bgRadiusDisplay">0px</span></label>
-                            <input type="range" id="bgRadiusSlider" min="0" max="100" value="0">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="bgPaddingTitle">Jarak (Padding)</span><span id="bgPaddingDisplay">0px</span></label>
-                            <input type="range" id="bgPaddingSlider" min="0" max="100" value="0">
-                        </div>
                     </div>
                 </div>
 
                 <div id="gridControlPanel" class="space-y-4 pt-4 mt-4 border-t border-slate-200">
                     <div class="flex items-center justify-between">
-                        <label class="text-[11px] font-bold text-slate-700" data-i18n="showGridX">Kisi Vertikal (X)</label>
+                        <label class="text-[11px] font-bold text-slate-700">Kisi Vertikal (X)</label>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleGridX" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            <input type="checkbox" id="toggleGridX" class="sr-only peer"><div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
                         </label>
                     </div>
                     <div class="flex items-center justify-between">
-                        <label class="text-[11px] font-bold text-slate-700" data-i18n="showGridY">Kisi Horizontal (Y)</label>
+                        <label class="text-[11px] font-bold text-slate-700">Kisi Horizontal (Y)</label>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleGridY" class="sr-only peer" checked>
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            <input type="checkbox" id="toggleGridY" class="sr-only peer" checked><div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
                         </label>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="gridColor">Warna Garis Kisi</label>
-                        <div class="flex h-8 overflow-hidden rounded-lg border border-slate-200 w-full bg-white">
-                            <input type="color" id="gridColor" value="#e2e8f0" class="w-8 h-10 -mt-1 -ml-1 cursor-pointer shrink-0 border-none">
-                            <div class="flex-1 bg-white flex items-center px-2 text-[10px] font-mono text-slate-500" id="gridColorText">#e2e8f0</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -435,34 +412,23 @@
             <div id="axesControlPanel" class="bg-white border border-slate-200 rounded-3xl p-4 md:p-5 shadow-sm">
                 <div class="flex items-center gap-2 mb-5">
                     <div class="w-2 h-2 rounded-full bg-orange-500"></div>
-                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase" data-i18n="axisGrid">Sumbu Angka</h2>
+                    <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase">Pengaturan Sumbu</h2>
                 </div>
-                
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
-                        <label class="text-[11px] font-bold text-slate-700" data-i18n="axisX">Sumbu Utama</label>
+                        <label class="text-[11px] font-bold text-slate-700">Sumbu Angka (Kiri & Kanan)</label>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleAxisX" class="sr-only peer" checked>
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                            <input type="checkbox" id="toggleAxisY" class="sr-only peer" checked><div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-[16px] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
                         </label>
                     </div>
                     <div class="flex items-center justify-between">
-                        <label class="text-[11px] font-bold text-slate-700" data-i18n="axisYLeft">Sumbu Kategori</label>
+                        <label class="text-[11px] font-bold text-slate-700">Sumbu Kategori (Label Bawah)</label>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleAxisY" class="sr-only peer" checked>
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
+                            <input type="checkbox" id="toggleAxisX" class="sr-only peer" checked><div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-[16px] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
                         </label>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <label class="text-[11px] font-bold text-slate-700" data-i18n="axisYRight">Sumbu Sekunder</label>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleAxisYRight" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]"></div>
-                        </label>
-                    </div>
-
                     <div class="pt-3 border-t border-slate-100">
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span data-i18n="axisSize">Ukuran Font Sumbu</span><span id="axisFontSizeDisplay">12px</span></label>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2 flex justify-between"><span>Ukuran Font</span><span id="axisFontSizeDisplay">12px</span></label>
                         <input type="range" id="axisFontSizeSlider" min="8" max="24" value="12">
                     </div>
                 </div>
@@ -471,43 +437,45 @@
     </div>
 
     <!-- RIGHT PANEL: CANVAS WORKSPACE -->
-    <div class="flex-1 min-w-0 bg-[#f8fafc] flex flex-col relative overflow-hidden" id="workspaceArea">
+    <div class="flex-1 min-w-0 bg-[#f8fafc] flex flex-col relative overflow-hidden transition-all duration-500" id="workspaceArea">
         
         <!-- HEADER KANAN -->
-        <div class="hide-on-fullscreen h-16 md:h-20 px-4 md:px-8 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/50 bg-white/70 backdrop-blur-md shadow-sm">
-            <div class="flex items-center gap-3 md:gap-4">
-                <button id="btnToggleSidebar" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition border border-slate-200 z-50">
-                    <i id="burgerIcon" class="ph ph-list text-lg transition-transform duration-300"></i>
+        <div class="hide-on-fullscreen h-16 md:h-20 px-4 md:px-8 flex items-center justify-between z-10 shrink-0 pointer-events-none w-full border-b border-slate-200/50 bg-white/70 backdrop-blur-md">
+            <div class="flex items-center gap-3 md:gap-4 pointer-events-auto">
+                <button id="btnToggleSidebar" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 transition border border-slate-200">
+                    <i id="burgerIcon" class="ph ph-list text-lg"></i>
                 </button>
-                <div class="glass-panel px-3 sm:px-5 py-2 sm:py-2.5 rounded-full hidden sm:flex items-center gap-2 shadow-sm">
-                    <div class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#cafc03] animate-pulse"></div>
-                    <span class="text-xs sm:text-sm font-bold text-slate-800 whitespace-nowrap" data-i18n="visualWorkspace">Ruang Kerja Visual</span>
-                </div>
             </div>
-            <div class="flex items-center gap-2 sm:gap-4">
-                <div class="glass-panel px-2 sm:px-3 py-1.5 rounded-full hidden sm:flex items-center gap-2 shadow-sm border border-slate-200">
-                    <span class="text-[9px] sm:text-[10px] font-black text-slate-800">ID</span>
+            
+            <div class="flex items-center gap-2 sm:gap-4 pointer-events-auto">
+                <!-- BAHASA -->
+                <div class="glass-panel px-2 py-1.5 rounded-full hidden sm:flex items-center gap-2 shadow-sm border border-slate-200">
+                    <span class="text-[9px] font-black text-slate-800">ID</span>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="langToggle" class="sr-only peer">
-                        <div class="w-6 h-3 sm:w-8 sm:h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[12px] sm:peer-checked:after:translate-x-[16px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[1.5px] sm:after:top-[2px] after:left-[1.5px] sm:after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-2.5 after:w-2.5 sm:after:h-3 sm:after:w-3 after:transition-all peer-checked:bg-slate-800"></div>
+                        <div class="w-6 h-3 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[12px] after:absolute after:top-[1.5px] after:left-[1.5px] after:bg-white after:border after:rounded-full after:h-2.5 after:w-2.5 after:transition-all peer-checked:bg-slate-800"></div>
                     </label>
-                    <span class="text-[9px] sm:text-[10px] font-black text-slate-400">EN</span>
+                    <span class="text-[9px] font-black text-slate-400">EN</span>
                 </div>
-                
-                <button id="btnFullscreen" class="bg-white hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shadow-sm transition border border-slate-200 whitespace-nowrap">
-                    <i class="ph ph-presentation-chart text-sm sm:text-base"></i> <span class="hidden lg:inline" data-i18n="presentationMode">Mode Presentasi</span>
+
+                <button id="btnToggleRightPanel" class="bg-white hover:bg-slate-50 text-slate-700 w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition border border-slate-200">
+                    <i class="ph ph-stack text-lg"></i>
                 </button>
 
-                <button id="btnExport" class="bg-slate-900 hover:bg-slate-800 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-[10px] sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-slate-900/20 transition transform hover:-translate-y-0.5 border border-slate-700 whitespace-nowrap">
-                    <i class="ph ph-download-simple text-sm sm:text-base"></i> <span data-i18n="exportImage" class="hidden sm:inline">Ekspor HD</span><span class="sm:hidden">Ekspor</span>
+                <button id="btnFullscreen" class="bg-white hover:bg-[#cafc03] hover:text-slate-900 hover:border-[#b5e003] text-green-700 px-3 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-sm transition border border-green-200">
+                    <i class="ph ph-play text-base"></i> <span class="hidden sm:inline" data-i18n="presentationMode">Mode Presentasi</span>
+                </button>
+
+                <button id="btnExport" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg transition border border-slate-700">
+                    <i class="ph ph-download-simple"></i> <span data-i18n="exportImage" class="hidden sm:inline">Ekspor HD</span>
                 </button>
             </div>
         </div>
 
-        <!-- AREA CANVAS UTAMA (BULLETPROOF CONTAINER) -->
+        <!-- AREA KANVAS -->
         <div class="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 pb-40 md:pb-32 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
-            <div id="exportTarget" class="relative chart-wrapper-transition origin-center flex items-center justify-center bg-transparent" style="width: 100%; height: 500px;">
-                <div id="canvasWrapper" class="w-full h-full relative transition-all duration-300 box-border flex items-center justify-center overflow-hidden">
+            <div id="exportTarget" class="relative origin-center flex items-center justify-center bg-transparent transition-all duration-500" style="width: 100%; height: 500px;">
+                <div id="canvasWrapper" class="w-full h-full relative box-border flex items-center justify-center overflow-hidden">
                     <div id="canvasContainer" class="w-full h-full absolute inset-0 p-[inherit] box-border relative">
                         <!-- Canvas di-inject via JS -->
                     </div>
@@ -516,67 +484,74 @@
         </div>
         
         <!-- PANEL ANALITIK BAWAH -->
-        <div class="hide-on-fullscreen absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-4 md:px-6 py-3 md:py-4 shadow-xl flex flex-col md:flex-row items-center gap-3 md:gap-6 z-10 w-[92%] md:w-[80%] max-w-4xl border border-white/40">
-            <div class="flex items-center gap-3 md:pr-6 md:border-r border-slate-200 shrink-0 w-full md:w-auto justify-center md:justify-start border-b md:border-b-0 pb-2 md:pb-0">
-                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03] shrink-0">
-                    <i class="ph ph-sigma text-lg md:text-xl"></i>
+        <div class="hide-on-fullscreen absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-4 py-3 shadow-xl flex items-center gap-4 z-10 w-[92%] md:w-[80%] max-w-4xl border border-white/40 pointer-events-auto">
+            <div class="flex items-center gap-3 pr-4 border-r border-slate-200 shrink-0">
+                <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03] shrink-0">
+                    <i class="ph ph-sigma text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[9px] md:text-[10px] font-bold text-slate-400 tracking-widest uppercase" data-i18n="totalData">Total Keseluruhan</p>
-                    <h4 class="text-lg md:text-xl font-black text-slate-800" id="totalSumDisplay">0</h4>
+                    <p class="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Total Keseluruhan</p>
+                    <h4 class="text-lg font-black text-slate-800" id="totalSumDisplay">0</h4>
                 </div>
             </div>
-            <div class="flex-1 flex gap-3 md:gap-4 overflow-x-auto pb-1 w-full justify-start items-center custom-scrollbar" id="percentageContainer">
+            <div class="flex-1 flex gap-3 overflow-x-auto custom-scrollbar" id="percentageContainer">
                 <!-- Persentase otomatis via JS -->
             </div>
         </div>
 
-        <!-- OVERLAY LOADING / ERROR RESCUE -->
-        <div id="loadingOverlay" class="absolute inset-0 bg-white/90 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden">
+        <!-- OVERLAY LOADING -->
+        <div id="loadingOverlay" class="absolute inset-0 bg-white/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center hidden pointer-events-auto">
             <div id="loadingContent" class="flex flex-col items-center gap-3">
                 <i class="ph ph-spinner-gap text-4xl text-[#cafc03] animate-spin"></i>
-                <p class="text-sm font-bold text-slate-600 tracking-widest uppercase" data-i18n="rendering">Memproses HD...</p>
-            </div>
-            <div id="errorRescueContent" class="flex flex-col items-center gap-4 hidden max-w-sm text-center px-6">
-                <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 mb-2 shadow-sm">
-                    <i class="ph ph-warning-circle text-3xl"></i>
-                </div>
-                <h3 class="text-lg font-black text-slate-800" data-i18n="errorTitle">Mengkoreksi Tampilan...</h3>
-                <p class="text-xs text-slate-500 font-medium mb-4" data-i18n="errorDesc">Sistem sedang mereset konflik susunan grafik Anda secara otomatis.</p>
-                <button onclick="executeResetData()" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-full text-xs font-bold transition flex items-center gap-2 shadow-md">
-                    Reset Paksa (Force Reset)
-                </button>
+                <p class="text-sm font-bold text-slate-600 tracking-widest uppercase">Memproses HD...</p>
             </div>
         </div>
+
+        <!-- FLOATING PANEL KANAN (SLIDE MANAGER) -->
+        <div id="rightLayerPanel" class="absolute right-4 md:right-8 top-24 bottom-6 md:bottom-8 w-[90%] sm:w-[300px] md:w-[320px] z-[60] flex flex-col bg-white/95 backdrop-blur-xl border border-slate-100 shadow-2xl rounded-3xl shrink-0 overflow-hidden hide-on-fullscreen transition-all duration-400 transform origin-right opacity-0 scale-95 pointer-events-none">
+            
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+                <h3 class="text-[11px] font-black text-slate-800 tracking-widest uppercase">Slides / Scenes</h3>
+                <div class="flex gap-2">
+                    <button onclick="openResetModal()" class="text-slate-400 hover:text-red-500 transition"><i class="ph ph-trash text-lg"></i></button>
+                    <button id="btnCloseRightPanel" class="text-slate-400 hover:text-slate-900 transition"><i class="ph ph-x text-lg"></i></button>
+                </div>
+            </div>
+
+            <div class="p-4 shrink-0 border-b border-slate-100">
+                <button id="btnAddSlide" class="w-full bg-slate-900 hover:bg-slate-800 text-[#cafc03] py-3 rounded-xl text-[10px] font-bold uppercase transition flex items-center justify-center gap-2 shadow-md">
+                    <i class="ph ph-plus-circle text-sm"></i> Tambah Slide Baru
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar" id="slideListContainer">
+                <!-- Slide List JS -->
+            </div>
+        </div>
+
     </div>
 
     <script>
         const translations = {
             id: {
-                brandingTitle: "Judul & Branding", chartTitleInput: "Judul Utama Grafik", chartSubtitleInput: "Sub-Judul (Deskripsi)", watermarkInput: "Teks Watermark (Sudut Kanan Bawah)",
+                brandingTitle: "Judul & Branding (Slide Ini)", chartTitleInput: "Judul Utama Grafik", chartSubtitleInput: "Sub-Judul (Deskripsi)", watermarkInput: "Teks Watermark",
                 coreSettings: "Pengaturan Utama", graphicType: "Tipe Grafik Utama", themeColor: "Tema Warna", subDataLogic: "Logika Sub-Data (Tumpukan)", accumulate: "Akumulasi (Tambah Tinggi)", include: "Include (Masuk ke Data Utama)", grouped: "Berdampingan (Versus)",
-                resetData: "Reset Data", resetConfirmTitle: "Reset Semua Pengaturan?", resetConfirmDesc: "Aksi ini akan menghapus semua data, layer, dan warna yang telah Anda buat, kembali ke pengaturan awal pabrik.", cancel: "Batal", yesReset: "Ya, Reset",
-                multiLayerEngine: "Mesin Multi-Lapis (Overlay)", addChart: "Tambah Grafik", multiLayerDesc: "Tambahkan grafik pelapis di atas data utama Anda. Matriks input akan menyesuaikan.",
-                liveDataInput: "Input Data Langsung", pasteExcel: "Paste Data", iconLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Label",
-                dimensionLayout: "Dimensi & Tata Letak", visualScale: "Skala Visual (Zoom)", width: "Lebar", height: "Tinggi", donutHole: "Lubang Donut", shadowEffect: "Efek Bayangan 3D (Shadow)", thickness: "Ketebalan Elemen", spacing: "Jarak Antar Elemen", borderRadius: "Sudut Melengkung", lineStyle: "Gaya Garis", smooth: "Melengkung (Smooth)", straight: "Lurus (Straight)", stepped: "Tangga (Stepped)",
-                typographyEst: "Tipografi & Estetika", showLegend: "Tampilkan Legenda", legendPosition: "Posisi", legendAlign: "Perataan", alignCenter: "Tengah", alignStart: "Kiri/Atas (Mulai)", alignEnd: "Kanan/Bawah (Akhir)", legendSize: "Ukuran Legenda", datalabelPos: "Posisi Angka (Datalabels)", posCenter: "Tengah Batang (Default)", posInsideTop: "Dalam - Ujung Atas/Kanan", posInsideBottom: "Dalam - Pangkal Bawah/Kiri", posOutside: "Luar Grafik (Melayang)",
-                bgAreaTitle: "Latar Belakang & Kisi", bgColorTitle: "Warna Latar Belakang", opacity: "Transparansi (Opasitas)", showGridX: "Kisi Vertikal (X)", showGridY: "Kisi Horizontal (Y)", gridColor: "Warna Garis Kisi", bgRadiusTitle: "Sudut Melengkung", bgPaddingTitle: "Jarak (Padding)",
-                axisGrid: "Sumbu Angka", axisX: "Sumbu Utama", axisYLeft: "Sumbu Kategori", axisYRight: "Sumbu Sekunder", axisSize: "Ukuran Font Sumbu",
-                visualWorkspace: "Ruang Kerja Visual", presentationMode: "Mode Presentasi", exportImage: "Ekspor HD", totalData: "Total Keseluruhan", rendering: "Memproses HD...",
-                errorTitle: "Mengkoreksi Tampilan...", errorDesc: "Sistem sedang mereset konflik susunan grafik Anda secara otomatis."
+                multiLayerEngine: "Mesin Multi-Lapis", addChart: "Tambah Data",
+                liveDataInput: "Input Data Langsung", pasteExcel: "Paste Data", iconLibrary: "Koleksi Ikon", dataRowCount: "Jumlah Baris Kategori",
+                dimensionLayout: "Dimensi & Tata Letak", visualScale: "Skala Visual (Zoom)", width: "Lebar", height: "Tinggi", donutHole: "Lubang Donut", shadowEffect: "Efek Bayangan 3D", thickness: "Ketebalan Elemen", spacing: "Jarak (Padding)", borderRadius: "Melengkung", lineStyle: "Gaya Garis",
+                typographyEst: "Tipografi & Legenda", showLegend: "Tampilkan Legenda",
+                presentationMode: "Mode Presentasi", exportImage: "Ekspor HD",
+                resetConfirmTitle: "Reset Seluruh Presentasi?", resetConfirmDesc: "Seluruh slide dan layer Anda akan dihapus permanen. Aksi ini tidak dapat dibatalkan.", cancel: "Batal", yesReset: "Ya, Hapus"
             },
             en: {
-                brandingTitle: "Title & Branding", chartTitleInput: "Main Chart Title", chartSubtitleInput: "Subtitle (Description)", watermarkInput: "Watermark Text (Bottom Right)",
-                coreSettings: "Core Settings", graphicType: "Main Graphic Type", themeColor: "Theme Color", subDataLogic: "Sub-Data Logic (Stack)", accumulate: "Accumulate (Increase Height)", include: "Include (Inside Main Data)", grouped: "Side-by-side (Versus)",
-                resetData: "Reset Data", resetConfirmTitle: "Reset All Settings?", resetConfirmDesc: "This action will clear all your data, layers, and colors, reverting to the factory defaults.", cancel: "Cancel", yesReset: "Yes, Reset",
-                multiLayerEngine: "Multi-Layer Engine (Overlay)", addChart: "Add Chart", multiLayerDesc: "Add overlay charts on top of your main data. Input matrix will adapt.",
-                liveDataInput: "Live Data Input", pasteExcel: "Paste Data", iconLibrary: "Icon Library", dataRowCount: "Label Row Count",
-                dimensionLayout: "Dimension & Layout", visualScale: "Visual Scale (Zoom)", width: "Width", height: "Height", donutHole: "Donut Hole", shadowEffect: "3D Shadow Effect", thickness: "Element Thickness", spacing: "Element Spacing", borderRadius: "Border Radius", lineStyle: "Line Style", smooth: "Smooth", straight: "Straight", stepped: "Stepped",
-                typographyEst: "Typography & Aesthetics", showLegend: "Show Legend", legendPosition: "Position", legendAlign: "Alignment", alignCenter: "Center", alignStart: "Left/Top (Start)", alignEnd: "Right/Bottom (End)", legendSize: "Legend Size", datalabelPos: "Number Position (Datalabels)", posCenter: "Center (Default)", posInsideTop: "Inside - Top/Right End", posInsideBottom: "Inside - Bottom/Left Base", posOutside: "Outside Chart (Floating)",
-                bgAreaTitle: "Background & Grid", bgColorTitle: "Background Color", opacity: "Opacity", showGridX: "Vertical Grid (X)", showGridY: "Horizontal Grid (Y)", gridColor: "Grid Line Color", bgRadiusTitle: "Border Radius", bgPaddingTitle: "Background Padding",
-                axisGrid: "Number Axes", axisX: "Primary Axis", axisYLeft: "Category Axis", axisYRight: "Secondary Axis", axisSize: "Axis Font Size",
-                visualWorkspace: "Visual Workspace", presentationMode: "Presentation Mode", exportImage: "Export HD", totalData: "Grand Total", rendering: "Processing HD...",
-                errorTitle: "Correcting Display...", errorDesc: "System is resolving chart layer conflicts automatically."
+                brandingTitle: "Title & Branding (This Slide)", chartTitleInput: "Main Chart Title", chartSubtitleInput: "Subtitle (Description)", watermarkInput: "Watermark Text",
+                coreSettings: "Core Settings", graphicType: "Main Graphic Type", themeColor: "Theme Color", subDataLogic: "Sub-Data Logic (Stack)", accumulate: "Accumulate (Stack)", include: "Include (Inside)", grouped: "Side-by-side (Versus)",
+                multiLayerEngine: "Multi-Layer Engine", addChart: "Add Data",
+                liveDataInput: "Live Data Input", pasteExcel: "Paste Data", iconLibrary: "Icon Library", dataRowCount: "Category Rows Count",
+                dimensionLayout: "Dimension & Layout", visualScale: "Visual Scale (Zoom)", width: "Width", height: "Height", donutHole: "Donut Hole", shadowEffect: "3D Shadow Effect", thickness: "Element Thickness", spacing: "Spacing (Padding)", borderRadius: "Border Radius", lineStyle: "Line Style",
+                typographyEst: "Typography & Legend", showLegend: "Show Legend",
+                presentationMode: "Presentation Mode", exportImage: "Export HD",
+                resetConfirmTitle: "Reset Entire Presentation?", resetConfirmDesc: "All slides and layers will be permanently deleted. This cannot be undone.", cancel: "Cancel", yesReset: "Yes, Delete"
             }
         };
 
@@ -598,32 +573,32 @@
         let mainChart = null;
         let activeIconInput = null;
         let mapCache = { world: null, indo: null };
+        const STORAGE_KEY = 'ProChart_Vision_V65_Final'; 
         
-        // KUNCI MEMORI SUPER BARU
-        const STORAGE_KEY = 'ProChart_Vision_V14_GeoFix'; 
-        
-        const defaultAppState = {
-            language: 'id', 
-            chartTitle: 'Laporan Visual Data', chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', watermarkText: 'MNC Channels',
+        let globalLang = 'id';
+        let isPresenting = false;
+
+        const generateDefaultSlide = (index = 1) => ({
+            id: 'slide_' + Date.now() + Math.random().toString(36).substr(2, 9),
+            chartTitle: `Slide ${index}`, chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', watermarkText: 'MNC Channels',
             chartType: 'bar-vertical', colorTheme: 'lime', stackMode: 'accumulate',
-            showAxisX: true, showAxisY: true, showAxisYRight: false, axisFontSize: 12, 
-            chartScale: 100, chartWidth: 100, chartHeight: 500, 
-            donutCutout: 60, elementShadow: 0, chartThickness: 100, chartSpacing: 10, borderRadius: 8, lineStyle: 'smooth',
-            bgColor: '#f8fafc', bgOpacity: 0, bgRadius: 0, bgPadding: 0, showGridX: false, showGridY: true, gridColor: '#e2e8f0',
+            chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, chartSpacing: 10, borderRadius: 8, lineStyle: 'smooth',
             showLegend: true, legendFontSize: 14, legendPosition: 'top', legendAlign: 'center', datalabelPosition: 'center',
-            series: [
-                { id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }
-            ],
+            bgColor: '#f8fafc', bgOpacity: 0, showGridX: false, showGridY: true,
+            showAxisX: true, showAxisY: true, axisFontSize: 12,
+            series: [{ id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }],
             rows: [
-                { id: 'r_1', label: 'Jawa Barat', icon: '📍', values: [ { val: 450, val2: 500, color: '#cafc03' } ] },
-                { id: 'r_2', label: 'DKI Jakarta', icon: '🏢', values: [ { val: 320, val2: 380, color: '#111827' } ] },
-                { id: 'r_3', label: 'Sumatera Utara', icon: '🌴', values: [ { val: 150, val2: 200, color: '#94a3b8' } ] },
-                { id: 'r_4', label: 'Kalimantan', icon: '🌳', values: [ { val: 80, val2: 120, color: '#e2e8f0' } ] }
+                { id: 'r_1', label: 'Jawa Barat', icon: '📍', values: [{ val: 450, val2: 500, color: '#cafc03' }] },
+                { id: 'r_2', label: 'DKI Jakarta', icon: '🏢', values: [{ val: 320, val2: 380, color: '#111827' }] },
+                { id: 'r_3', label: 'Sumatera Utara', icon: '🌴', values: [{ val: 150, val2: 200, color: '#94a3b8' }] },
+                { id: 'r_4', label: 'Kalimantan', icon: '🌳', values: [{ val: 80, val2: 120, color: '#e2e8f0' }] }
             ]
-        };
+        });
 
-        let appState = JSON.parse(JSON.stringify(defaultAppState));
+        let appSlides = [generateDefaultSlide(1)];
+        let activeSlideIndex = 0;
 
+        // SAFE DOM ELEMENTS DEFINITION
         const els = {
             langToggle: document.getElementById('langToggle'), 
             chartTitleInput: document.getElementById('chartTitleInput'), chartSubtitleInput: document.getElementById('chartSubtitleInput'), watermarkInput: document.getElementById('watermarkInput'),
@@ -632,163 +607,198 @@
             dataRowsContainer: document.getElementById('dataRowsContainer'), btnAddRow: document.getElementById('btnAddRow'), btnRemoveRow: document.getElementById('btnRemoveRow'), rowCountDisplay: document.getElementById('rowCountDisplay'),
             chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), elementShadowSlider: document.getElementById('elementShadowSlider'), elementShadowDisplay: document.getElementById('elementShadowDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), chartSpacing: document.getElementById('chartSpacing'), chartSpacingDisplay: document.getElementById('chartSpacingDisplay'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'), lineStyleSelect: document.getElementById('lineStyleSelect'), donutCutoutContainer: document.getElementById('donutCutoutContainer'),
             toggleLegend: document.getElementById('toggleLegend'), legendPosition: document.getElementById('legendPosition'), legendAlign: document.getElementById('legendAlign'), legendFontSizeSlider: document.getElementById('legendFontSizeSlider'), legendFontSizeDisplay: document.getElementById('legendFontSizeDisplay'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'),
-            toggleAxisX: document.getElementById('toggleAxisX'), toggleAxisY: document.getElementById('toggleAxisY'), toggleAxisYRight: document.getElementById('toggleAxisYRight'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
-            bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), bgRadiusSlider: document.getElementById('bgRadiusSlider'), bgRadiusDisplay: document.getElementById('bgRadiusDisplay'), bgPaddingSlider: document.getElementById('bgPaddingSlider'), bgPaddingDisplay: document.getElementById('bgPaddingDisplay'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'), gridColor: document.getElementById('gridColor'), gridColorText: document.getElementById('gridColorText'),
-            exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), canvasContainer: document.getElementById('canvasContainer'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), btnFullscreen: document.getElementById('btnFullscreen'), loadingOverlay: document.getElementById('loadingOverlay'), loadingContent: document.getElementById('loadingContent'), errorRescueContent: document.getElementById('errorRescueContent'),
-            leftPanel: document.getElementById('leftPanel'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), burgerIcon: document.getElementById('burgerIcon'),
-            settingsScrollArea: document.getElementById('settingsScrollArea'), sidebarHeader: document.getElementById('sidebarHeader'), mobileOverlay: document.getElementById('mobileOverlay'), btnCloseMobile: document.getElementById('btnCloseMobile')
+            toggleAxisX: document.getElementById('toggleAxisX'), toggleAxisY: document.getElementById('toggleAxisY'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
+            bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'),
+            exportTarget: document.getElementById('exportTarget'), canvasWrapper: document.getElementById('canvasWrapper'), canvasContainer: document.getElementById('canvasContainer'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), btnFullscreen: document.getElementById('btnFullscreen'), loadingOverlay: document.getElementById('loadingOverlay'), loadingContent: document.getElementById('loadingContent'),
+            leftPanel: document.getElementById('leftPanel'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), burgerIcon: document.getElementById('burgerIcon'), settingsScrollArea: document.getElementById('settingsScrollArea'), sidebarHeader: document.getElementById('sidebarHeader'), mobileOverlay: document.getElementById('mobileOverlay'), btnCloseMobile: document.getElementById('btnCloseMobile'),
+            rightLayerPanel: document.getElementById('rightLayerPanel'), slideListContainer: document.getElementById('slideListContainer'), btnAddSlide: document.getElementById('btnAddSlide'), btnToggleRightPanel: document.getElementById('btnToggleRightPanel'), btnCloseRightPanel: document.getElementById('btnCloseRightPanel'),
+            activeSlideNameDisplay: document.getElementById('activeSlideNameDisplay') 
         };
+
+        const getActiveSlide = () => appSlides[activeSlideIndex];
 
         function showToast(msg, isError = false) {
             const toast = document.getElementById('toastNotification');
             const msgEl = document.getElementById('toastMessage');
             const iconEl = document.getElementById('toastIcon');
-            
             msgEl.innerText = msg;
-            if (isError) {
-                toast.classList.replace('bg-slate-900', 'bg-red-600');
-                iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-white"></i>';
-            } else {
-                toast.classList.replace('bg-red-600', 'bg-slate-900');
-                iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-lime-400"></i>';
-            }
-            
+            if (isError) { toast.classList.replace('bg-slate-900', 'bg-red-600'); iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-white"></i>'; } 
+            else { toast.classList.replace('bg-red-600', 'bg-slate-900'); iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-lime-400"></i>'; }
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000);
         }
 
-        let isMobile = window.innerWidth < 768;
-        let isSidebarOpen = !isMobile;
-
-        function applySidebarState() {
-            isMobile = window.innerWidth < 768;
-            
-            if (isSidebarOpen) {
-                els.leftPanel.classList.remove('-translate-x-full');
-                if (!isMobile) els.leftPanel.style.marginLeft = '0px';
-                
-                if (isMobile) {
-                    els.mobileOverlay.classList.remove('hidden');
-                    setTimeout(() => els.mobileOverlay.classList.remove('opacity-0'), 10);
-                }
-                els.burgerIcon.classList.replace('ph-list', 'ph-x');
-            } else {
-                if (isMobile) {
-                    els.leftPanel.classList.add('-translate-x-full');
-                    els.mobileOverlay.classList.add('opacity-0');
-                    setTimeout(() => els.mobileOverlay.classList.add('hidden'), 300);
-                } else {
-                    els.leftPanel.style.marginLeft = '-420px';
-                }
-                els.burgerIcon.classList.replace('ph-x', 'ph-list');
-            }
-            setTimeout(() => { if (mainChart) mainChart.resize(); }, 400);
-        }
-
-        els.btnToggleSidebar.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; applySidebarState(); });
-        els.btnCloseMobile.addEventListener('click', () => { isSidebarOpen = false; applySidebarState(); });
-        els.mobileOverlay.addEventListener('click', () => { if(isMobile) { isSidebarOpen = false; applySidebarState(); } });
-        
-        window.addEventListener('resize', () => {
-            let wasMobile = isMobile;
-            isMobile = window.innerWidth < 768;
-            if(wasMobile !== isMobile) {
-                isSidebarOpen = !isMobile;
-                applySidebarState();
-            }
-        });
-
-        els.settingsScrollArea.addEventListener('scroll', () => {
-            if (els.settingsScrollArea.scrollTop > 10) els.sidebarHeader.classList.add('scrolled');
-            else els.sidebarHeader.classList.remove('scrolled');
-        });
-
-        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); }
+        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ slides: appSlides, lang: globalLang })); }
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if(saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    appState = { ...defaultAppState, ...parsed };
-                    
-                    if(!appState.series || appState.series.length === 0) appState.series = defaultAppState.series;
-                    appState.rows.forEach(r => {
-                        while(r.values.length < appState.series.length) r.values.push({ val: 0, val2: 0, color: '#ccc' });
-                        if(r.values.length > appState.series.length) r.values.length = appState.series.length;
-                    });
-                } catch(e) { console.error("Error loading state", e); executeResetData(); }
+                    if(parsed.slides && parsed.slides.length > 0) appSlides = parsed.slides;
+                    globalLang = parsed.lang || 'id';
+                } catch(e) { console.error("Load error", e); executeResetData(); }
             }
         }
 
-        function translatePage() {
-            const lang = appState.language;
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if(translations[lang][key]) el.innerText = translations[lang][key];
-            });
-            if(els.langToggle) els.langToggle.checked = (lang === 'en');
+        let isMobile = window.innerWidth < 768;
+        let isSidebarOpen = !isMobile;
+        let isRightPanelOpen = false;
+
+        function applySidebarState() {
+            isMobile = window.innerWidth < 768;
+            if (isSidebarOpen) {
+                els.leftPanel.classList.remove('-translate-x-full');
+                if (!isMobile) els.leftPanel.style.marginLeft = '0px';
+                if (isMobile) { els.mobileOverlay.classList.remove('hidden'); setTimeout(() => els.mobileOverlay.classList.remove('opacity-0'), 10); }
+                els.burgerIcon.classList.replace('ph-list', 'ph-x');
+            } else {
+                if (isMobile) { els.leftPanel.classList.add('-translate-x-full'); els.mobileOverlay.classList.add('opacity-0'); setTimeout(() => els.mobileOverlay.classList.add('hidden'), 300); } 
+                else { els.leftPanel.style.marginLeft = '-420px'; }
+                els.burgerIcon.classList.replace('ph-x', 'ph-list');
+            }
+            setTimeout(() => { if (mainChart) mainChart.resize(); }, 400);
         }
 
-        function forceRecolor(theme) {
-            const palette = themes[theme] || themes['lime'];
-            let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'wordCloud'].includes(appState.chartType);
-            let colorfulMode = isRadial || appState.series.length === 1;
+        function applyRightPanelState() {
+            if(isRightPanelOpen) {
+                els.rightLayerPanel.classList.remove('pointer-events-none', 'opacity-0', 'scale-95');
+                els.btnToggleRightPanel.classList.add('bg-slate-900', 'text-[#cafc03]');
+                els.btnToggleRightPanel.classList.remove('text-slate-700');
+            } else {
+                els.rightLayerPanel.classList.add('pointer-events-none', 'opacity-0', 'scale-95');
+                els.btnToggleRightPanel.classList.remove('bg-slate-900', 'text-[#cafc03]');
+                els.btnToggleRightPanel.classList.add('text-slate-700');
+            }
+        }
 
-            appState.rows.forEach((r, rIdx) => {
+        els.btnToggleSidebar.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; applySidebarState(); });
+        els.btnCloseMobile.addEventListener('click', () => { isSidebarOpen = false; applySidebarState(); });
+        els.mobileOverlay.addEventListener('click', () => { if(isMobile) { isSidebarOpen = false; applySidebarState(); } });
+        els.btnToggleRightPanel.addEventListener('click', () => { isRightPanelOpen = !isRightPanelOpen; applyRightPanelState(); renderSlideList(); });
+        els.btnCloseRightPanel.addEventListener('click', () => { isRightPanelOpen = false; applyRightPanelState(); });
+
+        window.addEventListener('resize', () => {
+            let wasMobile = isMobile;
+            isMobile = window.innerWidth < 768;
+            if(wasMobile !== isMobile) { isSidebarOpen = !isMobile; applySidebarState(); }
+        });
+
+        function translatePage() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if(translations[globalLang][key]) el.innerText = translations[globalLang][key];
+            });
+            if(els.langToggle) els.langToggle.checked = (globalLang === 'en');
+        }
+        els.langToggle.addEventListener('change', (e) => { globalLang = e.target.checked ? 'en' : 'id'; translatePage(); saveState(); });
+
+        function forceRecolor(theme, slide) {
+            const palette = themes[theme] || themes['lime'];
+            let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'wordCloud'].includes(slide.chartType);
+            let colorfulMode = isRadial || slide.series.length === 1;
+
+            slide.rows.forEach((r, rIdx) => {
                 r.values.forEach((v, sIdx) => { 
-                    if (colorfulMode) {
-                        v.color = palette[rIdx % palette.length];
-                    } else {
-                        v.color = palette[sIdx % palette.length]; 
-                    }
+                    if (colorfulMode) v.color = palette[rIdx % palette.length];
+                    else v.color = palette[sIdx % palette.length]; 
                 });
             });
         }
 
-        function syncUIToState() {
-            els.chartTitleInput.value = appState.chartTitle || '';
-            els.chartSubtitleInput.value = appState.chartSubtitle || '';
-            els.watermarkInput.value = appState.watermarkText || '';
+        // TRIGGER ANIMASI SAAT PINDAH SLIDE
+        function triggerChartAnimation() {
+            els.exportTarget.classList.remove('slide-transition-active');
+            void els.exportTarget.offsetWidth; // Trigger reflow
+            els.exportTarget.classList.add('slide-transition-active');
+        }
 
-            els.chartType.value = appState.chartType; 
-            els.colorTheme.value = appState.colorTheme; 
-            els.stackMode.value = appState.stackMode || 'accumulate';
-            
-            els.chartScale.value = appState.chartScale; els.chartScaleDisplay.innerText = appState.chartScale + '%';
-            els.chartWidth.value = appState.chartWidth; els.chartWidthDisplay.innerText = appState.chartWidth + '%';
-            els.chartHeight.value = appState.chartHeight; els.chartHeightDisplay.innerText = appState.chartHeight + 'px';
-            els.donutCutout.value = appState.donutCutout; els.donutCutoutDisplay.innerText = appState.donutCutout + '%';
-            els.elementShadowSlider.value = appState.elementShadow || 0; els.elementShadowDisplay.innerText = (appState.elementShadow || 0) + 'px';
-            els.chartThickness.value = appState.chartThickness; els.chartThicknessDisplay.innerText = appState.chartThickness + '%';
-            els.chartSpacing.value = appState.chartSpacing; els.chartSpacingDisplay.innerText = appState.chartSpacing + 'px';
-            els.borderRadiusSlider.value = appState.borderRadius; els.borderRadiusDisplay.innerText = appState.borderRadius + 'px';
-            els.lineStyleSelect.value = appState.lineStyle || 'smooth';
-            
-            els.toggleLegend.checked = appState.showLegend; els.legendPosition.value = appState.legendPosition; els.legendAlign.value = appState.legendAlign || 'center';
-            els.legendFontSizeSlider.value = appState.legendFontSize; els.legendFontSizeDisplay.innerText = appState.legendFontSize + 'px';
-            els.datalabelPositionSelect.value = appState.datalabelPosition || 'center';
-            
-            els.toggleAxisX.checked = appState.showAxisX; els.toggleAxisY.checked = appState.showAxisY; els.toggleAxisYRight.checked = appState.showAxisYRight;
-            els.axisFontSizeSlider.value = appState.axisFontSize; els.axisFontSizeDisplay.innerText = appState.axisFontSize + 'px';
-            
-            els.bgColor.value = appState.bgColor || '#f8fafc'; els.bgColorText.innerText = appState.bgColor || '#f8fafc';
-            els.bgOpacitySlider.value = appState.bgOpacity || 0; els.bgOpacityDisplay.innerText = (appState.bgOpacity || 0) + '%';
-            els.bgRadiusSlider.value = appState.bgRadius || 0; els.bgRadiusDisplay.innerText = (appState.bgRadius || 0) + 'px';
-            els.bgPaddingSlider.value = appState.bgPadding || 0; els.bgPaddingDisplay.innerText = (appState.bgPadding || 0) + 'px';
-            
-            els.toggleGridX.checked = appState.showGridX; els.toggleGridY.checked = appState.showGridY; 
-            els.gridColor.value = appState.gridColor || '#e2e8f0'; els.gridColorText.innerText = appState.gridColor || '#e2e8f0';
+        function switchSlide(index) {
+            if(index < 0 || index >= appSlides.length) return;
+            activeSlideIndex = index;
+            triggerChartAnimation();
+            syncUIToActiveSlide();
+            renderSlideList();
+        }
 
-            els.rowCountDisplay.innerText = appState.rows.length;
+        function renderSlideList() {
+            els.slideListContainer.innerHTML = '';
+            appSlides.forEach((s, idx) => {
+                let isActive = idx === activeSlideIndex;
+                let div = document.createElement('div');
+                div.className = `p-3 rounded-2xl border ${isActive ? 'bg-[#cafc03]/10 border-[#cafc03] ring-1 ring-[#cafc03]' : 'bg-white border-slate-200 hover:border-slate-300'} cursor-pointer transition flex items-center justify-between group`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden flex-1" onclick="switchSlide(${idx})">
+                        <div class="w-6 h-6 rounded-md ${isActive ? 'bg-[#cafc03] text-slate-900' : 'bg-slate-800 text-white'} flex items-center justify-center text-[10px] font-black shrink-0">${idx+1}</div>
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <h4 class="text-xs font-bold text-slate-800 truncate">${s.chartTitle || 'Slide '+(idx+1)}</h4>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate flex items-center gap-1"><i class="ph ph-chart-bar"></i> ${s.chartType.replace('-',' ').toUpperCase()}</span>
+                        </div>
+                    </div>
+                    ${appSlides.length > 1 ? `<button onclick="deleteSlide(${idx})" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition shrink-0"><i class="ph ph-trash"></i></button>` : ''}
+                `;
+                els.slideListContainer.appendChild(div);
+            });
+        }
+
+        els.btnAddSlide.addEventListener('click', () => {
+            const newIndex = appSlides.length + 1;
+            const newSlide = generateDefaultSlide(newIndex);
+            appSlides.push(newSlide);
+            activeSlideIndex = appSlides.length - 1;
+            triggerChartAnimation();
+            syncUIToActiveSlide();
+            renderSlideList();
+            showToast('Slide Baru Ditambahkan!');
+        });
+
+        function deleteSlide(index) {
+            if(appSlides.length <= 1) return;
+            appSlides.splice(index, 1);
+            if(activeSlideIndex >= appSlides.length) activeSlideIndex = appSlides.length - 1;
+            triggerChartAnimation();
+            syncUIToActiveSlide();
+            renderSlideList();
+        }
+
+        function syncUIToActiveSlide() {
+            const slide = getActiveSlide();
+            if (!slide) return;
             
-            let isMap = appState.chartType === 'choropleth-world' || appState.chartType === 'choropleth-indo';
-            let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(appState.chartType);
-            let isWordCloud = appState.chartType === 'wordCloud';
+            if (els.activeSlideNameDisplay) els.activeSlideNameDisplay.innerText = slide.chartTitle || `Slide ${activeSlideIndex + 1}`;
             
-            els.donutCutoutContainer.style.display = appState.chartType === 'doughnut' ? 'block' : 'none';
+            els.chartTitleInput.value = slide.chartTitle || ''; els.chartSubtitleInput.value = slide.chartSubtitle || ''; els.watermarkInput.value = slide.watermarkText || '';
+            els.chartType.value = slide.chartType; els.colorTheme.value = slide.colorTheme; els.stackMode.value = slide.stackMode || 'accumulate';
+            
+            els.chartScale.value = slide.chartScale; els.chartScaleDisplay.innerText = slide.chartScale + '%';
+            els.chartWidth.value = slide.chartWidth; els.chartWidthDisplay.innerText = slide.chartWidth + '%';
+            els.chartHeight.value = slide.chartHeight; els.chartHeightDisplay.innerText = slide.chartHeight + 'px';
+            els.donutCutout.value = slide.donutCutout; els.donutCutoutDisplay.innerText = slide.donutCutout + '%';
+            els.elementShadowSlider.value = slide.elementShadow || 0; els.elementShadowDisplay.innerText = (slide.elementShadow || 0) + 'px';
+            els.chartThickness.value = slide.chartThickness; els.chartThicknessDisplay.innerText = slide.chartThickness + '%';
+            els.chartSpacing.value = slide.chartSpacing; els.chartSpacingDisplay.innerText = slide.chartSpacing + 'px';
+            els.borderRadiusSlider.value = slide.borderRadius; els.borderRadiusDisplay.innerText = slide.borderRadius + 'px';
+            els.lineStyleSelect.value = slide.lineStyle || 'smooth';
+            
+            els.toggleLegend.checked = slide.showLegend; els.legendPosition.value = slide.legendPosition; els.legendAlign.value = slide.legendAlign || 'center';
+            els.legendFontSizeSlider.value = slide.legendFontSize; els.legendFontSizeDisplay.innerText = slide.legendFontSize + 'px';
+            els.datalabelPositionSelect.value = slide.datalabelPosition || 'center';
+            
+            els.toggleAxisX.checked = slide.showAxisX; els.toggleAxisY.checked = slide.showAxisY; 
+            els.axisFontSizeSlider.value = slide.axisFontSize; els.axisFontSizeDisplay.innerText = slide.axisFontSize + 'px';
+            
+            els.bgColor.value = slide.bgColor || '#f8fafc'; els.bgColorText.innerText = slide.bgColor || '#f8fafc';
+            els.bgOpacitySlider.value = slide.bgOpacity || 0; els.bgOpacityDisplay.innerText = (slide.bgOpacity || 0) + '%';
+            els.toggleGridX.checked = slide.showGridX; els.toggleGridY.checked = slide.showGridY; 
+            els.rowCountDisplay.innerText = slide.rows.length;
+            
+            let isMap = slide.chartType === 'choropleth-world' || slide.chartType === 'choropleth-indo';
+            let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(slide.chartType);
+            let isWordCloud = slide.chartType === 'wordCloud';
+            
+            els.donutCutoutContainer.style.display = slide.chartType === 'doughnut' ? 'block' : 'none';
             els.axesControlPanel.style.display = (isRadial || isWordCloud || isMap) ? 'none' : 'block';
-            els.gridControlPanel.style.display = (isRadial || appState.chartType === 'pie' || isWordCloud || isMap) ? 'none' : 'block';
-            els.stackModeContainer.style.display = (appState.chartType === 'gantt' || isRadial || isWordCloud || isMap) ? 'none' : 'block';
+            els.gridControlPanel.style.display = (isRadial || slide.chartType === 'pie' || isWordCloud || isMap) ? 'none' : 'block';
+            els.stackModeContainer.style.display = (slide.chartType === 'gantt' || isRadial || isWordCloud || isMap) ? 'none' : 'block';
             els.overlayEnginePanel.style.display = (isRadial || isWordCloud || isMap) ? 'none' : 'block';
 
             renderMultiLayerEngine();
@@ -796,167 +806,18 @@
             updateVisualizations();
         }
 
-        function renderMultiLayerEngine() {
-            els.seriesContainer.innerHTML = '';
-            appState.series.forEach((s, index) => {
-                const div = document.createElement('div');
-                div.className = "bg-white p-3 rounded-2xl border border-slate-200 flex flex-col gap-2 shadow-sm relative transition-all hover:border-slate-300";
-                
-                let isMain = index === 0;
-                let typeOptions = `<option value="auto">SESUAI TIPE UTAMA</option><option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>`;
-                let deleteBtn = isMain ? `` : `<button class="w-8 h-8 flex items-center justify-center rounded-xl border border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 transition shrink-0" onclick="removeSeries(${index})"><i class="ph ph-x text-lg"></i></button>`;
-
-                div.innerHTML = `
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="flex flex-col gap-1 text-slate-300">
-                            ${index > 0 ? `<button onclick="moveSeries(${index}, -1)" class="hover:text-slate-600 transition"><i class="ph-fill ph-caret-up"></i></button>` : `<div class="h-4"></div>`}
-                            ${index < appState.series.length - 1 ? `<button onclick="moveSeries(${index}, 1)" class="hover:text-slate-600 transition"><i class="ph-fill ph-caret-down"></i></button>` : `<div class="h-4"></div>`}
-                        </div>
-                        <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-black shrink-0" style="background-color: ${isMain ? '#cafc03' : '#e2e8f0'}">${isMain ? '*' : (index)}</div>
-                        <input type="text" value="${s.name}" onchange="updateSeriesName(${index}, this.value)" class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-2 sm:px-3 py-2 text-[10px] sm:text-xs font-bold text-slate-800 focus:bg-white focus:ring-2 focus:ring-[#cafc03] outline-none transition">
-                        ${deleteBtn}
-                    </div>
-                    <div class="grid grid-cols-3 gap-1 sm:gap-2 mt-2 pl-8 sm:pl-12">
-                        <select onchange="updateSeriesProp(${index}, 'type', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 sm:px-2 py-1.5 text-[8px] sm:text-[9px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
-                            ${typeOptions.replace(`value="${s.type}"`, `value="${s.type}" selected`)}
-                        </select>
-                        <select onchange="updateSeriesProp(${index}, 'zIndex', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 sm:px-2 py-1.5 text-[8px] sm:text-[9px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
-                            <option value="front" ${s.zIndex==='front'?'selected':''}>DEPAN</option>
-                            <option value="back" ${s.zIndex==='back'?'selected':''}>BELAKANG</option>
-                        </select>
-                        <select onchange="updateSeriesProp(${index}, 'axis', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 sm:px-2 py-1.5 text-[8px] sm:text-[9px] font-bold text-slate-600 uppercase focus:ring-2 focus:ring-[#cafc03] outline-none cursor-pointer">
-                            <option value="y" ${s.axis==='y'?'selected':''}>KIRI/BAWAH</option>
-                            <option value="y2" ${s.axis==='y2'?'selected':''}>KANAN/ATAS</option>
-                        </select>
-                    </div>
-                `;
-                els.seriesContainer.appendChild(div);
-            });
-        }
-
-        function renderDataInputs() {
-            els.dataRowsContainer.innerHTML = '';
-            let isGantt = appState.chartType === 'gantt';
-
-            appState.rows.forEach((row, rowIndex) => {
-                const div = document.createElement('div');
-                div.className = "bg-slate-50 p-3 sm:p-4 rounded-2xl border border-slate-100 flex flex-col gap-3 shadow-sm";
-                
-                div.innerHTML = `
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <button onclick="openIconFor('${row.id}')" class="w-8 h-8 sm:w-10 sm:h-10 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg sm:text-xl hover:border-[#cafc03] hover:shadow-md transition shadow-sm">${row.icon}</button>
-                        <input type="text" value="${row.label}" onchange="updateRowLabel('${row.id}', this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs sm:text-sm font-bold text-slate-700 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
-                    </div>
-                `;
-
-                const valsContainer = document.createElement('div');
-                valsContainer.className = "flex gap-2 overflow-x-auto pb-2 border-t border-slate-200 pt-3 mt-1 custom-scrollbar";
-
-                appState.series.forEach((s, sIdx) => {
-                    let v = row.values[sIdx];
-                    if(!v) return;
-
-                    const vDiv = document.createElement('div');
-                    vDiv.className = "flex flex-col gap-1 flex-1 min-w-[70px] sm:min-w-[80px]";
-                    let seriesName = s.name.length > 10 ? s.name.substring(0, 8) + '..' : s.name;
-                    
-                    let valInputHTML = isGantt ? 
-                        `<div class="flex flex-col gap-1">
-                            <input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" placeholder="Mulai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
-                            <input type="text" inputmode="numeric" value="${v.val2}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val2', this.value)" placeholder="Selesai" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs font-bold text-center focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm">
-                         </div>` 
-                        : 
-                        `<input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" class="w-full bg-white border border-slate-200 rounded-lg px-1 sm:px-2 py-2 text-sm font-black text-center focus:ring-2 focus:ring-slate-900 outline-none shadow-sm">`;
-
-                    vDiv.innerHTML = `
-                        <div class="text-[7px] sm:text-[8px] font-black text-slate-400 uppercase tracking-wider text-center truncate mb-1 flex items-center justify-center gap-1">
-                            ${sIdx === 0 ? `<div class="w-1.5 h-1.5 rounded-full bg-[#cafc03]"></div>` : `<div class="w-1.5 h-1.5 rounded-full bg-slate-500"></div>`}
-                            ${seriesName}
-                        </div>
-                        <div class="relative group">
-                            ${valInputHTML}
-                            <div class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border border-white overflow-hidden shadow-sm cursor-pointer hover:scale-125 transition-transform opacity-60 group-hover:opacity-100 z-10">
-                                <input type="color" value="${v.color}" onchange="updateRowValue('${row.id}', ${sIdx}, 'color', this.value)" class="absolute -top-2 -left-2 w-8 h-8 cursor-pointer border-none">
-                            </div>
-                        </div>
-                    `;
-                    valsContainer.appendChild(vDiv);
-                });
-
-                div.appendChild(valsContainer);
-                els.dataRowsContainer.appendChild(div);
-            });
-            translatePage();
-        }
-
-        els.chartTitleInput.addEventListener('input', (e) => { appState.chartTitle = e.target.value; updateVisualizations(); });
-        els.chartSubtitleInput.addEventListener('input', (e) => { appState.chartSubtitle = e.target.value; updateVisualizations(); });
-        els.watermarkInput.addEventListener('input', (e) => { appState.watermarkText = e.target.value; updateVisualizations(); });
-
-        function updateSeriesProp(index, prop, val) { if(appState.series[index]) { appState.series[index][prop] = val; updateVisualizations(); } }
-        function updateSeriesName(index, val) { if(appState.series[index]) { appState.series[index].name = val; renderDataInputs(); updateVisualizations(); } }
+        const syncAndRender = (prop, value) => { getActiveSlide()[prop] = value; updateVisualizations(); };
         
-        function moveSeries(index, dir) {
-            if(index + dir < 0 || index + dir >= appState.series.length) return;
-            const temp = appState.series[index];
-            appState.series[index] = appState.series[index + dir];
-            appState.series[index + dir] = temp;
-            
-            appState.rows.forEach(r => {
-                const tempVal = r.values[index];
-                r.values[index] = r.values[index + dir];
-                r.values[index + dir] = tempVal;
-            });
-            syncUIToState();
-        }
-
-        function removeSeries(index) { 
-            appState.series.splice(index, 1);
-            appState.rows.forEach(r => r.values.splice(index, 1));
-            forceRecolor(appState.colorTheme); 
-            syncUIToState(); 
-        }
-        
-        function updateRowLabel(id, val) { const r = appState.rows.find(x => x.id === id); if(r) { r.label = val; updateVisualizations(); } }
-        function updateRowValue(rowId, sIdx, prop, val) {
-            const r = appState.rows.find(x => x.id === rowId);
-            if(r && r.values[sIdx]) {
-                r.values[sIdx][prop] = (prop==='val'||prop==='val2') ? Number(val.replace(/[^0-9.-]/g, '')) : val;
-                updateVisualizations();
-            }
-        }
-
-        els.langToggle.addEventListener('change', (e) => { appState.language = e.target.checked ? 'en' : 'id'; translatePage(); saveState(); });
+        els.chartTitleInput.addEventListener('input', (e) => { syncAndRender('chartTitle', e.target.value); if(els.activeSlideNameDisplay) els.activeSlideNameDisplay.innerText = e.target.value || `Slide ${activeSlideIndex+1}`; renderSlideList(); });
+        els.chartSubtitleInput.addEventListener('input', (e) => syncAndRender('chartSubtitle', e.target.value));
+        els.watermarkInput.addEventListener('input', (e) => syncAndRender('watermarkText', e.target.value));
         
         els.chartType.addEventListener('change', (e) => { 
-            appState.chartType = e.target.value; 
-            appState.series.forEach(s => { s.type = 'auto'; }); 
-            forceRecolor(appState.colorTheme);
-            syncUIToState(); 
+            const slide = getActiveSlide(); slide.chartType = e.target.value; slide.series.forEach(s => s.type = 'auto'); 
+            forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide(); 
         });
-        els.colorTheme.addEventListener('change', (e) => { appState.colorTheme = e.target.value; forceRecolor(appState.colorTheme); syncUIToState(); });
-        els.stackMode.addEventListener('change', (e) => { appState.stackMode = e.target.value; updateVisualizations(); });
-        
-        els.btnAddOverlay.addEventListener('click', () => {
-            const newIndex = appState.series.length;
-            appState.series.push({ id: 's_' + Date.now(), name: 'Overlay ' + (newIndex), type: 'auto', axis: 'y', zIndex: 'front' });
-            appState.rows.forEach(r => {
-                r.values.push({ val: Math.floor(Math.random()*50)+10, val2: 0, color: '#000' });
-            });
-            forceRecolor(appState.colorTheme); 
-            syncUIToState();
-        });
-
-        els.btnAddRow.addEventListener('click', () => {
-            const newRow = { id: 'r_' + Date.now(), label: 'Data Baru', icon: '✨', values: [] };
-            appState.series.forEach((s, sIdx) => {
-                newRow.values.push({ val: 50, val2: 100, color: '#000' });
-            });
-            appState.rows.push(newRow);
-            forceRecolor(appState.colorTheme);
-            syncUIToState();
-        });
-        els.btnRemoveRow.addEventListener('click', () => { if(appState.rows.length > 1) { appState.rows.pop(); syncUIToState(); } });
+        els.colorTheme.addEventListener('change', (e) => { const slide=getActiveSlide(); slide.colorTheme=e.target.value; forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide(); });
+        els.stackMode.addEventListener('change', (e) => syncAndRender('stackMode', e.target.value));
 
         const sliderBinds = [
             { el: els.chartScale, prop: 'chartScale', disp: els.chartScaleDisplay, unit: '%' },
@@ -969,259 +830,233 @@
             { el: els.borderRadiusSlider, prop: 'borderRadius', disp: els.borderRadiusDisplay, unit: 'px' },
             { el: els.legendFontSizeSlider, prop: 'legendFontSize', disp: els.legendFontSizeDisplay, unit: 'px' },
             { el: els.axisFontSizeSlider, prop: 'axisFontSize', disp: els.axisFontSizeDisplay, unit: 'px' },
-            { el: els.bgOpacitySlider, prop: 'bgOpacity', disp: els.bgOpacityDisplay, unit: '%' },
-            { el: els.bgRadiusSlider, prop: 'bgRadius', disp: els.bgRadiusDisplay, unit: 'px' },
-            { el: els.bgPaddingSlider, prop: 'bgPadding', disp: els.bgPaddingDisplay, unit: 'px' }
+            { el: els.bgOpacitySlider, prop: 'bgOpacity', disp: els.bgOpacityDisplay, unit: '%' }
         ];
-        sliderBinds.forEach(bind => {
-            bind.el.addEventListener('input', (e) => {
-                const val = parseInt(e.target.value);
-                bind.disp.innerText = val + bind.unit;
-                appState[bind.prop] = val;
-                updateVisualizations();
+        sliderBinds.forEach(b => { b.el.addEventListener('input', (e) => { const val = parseInt(e.target.value); b.disp.innerText = val + b.unit; syncAndRender(b.prop, val); }); });
+
+        els.lineStyleSelect.addEventListener('change', (e) => syncAndRender('lineStyle', e.target.value));
+        els.legendPosition.addEventListener('change', (e) => syncAndRender('legendPosition', e.target.value));
+        els.legendAlign.addEventListener('change', (e) => syncAndRender('legendAlign', e.target.value));
+        els.datalabelPositionSelect.addEventListener('change', (e) => syncAndRender('datalabelPosition', e.target.value));
+        els.bgColor.addEventListener('input', (e) => { els.bgColorText.innerText = e.target.value; syncAndRender('bgColor', e.target.value); });
+        
+        const toggles = ['toggleLegend','toggleAxisX','toggleAxisY','toggleGridX','toggleGridY'];
+        toggles.forEach(id => { const prop = id.replace('toggle','show'); document.getElementById(id).addEventListener('change', (e) => syncAndRender(prop, e.target.checked)); });
+
+        function renderMultiLayerEngine() {
+            const slide = getActiveSlide();
+            els.seriesContainer.innerHTML = '';
+            slide.series.forEach((s, index) => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-3 rounded-2xl border border-slate-200 flex flex-col gap-2 shadow-sm relative";
+                let isMain = index === 0;
+                let deleteBtn = isMain ? `` : `<button class="w-8 h-8 flex items-center justify-center rounded-xl border border-red-100 text-red-500 hover:bg-red-50 transition shrink-0" onclick="removeSeries(${index})"><i class="ph ph-x text-lg"></i></button>`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-6 h-6 rounded-full border border-slate-100 flex items-center justify-center text-[10px] font-black shrink-0" style="background-color: ${isMain ? '#cafc03' : '#e2e8f0'}">${isMain ? '*' : (index)}</div>
+                        <input type="text" value="${s.name}" onchange="updateSeriesName(${index}, this.value)" class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-800 focus:ring-2 outline-none">
+                        ${deleteBtn}
+                    </div>
+                    <div class="grid grid-cols-3 gap-1 mt-2 pl-8">
+                        <select onchange="updateSeriesProp(${index}, 'type', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600 focus:ring-1 cursor-pointer">
+                            <option value="auto" ${s.type==='auto'?'selected':''}>IKUTI MASTER</option><option value="bar" ${s.type==='bar'?'selected':''}>BAR</option><option value="line" ${s.type==='line'?'selected':''}>LINE</option>
+                        </select>
+                        <select onchange="updateSeriesProp(${index}, 'zIndex', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600 focus:ring-1 cursor-pointer">
+                            <option value="front" ${s.zIndex==='front'?'selected':''}>DEPAN</option><option value="back" ${s.zIndex==='back'?'selected':''}>BELAKANG</option>
+                        </select>
+                        <select onchange="updateSeriesProp(${index}, 'axis', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600 focus:ring-1 cursor-pointer">
+                            <option value="y" ${s.axis==='y'?'selected':''}>KIRI/BAWAH</option><option value="y2" ${s.axis==='y2'?'selected':''}>KANAN/ATAS</option>
+                        </select>
+                    </div>`;
+                els.seriesContainer.appendChild(div);
             });
-        });
-
-        els.lineStyleSelect.addEventListener('change', (e) => { appState.lineStyle = e.target.value; updateVisualizations(); });
-        els.legendPosition.addEventListener('change', (e) => { appState.legendPosition = e.target.value; updateVisualizations(); });
-        els.legendAlign.addEventListener('change', (e) => { appState.legendAlign = e.target.value; updateVisualizations(); });
-        els.datalabelPositionSelect.addEventListener('change', (e) => { appState.datalabelPosition = e.target.value; updateVisualizations(); });
-        
-        const toggleMap = {
-            'toggleLegend': 'showLegend', 
-            'toggleAxisX': 'showAxisX', 
-            'toggleAxisY': 'showAxisY',
-            'toggleAxisYRight': 'showAxisYRight', 
-            'toggleGridX': 'showGridX', 
-            'toggleGridY': 'showGridY'
-        };
-        Object.keys(toggleMap).forEach(id => {
-            const el = document.getElementById(id);
-            if (el) { el.addEventListener('change', (e) => { appState[toggleMap[id]] = e.target.checked; updateVisualizations(); }); }
-        });
-
-        els.bgColor.addEventListener('input', (e) => { els.bgColorText.innerText = e.target.value; appState.bgColor = e.target.value; updateVisualizations(); });
-        els.gridColor.addEventListener('input', (e) => { els.gridColorText.innerText = e.target.value; appState.gridColor = e.target.value; updateVisualizations(); });
-
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag])
-            );
         }
 
-        async function handlePasteExcel() {
-            try {
-                const text = await navigator.clipboard.readText();
-                if (!text || text.trim() === '') { showToast('Clipboard kosong!', true); return; }
-                
-                // ANTI-XSS & ANTI-CRASH VALIDATION
-                if(text.length > 50000 || !text.includes('\t') || text.includes('<html') || text.includes('<!DOCTYPE')) {
-                    showToast('Format ditolak! Harap copy dari tabel Excel/Sheets.', true);
-                    return;
-                }
-
-                const rawRows = text.trim().split('\n');
-                if (rawRows.length < 2) { showToast('Butuh minimal 2 baris data.', true); return; }
-
-                const headers = rawRows[0].split('\t');
-                appState.series = [];
-                for(let i=1; i<headers.length; i++) {
-                    let cleanHeader = escapeHTML(headers[i].trim() || 'Data '+i);
-                    appState.series.push({ id: 's_'+Date.now()+i, name: cleanHeader, type: 'auto', axis: 'y', zIndex: i===1?'back':'front' });
-                }
-
-                appState.rows = [];
-                for(let i=1; i<rawRows.length; i++) {
-                    const cols = rawRows[i].split('\t');
-                    let cleanLabel = escapeHTML(cols[0].trim() || 'Label ' + i);
-                    const values = [];
-                    for(let j=1; j<headers.length; j++) {
-                        let parsed = parseFloat(cols[j] ? cols[j].replace(/[^0-9.-]/g, '') : 0);
-                        values.push({ val: isNaN(parsed) ? 0 : parsed, val2: 0, color: '#000' });
-                    }
-                    appState.rows.push({ id: 'r_'+Date.now()+i, label: cleanLabel, icon: '📊', values: values });
-                }
-                
-                forceRecolor(appState.colorTheme);
-                syncUIToState();
-                showToast('Data Excel berhasil di-import!');
-            } catch (err) {
-                console.error("Paste failed", err);
-                showToast("Gagal membaca Clipboard. Izinkan akses di Browser Anda.", true);
-            }
-        }
-
-        els.btnFullscreen.addEventListener('click', () => {
-            const workspace = document.getElementById('workspaceArea');
-            if (!document.fullscreenElement) {
-                if (workspace.requestFullscreen) workspace.requestFullscreen();
-                else if (workspace.webkitRequestFullscreen) workspace.webkitRequestFullscreen();
-                else if (workspace.msRequestFullscreen) workspace.msRequestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
+        els.btnAddOverlay.addEventListener('click', () => {
+            const slide = getActiveSlide();
+            slide.series.push({ id: 's_' + Date.now(), name: 'Overlay ' + (slide.series.length), type: 'auto', axis: 'y', zIndex: 'front' });
+            slide.rows.forEach(r => r.values.push({ val: 20, val2: 0, color: '#000' }));
+            forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide();
         });
 
-        els.btnExport.addEventListener('click', () => {
-            els.loadingOverlay.classList.remove('hidden');
-            els.loadingContent.classList.remove('hidden');
-            els.errorRescueContent.classList.add('hidden');
+        function removeSeries(index) {
+            const slide = getActiveSlide(); slide.series.splice(index, 1);
+            slide.rows.forEach(r => r.values.splice(index, 1));
+            forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide();
+        }
+
+        function updateSeriesProp(index, prop, val) { const slide=getActiveSlide(); if(slide.series[index]) { slide.series[index][prop] = val; updateVisualizations(); } }
+        function updateSeriesName(index, val) { const slide=getActiveSlide(); if(slide.series[index]) { slide.series[index].name = val; renderDataInputs(); updateVisualizations(); } }
+
+        function renderDataInputs() {
+            const slide = getActiveSlide();
+            els.dataRowsContainer.innerHTML = '';
             
-            setTimeout(() => {
-                const canvas = document.getElementById('mainCanvas');
-                const wrapper = document.getElementById('canvasWrapper');
-                
-                // AMBIL DIMENSI CSS ASLI UNTUK MENCEGAH HASIL GEPENG
-                const cssRect = wrapper.getBoundingClientRect();
-                const renderWidth = cssRect.width;
-                const renderHeight = cssRect.height;
-                
-                // MENGHITUNG KEPADATAN PIKSEL (DPI) DARI KANVAS HD CHART.JS
-                const pixelRatio = canvas.width / renderWidth; 
+            // FITUR SPESIAL: Tipe yang butuh 2 Input (Mulai & Selesai / Y & Radius)
+            let isDualInput = ['gantt', 'waterfall', 'scatter', 'bubble'].includes(slide.chartType);
+            let isScatterBubble = ['scatter', 'bubble'].includes(slide.chartType);
 
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = canvas.width; // Tetap HD 100%
-                tempCanvas.height = renderHeight * pixelRatio; // Menyesuaikan dengan DPI
-                
-                const tCtx = tempCanvas.getContext('2d');
-                
-                let finalBgColor = appState.bgOpacity > 0 ? hexToRgba(appState.bgColor, appState.bgOpacity) : 'transparent';
-                
-                if (finalBgColor !== 'transparent') {
-                    tCtx.fillStyle = finalBgColor;
-                    const rad = (appState.bgRadius || 0) * pixelRatio;
-                    if (rad > 0) {
-                        tCtx.beginPath();
-                        tCtx.moveTo(rad, 0); tCtx.lineTo(tempCanvas.width - rad, 0); tCtx.quadraticCurveTo(tempCanvas.width, 0, tempCanvas.width, rad);
-                        tCtx.lineTo(tempCanvas.width, tempCanvas.height - rad); tCtx.quadraticCurveTo(tempCanvas.width, tempCanvas.height, tempCanvas.width - rad, tempCanvas.height);
-                        tCtx.lineTo(rad, tempCanvas.height); tCtx.quadraticCurveTo(0, tempCanvas.height, 0, tempCanvas.height - rad);
-                        tCtx.lineTo(0, rad); tCtx.quadraticCurveTo(0, 0, rad, 0);
-                        tCtx.closePath(); tCtx.fill();
-                    } else {
-                        tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                    }
-                }
-                
-                // Terapkan skala padding sesuai dengan kepadatan piksel
-                const pad = (appState.bgPadding || 0) * pixelRatio;
-                tCtx.drawImage(canvas, pad, pad, tempCanvas.width - (pad*2), tempCanvas.height - (pad*2));
-                
-                const link = document.createElement('a');
-                link.download = `ProChart_${Date.now()}.png`;
-                link.href = tempCanvas.toDataURL('image/png', 1.0);
-                link.click();
-                els.loadingOverlay.classList.add('hidden');
-                showToast('Gambar HD Berhasil Diekspor!');
-            }, 800);
+            slide.rows.forEach((row, rowIndex) => {
+                const div = document.createElement('div');
+                div.className = "bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col gap-3 shadow-sm";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <button onclick="openIconFor('${row.id}')" class="w-8 h-8 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg hover:border-[#cafc03] transition shadow-sm">${row.icon}</button>
+                        <input type="text" value="${row.label}" onchange="updateRowLabel('${row.id}', this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 outline-none shadow-sm">
+                    </div>`;
+
+                const valsContainer = document.createElement('div');
+                valsContainer.className = "flex gap-2 overflow-x-auto pb-2 border-t border-slate-200 pt-3 mt-1 custom-scrollbar";
+
+                slide.series.forEach((s, sIdx) => {
+                    let v = row.values[sIdx]; if(!v) return;
+                    const vDiv = document.createElement('div'); vDiv.className = "flex flex-col gap-1 min-w-[70px]";
+                    let sName = s.name.length > 8 ? s.name.substring(0, 6) + '..' : s.name;
+                    
+                    let inputHTML = isDualInput ? 
+                        `<div class="flex flex-col gap-1">
+                            <input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" placeholder="${isScatterBubble ? 'Posisi Y' : 'Mulai'}" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-bold text-center">
+                            <input type="text" inputmode="numeric" value="${v.val2}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val2', this.value)" placeholder="${isScatterBubble ? 'Radius' : 'Selesai'}" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[11px] font-bold text-center">
+                         </div>`
+                        : `<input type="text" inputmode="numeric" value="${v.val}" onchange="updateRowValue('${row.id}', ${sIdx}, 'val', this.value)" class="w-full bg-white border border-slate-200 rounded-lg px-1 py-2 text-sm font-black text-center focus:ring-2">`;
+
+                    vDiv.innerHTML = `
+                        <div class="text-[7px] font-black text-slate-400 uppercase tracking-wider text-center truncate mb-1"><div class="inline-block w-1 h-1 rounded-full bg-slate-500 mr-1"></div>${sName}</div>
+                        <div class="relative group">
+                            ${inputHTML}
+                            <div class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border border-white overflow-hidden shadow-sm cursor-pointer opacity-60 hover:opacity-100 z-10">
+                                <input type="color" value="${v.color}" onchange="updateRowValue('${row.id}', ${sIdx}, 'color', this.value)" class="absolute -top-2 -left-2 w-8 h-8 cursor-pointer border-none">
+                            </div>
+                        </div>`;
+                    valsContainer.appendChild(vDiv);
+                });
+                div.appendChild(valsContainer); els.dataRowsContainer.appendChild(div);
+            });
+            translatePage();
+        }
+
+        els.btnAddRow.addEventListener('click', () => {
+            const slide = getActiveSlide();
+            const newRow = { id: 'r_' + Date.now(), label: 'Data Baru', icon: '✨', values: [] };
+            slide.series.forEach(() => newRow.values.push({ val: 50, val2: 0, color: '#000' }));
+            slide.rows.push(newRow); forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide();
         });
+        els.btnRemoveRow.addEventListener('click', () => { const slide=getActiveSlide(); if(slide.rows.length>1) { slide.rows.pop(); syncUIToActiveSlide(); } });
 
-        // EKSPANSI 200+ IKON EMOTICON 
-        const emojiList = [
-            // Manusia & Keluarga
-            '👨','👩','👦','👧','👶','👵','👴','👨‍👩‍👦','👨‍👩‍👧','👨‍👩‍👧‍👦','👪','👨‍👦','👩‍👧','🤝','🙌','👏','👍','❤','✨',
-            '👮','🕵️','💂','👷','🧑‍⚕️','🧑‍‍🎓','🧑‍🏫','🧑‍⚖️','🧑‍🌾','🧑‍🍳','🧑‍🔧','🧑‍🏭','🧑‍💼','🧑‍🔬','🧑‍💻','🧑‍🎤','🧑‍🎨','🧑‍✈️','🧑‍🚀','🧑‍🚒','🦸','🦹','🧙','🧚','🧛','🧜','🧝','🧞','🧟',
-            // Binatang
-            '🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜',
-            '🦟','🦗','🕷️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿️','🦔',
-            // Makanan & Minuman
-            '🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶','🌽','🥕','🧄','🧅','🥔','🍠','🥐','🍞','🥖','🥨','🧀','🥚','🍳','🥞','🥓','🥩','🍗','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🥗','🥘','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🍤','🍙','🍚','🍘','🍥','🥠','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','☕','🍵','🧃','🥤','🍶','🍺','🍻','🥂','🍷','🧊',
-            // Lokasi, Objek & Bisnis
-            '📍','🏢','🏠','🏭','🚗','🚌','🚑','🚒','🚓','🚕','🚜','🚲','🛵','🏍','✈️','🚀','🛸','🚁','🛶','⛵','🚤','🛳️','⛴️️','🚢','💻','📱','⌚','📷','🎥','📞','⚽','🏀','🏈','⚾','🎾','🏐','🏉','🎱','🏥','⚡','🔥','💧','☀','🌟','💰','💳','💸','📈','📉','📊','📦','🛒','🎉','🏆','💡','⚙','📌','📎','🔔','🎵','✅','❌','❓','❗','♻','💯'
-        ];
-        
+        function updateRowLabel(id, val) { const r = getActiveSlide().rows.find(x => x.id === id); if(r) { r.label = val; updateVisualizations(); } }
+        function updateRowValue(rowId, sIdx, prop, val) {
+            const r = getActiveSlide().rows.find(x => x.id === rowId);
+            if(r && r.values[sIdx]) { r.values[sIdx][prop] = (prop==='val'||prop==='val2') ? Number(val.replace(/[^0-9.-]/g, '')) : val; updateVisualizations(); }
+        }
+
+        const emojiList = ['👨','👩','👧','👦','👴','👵','🏢','🏠','🚗','⚽','💰','⚡','🔥','💧','🌟','📦','🛒','🎉','✅','❌'];
         function openIconFor(rowId) {
             activeIconInput = rowId;
-            const grid = document.getElementById('iconGrid');
-            grid.innerHTML = emojiList.map(e => `<button onclick="selectIcon('${e}')" class="text-2xl p-2 hover:bg-slate-100 rounded-xl transition cursor-pointer">${e}</button>`).join('');
-            document.getElementById('iconModal').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('iconModal').classList.remove('opacity-0'); document.getElementById('iconModalContent').classList.remove('scale-95'); }, 10);
+            document.getElementById('iconGrid').innerHTML = emojiList.map(e => `<button onclick="selectIcon('${e}')" class="text-2xl p-2 hover:bg-slate-100 rounded-xl transition cursor-pointer">${e}</button>`).join('');
+            document.getElementById('iconModal').classList.remove('hidden'); setTimeout(() => { document.getElementById('iconModal').classList.remove('opacity-0'); document.getElementById('iconModalContent').classList.remove('scale-95'); }, 10);
         }
-        function closeIconModal() {
-            document.getElementById('iconModal').classList.add('opacity-0'); document.getElementById('iconModalContent').classList.add('scale-95');
-            setTimeout(() => document.getElementById('iconModal').classList.add('hidden'), 300);
-        }
-        function selectIcon(icon) {
-            if(activeIconInput) {
-                const r = appState.rows.find(x => x.id === activeIconInput);
-                if(r) { r.icon = icon; updateVisualizations(); renderDataInputs(); }
-            }
-            closeIconModal();
-        }
-        
-        function applyCustomIcon() {
-            const inputEl = document.getElementById('customIconInput');
-            const val = inputEl.value.trim();
-            if (val && activeIconInput) {
-                selectIcon(val);
-                inputEl.value = ''; 
-            } else if (!val) {
-                showToast('Ketik atau Paste ikon terlebih dahulu!', true);
-            }
-        }
+        function closeIconModal() { document.getElementById('iconModal').classList.add('opacity-0'); document.getElementById('iconModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('iconModal').classList.add('hidden'), 300); }
+        function selectIcon(icon) { if(activeIconInput) { const r = getActiveSlide().rows.find(x => x.id === activeIconInput); if(r) { r.icon = icon; updateVisualizations(); renderDataInputs(); } } closeIconModal(); }
+        function applyCustomIcon() { const val = document.getElementById('customIconInput').value.trim(); if(val && activeIconInput) { selectIcon(val); document.getElementById('customIconInput').value = ''; } }
 
-        function openResetModal() {
-            document.getElementById('resetModal').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('resetModal').classList.remove('opacity-0'); document.getElementById('resetModalContent').classList.remove('scale-95'); }, 10);
-        }
-        function closeResetModal() {
-            document.getElementById('resetModal').classList.add('opacity-0'); document.getElementById('resetModalContent').classList.add('scale-95');
-            setTimeout(() => document.getElementById('resetModal').classList.add('hidden'), 300);
-        }
+        function openResetModal() { document.getElementById('resetModal').classList.remove('hidden'); setTimeout(() => { document.getElementById('resetModal').classList.remove('opacity-0'); document.getElementById('resetModalContent').classList.remove('scale-95'); }, 10); }
+        function closeResetModal() { document.getElementById('resetModal').classList.add('opacity-0'); document.getElementById('resetModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('resetModal').classList.add('hidden'), 300); }
         function executeResetData() {
-            localStorage.removeItem(STORAGE_KEY);
-            appState = JSON.parse(JSON.stringify(defaultAppState));
-            forceRecolor(appState.colorTheme); 
-            syncUIToState();
-            closeResetModal();
+            localStorage.removeItem(STORAGE_KEY); appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0;
+            syncUIToActiveSlide(); renderSlideList(); closeResetModal();
         }
 
-        // EVENT LISTENER: TUTUP MODAL SAAT KLIK AREA LUAR (BACKDROP)
-        document.getElementById('iconModal').addEventListener('click', function(e) {
-            if (e.target === this) closeIconModal();
+        document.getElementById('iconModal').addEventListener('click', function(e){ if(e.target === this) closeIconModal(); });
+        document.getElementById('resetModal').addEventListener('click', function(e){ if(e.target === this) closeResetModal(); });
+
+        function enterPresentationUI() {
+            isPresenting = true;
+            document.body.classList.add('is-fullscreen');
+            
+            // Bypass skala dari panel kiri agar tidak gepeng di layar penuh
+            els.exportTarget.style.transform = 'none';
+            els.exportTarget.style.width = '100%';
+            els.exportTarget.style.height = '100%';
+            
+            if (isSidebarOpen) { isSidebarOpen = false; applySidebarState(); }
+            if (isRightPanelOpen) { isRightPanelOpen = false; applyRightPanelState(); }
+            
+            // Mulai selalu dari slide 1
+            if (activeSlideIndex !== 0) { switchSlide(0); } else { triggerChartAnimation(); }
+            setTimeout(() => { if (mainChart) mainChart.resize(); }, 500);
+        }
+
+        function exitPresentationUI() {
+            if (!isPresenting) return;
+            isPresenting = false;
+            document.body.classList.remove('is-fullscreen');
+            
+            // Kembalikan skala dari slide aktif saat ini
+            const slide = getActiveSlide();
+            els.exportTarget.style.transform = `scale(${slide.chartScale / 100})`;
+            els.exportTarget.style.width = slide.chartWidth + '%';
+            els.exportTarget.style.height = slide.chartHeight + 'px';
+            
+            if (!isMobile) { isSidebarOpen = true; applySidebarState(); }
+            setTimeout(() => { if (mainChart) mainChart.resize(); }, 500);
+        }
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && isPresenting) exitPresentationUI();
+        }
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+        els.btnFullscreen.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) elem.requestFullscreen();
+                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+                enterPresentationUI();
+            }
         });
-        
-        document.getElementById('resetModal').addEventListener('click', function(e) {
-            if (e.target === this) closeResetModal();
+
+        function nextSlide() { if(activeSlideIndex < appSlides.length - 1) switchSlide(activeSlideIndex + 1); }
+        function prevSlide() { if(activeSlideIndex > 0) switchSlide(activeSlideIndex - 1); }
+
+        window.addEventListener('keydown', (e) => {
+            if (!isPresenting) return;
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
         });
+        els.canvasWrapper.addEventListener('click', () => { if (isPresenting) nextSlide(); });
 
         const customEnginePlugin = {
             id: 'customEngine',
             beforeDatasetsDraw: (chart) => {
-                if(appState.elementShadow > 0) {
-                    const ctx = chart.ctx;
-                    ctx.save();
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-                    ctx.shadowBlur = appState.elementShadow;
-                    ctx.shadowOffsetX = appState.elementShadow / 2;
-                    ctx.shadowOffsetY = appState.elementShadow / 2;
+                const slide = getActiveSlide();
+                if(slide.elementShadow > 0) {
+                    const ctx = chart.ctx; ctx.save();
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)'; ctx.shadowBlur = slide.elementShadow;
+                    ctx.shadowOffsetX = slide.elementShadow / 2; ctx.shadowOffsetY = slide.elementShadow / 2;
                 }
             },
-            afterDatasetsDraw: (chart) => {
-                if(appState.elementShadow > 0) chart.ctx.restore();
-            },
+            afterDatasetsDraw: (chart) => { const slide = getActiveSlide(); if(slide.elementShadow > 0) chart.ctx.restore(); },
             afterDraw: (chart) => {
-                if (appState.watermarkText) {
-                    const ctx = chart.ctx;
-                    ctx.save();
-                    ctx.font = 'bold 16px Inter';
-                    ctx.fillStyle = 'rgba(150, 150, 150, 0.5)';
-                    ctx.textAlign = 'right';
-                    ctx.textBaseline = 'bottom';
-                    ctx.fillText(appState.watermarkText, chart.width - 20, chart.height - 20);
+                const slide = getActiveSlide();
+                if (slide.watermarkText) {
+                    const ctx = chart.ctx; ctx.save();
+                    ctx.font = 'bold 16px Inter'; ctx.fillStyle = 'rgba(150, 150, 150, 0.5)';
+                    ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
+                    ctx.fillText(slide.watermarkText, chart.width - 20, chart.height - 20);
                     ctx.restore();
                 }
             }
         };
 
         async function updateVisualizations() {
-            els.exportTarget.style.transform = `scale(${appState.chartScale / 100})`;
-            els.exportTarget.style.width = appState.chartWidth + '%';
-            els.exportTarget.style.height = appState.chartHeight + 'px';
-            
-            els.canvasWrapper.style.backgroundColor = hexToRgba(appState.bgColor || '#f8fafc', appState.bgOpacity || 0);
-            els.canvasWrapper.style.borderRadius = (appState.bgRadius || 0) + 'px';
-            els.canvasWrapper.style.padding = (appState.bgPadding || 0) + 'px';
-
+            const slide = getActiveSlide();
+            if(!isPresenting) {
+                els.exportTarget.style.transform = `scale(${slide.chartScale / 100})`;
+                els.exportTarget.style.width = slide.chartWidth + '%';
+                els.exportTarget.style.height = slide.chartHeight + 'px';
+            }
+            els.canvasWrapper.style.backgroundColor = hexToRgba(slide.bgColor || '#f8fafc', slide.bgOpacity || 0);
             await renderMainChart();
             renderPercentageWidgets();
             saveState();
@@ -1229,39 +1064,31 @@
 
         async function renderMainChart() {
             try {
-                els.loadingOverlay.classList.remove('hidden');
-                els.errorRescueContent.classList.add('hidden');
-                els.loadingContent.classList.remove('hidden');
-
+                const slide = getActiveSlide();
                 if (mainChart) { mainChart.destroy(); mainChart = null; }
                 els.canvasContainer.innerHTML = ''; 
-                const canvasEl = document.createElement('canvas');
-                canvasEl.id = 'mainCanvas';
+                const canvasEl = document.createElement('canvas'); canvasEl.id = 'mainCanvas';
                 els.canvasContainer.appendChild(canvasEl);
                 const ctx = canvasEl.getContext('2d');
 
-                let isHorizontal = appState.chartType === 'bar-horizontal' || appState.chartType === 'gantt';
-                let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(appState.chartType);
-                let isScatterBubble = ['scatter', 'bubble'].includes(appState.chartType);
-                let isWaterfall = appState.chartType === 'waterfall';
-                let isWordCloud = appState.chartType === 'wordCloud';
-                let isMapWorld = appState.chartType === 'choropleth-world';
-                let isMapIndo = appState.chartType === 'choropleth-indo';
-                let isMap = isMapWorld || isMapIndo;
+                let isHorizontal = slide.chartType === 'bar-horizontal' || slide.chartType === 'gantt';
+                let isRadial = ['pie', 'doughnut', 'polarArea', 'radar'].includes(slide.chartType);
+                let isMapWorld = slide.chartType === 'choropleth-world', isMapIndo = slide.chartType === 'choropleth-indo';
+                let isMap = isMapWorld || isMapIndo, isWordCloud = slide.chartType === 'wordCloud';
                 
-                let labels = appState.rows.map(r => r.icon + ' ' + r.label);
+                let isFloatingBar = ['gantt', 'waterfall'].includes(slide.chartType);
+                let isScatterBubble = ['scatter', 'bubble'].includes(slide.chartType);
+
+                let labels = slide.rows.map(r => r.icon + ' ' + r.label);
                 let datasets = [];
                 
-                let stackLogic = appState.stackMode || 'accumulate';
-                let isStacked = stackLogic === 'accumulate';
+                let stackLogic = slide.stackMode || 'accumulate';
+                let isStacked = stackLogic === 'accumulate' && !isFloatingBar && !isScatterBubble; // Matikan stack untuk waterfall/scatter
                 let isGrouped = stackLogic === 'grouped';
                 let isInclude = stackLogic === 'include';
 
-                let lineTension = appState.lineStyle === 'smooth' ? 0.4 : 0;
-                let lineStepped = appState.lineStyle === 'stepped';
-
                 function getDatalabelAlignPos() {
-                    switch(appState.datalabelPosition) {
+                    switch(slide.datalabelPosition) {
                         case 'end': return { anchor: 'end', align: 'start' };
                         case 'start': return { anchor: 'start', align: 'end' };
                         case 'outside': return { anchor: 'end', align: 'end' };
@@ -1269,287 +1096,187 @@
                     }
                 }
                 let dlPos = getDatalabelAlignPos();
+                let globalBaseType = isWordCloud ? 'wordCloud' : (isMap ? 'choropleth' : (isRadial || isScatterBubble ? slide.chartType : (['line','area'].includes(slide.chartType) ? 'line' : 'bar')));
 
-                let globalBaseType = 'bar';
-                if (isWordCloud) globalBaseType = 'wordCloud';
-                else if (isMap) globalBaseType = 'choropleth';
-                else if (isRadial || isScatterBubble) globalBaseType = appState.chartType;
-                else if (appState.chartType === 'line' || appState.chartType === 'area') globalBaseType = 'line';
-                else if (appState.chartType === 'bar-horizontal') globalBaseType = 'bar';
-
-                // ==========================================
-                // BYPASS SPESIFIK MAPS (PETA GEOSPASIAL)
-                // ==========================================
                 if (isMap) {
                     let features = [];
-                    if (isMapWorld) {
-                        if (!mapCache.world) {
-                            const res = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
-                            mapCache.world = await res.json();
-                        }
-                        features = mapCache.world.features;
-                    } else {
-                        if (!mapCache.indo) {
-                            const res = await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province.json');
-                            mapCache.indo = await res.json();
-                        }
-                        features = mapCache.indo.features;
-                    }
+                    if (isMapWorld) { if (!mapCache.world) { const res = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json'); mapCache.world = await res.json(); } features = mapCache.world.features; } 
+                    else { if (!mapCache.indo) { const res = await fetch('https://raw.githubusercontent.com/superpikar/indonesia-geojson/master/indonesia-province.json'); mapCache.indo = await res.json(); } features = mapCache.indo.features; }
 
-                    // Mapping Data User dengan Geografi Peta (Pencarian Nama Pintar)
-                    let userRowDict = {};
-                    appState.rows.forEach(r => {
-                        let cleanLabel = r.label.replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim();
-                        userRowDict[cleanLabel] = r;
-                    });
-
-                    let mapLabels = [];
-                    let mapDataArr = [];
+                    let userRowDict = {}; slide.rows.forEach(r => userRowDict[r.label.replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim()] = r);
+                    let mapDataArr = [], mapLabels = [];
 
                     features.forEach(f => {
                         let fname = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim();
                         let matchedRow = userRowDict[fname];
-
-                        if (!matchedRow) {
-                            for (let key in userRowDict) {
-                                if ((fname && key.includes(fname)) || (fname && fname.includes(key))) {
-                                    matchedRow = userRowDict[key];
-                                    break;
-                                }
-                            }
-                        }
-
-                        mapLabels.push(f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "Unknown");
+                        if (!matchedRow) { for (let key in userRowDict) { if (fname.includes(key) || key.includes(fname)) { matchedRow = userRowDict[key]; break; } } }
                         
-                        // FIX SUPER PENTING: Mencegah NaN pada Peta yang menyebabkan Blank Screen
-                        let val = 0;
-                        if (matchedRow && matchedRow.values[0] && matchedRow.values[0].val !== undefined) {
-                            val = Number(matchedRow.values[0].val);
-                            if (isNaN(val)) val = 0;
-                        }
-                        mapDataArr.push({ feature: f, value: val });
+                        mapLabels.push(f.properties.name || f.properties.NAME_1 || f.id || "Unknown");
+                        let val = (matchedRow && matchedRow.values[0] && matchedRow.values[0].val !== undefined) ? Number(matchedRow.values[0].val) : 0;
+                        mapDataArr.push({ feature: f, value: isNaN(val) ? 0 : val });
                     });
-
+                    
                     labels = mapLabels;
                     datasets = [{
-                        label: appState.series[0]?.name || 'Data Utama',
-                        outline: features, // FIX PENTING: Memaksa batas (bounding box) peta tampil sempurna 100%
-                        data: mapDataArr,
-                        backgroundColor: (context) => {
-                            if (context.raw && context.raw.feature) {
-                                let f = context.raw.feature;
-                                let fname = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim();
-                                let matchedRow = userRowDict[fname];
-                                if (!matchedRow) {
-                                    for (let key in userRowDict) {
-                                        if ((fname && key.includes(fname)) || (fname && fname.includes(key))) {
-                                            matchedRow = userRowDict[key]; break;
-                                        }
-                                    }
-                                }
-                                return matchedRow && matchedRow.values[0] ? matchedRow.values[0].color : 'rgba(200, 200, 200, 0.15)'; // Warna abu-abu jika kosong
-                            }
+                        label: slide.series[0]?.name || 'Data Utama', outline: features, data: mapDataArr,
+                        backgroundColor: (c) => { 
+                            let f = c.raw?.feature; 
+                            if(f) { 
+                                let n = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim(); 
+                                let mr = userRowDict[n]; 
+                                if(!mr){ for(let k in userRowDict) if(n.includes(k)||k.includes(n)) {mr=userRowDict[k];break;} } 
+                                return mr && mr.values[0] ? mr.values[0].color : 'rgba(200, 200, 200, 0.15)'; 
+                            } 
                             return 'rgba(200, 200, 200, 0.15)'; 
                         },
-                        borderColor: appState.chartSpacing > 0 ? '#ffffff' : 'rgba(0,0,0,0.1)',
-                        borderWidth: appState.chartSpacing > 0 ? 1 : 0.5
+                        borderColor: slide.chartSpacing > 0 ? '#ffffff' : 'rgba(0,0,0,0.1)', borderWidth: slide.chartSpacing > 0 ? 1 : 0.5
                     }];
-                }
-                // ==========================================
-                // BYPASS SPESIFIK WORD CLOUD
-                // ==========================================
-                else if (isWordCloud) {
-                    let wcData = appState.rows.map(r => (r.values[0]?.val || 0));
-                    let wcColors = appState.rows.map(r => r.values[0]?.color || '#000');
-                    datasets = [{
-                        label: appState.series[0]?.name || 'Word Cloud',
-                        data: wcData,
-                        color: wcColors,
-                        fontFamily: 'Inter'
-                    }];
-                }
-                // ==========================================
-                // BYPASS SPESIFIK RADIAL (PIE, DONUT, RADAR, POLAR)
-                // ==========================================
-                else if (isRadial) {
-                    let rData = appState.rows.map(r => (r.values[0]?.val || 0));
-                    let rColors = appState.rows.map(r => r.values[0]?.color || '#000');
-                    
-                    let datasetConfig = {
-                        label: appState.series[0]?.name || 'Data Utama',
-                        data: rData,
-                        backgroundColor: rColors,
-                        borderColor: appState.chartType === 'radar' ? rColors[0] : '#ffffff',
-                        borderWidth: appState.chartSpacing > 0 ? 2 : 0,
-                    };
+                } else if (isWordCloud) {
+                    datasets = [{ label: slide.series[0]?.name || 'Word Cloud', data: slide.rows.map(r => r.values[0]?.val || 0), color: slide.rows.map(r => r.values[0]?.color || '#000'), fontFamily: 'Inter' }];
+                } else if (isRadial) {
+                    let rColors = slide.rows.map(r => r.values[0]?.color || '#000');
+                    let dsConfig = { label: slide.series[0]?.name || 'Data', data: slide.rows.map(r => r.values[0]?.val || 0), backgroundColor: rColors, borderColor: slide.chartType === 'radar' ? rColors[0] : '#ffffff', borderWidth: slide.chartSpacing > 0 ? 2 : 0 };
+                    if (slide.chartType === 'radar') { dsConfig.backgroundColor = hexToRgba(rColors[0], 20); dsConfig.fill = true; dsConfig.borderWidth = 3; }
+                    datasets = [dsConfig];
+                } else {
+                    slide.series.forEach((s, sIdx) => {
+                        let parsedType = s.type === 'auto' ? globalBaseType : s.type; if (parsedType === 'area') parsedType = 'line';
+                        let isLine = parsedType === 'line', isFillArea = s.type === 'area' || (s.type === 'auto' && slide.chartType === 'area');
+                        let dataArr = [], colorArr = [];
 
-                    if (appState.chartType === 'radar') {
-                        datasetConfig.backgroundColor = hexToRgba(rColors[0], 20); // Transparan agar tidak nutupi garis
-                        datasetConfig.fill = true;
-                        datasetConfig.borderWidth = 3;
-                    }
+                        slide.rows.forEach((r, rIdx) => {
+                            let v = r.values[sIdx] || {val:0, val2:0, color:'#000'}; colorArr.push(v.color);
+                            let val1 = Number(v.val) || 0;
+                            let val2 = Number(v.val2) || 0;
 
-                    datasets = [datasetConfig];
-                }
-                // ==========================================
-                // CHART UMUM (BAR, LINE, AREA, SCATTER, DLL)
-                // ==========================================
-                else {
-                    appState.series.forEach((s, sIdx) => {
-                        let parsedType = s.type === 'auto' ? globalBaseType : s.type;
-                        if (parsedType === 'area') parsedType = 'line';
-                        
-                        let isLine = parsedType === 'line';
-                        let isFillArea = s.type === 'area' || (s.type === 'auto' && appState.chartType === 'area');
-                        
-                        let dataArr = [];
-                        let colorArr = [];
-
-                        appState.rows.forEach((r, rIdx) => {
-                            let v = r.values[sIdx] || {val:0, val2:0, color:'#000'};
-                            colorArr.push(v.color);
-                            
                             if (isScatterBubble) {
-                                dataArr.push({ x: rIdx+1, y: v.val, r: (v.val2 || 10) / 5 });
-                            } else if (appState.chartType === 'gantt' || isWaterfall) {
-                                dataArr.push([v.val, v.val2]);
-                            } else {
-                                dataArr.push(v.val);
+                                // MAPPING SPESIAL UNTUK BUBBLE / SCATTER
+                                dataArr.push({ x: labels[rIdx], y: val1, r: Math.max(3, val2 / 5) });
+                            }
+                            else if (isFloatingBar) {
+                                // MAPPING SPESIAL UNTUK WATERFALL / GANTT (Nilai Rentang)
+                                dataArr.push([Math.min(val1, val2), Math.max(val1, val2)]);
+                            }
+                            else {
+                                dataArr.push(val1);
                             }
                         });
 
-                        let bgColor = isLine && !isFillArea ? 'transparent' : colorArr;
-                        let borderColor = isLine ? colorArr[0] : (appState.chartSpacing > 0 ? '#ffffff' : 'transparent');
-                        
-                        // Jika 1 series colorful
-                        if(appState.series.length === 1 && !isLine) {
-                            borderColor = appState.chartSpacing > 0 ? '#ffffff' : 'transparent';
-                        }
-
+                        let bgColor = isLine && !isFillArea ? 'transparent' : colorArr, borderColor = isLine ? colorArr[0] : (slide.chartSpacing > 0 ? '#ffffff' : 'transparent');
                         if (isFillArea) bgColor = hexToRgba(colorArr[0], 20);
 
-                        let reqAxis = s.axis === 'y2' ? 'Right' : 'Primary';
-                        let useX, useY;
+                        let useX = isHorizontal ? (s.axis === 'y2' ? 'xRight' : 'x') : 'x';
+                        let useY = isHorizontal ? 'y' : (s.axis === 'y2' ? 'yRight' : 'y');
                         
-                        if (isHorizontal) { useY = 'y'; useX = reqAxis === 'Right' ? 'xRight' : 'x'; } 
-                        else { useX = 'x'; useY = reqAxis === 'Right' ? 'yRight' : 'y'; }
-
-                        let datasetConfig = {
-                            label: s.name, type: parsedType, indexAxis: isHorizontal ? 'y' : 'x',
-                            data: dataArr, backgroundColor: bgColor, borderColor: borderColor,
-                            borderWidth: isLine ? 3 : (appState.chartSpacing > 0 ? 2 : 0),
-                            fill: isFillArea, tension: lineTension, stepped: lineStepped, borderRadius: appState.borderRadius,
-                            grouped: isGrouped, 
-                            stack: isStacked ? 'Stack 0' : undefined,
-                            order: s.zIndex === 'front' ? 0 : 2
-                        };
-
-                        datasetConfig.yAxisID = useY; 
-                        datasetConfig.xAxisID = useX;
-                        datasets.push(datasetConfig);
+                        datasets.push({
+                            label: s.name, type: parsedType, indexAxis: isHorizontal ? 'y' : 'x', data: dataArr, backgroundColor: bgColor, borderColor: borderColor,
+                            borderWidth: isLine ? 3 : (slide.chartSpacing > 0 ? 2 : 0), fill: isFillArea, tension: slide.lineStyle === 'smooth' ? 0.4 : 0, stepped: slide.lineStyle === 'stepped',
+                            borderRadius: slide.borderRadius, grouped: isGrouped, stack: isStacked ? 'Stack 0' : undefined, order: s.zIndex === 'front' ? 0 : 2, xAxisID: useX, yAxisID: useY
+                        });
                     });
                 }
 
                 const chartOptions = {
-                    responsive: true, maintainAspectRatio: false,
-                    indexAxis: isHorizontal ? 'y' : 'x',
-                    layout: { padding: { top: 20, bottom: 20, left: 20, right: 20 } },
-                    interaction: { mode: isInclude ? 'index' : 'nearest', intersect: false },
+                    responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x',
+                    layout: { padding: 20 }, interaction: { mode: isInclude ? 'index' : 'nearest', intersect: false },
                     plugins: {
-                        title: { display: !!appState.chartTitle, text: appState.chartTitle, font: { family:'Inter', size:24, weight:'900' }, color: '#0f172a', padding:{bottom: 10} },
-                        subtitle: { display: !!appState.chartSubtitle, text: appState.chartSubtitle, font: { family:'Inter', size:14, weight:'500' }, color: '#64748b', padding:{bottom: 24} },
-                        legend: { display: appState.showLegend, position: appState.legendPosition, align: appState.legendAlign || 'center', labels: { font: { family: 'Inter', size: appState.legendFontSize, weight: 'bold' }, color: '#334155', usePointStyle: true, padding: 20 } },
-                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
-                        datalabels: {
-                            display: !isRadial && !isScatterBubble && !isMap, anchor: dlPos.anchor, align: dlPos.align, color: appState.datalabelPosition === 'outside' ? '#111827' : '#fff',
-                            font: { family: 'Inter', weight: '900', size: 14 },
-                            formatter: (v) => Array.isArray(v) ? (v[1] - v[0]) : Math.round(v),
-                            textStrokeColor: appState.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: appState.datalabelPosition === 'outside' ? 0 : 3
+                        title: { display: !!slide.chartTitle, text: slide.chartTitle, font: { family:'Inter', size:32, weight:'900' }, color: '#0f172a', padding:{bottom: 10} },
+                        subtitle: { display: !!slide.chartSubtitle, text: slide.chartSubtitle, font: { family:'Inter', size:16, weight:'500' }, color: '#64748b', padding:{bottom: 24} },
+                        legend: { display: slide.showLegend && !isMap, position: slide.legendPosition, align: slide.legendAlign || 'center', labels: { font: { family: 'Inter', size: slide.legendFontSize, weight: 'bold' }, color: '#334155', usePointStyle: true, padding: 20 } },
+                        datalabels: { 
+                            display: !isRadial && !isMap && !isScatterBubble, 
+                            anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelPosition === 'outside' ? '#111827' : '#fff', 
+                            font: { family: 'Inter', weight: '900', size: 14 }, 
+                            formatter: (v) => Array.isArray(v) ? Math.abs(v[1] - v[0]) : (typeof v === 'object' ? v.y : Math.round(v)), 
+                            textStrokeColor: slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: slide.datalabelPosition === 'outside' ? 0 : 3 
                         }
                     },
                     scales: {}
                 };
 
                 if (isMap) {
-                    chartOptions.scales = {
-                        projection: {
-                            axis: 'x',
-                            projection: isMapIndo ? 'mercator' : 'equirectangular'
-                        }
-                    };
-                    chartOptions.plugins.legend.display = false; // Legend peta seringkali berantakan
+                    chartOptions.scales = { projection: { axis: 'x', projection: isMapIndo ? 'mercator' : 'equirectangular' } };
+                    chartOptions.plugins.legend.display = false;
                 } else if (!isRadial && !isWordCloud) {
-                    let hasSecondaryAxis = appState.series.some(s => s.axis === 'y2');
+                    
+                    // PEMAKSAAN AXIS KATEGORI (Mencegah Bubble/Scatter Berubah Menjadi Angka)
+                    let catAxisType = isScatterBubble ? 'category' : undefined; 
+                    let hasSecondaryAxis = slide.series.some(s => s.axis === 'y2');
+                    
+                    // KENDALI MUTLAK SUMBU
+                    let displayNumbers = slide.showAxisY !== false;
+                    let displayCategory = slide.showAxisX !== false;
+
                     if (isHorizontal) {
-                        chartOptions.scales.y = { display: appState.showAxisY, stacked: isStacked, grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        chartOptions.scales.x = { display: appState.showAxisX, stacked: isStacked, grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.xRight = { display: appState.showAxisYRight, position: 'top', stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
+                        chartOptions.scales.y = { type: catAxisType || 'category', display: displayCategory, stacked: isStacked, grid: { display: slide.showGridY, color: slide.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        chartOptions.scales.x = { type: 'linear', display: displayNumbers, stacked: isStacked, grid: { display: slide.showGridX, color: slide.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        if (hasSecondaryAxis) {
+                            chartOptions.scales.xRight = { type: 'linear', position: 'top', display: displayNumbers, stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize }, color: '#64748b' } };
+                        }
                     } else {
-                        chartOptions.scales.x = { display: appState.showAxisX, stacked: isStacked, grid: { display: appState.showGridX, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        chartOptions.scales.y = { display: appState.showAxisY, position: 'left', stacked: isStacked, grid: { display: appState.showGridY, color: appState.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize, weight: '500' }, color: '#64748b' } };
-                        if (appState.showAxisYRight || hasSecondaryAxis) chartOptions.scales.yRight = { display: appState.showAxisYRight, position: 'right', stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: appState.axisFontSize }, color: '#64748b' } };
+                        chartOptions.scales.x = { type: catAxisType || 'category', display: displayCategory, stacked: isStacked, grid: { display: slide.showGridX, color: slide.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        chartOptions.scales.y = { type: 'linear', display: displayNumbers, position: 'left', stacked: isStacked, grid: { display: slide.showGridY, color: slide.gridColor, drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } };
+                        if (hasSecondaryAxis) {
+                            chartOptions.scales.yRight = { type: 'linear', position: 'right', display: displayNumbers, stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize }, color: '#64748b' } };
+                        }
                     }
                 } else if (isRadial) {
-                    if (appState.chartType !== 'radar' && appState.chartType !== 'polarArea') { 
-                        delete chartOptions.scales; // HAPUS SCALES MUTLAK UNTUK PIE & DONUT AGAR TIDAK CRASH
-                    }
-                    chartOptions.cutout = appState.chartType === 'doughnut' ? appState.donutCutout + '%' : 0;
-                    if (appState.chartType !== 'radar') { 
-                        chartOptions.elements = { arc: { borderRadius: appState.borderRadius, borderWidth: appState.chartSpacing > 0 ? 2 : 0, borderColor: '#fff' } }; 
-                    }
-                    chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => { 
-                        let sum=0; ctx.chart.data.datasets[0].data.map(d=>sum+=(d||0)); 
-                        if(sum===0) return '0%'; return Math.round((value/sum)*100)+'%'; 
-                    }};
+                    if (slide.chartType !== 'radar' && slide.chartType !== 'polarArea') delete chartOptions.scales;
+                    chartOptions.cutout = slide.chartType === 'doughnut' ? slide.donutCutout + '%' : 0;
+                    if (slide.chartType !== 'radar') chartOptions.elements = { arc: { borderRadius: slide.borderRadius, borderWidth: slide.chartSpacing > 0 ? 2 : 0, borderColor: '#fff' } };
+                    chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, formatter: (value, ctx) => { let sum=0; ctx.chart.data.datasets[0].data.map(d=>sum+=(d||0)); return sum===0 ? '0%' : Math.round((value/sum)*100)+'%'; }};
                 }
                 
-                if (!isRadial && !isMap) { chartOptions.barPercentage = appState.chartThickness / 100; chartOptions.categoryPercentage = 0.8; }
-
-                let activePlugins = [customEnginePlugin];
-                if (typeof ChartDataLabels !== 'undefined') activePlugins.push(ChartDataLabels);
-
-                mainChart = new Chart(ctx, { type: globalBaseType, data: { labels: labels, datasets: datasets }, options: chartOptions, plugins: activePlugins });
+                if (!isRadial && !isMap) { chartOptions.barPercentage = slide.chartThickness / 100; chartOptions.categoryPercentage = 0.8; }
                 
-                els.loadingOverlay.classList.add('hidden');
-                els.errorRescueContent.classList.add('hidden');
-                els.loadingContent.classList.remove('hidden');
+                let activePlugins = [customEnginePlugin]; if (typeof ChartDataLabels !== 'undefined') activePlugins.push(ChartDataLabels);
+                mainChart = new Chart(ctx, { type: globalBaseType, data: { labels: labels, datasets: datasets }, options: chartOptions, plugins: activePlugins });
 
-            } catch (err) {
-                console.error("Renderer Reset System Activated:", err);
-                els.loadingContent.classList.add('hidden');
-                els.errorRescueContent.classList.remove('hidden');
-                els.loadingOverlay.classList.remove('hidden');
-            }
+            } catch (err) { console.error("Rendering Failed:", err); }
         }
 
         function renderPercentageWidgets() {
-            let total = 0;
-            appState.rows.forEach(r => { if(r.values[0]) total += (r.values[0].val || 0); });
-            els.totalSumDisplay.innerText = total.toLocaleString();
-
-            els.percentageContainer.innerHTML = '';
-            appState.rows.forEach(r => {
-                let val = r.values[0] ? (r.values[0].val || 0) : 0;
-                let perc = total > 0 ? Math.round((val / total) * 100) : 0;
-                let color = r.values[0] ? r.values[0].color : '#ccc';
-                
+            let total = 0; getActiveSlide().rows.forEach(r => { if(r.values[0]) total += (r.values[0].val || 0); });
+            els.totalSumDisplay.innerText = total.toLocaleString(); els.percentageContainer.innerHTML = '';
+            getActiveSlide().rows.forEach(r => {
+                let perc = total > 0 ? Math.round(((r.values[0]?.val || 0) / total) * 100) : 0;
                 els.percentageContainer.innerHTML += `
-                    <div class="flex items-center gap-1.5 sm:gap-2 bg-white/50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-white shrink-0 shadow-sm">
-                        <div class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full" style="background-color: ${color}"></div>
-                        <span class="text-[10px] sm:text-xs font-bold text-slate-700 whitespace-nowrap">${r.icon} ${r.label}</span>
-                        <span class="text-[10px] sm:text-xs font-black text-slate-900 ml-1">${perc}%</span>
-                    </div>
-                `;
+                    <div class="flex items-center gap-2 bg-white/50 px-3 py-1.5 rounded-xl border border-white shrink-0 shadow-sm">
+                        <div class="w-2.5 h-2.5 rounded-full" style="background-color: ${r.values[0]?.color || '#ccc'}"></div>
+                        <span class="text-xs font-bold text-slate-700 whitespace-nowrap">${r.icon} ${r.label}</span>
+                        <span class="text-xs font-black text-slate-900 ml-1">${perc}%</span>
+                    </div>`;
             });
         }
 
-        window.onload = () => {
+        els.btnExport.addEventListener('click', () => {
+            els.loadingOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                const canvas = document.getElementById('mainCanvas'), wrapper = document.getElementById('canvasWrapper');
+                const pixelRatio = canvas.width / wrapper.getBoundingClientRect().width;
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width; tempCanvas.height = wrapper.getBoundingClientRect().height * pixelRatio;
+                const tCtx = tempCanvas.getContext('2d'), slide = getActiveSlide();
+                
+                if (slide.bgOpacity > 0) {
+                    tCtx.fillStyle = hexToRgba(slide.bgColor, slide.bgOpacity);
+                    tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                }
+                tCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+                
+                const link = document.createElement('a'); link.download = `ProChart_Slide_${activeSlideIndex+1}_${Date.now()}.png`; link.href = tempCanvas.toDataURL('image/png', 1.0); link.click();
+                els.loadingOverlay.classList.add('hidden'); showToast('Slide Diekspor HD!');
+            }, 800);
+        });
+
+        // Initialize App on DOM Load (Mencegah Blank Screen)
+        window.addEventListener('DOMContentLoaded', () => {
             loadState();
             applySidebarState();
-            forceRecolor(appState.colorTheme);
-            syncUIToState();
+            syncUIToActiveSlide();
+            renderSlideList();
             translatePage();
-        };
+        });
     </script>
 </body>
 </html>
