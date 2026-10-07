@@ -36,7 +36,8 @@
 
     <style>
         /* FIX iOS Safari Height Issue (Anti Menggantung) */
-        html, body {
+        html,
+        body {
             height: 100%;
             height: -webkit-fill-available;
             width: 100%;
@@ -121,6 +122,12 @@
         .modal-bg-blur {
             background: rgba(15, 23, 42, 0.6);
             backdrop-filter: blur(8px);
+        }
+
+        .hidden-popup {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: scale(0.95) !important;
         }
 
         #sidebarHeader.scrolled {
@@ -249,6 +256,27 @@
             transform: scale(1.02);
         }
 
+        /* CALLOUT BOX & LEADER LINE CSS */
+        .callout-box {
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            pointer-events: auto;
+            transition: box-shadow 0.2s, transform 0.1s;
+        }
+
+        .callout-box:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 0 0 2px #cafc03;
+            z-index: 65 !important;
+        }
+
+        .callout-box.grabbing {
+            cursor: grabbing !important;
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.2), 0 0 0 2px #111827;
+            transform: translate(-50%, -50%) scale(1.04) !important;
+            z-index: 70 !important;
+        }
+
         @keyframes fadeInScale {
             0% {
                 opacity: 0;
@@ -321,9 +349,90 @@
         </div>
     </div>
 
-    <!-- POPUP ZOOM / EXPLODE INTERAKTIF -->
+    <!-- MODAL PROJECT MANAGER (NEW PROJECT, SAVE, SAVE AS, OPEN) -->
+    <div id="projectModal"
+        class="fixed inset-0 z-[190] hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300 px-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88vh] border border-slate-100"
+            id="projectModalContent">
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-[#cafc03] text-slate-900 flex items-center justify-center font-black">
+                        <i class="ph-bold ph-folder-notch-open text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-sm tracking-wide uppercase" data-i18n="projManager">Manajer Proyek Studio</h3>
+                        <p class="text-[10px] text-slate-400" id="currentProjectNameLabel">Proyek Aktif: Tanpa Judul</p>
+                    </div>
+                </div>
+                <button onclick="closeProjectModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto custom-scrollbar space-y-5">
+                <!-- NAMA PROYEK AKTIF -->
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                    <label class="block text-[10px] font-black text-slate-500 uppercase mb-1.5" data-i18n="projName">Nama Proyek Saat Ini</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="projectNameInput" placeholder="Ketik nama proyek..."
+                            class="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-[#cafc03]">
+                        <button onclick="quickSaveProject()"
+                            class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition shrink-0">
+                            <i class="ph-bold ph-floppy-disk"></i> <span data-i18n="saveBtn">Save</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AKSI UTAMA: NEW, SAVE AS FILE, OPEN FILE -->
+                <div class="grid grid-cols-3 gap-2.5">
+                    <button onclick="createNewProjectPrompt()"
+                        class="flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 transition group text-center">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition">
+                            <i class="ph-bold ph-file-plus text-lg"></i>
+                        </div>
+                        <span class="text-[11px] font-black text-slate-800" data-i18n="newProj">New Project</span>
+                        <span class="text-[9px] text-slate-400 leading-tight">Mulai kanvas baru yang bersih</span>
+                    </button>
+
+                    <button onclick="exportProjectFile()"
+                        class="flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/40 transition group text-center">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition">
+                            <i class="ph-bold ph-download-simple text-lg"></i>
+                        </div>
+                        <span class="text-[11px] font-black text-slate-800" data-i18n="saveAsFile">Save As (File)</span>
+                        <span class="text-[9px] text-slate-400 leading-tight">Unduh file backup (.json) ke PC/HP</span>
+                    </button>
+
+                    <button onclick="document.getElementById('importProjectFileInput').click()"
+                        class="flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/40 transition group text-center">
+                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center transition">
+                            <i class="ph-bold ph-upload-simple text-lg"></i>
+                        </div>
+                        <span class="text-[11px] font-black text-slate-800" data-i18n="openFile">Open File</span>
+                        <span class="text-[9px] text-slate-400 leading-tight">Buka file proyek dari perangkat</span>
+                    </button>
+                    <input type="file" id="importProjectFileInput" accept=".json,.pcv" class="hidden" onchange="importProjectFile(event)">
+                </div>
+
+                <!-- DAFTAR SIMPANAN DI BROWSER (LOCAL SLOTS) -->
+                <div class="space-y-2.5 pt-2 border-t border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1.5">
+                            <i class="ph-bold ph-Archive text-indigo-500"></i> <span data-i18n="savedSlots">Daftar Proyek Tersimpan (Browser)</span>
+                        </label>
+                        <button onclick="saveAsNewSlot()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2.5 py-1 rounded-lg transition">
+                            + Save As Slot Baru
+                        </button>
+                    </div>
+                    <div id="savedProjectsList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP ZOOM / EXPLODE & DRILL-DOWN INTERAKTIF -->
     <div id="elementPopup"
-        class="fixed z-[100] bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-2xl p-4 w-[280px] transition-all duration-200 scale-95 opacity-0 pointer-events-none transform origin-top-left flex flex-col gap-3 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        class="fixed z-[100] bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-2xl p-4 w-[280px] transition-all duration-200 transform origin-top-left flex flex-col gap-3 hidden-popup">
         <div class="flex items-center justify-between border-b border-slate-100 pb-2">
             <div class="flex items-center gap-2">
                 <span id="popupIcon" class="text-base">📍</span>
@@ -355,6 +464,29 @@
             <input type="range" id="popupExplodeSlider" min="0" max="100" value="0">
             <p class="text-[8px] text-slate-400 mt-2 leading-tight" data-i18n="popupDesc">Geser untuk
                 membesarkan/menarik elemen keluar dari grafik.</p>
+        </div>
+        <!-- FITUR BARU: CALLOUT & GARIS PETUNJUK SPESIFIK ELEMEN -->
+        <div class="pt-2.5 border-t border-slate-100 space-y-2.5">
+            <div class="flex items-center justify-between">
+                <label class="text-[10px] font-black text-emerald-700 uppercase flex items-center gap-1">
+                    <i class="ph-bold ph-Exclude"></i> <span data-i18n="popupCallout">Garis Petunjuk (Callout)</span>
+                </label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="popupCalloutToggle" class="sr-only peer">
+                    <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+            </div>
+            <div id="popupCalloutDetails" class="hidden space-y-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
+                <input type="text" id="popupCalloutSubInput" placeholder="Keterangan tambahan (opsional)..."
+                    class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-medium text-slate-700 outline-none focus:ring-1 focus:ring-emerald-500">
+                <p class="text-[8px] text-slate-400 leading-tight">💡 Kotak petunjuk di kanvas bisa di-drag (geser) bebas!</p>
+            </div>
+        </div>
+        <div id="popupDrillSection" class="pt-2 border-t border-slate-100 hidden">
+            <button id="btnPopupDrill"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-md transition">
+                <i class="ph-bold ph-arrows-out-simple text-sm"></i> <span id="popupDrillText">Lihat Breakdown Data</span>
+            </button>
         </div>
     </div>
 
@@ -720,20 +852,25 @@
                                     id="donutCutoutDisplay">60%</span></label><input type="range" id="donutCutout"
                                 min="0" max="90" value="60"></div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                        <div><label class="block text-[10px] font-bold uppercase mb-2 flex justify-between"><span
-                                    class="text-indigo-600" data-i18n="oThick">TEBAL OUTLINE</span><span
-                                    id="outlineWidthDisplay" class="text-indigo-600 font-black">1PX</span></label><input
-                                type="range" id="outlineWidthSlider" min="0" max="10" value="1"></div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-indigo-600 uppercase mb-2"
-                                data-i18n="oColor">WARNA OUTLINE</label>
-                            <div
-                                class="flex h-8 overflow-hidden rounded-lg border border-indigo-200 shadow-sm bg-white">
-                                <input type="color" id="outlineColor" value="#ffffff"
-                                    class="w-10 h-10 -mt-1 -ml-1 cursor-pointer border-none shrink-0">
-                                <div class="flex-1 bg-white flex items-center justify-center px-1 text-[9px] font-mono text-indigo-600 font-bold"
-                                    id="outlineColorText">#ffffff</div>
+                    <!-- PENGATURAN TEKS TENGAH DONUT / INFO TOTAL SEMUA CHART -->
+                    <div id="donutCenterConfigContainer" class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[10px] font-black text-slate-700 uppercase flex items-center gap-1.5">
+                                <i class="ph-bold ph-target text-indigo-600"></i> <span data-i18n="donutCenterToggle">Info Total Data (Tengah / Badge)</span>
+                            </label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleDonutCenter" class="sr-only peer" checked>
+                                <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-900"></div>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1" data-i18n="centerLabel">Label Atas</label>
+                                <input type="text" id="donutCenterLabelInput" placeholder="Total Data:" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1" data-i18n="dataUnit">Satuan (Unit)</label>
+                                <input type="text" id="dataUnitInput" placeholder="unit / Rp / %" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
                             </div>
                         </div>
                     </div>
@@ -852,7 +989,29 @@
                             <option value="end" data-i18n="posEnd">Ujung Dalam</option>
                             <option value="start" data-i18n="posStart">Pangkal Dalam</option>
                             <option value="outside" data-i18n="posOut">Melayang Luar</option>
+                            <option value="none" data-i18n="posNone">Sembunyikan Angka Dalam (Pakai Callout)</option>
                         </select></div>
+
+                    <!-- FITUR BARU: KONTROL CEPAT GARIS PETUNJUK (CALLOUT) -->
+                    <div class="p-3 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black text-emerald-900 uppercase flex items-center gap-1.5">
+                                <i class="ph-bold ph-git-commit text-emerald-600"></i> <span data-i18n="calloutMaster">Garis Petunjuk (Callout)</span>
+                            </span>
+                        </div>
+                        <p class="text-[9px] text-emerald-700 leading-relaxed" data-i18n="calloutHint">
+                            Munculkan kotak info & garis putus-putus otomatis. Anda juga bisa klik batang/potongan chart untuk mengatur satu per satu.
+                        </p>
+                        <div class="flex gap-2">
+                            <button onclick="toggleAllCallouts(true)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold py-2 px-2 rounded-xl shadow-sm transition flex items-center justify-center gap-1">
+                                <i class="ph-bold ph-eye"></i> <span data-i18n="showAllCallout">Tampilkan Semua</span>
+                            </button>
+                            <button onclick="toggleAllCallouts(false)" class="flex-1 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 text-[9px] font-bold py-2 px-2 rounded-xl shadow-sm transition flex items-center justify-center gap-1">
+                                <i class="ph-bold ph-eye-slash"></i> <span data-i18n="hideAllCallout">Sembunyikan</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <div id="axesControlPanel" class="space-y-4 pt-4 mt-4 border-t border-slate-100">
                         <div class="flex items-center justify-between"><label
                                 class="text-[11px] font-bold text-slate-700" data-i18n="axisNum">Sumbu
@@ -899,7 +1058,21 @@
                         <div
                             class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[16px] peer-checked:after:border-white after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-800">
                         </div>
-                    </label><span class="text-[9px] font-black text-slate-400">EN</span></div>
+                    </label><span class="text-[9px] font-black text-slate-400">EN</span>
+                </div>
+
+                <!-- Tombol Project Manager (New / Save / Save As / Open) -->
+                <button onclick="openProjectModal()"
+                    class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-indigo-200 transition"
+                    title="Project Manager (New, Save, Save As, Open)">
+                    <i class="ph-bold ph-folder-notch-open text-sm md:text-base"></i>
+                    <span class="hidden md:inline" data-i18n="projectBtn">Proyek</span>
+                </button>
+                <button onclick="quickSaveProject()"
+                    class="bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"
+                    title="Quick Save (Simpan Cepat)">
+                    <i class="ph-bold ph-floppy-disk text-base md:text-lg"></i>
+                </button>
 
                 <!-- Tombol Tampil di Mobile (diperkecil w-8 h-8) dan PC (w-10 h-10) -->
                 <button id="btnShareLink"
@@ -934,6 +1107,10 @@
                 style="width: 100%; height: 500px;">
                 <div id="canvasWrapper"
                     class="w-full h-full relative transition-all duration-300 box-border flex flex-col items-center justify-start overflow-hidden">
+                    <button id="btnDrillBack" onclick="drillUpBack()"
+                        class="hidden absolute top-3 left-3 z-[70] bg-slate-900/90 hover:bg-slate-800 text-[#cafc03] px-3.5 py-2 rounded-xl text-[11px] font-bold flex items-center gap-2 shadow-xl backdrop-blur-md transition-all transform hover:scale-105 cursor-pointer border border-slate-700 pointer-events-auto">
+                        <i class="ph-bold ph-arrow-left text-sm"></i> <span data-i18n="backMain">Kembali ke Utama</span>
+                    </button>
                     <div id="globalChartHeader"
                         class="w-full text-center flex flex-col items-center justify-center shrink-0 transition-all duration-300 z-10"
                         style="display: none;">
@@ -944,6 +1121,9 @@
                     </div>
                     <div id="bentoWrapper"
                         class="w-full flex-1 box-border relative transition-all duration-500 min-h-0"></div>
+                    <!-- LAYER SVG GARIS PETUNJUK & KOTAK CALLOUT INTERAKTIF -->
+                    <svg id="calloutSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none z-[55]" style="overflow: visible;"></svg>
+                    <div id="calloutsContainer" class="absolute inset-0 pointer-events-none z-[58]"></div>
                     <div id="notesContainer" class="absolute inset-0 pointer-events-none z-[60]"></div>
                 </div>
                 <div id="globalWatermark"
@@ -956,7 +1136,8 @@
             class="hide-on-fullscreen absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-4 py-3 shadow-xl flex items-center gap-4 z-10 w-[92%] md:w-[80%] max-w-4xl border border-white/40 pointer-events-auto">
             <div class="flex items-center gap-3 pr-4 border-r border-slate-200 shrink-0">
                 <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03] shrink-0">
-                    <i class="ph ph-sigma text-lg"></i></div>
+                    <i class="ph ph-sigma text-lg"></i>
+                </div>
                 <div>
                     <p class="text-[9px] font-bold text-slate-400 uppercase" data-i18n="totalData">Total Keseluruhan</p>
                     <h4 class="text-lg font-black text-slate-800" id="totalSumDisplay">0</h4>
@@ -995,8 +1176,11 @@
                 inputData: "Input Data Langsung", paste: "Paste Data (Excel/CSV)", rowCount: "Baris Kategori",
                 dimTitle: "Dimensi & Estetika", zoomScale: "Skala Zoom", cWidth: "Lebar Kanvas", cHeight: "Tinggi Kanvas", eThick: "Tebal Elemen", dHole: "Lubang Donut", oThick: "Tebal Outline", oColor: "Warna Outline", rad: "Sudut Lengkung", shad: "Bayangan 3D",
                 bgTitle: "Latar Belakang", bgMain: "BG Utama (Kanvas)", bentoBg: "BG Kartu Bento", bgOp: "Transparansi BG", bentoOpacity: "Transparansi Kartu", gridX: "Kisi Vertikal", gridY: "Kisi Horizontal",
-                textTitle: "Tipografi & Sumbu", showLegend: "Tampilkan Legenda", dataLabelPos: "Posisi Angka", posCenter: "Tengah (Default)", posEnd: "Ujung Dalam", posStart: "Pangkal Dalam", posOut: "Melayang Luar", axisNum: "Sumbu Angka", axisCat: "Sumbu Kategori", axisSize: "Ukuran Font Sumbu",
-                iconLib: "Koleksi Ikon", applyBtn: "Terapkan", editingSlide: "Mengedit Slide:", editTarget: "Target Edit Data:", presentBtn: "Presentasi", exportBtn: "Ekspor HD", resetBtn: "Reset Data", totalData: "Total Keseluruhan", slidesTitle: "Slides / Scenes", addSlide: "+ Tambah Slide Baru", sSquare: "Kotak Kaku", sRounded: "Sudut Lengkung", sCircle: "Kapsul / Lingkaran", popupColor: "Warna Spesifik", popupZoom: "Zoom / Explode Efek", popupDesc: "Ubah nilai untuk menarik keluar elemen ini.", alignLeft: "Rata Kiri", alignCenter: "Rata Tengah", alignRight: "Rata Kanan"
+                textTitle: "Tipografi & Sumbu", showLegend: "Tampilkan Legenda", dataLabelPos: "Posisi Angka", posCenter: "Tengah (Default)", posEnd: "Ujung Dalam", posStart: "Pangkal Dalam", posOut: "Melayang Luar", posNone: "Sembunyikan Angka Dalam (Pakai Callout)", axisNum: "Sumbu Angka", axisCat: "Sumbu Kategori", axisSize: "Ukuran Font Sumbu",
+                iconLib: "Koleksi Ikon", applyBtn: "Terapkan", editingSlide: "Mengedit Slide:", editTarget: "Target Edit Data:", presentBtn: "Presentasi", exportBtn: "Ekspor HD", resetBtn: "Reset Data", totalData: "Total Keseluruhan", slidesTitle: "Slides / Scenes", addSlide: "+ Tambah Slide Baru", sSquare: "Kotak Kaku", sRounded: "Sudut Lengkung", sCircle: "Kapsul / Lingkaran", popupColor: "Warna Spesifik", popupZoom: "Zoom / Explode Efek", popupDesc: "Ubah nilai untuk menarik keluar elemen ini.", alignLeft: "Rata Kiri", alignCenter: "Rata Tengah", alignRight: "Rata Kanan",
+                backMain: "Kembali", drillTo: "Breakdown ke:", noDrill: "Tidak Ada (Standar)", createDrill: "➕ Buat Breakdown Baru",
+                popupCallout: "Garis Petunjuk (Callout)", donutCenterToggle: "Info Total Data (Tengah / Badge)", centerLabel: "Label Atas", dataUnit: "Satuan (Unit)", calloutMaster: "Garis Petunjuk (Callout)", calloutHint: "Munculkan kotak info & garis putus-putus otomatis. Anda juga bisa klik elemen chart untuk mengatur satu per satu.", showAllCallout: "Tampilkan Semua", hideAllCallout: "Sembunyikan",
+                projectBtn: "Proyek", projManager: "Manajer Proyek Studio", projName: "Nama Proyek Saat Ini", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Daftar Proyek Tersimpan (Browser)"
             },
             en: {
                 brandTitle: "Title & Branding", mainTitle: "Main Title", subTitle: "Subtitle", watermark: "Watermark (Bottom Right)",
@@ -1005,8 +1189,11 @@
                 inputData: "Live Data Input", paste: "Paste Data (Excel/CSV)", rowCount: "Category Rows",
                 dimTitle: "Dimension & Esthetics", zoomScale: "Zoom Scale", cWidth: "Canvas Width", cHeight: "Canvas Height", eThick: "Element Thickness", dHole: "Donut Cutout", oThick: "Outline Thickness", oColor: "Outline Color", rad: "Border Radius", shad: "3D Shadow",
                 bgTitle: "Backgrounds", bgMain: "Main BG (Canvas)", bentoBg: "Bento Card BG", bgOp: "BG Opacity", bentoOpacity: "Card Opacity", gridX: "Vertical Grid", gridY: "Horizontal Grid",
-                textTitle: "Typography & Axes", showLegend: "Show Legend", dataLabelPos: "Datalabel Position", posCenter: "Center (Default)", posEnd: "Inner End", posStart: "Inner Start", posOut: "Floating Outside", axisNum: "Number Axis", axisCat: "Category Axis", axisSize: "Axis Font Size",
-                iconLib: "Icon Library", applyBtn: "Apply", editingSlide: "Editing Slide:", editTarget: "Target Edit Data:", presentBtn: "Present Mode", exportBtn: "Export HD", resetBtn: "Reset Data", totalData: "Grand Total", slidesTitle: "Slides / Scenes", addSlide: "+ Add New Slide", sSquare: "Rigid Square", sRounded: "Rounded Corners", sCircle: "Capsule / Circle", popupColor: "Specific Color", popupZoom: "Zoom / Explode Effect", popupDesc: "Change value to pull this element out.", alignLeft: "Align Left", alignCenter: "Align Center", alignRight: "Align Right"
+                textTitle: "Typography & Axes", showLegend: "Show Legend", dataLabelPos: "Datalabel Position", posCenter: "Center (Default)", posEnd: "Inner End", posStart: "Inner Start", posOut: "Floating Outside", posNone: "Hide Inner Numbers (Use Callout)", axisNum: "Number Axis", axisCat: "Category Axis", axisSize: "Axis Font Size",
+                iconLib: "Icon Library", applyBtn: "Apply", editingSlide: "Editing Slide:", editTarget: "Target Edit Data:", presentBtn: "Present Mode", exportBtn: "Export HD", resetBtn: "Reset Data", totalData: "Grand Total", slidesTitle: "Slides / Scenes", addSlide: "+ Add New Slide", sSquare: "Rigid Square", sRounded: "Rounded Corners", sCircle: "Capsule / Circle", popupColor: "Specific Color", popupZoom: "Zoom / Explode Effect", popupDesc: "Change value to pull this element out.", alignLeft: "Align Left", alignCenter: "Align Center", alignRight: "Align Right",
+                backMain: "Back", drillTo: "Breakdown to:", noDrill: "None (Standard)", createDrill: "➕ Create New Breakdown",
+                popupCallout: "Leader Line (Callout)", donutCenterToggle: "Total Data Info (Center / Badge)", centerLabel: "Top Label", dataUnit: "Unit Label", calloutMaster: "Leader Lines (Callouts)", calloutHint: "Show info boxes & dashed leader lines. You can also click any chart slice/bar to toggle individually.", showAllCallout: "Show All", hideAllCallout: "Hide All",
+                projectBtn: "Project", projManager: "Studio Project Manager", projName: "Current Project Name", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Saved Projects (Browser)"
             }
         };
 
@@ -1015,11 +1202,14 @@
         function hexToRgba(hex, opacity) { if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return 'transparent'; let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${isNaN(r) ? 0 : r}, ${isNaN(g) ? 0 : g}, ${isNaN(b) ? 0 : b}, ${opacity / 100})`; }
 
         let mainCharts = []; let activeIconInput = null; let mapCache = { world: null, indo: null }; const STORAGE_KEY = 'ProChart_Vision_V17_Master';
+        const SAVED_PROJECTS_KEY = 'ProChart_Vision_Saved_Slots';
+        let currentProjectName = 'Proyek Utama';
         let globalLang = 'id'; let isPresenting = false; let activeEditGridIndex = 0; let debounceTimer = null; let activeNoteId = null;
         let activePopup = false; let popupDatasetIndex = 0, popupDataIndex = 0, popupRowId = null; let activeElementData = null;
+        let drillHistoryStack = [];
 
-        const generateDefaultDataSet = (seed) => ({ series: [{ id: 's_main_' + seed, name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }], rows: [{ id: 'r_1_' + seed, label: 'Jawa Barat', icon: '📍', values: [{ val: 450, val2: 0, color: '#cafc03', offset: 0 }] }, { id: 'r_2_' + seed, label: 'DKI Jakarta', icon: '🏢', values: [{ val: 320, val2: 0, color: '#111827', offset: 0 }] }, { id: 'r_3_' + seed, label: 'Sumatera Utara', icon: '🌴', values: [{ val: 150, val2: 0, color: '#94a3b8', offset: 0 }] }, { id: 'r_4_' + seed, label: 'Kalimantan', icon: '🌲', values: [{ val: 80, val2: 0, color: '#e2e8f0', offset: 0 }] }] });
-        const generateDefaultSlide = (index = 1) => ({ id: 'slide_' + Date.now(), chartTitle: `Slide ${index}`, chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', watermarkText: 'MNC CHANNELS', notes: [], explodedElements: {}, bentoLayout: '1', bentoCharts: ['bar-vertical', 'doughnut', 'table'], colorTheme: 'lime', stackMode: 'accumulate', chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, outlineWidth: 1, outlineColor: '#ffffff', borderRadius: 8, showLegend: true, datalabelPosition: 'center', bgColor: '#f8fafc', bgOpacity: 0, bentoBgColor: '#ffffff', bentoBgOpacity: 100, showGridX: false, showGridY: true, showAxisNumbers: true, showAxisCategories: true, axisFontSize: 12, dataSets: [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)] });
+        const generateDefaultDataSet = (seed) => ({ series: [{ id: 's_main_' + seed, name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }], rows: [{ id: 'r_1_' + seed, label: 'Jawa Barat', icon: '📍', values: [{ val: 450, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_2_' + seed, label: 'DKI Jakarta', icon: '🏢', values: [{ val: 320, val2: 0, color: '#111827', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_3_' + seed, label: 'Sumatera Utara', icon: '🌴', values: [{ val: 150, val2: 0, color: '#94a3b8', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_4_' + seed, label: 'Kalimantan', icon: '🌲', values: [{ val: 80, val2: 0, color: '#e2e8f0', offset: 0, callout: false, calloutSub: '' }] }] });
+        const generateDefaultSlide = (index = 1) => ({ id: 'slide_' + Date.now() + '_' + index, chartTitle: `Slide ${index}`, chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', watermarkText: 'MNC CHANNELS', notes: [], explodedElements: {}, showDonutCenter: true, donutCenterLabel: 'Total Data:', valueUnit: 'unit', bentoLayout: '1', bentoCharts: ['bar-vertical', 'doughnut', 'table'], colorTheme: 'lime', stackMode: 'accumulate', chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, outlineWidth: 1, outlineColor: '#ffffff', borderRadius: 8, showLegend: true, datalabelPosition: 'center', bgColor: '#f8fafc', bgOpacity: 0, bentoBgColor: '#ffffff', bentoBgOpacity: 100, showGridX: false, showGridY: true, showAxisNumbers: true, showAxisCategories: true, axisFontSize: 12, dataSets: [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)] });
         let appSlides = [generateDefaultSlide(1)]; let activeSlideIndex = 0;
 
         const els = {
@@ -1029,7 +1219,7 @@
             chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), donutCutoutContainer: document.getElementById('donutCutoutContainer'), elementShadowSlider: document.getElementById('elementShadowSlider'), elementShadowDisplay: document.getElementById('elementShadowDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), outlineWidthSlider: document.getElementById('outlineWidthSlider'), outlineWidthDisplay: document.getElementById('outlineWidthDisplay'), outlineColor: document.getElementById('outlineColor'), outlineColorText: document.getElementById('outlineColorText'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'),
             toggleLegend: document.getElementById('toggleLegend'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'), toggleAxisNumbers: document.getElementById('toggleAxisNumbers'), toggleAxisCategories: document.getElementById('toggleAxisCategories'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
             bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), bentoBgColor: document.getElementById('bentoBgColor'), bentoBgColorText: document.getElementById('bentoBgColorText'), bentoBgOpacitySlider: document.getElementById('bentoBgOpacitySlider'), bentoBgOpacityDisplay: document.getElementById('bentoBgOpacityDisplay'), bentoBgControlPanel: document.getElementById('bentoBgControlPanel'), bentoOpacityWrapper: document.getElementById('bentoOpacityWrapper'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'),
-            exportTarget: document.getElementById('exportTarget'), globalHeader: document.getElementById('globalChartHeader'), globalTitle: document.getElementById('globalChartTitle'), globalSubtitle: document.getElementById('globalChartSubtitle'), globalWatermark: document.getElementById('globalWatermark'), canvasWrapper: document.getElementById('canvasWrapper'), bentoWrapper: document.getElementById('bentoWrapper'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), btnFullscreen: document.getElementById('btnFullscreen'), leftPanel: document.getElementById('leftPanel'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), burgerIcon: document.getElementById('burgerIcon'), rightLayerPanel: document.getElementById('rightLayerPanel'), slideListContainer: document.getElementById('slideListContainer'), btnAddSlide: document.getElementById('btnAddSlide'), btnToggleRightPanel: document.getElementById('btnToggleRightPanel'), btnCloseRightPanel: document.getElementById('btnCloseRightPanel'), rightPanelDragHandle: document.getElementById('rightLayerPanelHeader'), dataTargetSelectorPanel: document.getElementById('dataTargetSelectorPanel'), tabGrid0: document.getElementById('tabGrid0'), tabGrid1: document.getElementById('tabGrid1'), tabGrid2: document.getElementById('tabGrid2'), sidebarHeader: document.getElementById('sidebarHeader'), elementPopup: document.getElementById('elementPopup'), popupIcon: document.getElementById('popupIcon'), popupTitle: document.getElementById('popupTitle'), popupSubtitle: document.getElementById('popupSubtitle'), popupColorInput: document.getElementById('popupColorInput'), popupColorText: document.getElementById('popupColorText'), popupExplodeSlider: document.getElementById('popupExplodeSlider'), popupExplodeDisplay: document.getElementById('popupExplodeDisplay')
+            exportTarget: document.getElementById('exportTarget'), globalHeader: document.getElementById('globalChartHeader'), globalTitle: document.getElementById('globalChartTitle'), globalSubtitle: document.getElementById('globalChartSubtitle'), globalWatermark: document.getElementById('globalWatermark'), canvasWrapper: document.getElementById('canvasWrapper'), bentoWrapper: document.getElementById('bentoWrapper'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), btnFullscreen: document.getElementById('btnFullscreen'), leftPanel: document.getElementById('leftPanel'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), btnCloseMobile: document.getElementById('btnCloseMobile'), burgerIcon: document.getElementById('burgerIcon'), rightLayerPanel: document.getElementById('rightLayerPanel'), slideListContainer: document.getElementById('slideListContainer'), btnAddSlide: document.getElementById('btnAddSlide'), btnToggleRightPanel: document.getElementById('btnToggleRightPanel'), btnCloseRightPanel: document.getElementById('btnCloseRightPanel'), rightPanelDragHandle: document.getElementById('rightLayerPanelHeader'), dataTargetSelectorPanel: document.getElementById('dataTargetSelectorPanel'), tabGrid0: document.getElementById('tabGrid0'), tabGrid1: document.getElementById('tabGrid1'), tabGrid2: document.getElementById('tabGrid2'), sidebarHeader: document.getElementById('sidebarHeader'), elementPopup: document.getElementById('elementPopup'), popupIcon: document.getElementById('popupIcon'), popupTitle: document.getElementById('popupTitle'), popupSubtitle: document.getElementById('popupSubtitle'), popupColorInput: document.getElementById('popupColorInput'), popupColorText: document.getElementById('popupColorText'), popupExplodeSlider: document.getElementById('popupExplodeSlider'), popupExplodeDisplay: document.getElementById('popupExplodeDisplay')
         };
 
         if (els.bentoChart1) els.bentoChart1.innerHTML = chartTypeOptionsHTML; if (els.bentoChart2) els.bentoChart2.innerHTML = chartTypeOptionsHTML; if (els.bentoChart3) els.bentoChart3.innerHTML = chartTypeOptionsHTML;
@@ -1117,7 +1307,7 @@
         document.getElementById('btnNoteBorderClear')?.addEventListener('click', () => { updateActiveNoteProp('borderColor', 'transparent'); });
         document.getElementById('noteShapeSelect')?.addEventListener('change', (e) => { updateActiveNoteProp('shape', e.target.value); });
 
-        let isDraggingRightPanel = false; let rpDragStartX = 0, rpDragStartY = 0; let rpStartX = 0, rpStartY = 0;
+        let isDraggingRightPanel = false; let mouseStartX = 0, mouseStartY = 0; let panelStartX = 0, panelStartY = 0;
         if (els.rightPanelDragHandle && els.rightLayerPanel) {
             els.rightPanelDragHandle.addEventListener('mousedown', (e) => { if (e.target.closest('button')) return; isDraggingRightPanel = true; els.rightLayerPanel.classList.remove('transition-all', 'duration-400'); const rect = els.rightLayerPanel.getBoundingClientRect(); els.rightLayerPanel.classList.remove('right-4', 'md:right-8', 'top-24'); els.rightLayerPanel.style.right = 'auto'; els.rightLayerPanel.style.bottom = 'auto'; els.rightLayerPanel.style.left = rect.left + 'px'; els.rightLayerPanel.style.top = rect.top + 'px'; mouseStartX = e.clientX; mouseStartY = e.clientY; panelStartX = rect.left; panelStartY = rect.top; els.rightLayerPanel.classList.add('shadow-3xl', 'ring-2', 'ring-indigo-500/20'); e.preventDefault(); });
             document.addEventListener('mousemove', (e) => { if (!isDraggingRightPanel) return; const dx = e.clientX - mouseStartX; const dy = e.clientY - mouseStartY; let newX = panelStartX + dx; let newY = panelStartY + dy; newX = Math.max(0, Math.min(window.innerWidth - els.rightLayerPanel.offsetWidth, newX)); newY = Math.max(0, Math.min(window.innerHeight - els.rightLayerPanel.offsetHeight, newY)); els.rightLayerPanel.style.left = newX + 'px'; els.rightLayerPanel.style.top = newY + 'px'; });
@@ -1127,13 +1317,235 @@
         document.addEventListener('mousedown', (e) => {
             const ep = document.getElementById('elementPopup'); if (activePopup && ep && !ep.classList.contains('hidden-popup')) { if (!ep.contains(e.target) && e.target.tagName !== 'CANVAS') closeElementPopup(); }
             const iconModal = document.getElementById('iconModal'); const iconModalContent = document.getElementById('iconModalContent'); if (iconModal && !iconModal.classList.contains('hidden')) { if (!iconModalContent.contains(e.target) && !e.target.closest('#btnInsertNoteIcon') && !e.target.closest('button[onclick="closeIconModal()"]')) closeIconModal(); }
+            const projModal = document.getElementById('projectModal'); const projModalContent = document.getElementById('projectModalContent'); if (projModal && !projModal.classList.contains('hidden')) { if (!projModalContent.contains(e.target) && !e.target.closest('button[onclick="openProjectModal()"]')) closeProjectModal(); }
             if (activeNoteId && !e.target.closest('.draggable-note') && !e.target.closest('#leftPanel') && !e.target.closest('#iconModal')) { activeNoteId = null; document.querySelectorAll('.draggable-note').forEach(el => el.classList.remove('active-note')); syncNoteController(); }
         });
 
+        // FUNGSI MANAJER PROYEK (NEW, SAVE, SAVE AS, LOAD)
+        function openProjectModal() {
+            const modal = document.getElementById('projectModal');
+            if (!modal) return;
+            const nameInput = document.getElementById('projectNameInput');
+            const nameLabel = document.getElementById('currentProjectNameLabel');
+            if (nameInput) nameInput.value = currentProjectName || 'Proyek Utama';
+            if (nameLabel) nameLabel.innerText = `Proyek Aktif: ${currentProjectName || 'Proyek Utama'}`;
+            renderSavedProjectsList();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                document.getElementById('projectModalContent')?.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeProjectModal() {
+            const modal = document.getElementById('projectModal');
+            if (!modal) return;
+            modal.classList.add('opacity-0');
+            document.getElementById('projectModalContent')?.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function getSavedSlots() {
+            try {
+                const raw = localStorage.getItem(SAVED_PROJECTS_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) { return []; }
+        }
+
+        function setSavedSlots(slots) {
+            try {
+                localStorage.setItem(SAVED_PROJECTS_KEY, JSON.stringify(slots));
+            } catch (e) { showToast('Memori browser penuh!', true); }
+        }
+
+        function quickSaveProject() {
+            const nameInput = document.getElementById('projectNameInput');
+            if (nameInput && nameInput.value.trim() !== '') {
+                currentProjectName = nameInput.value.trim();
+            }
+            saveState();
+            let slots = getSavedSlots();
+            const existingIdx = slots.findIndex(s => s.name.toLowerCase() === currentProjectName.toLowerCase());
+            const payload = {
+                id: existingIdx >= 0 ? slots[existingIdx].id : 'proj_' + Date.now(),
+                name: currentProjectName,
+                updatedAt: new Date().toLocaleString('id-ID'),
+                slides: JSON.parse(JSON.stringify(appSlides))
+            };
+            if (existingIdx >= 0) slots[existingIdx] = payload;
+            else slots.unshift(payload);
+            setSavedSlots(slots);
+            renderSavedProjectsList();
+            const nameLabel = document.getElementById('currentProjectNameLabel');
+            if (nameLabel) nameLabel.innerText = `Proyek Aktif: ${currentProjectName}`;
+            showToast(`Proyek "${currentProjectName}" berhasil disimpan!`);
+        }
+
+        function saveAsNewSlot() {
+            const nameInput = document.getElementById('projectNameInput');
+            let baseName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : currentProjectName;
+            let slots = getSavedSlots();
+            let newName = `${baseName} (Salinan ${slots.length + 1})`;
+            if (nameInput && nameInput.value.trim() !== currentProjectName) {
+                newName = nameInput.value.trim();
+            }
+            currentProjectName = newName;
+            if (nameInput) nameInput.value = currentProjectName;
+            slots.unshift({
+                id: 'proj_' + Date.now(),
+                name: currentProjectName,
+                updatedAt: new Date().toLocaleString('id-ID'),
+                slides: JSON.parse(JSON.stringify(appSlides))
+            });
+            setSavedSlots(slots);
+            saveState();
+            renderSavedProjectsList();
+            showToast(`Disimpan sebagai slot baru: "${currentProjectName}"!`);
+        }
+
+        function loadProjectFromSlot(slotId) {
+            const slots = getSavedSlots();
+            const found = slots.find(s => s.id === slotId);
+            if (!found) return;
+            appSlides = JSON.parse(JSON.stringify(found.slides));
+            currentProjectName = found.name;
+            activeSlideIndex = 0;
+            activeEditGridIndex = 0;
+            drillHistoryStack = [];
+            updateDrillBackUI();
+            syncUIToActiveSlide();
+            renderSlideList();
+            saveState();
+            closeProjectModal();
+            showToast(`Proyek "${currentProjectName}" berhasil dimuat!`);
+        }
+
+        function deleteProjectSlot(slotId) {
+            let slots = getSavedSlots().filter(s => s.id !== slotId);
+            setSavedSlots(slots);
+            renderSavedProjectsList();
+            showToast('Slot proyek dihapus.');
+        }
+
+        function renderSavedProjectsList() {
+            const container = document.getElementById('savedProjectsList');
+            if (!container) return;
+            const slots = getSavedSlots();
+            if (slots.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">Belum ada slot proyek tersimpan.<br>Klik tombol <b>Save</b> di atas untuk menyimpan.</div>`;
+                return;
+            }
+            container.innerHTML = slots.map(s => `
+                <div class="flex items-center justify-between p-3 rounded-2xl border ${s.name === currentProjectName ? 'border-indigo-300 bg-indigo-50/40' : 'border-slate-200 bg-white'} hover:border-indigo-300 transition shadow-sm">
+                    <div class="flex flex-col min-w-0 flex-1 pr-2 cursor-pointer" onclick="loadProjectFromSlot('${s.id}')">
+                        <span class="text-xs font-black text-slate-800 truncate">${s.name}</span>
+                        <span class="text-[9px] text-slate-400">${s.slides.length} Slide • Disimpan: ${s.updatedAt}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="loadProjectFromSlot('${s.id}')" class="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-xl transition">Buka</button>
+                        <button onclick="deleteProjectSlot('${s.id}')" class="w-7 h-7 rounded-xl border border-red-100 text-red-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition"><i class="ph ph-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createNewProjectPrompt() {
+            closeProjectModal();
+            openResetModal();
+        }
+
+        function exportProjectFile() {
+            try {
+                const nameInput = document.getElementById('projectNameInput');
+                if (nameInput && nameInput.value.trim()) currentProjectName = nameInput.value.trim();
+                const dataStr = JSON.stringify({ projectName: currentProjectName, version: '17.0', slides: appSlides, lang: globalLang }, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const safeName = currentProjectName.replace(/[^a-zA-Z0-9_-]/g, '_');
+                a.href = url;
+                a.download = `${safeName}_ProChart.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                saveState();
+                showToast(`File "${safeName}_ProChart.json" berhasil diunduh!`);
+            } catch (e) {
+                showToast('Gagal mengunduh file proyek.', true);
+            }
+        }
+
+        function importProjectFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && Array.isArray(parsed.slides) && parsed.slides.length > 0) {
+                        appSlides = parsed.slides;
+                        currentProjectName = parsed.projectName || file.name.replace(/\.[^/.]+$/, "");
+                        if (parsed.lang) globalLang = parsed.lang;
+                        activeSlideIndex = 0;
+                        activeEditGridIndex = 0;
+                        drillHistoryStack = [];
+                        updateDrillBackUI();
+                        syncUIToActiveSlide();
+                        renderSlideList();
+                        saveState();
+                        closeProjectModal();
+                        showToast(`File proyek "${currentProjectName}" berhasil dibuka!`);
+                    } else {
+                        showToast('Format file proyek tidak valid!', true);
+                    }
+                } catch (err) {
+                    showToast('Gagal membaca file proyek!', true);
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
         // FUNGSI MODAL RESET CUSTOM UI
-        function openResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10); }
-        function closeResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.add('opacity-0'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); }, 300); }
-        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; syncUIToActiveSlide(); renderSlideList(); showToast("Workspace telah di-reset!"); }
+        function openResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10); }
+        function closeResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.add('opacity-0'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300); }
+        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); currentProjectName = 'Proyek Baru'; appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; drillHistoryStack = []; updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); saveState(); showToast("New Project berhasil dibuat!"); }
+
+        // FUNGSI INTERACTIVE DRILL-DOWN (BREAKDOWN DATA AREA)
+        function updateDrillBackUI() {
+            const btn = document.getElementById('btnDrillBack');
+            if (!btn) return;
+            if (drillHistoryStack.length > 0) {
+                btn.classList.remove('hidden');
+                const prevIdx = drillHistoryStack[drillHistoryStack.length - 1];
+                const prevSlide = appSlides[prevIdx];
+                const prevName = prevSlide ? (prevSlide.chartTitle || `Slide ${prevIdx + 1}`) : 'Utama';
+                const labelSpan = btn.querySelector('span');
+                const prefix = translations[globalLang]?.backMain || 'Kembali';
+                if (labelSpan) labelSpan.innerText = `${prefix} (${prevName})`;
+            } else {
+                btn.classList.add('hidden');
+            }
+        }
+
+        function drillDownTo(targetSlideId) {
+            const targetIdx = appSlides.findIndex(s => s.id === targetSlideId);
+            if (targetIdx === -1) return showToast("Slide tujuan breakdown tidak ditemukan!", true);
+            closeElementPopup();
+            drillHistoryStack.push(activeSlideIndex);
+            switchSlide(targetIdx, true);
+            showToast(`Membuka Breakdown: ${appSlides[targetIdx].chartTitle || 'Detail Area'}`);
+        }
+
+        function drillUpBack() {
+            if (drillHistoryStack.length === 0) return;
+            closeElementPopup();
+            const prevIdx = drillHistoryStack.pop();
+            switchSlide(prevIdx, true);
+        }
 
         // EXPORT & RECORD LOGIC
         if (els.btnExport) {
@@ -1160,13 +1572,13 @@
         function exitPresentationUI() {
             if (!isPresenting) return; isPresenting = false; document.body.classList.remove('is-fullscreen'); const slide = getActiveSlide();
             if (els.exportTarget && slide) { els.exportTarget.style.transform = `scale(${slide.chartScale / 100})`; els.exportTarget.style.width = slide.chartWidth + '%'; els.exportTarget.style.height = slide.chartHeight + 'px'; }
-            if (!isMobile) { isSidebarOpen = true; applySidebarState(); } setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); }, 500);
+            if (!isMobile) { isSidebarOpen = true; applySidebarState(); } setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); }, 500);
         }
         if (els.btnFullscreen) els.btnFullscreen.addEventListener('click', () => { const elem = document.documentElement; if (!document.fullscreenElement) { if (elem.requestFullscreen) elem.requestFullscreen(); enterPresentationUI(); } });
         function nextSlide() { if (activeSlideIndex < appSlides.length - 1) switchSlide(activeSlideIndex + 1); }
         function prevSlide() { if (activeSlideIndex > 0) switchSlide(activeSlideIndex - 1); }
         window.addEventListener('keydown', (e) => { if (!isPresenting) return; if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); } else if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); } });
-        if (els.canvasWrapper) els.canvasWrapper.addEventListener('click', (e) => { if (isPresenting && !e.target.closest('.draggable-note')) nextSlide(); });
+        if (els.canvasWrapper) els.canvasWrapper.addEventListener('click', (e) => { if (isPresenting && !e.target.closest('.draggable-note') && !e.target.closest('.callout-box') && !e.target.closest('#btnDrillBack') && e.target.tagName !== 'CANVAS') nextSlide(); });
 
         function salinTeks(text) {
             const textArea = document.createElement("textarea");
@@ -1176,25 +1588,23 @@
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-            try { document.execCommand('copy'); } catch (err) {}
+            try { document.execCommand('copy'); } catch (err) { }
             document.body.removeChild(textArea);
         }
 
-        if (document.getElementById('btnShareLink')) { 
-            document.getElementById('btnShareLink').addEventListener('click', () => { 
-                try { 
-                    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(appSlides)); 
-                    const shareUrl = window.location.href.split('#')[0] + '#v=' + compressed; 
-                    
-                    // 1. Salin link kilat untuk lolos dari blokir Safari/iPhone
+        if (document.getElementById('btnShareLink')) {
+            document.getElementById('btnShareLink').addEventListener('click', () => {
+                try {
+                    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(appSlides));
+                    const shareUrl = window.location.href.split('#')[0] + '#v=' + compressed;
+
                     salinTeks(shareUrl);
                     showToast('Membuat link pendek...');
 
-                    // 2. Minta link pendek ke server is.gd
-                    if (shareUrl.length < 3000) { 
+                    if (shareUrl.length < 3000) {
                         const script = document.createElement('script');
                         const callbackName = 'shorten_cb_' + Math.round(100000 * Math.random());
-                        window[callbackName] = function(data) {
+                        window[callbackName] = function (data) {
                             delete window[callbackName];
                             if (document.body.contains(script)) document.body.removeChild(script);
                             if (data.shorturl) {
@@ -1204,18 +1614,18 @@
                                 showToast('Tersalin! (Link asli dipakai)');
                             }
                         };
-                        
-                        setTimeout(() => { if(window[callbackName]) window[callbackName]({error: true}); }, 4000);
+
+                        setTimeout(() => { if (window[callbackName]) window[callbackName]({ error: true }); }, 4000);
                         script.src = `https://is.gd/create.php?format=json&url=${encodeURIComponent(shareUrl)}&callback=${callbackName}`;
                         document.body.appendChild(script);
                     } else {
                         showToast('Tersalin! (Data besar, link asli dipakai)');
                     }
-                } catch (e) { 
-                    console.error(e); 
-                    showToast('Gagal membuat link.', true); 
-                } 
-            }); 
+                } catch (e) {
+                    console.error(e);
+                    showToast('Gagal membuat link.', true);
+                }
+            });
         }
 
         if (document.getElementById('btnReplayAnim')) { document.getElementById('btnReplayAnim').addEventListener('click', () => { triggerVisUpdateWithDebounce(); }); }
@@ -1237,7 +1647,7 @@
             for (let i = 1; i < dataArr.length; i++) {
                 let rowData = dataArr[i]; if (!rowData || rowData.length === 0 || !rowData[0]) continue;
                 let label = rowData[0].toString().trim(); let newRow = { id: 'r_' + Date.now() + i, label: label, icon: '', values: [] };
-                ds.series.forEach((s, sIdx) => { let val = rowData[sIdx + 1]; let numVal = val !== undefined && val !== null && val !== '' ? Number(String(val).replace(/[^0-9.-]/g, '')) : null; newRow.values.push({ val: numVal, val2: 0, color: '#000', offset: 0 }); });
+                ds.series.forEach((s, sIdx) => { let val = rowData[sIdx + 1]; let numVal = val !== undefined && val !== null && val !== '' ? Number(String(val).replace(/[^0-9.-]/g, '')) : null; newRow.values.push({ val: numVal, val2: 0, color: '#000', offset: 0, callout: false, calloutSub: '' }); });
                 ds.rows.push(newRow);
             }
             const slide = getActiveSlide(); forceRecolor(slide.colorTheme, slide); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); showToast("Data berhasil di-paste!");
@@ -1253,27 +1663,139 @@
             const slide = getActiveSlide(); const ds = slide.dataSets[blockIndex] || slide.dataSets[0]; let rowIdx, sIdx; let originalType = slide.bentoCharts[blockIndex]; let isTape = originalType === 'tape'; let isWindrose = originalType === 'windrose'; let isConcentric = originalType === 'concentric'; let isMap = originalType === 'choropleth-world' || originalType === 'choropleth-indo'; let isWordCloud = originalType === 'wordCloud';
             if (isMap || isWordCloud || originalType === 'treemap') return;
             if (isTape) { rowIdx = datasetIndex; sIdx = index; } else if (isConcentric || isWindrose) { sIdx = datasetIndex; rowIdx = index; if (isWindrose) sIdx = (ds.series.length - 1) - datasetIndex; } else if (['pie', 'doughnut', 'polarArea', 'radar'].includes(originalType)) { sIdx = 0; rowIdx = index; } else { sIdx = datasetIndex; rowIdx = index; }
-            let row = ds.rows[rowIdx]; if (!row) return; let valObj = row.values[sIdx]; if (!valObj) return; activeElementData = { gridIndex: blockIndex, rowId: row.id, sIdx: sIdx };
+            let row = ds.rows[rowIdx]; if (!row) return; let valObj = row.values[sIdx]; if (!valObj) return;
+
+            if (isPresenting && row.drillTarget && appSlides.some(s => s.id === row.drillTarget)) {
+                drillDownTo(row.drillTarget);
+                return;
+            }
+
+            activeElementData = { gridIndex: blockIndex, rowId: row.id, sIdx: sIdx };
             const popup = document.getElementById('elementPopup'); document.getElementById('popupTitle').innerHTML = `${row.icon} ${row.label}`; document.getElementById('popupSubtitle').innerText = `Series: ${ds.series[sIdx].name}`; document.getElementById('popupColorInput').value = valObj.color || '#000000'; document.getElementById('popupColorText').innerText = valObj.color || '#000000'; document.getElementById('popupExplodeSlider').value = valObj.offset || 0; document.getElementById('popupExplodeDisplay').innerText = (valObj.offset || 0) + '%';
-            let popX = clientX + 15; let popY = clientY + 15; if (popX + 280 > window.innerWidth) popX = clientX - 295; if (popY + 160 > window.innerHeight) popY = clientY - 175; popup.style.left = popX + 'px'; popup.style.top = popY + 'px'; popup.classList.remove('hidden-popup'); activePopup = true;
+
+            const calloutToggle = document.getElementById('popupCalloutToggle');
+            const calloutDetails = document.getElementById('popupCalloutDetails');
+            const calloutSubInput = document.getElementById('popupCalloutSubInput');
+            if (calloutToggle) {
+                calloutToggle.checked = !!valObj.callout;
+                if (calloutDetails) calloutDetails.classList.toggle('hidden', !valObj.callout);
+                if (calloutSubInput) calloutSubInput.value = valObj.calloutSub || '';
+            }
+
+            const drillSection = document.getElementById('popupDrillSection');
+            const btnDrill = document.getElementById('btnPopupDrill');
+            const drillText = document.getElementById('popupDrillText');
+            if (drillSection && btnDrill) {
+                const targetSlide = row.drillTarget ? appSlides.find(s => s.id === row.drillTarget) : null;
+                if (targetSlide) {
+                    drillSection.classList.remove('hidden');
+                    drillText.innerText = `Breakdown: ${targetSlide.chartTitle || 'Detail'}`;
+                    btnDrill.onclick = () => drillDownTo(targetSlide.id);
+                } else {
+                    drillSection.classList.add('hidden');
+                }
+            }
+
+            let popX = clientX + 15; let popY = clientY + 15; if (popX + 280 > window.innerWidth) popX = clientX - 295; if (popY + 260 > window.innerHeight) popY = clientY - 275; popup.style.left = Math.max(10, popX) + 'px'; popup.style.top = Math.max(10, popY) + 'px'; popup.classList.remove('hidden-popup'); activePopup = true;
         }
         function closeElementPopup() { const popup = document.getElementById('elementPopup'); if (popup) { popup.classList.add('hidden-popup'); activeElementData = null; activePopup = false; } }
         document.getElementById('popupColorInput')?.addEventListener('input', (e) => { if (!activeElementData) return; const slide = getActiveSlide(); const ds = slide.dataSets[activeElementData.gridIndex] || slide.dataSets[0]; const row = ds.rows.find(r => r.id === activeElementData.rowId); if (row && row.values[activeElementData.sIdx]) { row.values[activeElementData.sIdx].color = e.target.value; document.getElementById('popupColorText').innerText = e.target.value; if (debounceTimer) clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { updateVisualizations(); }, 50); if (activeElementData.gridIndex === activeEditGridIndex) renderDataInputs(); } });
         document.getElementById('popupExplodeSlider')?.addEventListener('input', (e) => { if (!activeElementData) return; const slide = getActiveSlide(); const ds = slide.dataSets[activeElementData.gridIndex] || slide.dataSets[0]; const row = ds.rows.find(r => r.id === activeElementData.rowId); if (row && row.values[activeElementData.sIdx]) { row.values[activeElementData.sIdx].offset = parseInt(e.target.value); document.getElementById('popupExplodeDisplay').innerText = e.target.value + '%'; let rIdx = ds.rows.findIndex(r => r.id === activeElementData.rowId); let key = `${activeElementData.gridIndex}_${activeElementData.sIdx}_${rIdx}`; if (!slide.explodedElements) slide.explodedElements = {}; slide.explodedElements[key] = parseInt(e.target.value); if (debounceTimer) clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { updateVisualizations(); }, 50); } });
 
+        // EVENT LISTENER UNTUK CALLOUT SPESIFIK ELEMEN
+        document.getElementById('popupCalloutToggle')?.addEventListener('change', (e) => {
+            if (!activeElementData) return;
+            const slide = getActiveSlide();
+            const ds = slide.dataSets[activeElementData.gridIndex] || slide.dataSets[0];
+            const row = ds.rows.find(r => r.id === activeElementData.rowId);
+            if (row && row.values[activeElementData.sIdx]) {
+                row.values[activeElementData.sIdx].callout = e.target.checked;
+                if (!e.target.checked) {
+                    delete row.values[activeElementData.sIdx].calloutX;
+                    delete row.values[activeElementData.sIdx].calloutY;
+                }
+                document.getElementById('popupCalloutDetails')?.classList.toggle('hidden', !e.target.checked);
+                renderDataInputs();
+                saveState();
+                requestAnimationFrame(() => renderCalloutsOverlay());
+            }
+        });
+
+        document.getElementById('popupCalloutSubInput')?.addEventListener('input', (e) => {
+            if (!activeElementData) return;
+            const slide = getActiveSlide();
+            const ds = slide.dataSets[activeElementData.gridIndex] || slide.dataSets[0];
+            const row = ds.rows.find(r => r.id === activeElementData.rowId);
+            if (row && row.values[activeElementData.sIdx]) {
+                row.values[activeElementData.sIdx].calloutSub = e.target.value;
+                saveState();
+                requestAnimationFrame(() => renderCalloutsOverlay());
+            }
+        });
+
+        function toggleAllCallouts(state) {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const numCharts = slide.bentoLayout === '1' ? 1 : (slide.bentoLayout.startsWith('2') ? 2 : 3);
+            for (let bIdx = 0; bIdx < numCharts; bIdx++) {
+                const ds = slide.dataSets[bIdx] || slide.dataSets[0];
+                ds.rows.forEach(r => {
+                    r.values.forEach(v => {
+                        if (v) {
+                            v.callout = state;
+                            if (!state) { delete v.calloutX; delete v.calloutY; }
+                        }
+                    });
+                });
+            }
+            renderDataInputs();
+            saveState();
+            requestAnimationFrame(() => {
+                renderCalloutsOverlay();
+                setTimeout(() => renderCalloutsOverlay(), 100);
+            });
+            showToast(state ? "Semua Garis Petunjuk diaktifkan!" : "Garis Petunjuk disembunyikan.");
+        }
+
+        function toggleRowCallout(rowId) {
+            const ds = getActiveDataSet();
+            const r = ds.rows.find(x => x.id === rowId);
+            if (r && r.values.length > 0) {
+                const newState = !r.values.some(v => v && v.callout);
+                r.values.forEach(v => {
+                    if (v) {
+                        v.callout = newState;
+                        if (!newState) { delete v.calloutX; delete v.calloutY; }
+                    }
+                });
+                renderDataInputs();
+                saveState();
+                requestAnimationFrame(() => {
+                    renderCalloutsOverlay();
+                    setTimeout(() => renderCalloutsOverlay(), 80);
+                });
+            }
+        }
+
         function showToast(msg, isError = false) { const toast = document.getElementById('toastNotification'), msgEl = document.getElementById('toastMessage'), iconEl = document.getElementById('toastIcon'); if (!toast || !msgEl || !iconEl) return; msgEl.innerText = msg; if (isError) { toast.classList.replace('bg-slate-900', 'bg-red-600'); iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-white"></i>'; } else { toast.classList.replace('bg-red-600', 'bg-slate-900'); iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-lime-400"></i>'; } toast.classList.remove('translate-y-20', 'opacity-0'); setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000); }
 
-        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ slides: appSlides, lang: globalLang })); }
+        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ projectName: currentProjectName, slides: appSlides, lang: globalLang })); }
         function loadState() {
             try {
                 if (window.location.hash && window.location.hash.startsWith('#v=')) { const compressed = window.location.hash.substring(3); const decompressed = LZString.decompressFromEncodedURIComponent(compressed); if (decompressed) { const parsed = JSON.parse(decompressed); if (parsed && parsed.length > 0) { appSlides = parsed; showToast('Proyek dimuat dari Link!'); history.replaceState(null, null, ' '); return; } } }
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
-                    const parsed = JSON.parse(saved); if (parsed.lang) globalLang = parsed.lang;
+                    const parsed = JSON.parse(saved);
+                    if (parsed.lang) globalLang = parsed.lang;
+                    if (parsed.projectName) currentProjectName = parsed.projectName;
                     if (parsed.slides && parsed.slides.length > 0) {
                         appSlides = parsed.slides;
-                        appSlides.forEach(slide => {
+                        appSlides.forEach((slide, idx) => {
+                            if (!slide.id) slide.id = 'slide_' + Date.now() + '_' + idx;
                             if (!slide.bentoLayout) slide.bentoLayout = '1'; if (!slide.bentoCharts) slide.bentoCharts = ['bar-vertical', 'doughnut', 'table']; if (!slide.dataSets) slide.dataSets = [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)]; if (slide.bentoBgColor === undefined) slide.bentoBgColor = '#ffffff'; if (slide.bentoBgOpacity === undefined) slide.bentoBgOpacity = 100; if (slide.outlineWidth === undefined) slide.outlineWidth = 1; if (slide.outlineColor === undefined) slide.outlineColor = '#ffffff'; if (!slide.notes) slide.notes = []; if (!slide.explodedElements) slide.explodedElements = {};
+                            if (slide.showDonutCenter === undefined) slide.showDonutCenter = true;
+                            if (slide.donutCenterLabel === undefined) slide.donutCenterLabel = 'Total Data:';
+                            if (slide.valueUnit === undefined) slide.valueUnit = 'unit';
                         });
                     }
                 }
@@ -1308,7 +1830,7 @@
             if (els.langToggle) els.langToggle.checked = (globalLang === 'en');
         }
 
-        if (els.langToggle) els.langToggle.addEventListener('change', (e) => { globalLang = e.target.checked ? 'en' : 'id'; translatePage(); saveState(); });
+        if (els.langToggle) els.langToggle.addEventListener('change', (e) => { globalLang = e.target.checked ? 'en' : 'id'; translatePage(); renderDataInputs(); updateDrillBackUI(); saveState(); });
 
         let isMobile = window.innerWidth < 768; let isSidebarOpen = !isMobile; let isRightPanelOpen = false;
         function applySidebarState() {
@@ -1333,19 +1855,20 @@
                     setTimeout(() => overlay.classList.add('hidden'), 300);
                 }
             }
-            setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); }, 400);
+            setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); }, 400);
         }
 
         document.getElementById('mobileOverlay')?.addEventListener('click', () => { isSidebarOpen = false; applySidebarState(); });
+        if (els.btnCloseMobile) els.btnCloseMobile.addEventListener('click', () => { isSidebarOpen = false; applySidebarState(); });
 
         function applyRightPanelState() { if (!els.rightLayerPanel) return; if (isRightPanelOpen) { els.rightLayerPanel.classList.remove('pointer-events-none', 'opacity-0', 'scale-95'); if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.add('bg-slate-900', 'text-[#cafc03]'); } else { els.rightLayerPanel.classList.add('pointer-events-none', 'opacity-0', 'scale-95'); if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.remove('bg-slate-900', 'text-[#cafc03]'); } }
-        if (els.btnToggleSidebar) els.btnToggleSidebar.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; applySidebarState(); }); if (els.btnToggleRightPanel) els.btnToggleRightPanel.addEventListener('click', () => { isRightPanelOpen = !isRightPanelOpen; applyRightPanelState(); renderSlideList(); }); if (els.btnCloseRightPanel) els.btnCloseRightPanel.addEventListener('click', () => { isRightPanelOpen = false; applyRightPanelState(); }); window.addEventListener('resize', () => { let wasMobile = isMobile; isMobile = window.innerWidth < 768; if (wasMobile !== isMobile) { isSidebarOpen = !isMobile; applySidebarState(); } mainCharts.forEach(c => c && c.resize && c.resize()); });
+        if (els.btnToggleSidebar) els.btnToggleSidebar.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; applySidebarState(); }); if (els.btnToggleRightPanel) els.btnToggleRightPanel.addEventListener('click', () => { isRightPanelOpen = !isRightPanelOpen; applyRightPanelState(); renderSlideList(); }); if (els.btnCloseRightPanel) els.btnCloseRightPanel.addEventListener('click', () => { isRightPanelOpen = false; applyRightPanelState(); }); window.addEventListener('resize', () => { let wasMobile = isMobile; isMobile = window.innerWidth < 768; if (wasMobile !== isMobile) { isSidebarOpen = !isMobile; applySidebarState(); } mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); });
 
         function handleSidebarScroll(el) { const sidebarHeader = document.getElementById('sidebarHeader'); const logoIcon = document.getElementById('logoIcon'); const headerTitle = document.getElementById('headerTitle'); const headerSubtitle = document.getElementById('headerSubtitle'); if (sidebarHeader) { if (el.scrollTop > 15) { sidebarHeader.classList.replace('p-5', 'py-3'); sidebarHeader.classList.replace('md:p-6', 'px-5'); if (logoIcon) { logoIcon.classList.replace('w-10', 'w-8'); logoIcon.classList.replace('h-10', 'h-8'); } if (headerTitle) { headerTitle.classList.replace('text-xl', 'text-base'); } if (headerSubtitle) { headerSubtitle.style.opacity = '0'; headerSubtitle.style.height = '0'; headerSubtitle.style.marginTop = '0'; headerSubtitle.style.transform = 'scaleY(0)'; } } else { sidebarHeader.classList.replace('py-3', 'p-5'); sidebarHeader.classList.replace('px-5', 'md:p-6'); if (logoIcon) { logoIcon.classList.replace('w-8', 'w-10'); logoIcon.classList.replace('h-8', 'h-10'); } if (headerTitle) { headerTitle.classList.replace('text-base', 'text-xl'); } if (headerSubtitle) { headerSubtitle.style.opacity = '1'; headerSubtitle.style.height = 'auto'; headerSubtitle.style.marginTop = '6px'; headerSubtitle.style.transform = 'scaleY(1)'; } } } }
 
         function forceRecolor(theme, slide) { const palette = themes[theme] || themes['lime']; slide.dataSets.forEach((ds, dsIdx) => { let pType = slide.bentoCharts[dsIdx]; let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'wordCloud', 'windrose'].includes(pType) && pType !== 'concentric'; let colorfulMode = isRadial || ds.series.length === 1; ds.rows.forEach((r, rIdx) => { r.values.forEach((v, sIdx) => { v.color = colorfulMode ? palette[rIdx % palette.length] : palette[sIdx % palette.length]; }); }); }); }
         function setActiveEditGrid(index) { activeEditGridIndex = index;[els.tabGrid0, els.tabGrid1, els.tabGrid2].forEach((el, i) => { if (!el) return; if (i === index) el.className = "flex-1 py-1.5 text-[10px] font-bold rounded-md bg-[#cafc03] text-slate-900 transition shadow-sm"; else el.className = "flex-1 py-1.5 text-[10px] font-bold rounded-md text-slate-400 hover:text-white transition"; }); syncUIPartialToGrid(); }
-        function switchSlide(index) { if (index < 0 || index >= appSlides.length) return; activeSlideIndex = index; activeEditGridIndex = 0; syncUIToActiveSlide(); renderSlideList(); }
+        function switchSlide(index, isFromDrill = false) { if (index < 0 || index >= appSlides.length) return; if (!isFromDrill) drillHistoryStack = []; activeSlideIndex = index; activeEditGridIndex = 0; updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); }
 
         function renderSlideList() {
             if (!els.slideListContainer) return; els.slideListContainer.innerHTML = '';
@@ -1354,8 +1877,8 @@
                 div.innerHTML = `<div class="flex items-center gap-3 overflow-hidden flex-1" onclick="switchSlide(${idx})"><div class="w-6 h-6 rounded-md ${isActive ? 'bg-[#cafc03] text-slate-900' : 'bg-slate-800 text-white'} flex items-center justify-center text-[10px] font-black shrink-0">${idx + 1}</div><div class="flex flex-col flex-1 min-w-0"><h4 class="text-xs font-bold text-slate-800 truncate">${s.chartTitle || 'Slide ' + (idx + 1)}</h4><p class="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5 truncate">${s.bentoLayout === '1' ? '1 Grid' : 'Multi Grid'}</p></div></div>${appSlides.length > 1 ? `<button onclick="deleteSlide(${idx})" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition shrink-0"><i class="ph ph-trash"></i></button>` : ''}`; els.slideListContainer.appendChild(div);
             });
         }
-        if (els.btnAddSlide) els.btnAddSlide.addEventListener('click', () => { appSlides.push(generateDefaultSlide(appSlides.length + 1)); activeSlideIndex = appSlides.length - 1; activeEditGridIndex = 0; syncUIToActiveSlide(); renderSlideList(); showToast('Slide Baru Dibuat!'); });
-        function deleteSlide(index) { if (appSlides.length <= 1) return; appSlides.splice(index, 1); if (activeSlideIndex >= appSlides.length) activeSlideIndex = appSlides.length - 1; syncUIToActiveSlide(); renderSlideList(); }
+        if (els.btnAddSlide) els.btnAddSlide.addEventListener('click', () => { appSlides.push(generateDefaultSlide(appSlides.length + 1)); activeSlideIndex = appSlides.length - 1; activeEditGridIndex = 0; drillHistoryStack = []; updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); renderDataInputs(); showToast('Slide Baru Dibuat!'); });
+        function deleteSlide(index) { if (appSlides.length <= 1) return; appSlides.splice(index, 1); if (activeSlideIndex >= appSlides.length) activeSlideIndex = appSlides.length - 1; drillHistoryStack = []; updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); renderDataInputs(); }
 
         function triggerVisUpdateWithDebounce() { if (debounceTimer) clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { updateVisualizations(); }, 300); }
 
@@ -1374,6 +1897,9 @@
                 if (els.toggleLegend) els.toggleLegend.checked = slide.showLegend; if (els.datalabelPositionSelect) els.datalabelPositionSelect.value = slide.datalabelPosition || 'center'; if (els.toggleAxisNumbers) els.toggleAxisNumbers.checked = slide.showAxisNumbers; if (els.toggleAxisCategories) els.toggleAxisCategories.checked = slide.showAxisCategories; if (els.axisFontSizeSlider) { els.axisFontSizeSlider.value = slide.axisFontSize; els.axisFontSizeDisplay.innerText = slide.axisFontSize + 'px'; }
                 if (els.bgColor) { els.bgColor.value = slide.bgColor || '#f8fafc'; els.bgColorText.innerText = slide.bgColor || '#f8fafc'; } if (els.bgOpacitySlider) { els.bgOpacitySlider.value = slide.bgOpacity || 0; els.bgOpacityDisplay.innerText = (slide.bgOpacity || 0) + '%'; } if (els.bentoBgColor) { els.bentoBgColor.value = slide.bentoBgColor || '#ffffff'; els.bentoBgColorText.innerText = slide.bentoBgColor || '#ffffff'; } if (els.bentoBgOpacitySlider) { els.bentoBgOpacitySlider.value = slide.bentoBgOpacity === undefined ? 100 : slide.bentoBgOpacity; els.bentoBgOpacityDisplay.innerText = (slide.bentoBgOpacity === undefined ? 100 : slide.bentoBgOpacity) + '%'; } if (els.bentoBgControlPanel) els.bentoBgControlPanel.style.display = slide.bentoLayout === '1' ? 'none' : 'block'; if (els.bentoOpacityWrapper) els.bentoOpacityWrapper.style.display = slide.bentoLayout === '1' ? 'none' : 'block';
                 if (els.toggleGridX) els.toggleGridX.checked = slide.showGridX; if (els.toggleGridY) els.toggleGridY.checked = slide.showGridY;
+                if (document.getElementById('toggleDonutCenter')) document.getElementById('toggleDonutCenter').checked = slide.showDonutCenter !== false;
+                if (document.getElementById('donutCenterLabelInput')) document.getElementById('donutCenterLabelInput').value = slide.donutCenterLabel !== undefined ? slide.donutCenterLabel : 'Total Data:';
+                if (document.getElementById('dataUnitInput')) document.getElementById('dataUnitInput').value = slide.valueUnit !== undefined ? slide.valueUnit : 'unit';
                 triggerVisUpdateWithDebounce();
             } catch (e) { console.error("SyncUI Error:", e); }
         }
@@ -1381,21 +1907,26 @@
         function syncUIPartialToGrid() {
             try {
                 const slide = getActiveSlide(); const ds = getActiveDataSet(); if (!slide || !ds) return; let primaryType = slide.bentoCharts[activeEditGridIndex]; let isMap = primaryType === 'choropleth-world' || primaryType === 'choropleth-indo'; let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'concentric', 'windrose'].includes(primaryType); let isWordCloud = primaryType === 'wordCloud'; let isTable = primaryType === 'table'; let isTreemap = primaryType === 'treemap'; let isTape = primaryType === 'tape';
-                if (els.donutCutoutContainer) els.donutCutoutContainer.style.display = (primaryType === 'doughnut' || primaryType === 'concentric') ? 'block' : 'none'; if (els.stackModeContainer) els.stackModeContainer.style.display = (primaryType === 'gantt' || (isRadial && primaryType !== 'windrose') || isWordCloud || isMap || isTable || isTreemap || isTape) ? 'none' : 'block';
+                if (els.donutCutoutContainer) els.donutCutoutContainer.style.display = (primaryType === 'doughnut' || primaryType === 'concentric') ? 'block' : 'none';
+                const dcContainer = document.getElementById('donutCenterConfigContainer');
+                if (dcContainer) dcContainer.style.display = isTable ? 'none' : 'block';
+                if (els.stackModeContainer) els.stackModeContainer.style.display = (primaryType === 'gantt' || (isRadial && primaryType !== 'windrose') || isWordCloud || isMap || isTable || isTreemap || isTape) ? 'none' : 'block';
                 if (els.overlayEnginePanel) { els.overlayEnginePanel.style.display = (isRadial && primaryType !== 'concentric' && primaryType !== 'windrose') || isWordCloud || isMap || isTreemap ? 'none' : 'block'; const panelTitle = els.overlayEnginePanel.querySelector('h3'); const btnAddText = document.querySelector('#btnAddOverlay span'); if (isTable) { if (panelTitle) panelTitle.innerText = "MANAJEMEN KOLOM TABEL"; if (btnAddText) btnAddText.innerText = "+ Tambah Kolom"; } else if (primaryType === 'concentric' || primaryType === 'windrose') { if (panelTitle) panelTitle.innerText = primaryType === 'concentric' ? "LAPISAN CINCIN (RINGS)" : "LAPISAN KIPAS (BANDS)"; if (btnAddText) btnAddText.innerText = primaryType === 'concentric' ? "+ Tambah Cincin" : "+ Tambah Kipas"; } else { if (panelTitle) panelTitle.innerText = "MESIN MULTI-LAPIS"; if (btnAddText) btnAddText.innerText = "+ Tambah Layer"; } }
                 if (els.rowCountDisplay) els.rowCountDisplay.innerText = ds.rows.length; renderMultiLayerEngine(); renderDataInputs(); renderPercentageWidgets();
             } catch (e) { console.error("SyncPartial Error:", e); }
         }
 
         const syncAndRender = (prop, value) => { const s = getActiveSlide(); if (s) { s[prop] = value; triggerVisUpdateWithDebounce(); } };
-        if (els.chartTitleInput) els.chartTitleInput.addEventListener('input', (e) => { const slide = getActiveSlide(); slide.chartTitle = e.target.value; if (els.activeSlideNameDisplay) els.activeSlideNameDisplay.innerText = e.target.value || `Slide ${activeSlideIndex + 1}`; renderSlideList(); triggerVisUpdateWithDebounce(); }); if (els.chartSubtitleInput) els.chartSubtitleInput.addEventListener('input', (e) => syncAndRender('chartSubtitle', e.target.value)); if (els.watermarkInput) els.watermarkInput.addEventListener('input', (e) => syncAndRender('watermarkText', e.target.value));
+        if (els.chartTitleInput) els.chartTitleInput.addEventListener('input', (e) => { const slide = getActiveSlide(); slide.chartTitle = e.target.value; if (els.activeSlideNameDisplay) els.activeSlideNameDisplay.innerText = e.target.value || `Slide ${activeSlideIndex + 1}`; renderSlideList(); renderDataInputs(); triggerVisUpdateWithDebounce(); }); if (els.chartSubtitleInput) els.chartSubtitleInput.addEventListener('input', (e) => syncAndRender('chartSubtitle', e.target.value)); if (els.watermarkInput) els.watermarkInput.addEventListener('input', (e) => syncAndRender('watermarkText', e.target.value));
         if (els.bentoLayout) els.bentoLayout.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.bentoLayout = e.target.value; if (e.target.value === '1') activeEditGridIndex = 0; if ((e.target.value === '2-h' || e.target.value === '2-v') && activeEditGridIndex > 1) activeEditGridIndex = 0; syncUIToActiveSlide(); });[els.bentoChart1, els.bentoChart2, els.bentoChart3].forEach((el, index) => { if (el) el.addEventListener('change', (e) => { getActiveSlide().bentoCharts[index] = e.target.value; forceRecolor(getActiveSlide().colorTheme, getActiveSlide()); syncUIToActiveSlide(); }); });
         if (els.colorTheme) els.colorTheme.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.colorTheme = e.target.value; forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide(); }); if (els.stackMode) els.stackMode.addEventListener('change', (e) => syncAndRender('stackMode', e.target.value));
 
         const sliderBinds = [{ el: els.chartScale, prop: 'chartScale', disp: els.chartScaleDisplay, unit: '%' }, { el: els.chartWidth, prop: 'chartWidth', disp: els.chartWidthDisplay, unit: '%' }, { el: els.chartHeight, prop: 'chartHeight', disp: els.chartHeightDisplay, unit: 'px' }, { el: els.donutCutout, prop: 'donutCutout', disp: els.donutCutoutDisplay, unit: '%' }, { el: els.elementShadowSlider, prop: 'elementShadow', disp: els.elementShadowDisplay, unit: 'px' }, { el: els.chartThickness, prop: 'chartThickness', disp: els.chartThicknessDisplay, unit: '%' }, { el: els.outlineWidthSlider, prop: 'outlineWidth', disp: els.outlineWidthDisplay, unit: 'px' }, { el: els.borderRadiusSlider, prop: 'borderRadius', disp: els.borderRadiusDisplay, unit: 'px' }, { el: els.axisFontSizeSlider, prop: 'axisFontSize', disp: els.axisFontSizeDisplay, unit: 'px' }, { el: els.bgOpacitySlider, prop: 'bgOpacity', disp: els.bgOpacityDisplay, unit: '%' }, { el: els.bentoBgOpacitySlider, prop: 'bentoBgOpacity', disp: els.bentoBgOpacityDisplay, unit: '%' }];
         sliderBinds.forEach(b => { if (b.el) b.el.addEventListener('input', (e) => { const val = parseInt(e.target.value); if (b.disp) b.disp.innerText = val + (b.unit.toLowerCase() === 'px' ? 'PX' : b.unit); syncAndRender(b.prop, val); }); });
         if (els.datalabelPositionSelect) els.datalabelPositionSelect.addEventListener('change', (e) => syncAndRender('datalabelPosition', e.target.value)); if (els.bgColor) els.bgColor.addEventListener('input', (e) => { if (els.bgColorText) els.bgColorText.innerText = e.target.value; syncAndRender('bgColor', e.target.value); }); if (els.bentoBgColor) els.bentoBgColor.addEventListener('input', (e) => { if (els.bentoBgColorText) els.bentoBgColorText.innerText = e.target.value; syncAndRender('bentoBgColor', e.target.value); }); if (els.outlineColor) els.outlineColor.addEventListener('input', (e) => { if (els.outlineColorText) els.outlineColorText.innerText = e.target.value; syncAndRender('outlineColor', e.target.value); });
-        const toggles = { 'toggleLegend': 'showLegend', 'toggleAxisNumbers': 'showAxisNumbers', 'toggleAxisCategories': 'showAxisCategories', 'toggleGridX': 'showGridX', 'toggleGridY': 'showGridY' }; Object.keys(toggles).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => syncAndRender(toggles[id], e.target.checked)); });
+        const toggles = { 'toggleLegend': 'showLegend', 'toggleAxisNumbers': 'showAxisNumbers', 'toggleAxisCategories': 'showAxisCategories', 'toggleGridX': 'showGridX', 'toggleGridY': 'showGridY', 'toggleDonutCenter': 'showDonutCenter' }; Object.keys(toggles).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => syncAndRender(toggles[id], e.target.checked)); });
+        document.getElementById('donutCenterLabelInput')?.addEventListener('input', (e) => syncAndRender('donutCenterLabel', e.target.value));
+        document.getElementById('dataUnitInput')?.addEventListener('input', (e) => syncAndRender('valueUnit', e.target.value));
 
         function renderMultiLayerEngine() {
             try {
@@ -1407,7 +1938,7 @@
             } catch (e) { console.error("MultiLayer render failed", e); }
         }
 
-        if (els.btnAddOverlay) els.btnAddOverlay.addEventListener('click', () => { const slide = getActiveSlide(); const ds = getActiveDataSet(); ds.series.push({ id: 's_' + Date.now(), name: 'Overlay ' + (ds.series.length), type: 'auto', axis: 'y', zIndex: 'front' }); ds.rows.forEach(r => r.values.push({ val: Math.floor(Math.random() * 50) + 10, val2: 0, color: '#000', offset: 0 })); forceRecolor(slide.colorTheme, slide); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); });
+        if (els.btnAddOverlay) els.btnAddOverlay.addEventListener('click', () => { const slide = getActiveSlide(); const ds = getActiveDataSet(); ds.series.push({ id: 's_' + Date.now(), name: 'Overlay ' + (ds.series.length), type: 'auto', axis: 'y', zIndex: 'front' }); ds.rows.forEach(r => r.values.push({ val: Math.floor(Math.random() * 50) + 10, val2: 0, color: '#000', offset: 0, callout: false, calloutSub: '' })); forceRecolor(slide.colorTheme, slide); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); });
         function removeSeries(index) { const slide = getActiveSlide(); const ds = getActiveDataSet(); ds.series.splice(index, 1); ds.rows.forEach(r => r.values.splice(index, 1)); forceRecolor(slide.colorTheme, slide); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); }
         function updateSeriesProp(index, prop, val) { const ds = getActiveDataSet(); if (ds.series[index]) { ds.series[index][prop] = val; triggerVisUpdateWithDebounce(); } }
         function updateSeriesName(index, val) { const ds = getActiveDataSet(); if (ds.series[index]) { ds.series[index].name = val; renderDataInputs(); triggerVisUpdateWithDebounce(); } }
@@ -1416,8 +1947,42 @@
             try {
                 const slide = getActiveSlide(); const ds = getActiveDataSet(); if (!slide || !ds || !els.dataRowsContainer) return; els.dataRowsContainer.innerHTML = '';
                 let primaryType = slide.bentoCharts[activeEditGridIndex]; let needsDualInput = ['gantt', 'waterfall', 'scatter', 'bubble'].includes(primaryType); let isScatterBubble = ['scatter', 'bubble'].includes(primaryType);
+
+                const tDrillTo = translations[globalLang]?.drillTo || 'Breakdown ke:';
+                const tNoDrill = translations[globalLang]?.noDrill || 'Tidak Ada (Standar)';
+                const tCreateDrill = translations[globalLang]?.createDrill || '➕ Buat Breakdown Baru';
+
                 ds.rows.forEach((row, rowIndex) => {
-                    const div = document.createElement('div'); div.className = "bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col gap-3 shadow-sm"; div.innerHTML = `<div class="flex items-center gap-2"><button onclick="openIconFor('${row.id}')" class="w-8 h-8 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg shadow-sm hover:border-[#cafc03] transition">${row.icon}</button><input type="text" value="${row.label}" onchange="updateRowLabel('${row.id}', this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-none shadow-sm focus:ring-2 focus:ring-[#cafc03] transition"></div>`;
+                    let slideOptions = `<option value="">${tNoDrill}</option>`;
+                    appSlides.forEach((s, idx) => {
+                        if (idx !== activeSlideIndex) {
+                            const selected = row.drillTarget === s.id ? 'selected' : '';
+                            slideOptions += `<option value="${s.id}" ${selected}>🎯 Slide ${idx + 1}: ${s.chartTitle || 'Untitled'}</option>`;
+                        }
+                    });
+                    slideOptions += `<option value="__create_new__" class="font-bold text-indigo-600 bg-indigo-50">${tCreateDrill}</option>`;
+
+                    const hasDrillBadge = row.drillTarget && appSlides.some(s => s.id === row.drillTarget);
+                    const hasCallout = row.values.some(v => v && v.callout);
+
+                    const div = document.createElement('div'); div.className = `bg-slate-50 p-3 rounded-2xl border ${hasDrillBadge ? 'border-indigo-300 ring-1 ring-indigo-500/20 bg-indigo-50/20' : 'border-slate-100'} flex flex-col gap-2.5 shadow-sm transition`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <button onclick="openIconFor('${row.id}')" class="w-8 h-8 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg shadow-sm hover:border-[#cafc03] transition">${row.icon}</button>
+                            <input type="text" value="${row.label}" onchange="updateRowLabel('${row.id}', this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-none shadow-sm focus:ring-2 focus:ring-[#cafc03] transition">
+                            <button onclick="toggleRowCallout('${row.id}')" title="Tampilkan Garis Petunjuk (Callout)" class="w-8 h-8 shrink-0 rounded-xl border flex items-center justify-center transition shadow-sm ${hasCallout ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-400 border-slate-200 hover:text-slate-700'}">
+                                <i class="ph-bold ph-chat-teardrop-text text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-xl border border-slate-200/80 shadow-sm">
+                            <i class="ph-bold ph-git-branch text-indigo-500 text-xs shrink-0"></i>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase whitespace-nowrap">${tDrillTo}</span>
+                            <select onchange="updateRowDrillTarget('${row.id}', this.value)" class="flex-1 min-w-0 bg-transparent text-[10px] font-bold ${hasDrillBadge ? 'text-indigo-600' : 'text-slate-600'} outline-none cursor-pointer truncate">
+                                ${slideOptions}
+                            </select>
+                            ${hasDrillBadge ? `<button onclick="drillDownTo('${row.drillTarget}')" class="bg-indigo-100 hover:bg-indigo-600 text-indigo-700 hover:text-white text-[9px] font-bold px-2 py-0.5 rounded-md transition shrink-0 flex items-center gap-1">Buka <i class="ph-bold ph-arrow-right"></i></button>` : ''}
+                        </div>
+                    `;
                     const valsContainer = document.createElement('div'); valsContainer.className = "flex gap-2 overflow-x-auto pb-2 border-t border-slate-200 pt-3 mt-1 custom-scrollbar";
                     ds.series.forEach((s, sIdx) => {
                         let v = row.values[sIdx]; if (!v) return; const vDiv = document.createElement('div'); vDiv.className = "flex flex-col gap-1 min-w-[70px]"; let sName = s.name.length > 8 ? s.name.substring(0, 6) + '..' : s.name; let val1 = v.val !== null && v.val !== undefined ? v.val : ''; let val2 = v.val2 !== null && v.val2 !== undefined ? v.val2 : '';
@@ -1428,7 +1993,40 @@
             } catch (e) { console.error("DataInputs render failed", e); }
         }
 
-        if (els.btnAddRow) els.btnAddRow.addEventListener('click', () => { const slide = getActiveSlide(); const ds = getActiveDataSet(); const newRow = { id: 'r_' + Date.now(), label: 'Data Baru', icon: '✨', values: [] }; ds.series.forEach(() => newRow.values.push({ val: 50, val2: 100, color: '#000', offset: 0 })); ds.rows.push(newRow); forceRecolor(slide.colorTheme, slide); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); });
+        function updateRowDrillTarget(rowId, targetVal) {
+            const ds = getActiveDataSet();
+            const r = ds.rows.find(x => x.id === rowId);
+            if (!r) return;
+            if (targetVal === '__create_new__') {
+                const newSlideIdx = appSlides.length + 1;
+                const newSlide = generateDefaultSlide(newSlideIdx);
+                newSlide.chartTitle = `Breakdown: ${r.label}`;
+                newSlide.chartSubtitle = `Detail Area untuk ${r.label}`;
+                const totalParent = Number(r.values[0]?.val) || 300;
+                const p1 = Math.round(totalParent * 0.45);
+                const p2 = Math.round(totalParent * 0.35);
+                const p3 = Math.max(10, totalParent - p1 - p2);
+                newSlide.dataSets[0].rows = [
+                    { id: 'r_sub1_' + Date.now(), label: `${r.label} - Area 1`, icon: '📍', values: [{ val: p1, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' }] },
+                    { id: 'r_sub2_' + Date.now(), label: `${r.label} - Area 2`, icon: '🏢', values: [{ val: p2, val2: 0, color: '#111827', offset: 0, callout: false, calloutSub: '' }] },
+                    { id: 'r_sub3_' + Date.now(), label: `${r.label} - Area 3`, icon: '⚡', values: [{ val: p3, val2: 0, color: '#94a3b8', offset: 0, callout: false, calloutSub: '' }] }
+                ];
+                appSlides.push(newSlide);
+                r.drillTarget = newSlide.id;
+                renderSlideList();
+                renderDataInputs();
+                renderPercentageWidgets();
+                saveState();
+                showToast(`Slide "${newSlide.chartTitle}" otomatis dibuat!`);
+            } else {
+                r.drillTarget = targetVal || null;
+                renderDataInputs();
+                renderPercentageWidgets();
+                saveState();
+            }
+        }
+
+        if (els.btnAddRow) els.btnAddRow.addEventListener('click', () => { const slide = getActiveSlide(); const ds = getActiveDataSet(); const newRow = { id: 'r_' + Date.now(), label: 'Data Baru', icon: '✨', values: [] }; ds.series.forEach(() => newRow.values.push({ val: 50, val2: 100, color: '#000', offset: 0, callout: false, calloutSub: '' })); ds.rows.push(newRow); forceRecolor(slide.colorTheme, slide); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); });
         if (els.btnRemoveRow) els.btnRemoveRow.addEventListener('click', () => { const ds = getActiveDataSet(); if (ds.rows.length > 1) { ds.rows.pop(); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); } });
         function updateRowLabel(id, val) { const ds = getActiveDataSet(); const r = ds.rows.find(x => x.id === id); if (r) { r.label = val; triggerVisUpdateWithDebounce(); renderPercentageWidgets(); } }
         function updateRowValue(rowId, sIdx, prop, val) { const ds = getActiveDataSet(); const r = ds.rows.find(x => x.id === rowId); if (r && r.values[sIdx]) { if (prop === 'val' || prop === 'val2') { if (val === "" || val.trim() === "") r.values[sIdx][prop] = null; else r.values[sIdx][prop] = Number(String(val).replace(/[^0-9.-]/g, '')); } else { r.values[sIdx][prop] = val; } triggerVisUpdateWithDebounce(); renderPercentageWidgets(); } }
@@ -1436,8 +2034,400 @@
         function closeIconModal() { document.getElementById('iconModal').classList.add('opacity-0'); document.getElementById('iconModalContent').classList.add('scale-95'); setTimeout(() => document.getElementById('iconModal').classList.add('hidden'), 300); }
         function selectIcon(icon) { if (activeIconInput === 'note') { const slide = getActiveSlide(); const note = slide?.notes?.find(n => n.id === activeNoteId); if (note) { note.text = (note.text || '') + icon; syncNoteController(); renderNotes(); saveState(); } } else if (activeIconInput && activeIconInput.startsWith('r_')) { const ds = getActiveDataSet(); const r = ds.rows.find(x => x.id === activeIconInput); if (r) { r.icon = icon; triggerVisUpdateWithDebounce(); renderDataInputs(); renderPercentageWidgets(); } } closeIconModal(); }
 
-        const customEnginePlugin = { id: 'customEngine', beforeDatasetsDraw: (chart) => { try { const slide = getActiveSlide(); if (!slide) return; if (slide.elementShadow > 0) { const ctx = chart.ctx; ctx.save(); ctx.shadowColor = 'rgba(0, 0, 0, 0.4)'; ctx.shadowBlur = slide.elementShadow; ctx.shadowOffsetX = slide.elementShadow / 2; ctx.shadowOffsetY = slide.elementShadow / 2; chart.__hasShadow = true; } else { chart.__hasShadow = false; } } catch (e) { } }, afterDatasetsDraw: (chart) => { if (chart.__hasShadow) chart.ctx.restore(); } };
+        const customEnginePlugin = {
+            id: 'customEngine',
+            beforeDatasetsDraw: (chart) => {
+                try {
+                    const slide = getActiveSlide(); if (!slide) return;
+                    if (slide.elementShadow > 0) {
+                        const ctx = chart.ctx; ctx.save();
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                        ctx.shadowBlur = slide.elementShadow;
+                        ctx.shadowOffsetX = slide.elementShadow / 2;
+                        ctx.shadowOffsetY = slide.elementShadow / 2;
+                        chart.__hasShadow = true;
+                    } else { chart.__hasShadow = false; }
+                } catch (e) { }
+            },
+            afterDatasetsDraw: (chart) => {
+                if (chart.__hasShadow) chart.ctx.restore();
+                // RENDER INFORMASI TOTAL DATA (TENGAH DONUT / RADIAL / BADGE CHART LAINNYA)
+                try {
+                    const slide = getActiveSlide();
+                    if (!slide || slide.showDonutCenter === false) return;
+                    const bIdx = parseInt(chart.canvas.dataset.blockIndex || 0);
+                    const cType = slide.bentoCharts[bIdx];
+                    if (cType === 'table' || cType === 'wordCloud' || cType === 'choropleth-world' || cType === 'choropleth-indo') return;
+
+                    const ds = slide.dataSets[bIdx] || slide.dataSets[0];
+                    let total = 0;
+                    ds.rows.forEach(r => {
+                        let v = parseFloat(r.values[0]?.val);
+                        if (!isNaN(v)) total += v;
+                    });
+
+                    const labelTop = slide.donutCenterLabel !== undefined ? slide.donutCenterLabel : 'Total Data:';
+                    const unitStr = slide.valueUnit !== undefined ? slide.valueUnit : '';
+                    const formattedTotal = total.toLocaleString('id-ID');
+
+                    const isRadialType = ['pie', 'doughnut', 'polarArea', 'radar', 'concentric', 'windrose'].includes(cType);
+
+                    if (isRadialType) {
+                        const meta = chart.getDatasetMeta(0);
+                        if (!meta || !meta.data || meta.data.length === 0) return;
+                        const firstElem = meta.data[0];
+                        let centerX = firstElem.x;
+                        let centerY = firstElem.y;
+                        if (cType === 'radar' && chart.scales && chart.scales.r) {
+                            centerX = chart.scales.r.xCenter;
+                            centerY = chart.scales.r.yCenter;
+                        }
+                        if (centerX === undefined || centerY === undefined) return;
+
+                        const innerR = firstElem.innerRadius || 0;
+                        const outerR = firstElem.outerRadius || 80;
+                        const isHollowDonut = (cType === 'doughnut' || cType === 'concentric') && slide.donutCutout >= 30 && innerR >= 28;
+
+                        const ctx = chart.ctx;
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+
+                        const refRadius = isHollowDonut ? innerR : Math.min(outerR * 0.55, 58);
+                        const baseFontSize = Math.max(11, Math.min(22, Math.floor(refRadius / 2.8)));
+                        const subFontSize = Math.max(9, Math.floor(baseFontSize * 0.65));
+
+                        // Jika bukan Donut berlubang (misal Pie / Polar / Radar), beri lencana (badge) bulat putih elegan di tengah
+                        if (!isHollowDonut) {
+                            const pillW = Math.max(88, formattedTotal.length * (baseFontSize * 0.68) + 28);
+                            const pillH = (labelTop ? subFontSize + 4 : 0) + baseFontSize + (unitStr ? subFontSize + 4 : 0) + 16;
+                            const rx = centerX - pillW / 2;
+                            const ry = centerY - pillH / 2;
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+                            ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
+                            ctx.shadowBlur = 10;
+                            ctx.beginPath();
+                            if (ctx.roundRect) ctx.roundRect(rx, ry, pillW, pillH, 14);
+                            else ctx.rect(rx, ry, pillW, pillH);
+                            ctx.fill();
+                            ctx.shadowBlur = 0;
+                            ctx.strokeStyle = 'rgba(226, 232, 240, 0.9)';
+                            ctx.lineWidth = 1.5;
+                            ctx.stroke();
+                        }
+
+                        if (labelTop) {
+                            ctx.font = `600 ${subFontSize}px Inter, sans-serif`;
+                            ctx.fillStyle = '#475569';
+                            ctx.fillText(labelTop, centerX, centerY - (unitStr ? baseFontSize * 0.85 : baseFontSize * 0.55));
+                        }
+
+                        ctx.font = `900 ${baseFontSize}px Inter, sans-serif`;
+                        ctx.fillStyle = '#0f172a';
+                        ctx.fillText(formattedTotal, centerX, centerY + (labelTop && !unitStr ? subFontSize * 0.4 : 0));
+
+                        if (unitStr) {
+                            ctx.font = `800 ${subFontSize + 1}px Inter, sans-serif`;
+                            ctx.fillStyle = '#1e293b';
+                            ctx.fillText(unitStr, centerX, centerY + baseFontSize * 0.85);
+                        }
+                        ctx.restore();
+                    } else {
+                        // Untuk Bar, Line, Area, Waterfall, Gantt, Tape, Treemap: Tampilkan kapsul Info Total di kanan atas chartArea
+                        const area = chart.chartArea;
+                        if (!area) return;
+                        const ctx = chart.ctx;
+                        ctx.save();
+
+                        const summaryText = `${labelTop ? labelTop + ' ' : ''}${formattedTotal}${unitStr ? ' ' + unitStr : ''}`;
+                        ctx.font = `800 11px Inter, sans-serif`;
+                        const textW = ctx.measureText(summaryText).width;
+                        const padX = 12;
+                        const boxW = textW + padX * 2;
+                        const boxH = 26;
+                        const boxX = Math.max(area.left, area.right - boxW - 6);
+                        const boxY = Math.max(4, area.top - 6);
+
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+                        ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
+                        ctx.shadowBlur = 8;
+                        ctx.beginPath();
+                        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 999);
+                        else ctx.rect(boxX, boxY, boxW, boxH);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                        ctx.strokeStyle = '#cbd5e1';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#0f172a';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(summaryText, boxX + boxW / 2, boxY + boxH / 2 + 0.5);
+                        ctx.restore();
+                    }
+                } catch (e) { console.error("Total Data Info Render Error:", e); }
+            }
+        };
         const barExplodePlugin = { id: 'barExplode', beforeUpdate(chart) { }, afterUpdate(chart) { try { const isBar = chart.config.type === 'bar'; const isLine = chart.config.type === 'line'; if (!isBar && !isLine) return; chart.data.datasets.forEach((dataset, i) => { if (!dataset.customOffsets) return; const meta = chart.getDatasetMeta(i); meta.data.forEach((el, index) => { let offsetPercent = dataset.customOffsets[index] || 0; if (offsetPercent > 0) { let scale = 1 + (offsetPercent / 100); if (isBar && el.width !== undefined && el.height !== undefined) { if (chart.options.indexAxis === 'y') { let dh = el.height * (scale - 1); el.height += dh; el.y -= dh / 2; } else { let dw = el.width * (scale - 1); el.width += dw; el.x -= dw / 2; } } else if (isLine && el.options && el.options.radius !== undefined) { el.options.radius *= scale; el.options.borderWidth *= scale; } } }); }); } catch (e) { console.error('Explode plugin err:', e); } } };
+
+        // MESIN CALLOUT & GARIS PETUNJUK SIKU-SIKU INTERAKTIF (ALA BIG ALPHA)
+        let isDraggingCallout = false;
+        let draggedCalloutInfo = null;
+        let calloutDragStartX = 0, calloutDragStartY = 0;
+        let calloutBoxStartX = 0, calloutBoxStartY = 0;
+
+        function getChartElementAnchor(chart, cType, datasetIndex, dataIndex, wrapperRect) {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (!meta || !meta.data || !meta.data[dataIndex]) return null;
+            const el = meta.data[dataIndex];
+            if (el.x === undefined || el.y === undefined || isNaN(el.x) || isNaN(el.y)) return null;
+
+            const wWidth = els.canvasWrapper.offsetWidth || 600;
+            const wHeight = els.canvasWrapper.offsetHeight || 500;
+            const scaleRatio = wrapperRect.width > 0 ? (wrapperRect.width / wWidth) : 1;
+
+            const canvasRect = chart.canvas.getBoundingClientRect();
+            const offsetX = (canvasRect.left - wrapperRect.left) / (scaleRatio || 1);
+            const offsetY = (canvasRect.top - wrapperRect.top) / (scaleRatio || 1);
+
+            let anchorX = el.x, anchorY = el.y;
+            let defaultBoxX = el.x, defaultBoxY = el.y;
+            let side = 'right';
+
+            if (['pie', 'doughnut', 'polarArea', 'concentric', 'windrose'].includes(cType)) {
+                const startA = el.startAngle !== undefined ? el.startAngle : 0;
+                const endA = el.endAngle !== undefined ? el.endAngle : 0;
+                const midAngle = (startA + endA) / 2;
+                const innerR = el.innerRadius || 0;
+                const outerR = el.outerRadius || 80;
+                const midR = innerR > 0 ? (innerR + outerR) / 2 : outerR * 0.75;
+                anchorX = el.x + Math.cos(midAngle) * midR;
+                anchorY = el.y + Math.sin(midAngle) * midR;
+                const cosA = Math.cos(midAngle);
+                const sinA = Math.sin(midAngle);
+                side = cosA >= 0 ? 'right' : 'left';
+                const spreadStep = (datasetIndex * 26);
+                const outDist = outerR + 50 + spreadStep;
+                defaultBoxX = el.x + (cosA >= 0 ? Math.max(cosA * outDist, outerR * 0.7 + 45 + spreadStep) : Math.min(cosA * outDist, -outerR * 0.7 - 45 - spreadStep));
+                defaultBoxY = el.y + sinA * (outerR + 30 + spreadStep);
+            } else if (cType === 'bar-horizontal' || cType === 'gantt' || cType === 'tape') {
+                anchorX = el.x;
+                anchorY = el.y;
+                defaultBoxX = el.x + 80;
+                defaultBoxY = el.y - 22 + (datasetIndex * 22);
+                side = 'right';
+            } else {
+                anchorX = el.x;
+                anchorY = el.y;
+                defaultBoxX = el.x + (dataIndex % 2 === 0 ? -65 : 65);
+                defaultBoxY = el.y - 50 - (datasetIndex * 24);
+                side = dataIndex % 2 === 0 ? 'left' : 'right';
+            }
+
+            return {
+                ax: offsetX + anchorX,
+                ay: offsetY + anchorY,
+                defX: Math.max(10, Math.min(90, ((offsetX + defaultBoxX) / wWidth) * 100)),
+                defY: Math.max(10, Math.min(90, ((offsetY + defaultBoxY) / wHeight) * 100)),
+                side
+            };
+        }
+
+        function renderCalloutsOverlay() {
+            const svg = document.getElementById('calloutSvgLayer');
+            const container = document.getElementById('calloutsContainer');
+            if (!svg || !container || !els.canvasWrapper) return;
+            svg.innerHTML = '';
+            container.innerHTML = '';
+
+            const slide = getActiveSlide();
+            if (!slide) return;
+
+            const wWidth = els.canvasWrapper.offsetWidth;
+            const wHeight = els.canvasWrapper.offsetHeight;
+            if (!wWidth || !wHeight) return;
+
+            const wrapperRect = els.canvasWrapper.getBoundingClientRect();
+            const numCharts = slide.bentoLayout === '1' ? 1 : (slide.bentoLayout.startsWith('2') ? 2 : 3);
+
+            for (let bIdx = 0; bIdx < numCharts; bIdx++) {
+                const chart = mainCharts[bIdx];
+                const cType = slide.bentoCharts[bIdx];
+                if (!chart || !chart.canvas || cType === 'table') continue;
+
+                const ds = slide.dataSets[bIdx] || slide.dataSets[0];
+                const isMultiSeries = ds.series.length > 1;
+
+                // Hitung total per-series untuk persentase masing-masing layer/cincin
+                const seriesTotals = ds.series.map((s, sIdx) => {
+                    let t = 0;
+                    ds.rows.forEach(r => {
+                        let v = parseFloat(r.values[sIdx]?.val);
+                        if (!isNaN(v)) t += v;
+                    });
+                    return t;
+                });
+
+                ds.rows.forEach((row, rIdx) => {
+                    row.values.forEach((valObj, sIdx) => {
+                        if (!valObj || !valObj.callout || valObj.val === null || valObj.val === undefined) return;
+                        if (sIdx >= ds.series.length) return;
+
+                        // Tentukan datasetIndex & dataIndex sesuai tipe chart
+                        let chartDatasetIdx = sIdx;
+                        let chartDataIdx = rIdx;
+                        if (cType === 'tape') {
+                            chartDatasetIdx = rIdx;
+                            chartDataIdx = sIdx;
+                        } else if (cType === 'windrose') {
+                            chartDatasetIdx = (ds.series.length - 1) - sIdx;
+                            chartDataIdx = rIdx;
+                        } else if (['pie', 'doughnut', 'polarArea', 'radar'].includes(cType) && cType !== 'concentric') {
+                            if (sIdx > 0) return; // Chart radial tunggal hanya merender series 0
+                            chartDatasetIdx = 0;
+                            chartDataIdx = rIdx;
+                        }
+
+                        const anchor = getChartElementAnchor(chart, cType, chartDatasetIdx, chartDataIdx, wrapperRect);
+                        if (!anchor) return;
+
+                        if (valObj.calloutX === undefined) valObj.calloutX = anchor.defX;
+                        if (valObj.calloutY === undefined) valObj.calloutY = anchor.defY;
+
+                        const boxX = (valObj.calloutX / 100) * wWidth;
+                        const boxY = (valObj.calloutY / 100) * wHeight;
+
+                        const total = seriesTotals[sIdx] || 0;
+                        const numVal = Number(valObj.val) || 0;
+                        const pctRaw = total > 0 ? (numVal / total) * 100 : 0;
+                        const pctFormatted = pctRaw < 1 && pctRaw > 0 ? pctRaw.toFixed(2).replace('.', ',') : (pctRaw % 1 === 0 ? pctRaw.toFixed(0) : pctRaw.toFixed(1).replace('.', ','));
+                        const unitStr = slide.valueUnit ? ` ${slide.valueUnit}` : '';
+                        const hasDrill = row.drillTarget && appSlides.some(s => s.id === row.drillTarget);
+                        const seriesBadge = isMultiSeries ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 ml-1">${ds.series[sIdx]?.name || ''}</span>` : '';
+
+                        const boxEl = document.createElement('div');
+                        boxEl.className = 'callout-box absolute bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl shadow-md border border-slate-200/90 font-[\'Inter\'] min-w-[145px] max-w-[240px]';
+                        boxEl.style.left = valObj.calloutX + '%';
+                        boxEl.style.top = valObj.calloutY + '%';
+                        boxEl.style.transform = 'translate(-50%, -50%)';
+                        boxEl.dataset.bIdx = bIdx;
+                        boxEl.dataset.rowId = row.id;
+                        boxEl.dataset.sIdx = sIdx;
+
+                        boxEl.innerHTML = `
+                            <div class="text-[11px] font-medium text-slate-700 leading-snug flex items-center justify-between gap-1">
+                                <span>${row.icon ? row.icon + ' ' : ''}${row.label}:</span>
+                                ${seriesBadge}
+                            </div>
+                            <div class="text-xs sm:text-[13px] text-slate-900 leading-tight mt-0.5">
+                                <span class="font-black">${numVal.toLocaleString('id-ID')}${unitStr}</span>
+                                <span class="font-normal text-slate-600"> (${pctFormatted}%)</span>
+                            </div>
+                            ${valObj.calloutSub ? `<div class="text-[9px] text-slate-500 mt-1 pt-1 border-t border-slate-100 leading-tight">${valObj.calloutSub}</div>` : ''}
+                            ${hasDrill ? `<button onclick="event.stopPropagation(); drillDownTo('${row.drillTarget}')" class="mt-1.5 w-full bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white text-[9px] font-bold py-1 px-2 rounded-lg transition flex items-center justify-center gap-1"><i class="ph-bold ph-arrows-out-simple"></i> Breakdown Area</button>` : ''}
+                        `;
+
+                        container.appendChild(boxEl);
+
+                        const boxWidth = boxEl.offsetWidth || 160;
+                        const isBoxRight = boxX >= anchor.ax;
+                        const dotX = isBoxRight ? (boxX - boxWidth / 2 - 4) : (boxX + boxWidth / 2 + 4);
+                        const dotY = boxY;
+
+                        // Buat jalur garis putus-putus siku-siku (Orthogonal L-shape / Z-shape seperti Big Alpha)
+                        let pathD = '';
+                        const dy = Math.abs(dotY - anchor.ay);
+                        const dx = Math.abs(dotX - anchor.ax);
+                        if (dy > dx * 0.6) {
+                            pathD = `M ${anchor.ax} ${anchor.ay} L ${anchor.ax} ${dotY} L ${dotX} ${dotY}`;
+                        } else {
+                            const midX = anchor.ax + (dotX - anchor.ax) * 0.35;
+                            pathD = `M ${anchor.ax} ${anchor.ay} L ${midX} ${dotY} L ${dotX} ${dotY}`;
+                        }
+
+                        const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        pathEl.setAttribute('d', pathD);
+                        pathEl.setAttribute('fill', 'none');
+                        pathEl.setAttribute('stroke', '#334155');
+                        pathEl.setAttribute('stroke-width', '1.6');
+                        pathEl.setAttribute('stroke-dasharray', '5,5');
+                        pathEl.setAttribute('stroke-linecap', 'round');
+                        pathEl.setAttribute('stroke-linejoin', 'round');
+                        svg.appendChild(pathEl);
+
+                        // Titik Bulatan Berwarna sesuai warna spesifik layer/elemen tersebut
+                        const circleEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circleEl.setAttribute('cx', dotX);
+                        circleEl.setAttribute('cy', dotY);
+                        circleEl.setAttribute('r', '5.5');
+                        circleEl.setAttribute('fill', valObj.color || '#0f172a');
+                        circleEl.setAttribute('stroke', '#ffffff');
+                        circleEl.setAttribute('stroke-width', '1.5');
+                        svg.appendChild(circleEl);
+                    });
+                });
+            }
+        }
+
+        function startCalloutDrag(e) {
+            if (e.target.closest('button')) return;
+            const boxEl = e.target.closest('.callout-box');
+            if (!boxEl) return;
+            isDraggingCallout = true;
+            const bIdx = parseInt(boxEl.dataset.bIdx || 0);
+            const sIdx = parseInt(boxEl.dataset.sIdx || 0);
+            const rowId = boxEl.dataset.rowId;
+            const slide = getActiveSlide();
+            const ds = slide.dataSets[bIdx] || slide.dataSets[0];
+            const row = ds.rows.find(r => r.id === rowId);
+            if (!row || !row.values[sIdx]) return;
+
+            draggedCalloutInfo = { valObj: row.values[sIdx], boxEl };
+            calloutDragStartX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            calloutDragStartY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            calloutBoxStartX = row.values[sIdx].calloutX || 50;
+            calloutBoxStartY = row.values[sIdx].calloutY || 50;
+            boxEl.classList.add('grabbing');
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function moveCalloutDrag(e) {
+            if (!isDraggingCallout || !draggedCalloutInfo) return;
+            e.preventDefault();
+            const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const rect = els.canvasWrapper.getBoundingClientRect();
+            const dx = clientX - calloutDragStartX;
+            const dy = clientY - calloutDragStartY;
+
+            let newX = calloutBoxStartX + (dx / rect.width) * 100;
+            let newY = calloutBoxStartY + (dy / rect.height) * 100;
+            newX = Math.max(5, Math.min(95, newX));
+            newY = Math.max(5, Math.min(95, newY));
+
+            draggedCalloutInfo.valObj.calloutX = newX;
+            draggedCalloutInfo.valObj.calloutY = newY;
+            renderCalloutsOverlay();
+        }
+
+        function endCalloutDrag() {
+            if (!isDraggingCallout) return;
+            isDraggingCallout = false;
+            if (draggedCalloutInfo && draggedCalloutInfo.boxEl) {
+                draggedCalloutInfo.boxEl.classList.remove('grabbing');
+            }
+            draggedCalloutInfo = null;
+            saveState();
+        }
+
+        document.getElementById('calloutsContainer')?.addEventListener('mousedown', startCalloutDrag);
+        document.getElementById('calloutsContainer')?.addEventListener('touchstart', startCalloutDrag, { passive: false });
+        document.addEventListener('mousemove', moveCalloutDrag);
+        document.addEventListener('touchmove', moveCalloutDrag, { passive: false });
+        document.addEventListener('mouseup', endCalloutDrag);
+        document.addEventListener('touchend', endCalloutDrag);
 
         async function prepareChartConfig(cType, blockIndex, slide) {
             let ds = slide.dataSets[blockIndex] || slide.dataSets[0];
@@ -1479,13 +2469,22 @@
             }
 
             const chartOptions = {
-                responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: slide.bentoLayout === '1' ? 10 : 20 }, interaction: { mode: isInclude ? 'index' : 'nearest', intersect: false }, animation: { duration: 1000, delay: blockIndex * 150, easing: 'easeOutQuart' },
+                responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: slide.bentoLayout === '1' ? 10 : 20 }, interaction: { mode: isInclude ? 'index' : 'nearest', intersect: true }, animation: { duration: 1000, delay: blockIndex * 150, easing: 'easeOutQuart', onProgress: () => { renderCalloutsOverlay(); }, onComplete: () => { renderCalloutsOverlay(); } },
                 plugins: {
                     legend: { display: slide.showLegend && !isMap && !isTreemap && (blockIndex === 0 || slide.bentoLayout !== '1'), position: 'top', align: 'center', labels: { font: { family: 'Inter', size: 14, weight: 'bold' }, color: '#334155', usePointStyle: true, padding: 16 } },
                     tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
-                    datalabels: { display: !isRadial && !isMap && !isScatterBubble && !isTreemap, anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelPosition === 'outside' ? '#111827' : '#fff', font: { family: 'Inter', weight: '900', size: 14 }, formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : raw; } if (Array.isArray(v)) return Math.abs(v[1] - v[0]); if (typeof v === 'object') return v.y; return Math.round(v); }, textStrokeColor: slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: slide.datalabelPosition === 'outside' ? 0 : 3 }
+                    datalabels: { display: slide.datalabelPosition !== 'none' && !isRadial && !isMap && !isScatterBubble && !isTreemap, anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelPosition === 'outside' ? '#111827' : '#fff', font: { family: 'Inter', weight: '900', size: 14 }, formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : raw; } if (Array.isArray(v)) return Math.abs(v[1] - v[0]); if (typeof v === 'object') return v.y; return Math.round(v); }, textStrokeColor: slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: slide.datalabelPosition === 'outside' ? 0 : 3 }
                 },
-                scales: {}, onClick: (e, elements, chart) => { if (elements && elements.length > 0) { const el = elements[0]; const bIndex = parseInt(chart.canvas.dataset.blockIndex || 0); openElementEditor(el.datasetIndex, el.index, e.native.clientX, e.native.clientY, slide.bentoCharts[bIndex], bIndex); } else { closeElementPopup(); } }
+                scales: {}, onClick: (e, elements, chart) => {
+                    const directElements = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
+                    if (directElements && directElements.length > 0) {
+                        const el = directElements[0];
+                        const bIndex = parseInt(chart.canvas.dataset.blockIndex || 0);
+                        openElementEditor(el.datasetIndex, el.index, e.native.clientX, e.native.clientY, slide.bentoCharts[bIndex], bIndex);
+                    } else {
+                        closeElementPopup();
+                    }
+                }
             };
 
             if (isMap) {
@@ -1500,7 +2499,7 @@
                 else { chartOptions.scales.x = { type: catAxisType || 'category', display: displayCategory, stacked: isStacked, grid: { display: slide.showGridX, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; chartOptions.scales.y = { type: 'linear', display: displayNumbers, position: 'left', stacked: isStacked, grid: { display: slide.showGridY, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; if (hasSecondaryAxis) chartOptions.scales.yRight = { type: 'linear', position: 'right', display: displayNumbers, stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize }, color: '#64748b' } }; }
             } else if (isRadial) {
                 if (cType !== 'radar' && cType !== 'polarArea' && !isWindrose) delete chartOptions.scales; chartOptions.cutout = cType === 'doughnut' || isConcentric ? slide.donutCutout + '%' : 0; if (cType !== 'radar') chartOptions.elements = { arc: { borderRadius: slide.borderRadius, borderWidth: oWidth, borderColor: oColor } };
-                chartOptions.plugins.datalabels = { display: true, color: '#fff', font: { weight: 'bold', size: 14 }, textStrokeColor: 'rgba(0,0,0,0.5)', textStrokeWidth: 2, formatter: (value, ctx) => { if (isWindrose || isConcentric || cType === 'polarArea') { if (isWindrose && stackLogic === 'accumulate') { let actualValue = value; let nextDataset = ctx.chart.data.datasets[ctx.datasetIndex + 1]; if (nextDataset) actualValue -= nextDataset.data[ctx.dataIndex]; return Math.round(actualValue); } return Math.round(value); } let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += (d || 0)); return sum === 0 ? '0%' : Math.round((value / sum) * 100) + '%'; } };
+                chartOptions.plugins.datalabels = { display: slide.datalabelPosition !== 'none', color: '#fff', font: { weight: 'bold', size: 14 }, textStrokeColor: 'rgba(0,0,0,0.5)', textStrokeWidth: 2, formatter: (value, ctx) => { if (isWindrose || isConcentric || cType === 'polarArea') { if (isWindrose && stackLogic === 'accumulate') { let actualValue = value; let nextDataset = ctx.chart.data.datasets[ctx.datasetIndex + 1]; if (nextDataset) actualValue -= nextDataset.data[ctx.dataIndex]; return Math.round(actualValue); } return Math.round(value); } let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += (d || 0)); return sum === 0 ? '0%' : Math.round((value / sum) * 100) + '%'; } };
             }
             if (!isRadial && !isMap && !isTreemap) { chartOptions.barPercentage = isTape ? 1 : slide.chartThickness / 100; chartOptions.categoryPercentage = isTape ? 1 : 0.8; }
             return { datasets, labels, chartOptions, globalBaseType };
@@ -1522,9 +2521,11 @@
                         if (isNaN(val) || val <= 0) return;
                         let pct = Math.round((val / total) * 100);
                         let color = r.values[0]?.color || '#000';
+                        const hasDrill = r.drillTarget && appSlides.some(s => s.id === r.drillTarget);
                         const div = document.createElement('div');
-                        div.className = "flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm whitespace-nowrap shrink-0 transition-transform hover:scale-105";
-                        div.innerHTML = `<div class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></div><span class="text-[10px] font-bold text-slate-700">${r.icon} ${r.label}</span><span class="text-[11px] font-black text-slate-900 ml-1">${pct}%</span>`;
+                        div.className = `flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border ${hasDrill ? 'border-indigo-300 cursor-pointer hover:bg-indigo-50' : 'border-slate-100'} shadow-sm whitespace-nowrap shrink-0 transition-transform hover:scale-105`;
+                        if (hasDrill) div.onclick = () => drillDownTo(r.drillTarget);
+                        div.innerHTML = `<div class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></div><span class="text-[10px] font-bold text-slate-700">${r.icon} ${r.label}</span><span class="text-[11px] font-black text-slate-900 ml-1">${pct}%</span>${hasDrill ? '<i class="ph-bold ph-arrow-up-right text-indigo-600 text-[10px]"></i>' : ''}`;
                         els.percentageContainer.appendChild(div);
                     });
                 }
@@ -1560,7 +2561,13 @@
                         const tableWrapper = document.createElement('div'); let tablePad = slide.bentoLayout === '1' ? 'p-3' : 'p-1.5 sm:p-2'; tableWrapper.className = 'table-wrapper w-full h-full overflow-auto custom-scrollbar p-1 flex items-start justify-center min-h-0';
                         let ds = slide.dataSets[i] || slide.dataSets[0]; let tableHTML = `<table class="custom-table w-full text-[10px] sm:text-xs text-left text-slate-600 font-['Inter'] rounded-xl overflow-hidden shadow-sm border border-slate-100"><thead class="text-slate-800 uppercase font-black tracking-wider"><tr><th class="${tablePad} border-b border-slate-200">Label Kategori</th>`;
                         ds.series.forEach(s => { tableHTML += `<th class="${tablePad} border-b border-slate-200">${s.name}</th>`; }); tableHTML += `</tr></thead><tbody class="divide-y divide-slate-100 bg-white/50">`;
-                        ds.rows.forEach(r => { tableHTML += `<tr class="hover:bg-white/80 transition"><td class="${tablePad} font-bold text-slate-800 flex items-center gap-2"><span>${r.icon}</span> ${r.label}</td>`; ds.series.forEach((s, sIdx) => { let v = r.values[sIdx]; let valText = v && v.val !== null ? v.val : '-'; if (slide.bentoCharts[i] === 'waterfall' || slide.bentoCharts[i] === 'gantt' || slide.bentoCharts[i] === 'tape') valText = (v && v.val !== null ? v.val : '-') + ' - ' + (v && v.val2 !== null ? v.val2 : '-'); tableHTML += `<td class="${tablePad} font-medium" style="color: ${v ? v.color : '#000'}">${valText}</td>`; }); tableHTML += `</tr>`; }); tableHTML += `</tbody></table>`;
+                        ds.rows.forEach(r => {
+                            const hasDrill = r.drillTarget && appSlides.some(s => s.id === r.drillTarget);
+                            const rowClickAttr = hasDrill ? `onclick="drillDownTo('${r.drillTarget}')" class="hover:bg-indigo-50/80 cursor-pointer transition group"` : `class="hover:bg-white/80 transition"`;
+                            const drillBadge = hasDrill ? `<span class="ml-auto text-[9px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold group-hover:bg-indigo-600 group-hover:text-white transition">🔍 Detail</span>` : '';
+                            tableHTML += `<tr ${rowClickAttr}><td class="${tablePad} font-bold text-slate-800 flex items-center gap-2"><span>${r.icon}</span> <span>${r.label}</span> ${drillBadge}</td>`;
+                            ds.series.forEach((s, sIdx) => { let v = r.values[sIdx]; let valText = v && v.val !== null ? v.val : '-'; if (slide.bentoCharts[i] === 'waterfall' || slide.bentoCharts[i] === 'gantt' || slide.bentoCharts[i] === 'tape') valText = (v && v.val !== null ? v.val : '-') + ' - ' + (v && v.val2 !== null ? v.val2 : '-'); tableHTML += `<td class="${tablePad} font-medium" style="color: ${v ? v.color : '#000'}">${valText}</td>`; }); tableHTML += `</tr>`;
+                        }); tableHTML += `</tbody></table>`;
                         tableWrapper.innerHTML = tableHTML; card.appendChild(tableWrapper); mainCharts.push({ resize: () => { } });
                     } else {
                         const canvasContainer = document.createElement('div'); canvasContainer.className = 'flex-1 relative w-full h-full flex flex-col justify-center min-h-0 pointer-events-none';
@@ -1570,11 +2577,16 @@
                     }
                     els.bentoWrapper.appendChild(card);
                 }
-                renderNotes(); renderPercentageWidgets(); saveState();
+                renderNotes();
+                renderCalloutsOverlay();
+                setTimeout(() => renderCalloutsOverlay(), 150);
+                setTimeout(() => renderCalloutsOverlay(), 550);
+                renderPercentageWidgets();
+                saveState();
             } catch (err) { console.error("Rendering Failed:", err); }
         }
 
-        window.addEventListener('DOMContentLoaded', () => { loadState(); applySidebarState(); syncUIToActiveSlide(); renderSlideList(); translatePage(); populateIcons(); });
+        window.addEventListener('DOMContentLoaded', () => { loadState(); applySidebarState(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); translatePage(); populateIcons(); });
     </script>
 </body>
 
