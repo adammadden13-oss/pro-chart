@@ -277,6 +277,72 @@
             z-index: 70 !important;
         }
 
+        /* APP-WIDE ELEGANT THEME ENGINE (OBSIDIAN DARK & CYBERPUNK HUD) */
+        body.app-theme-obsidian {
+            background-color: #090d16 !important;
+            color: #f8fafc !important;
+        }
+        body.app-theme-obsidian #workspaceArea {
+            background-color: #090d16 !important;
+        }
+        body.app-theme-obsidian #workspaceArea > div:first-child {
+            background: rgba(15, 23, 42, 0.85) !important;
+            border-bottom-color: rgba(51, 65, 85, 0.5) !important;
+        }
+        body.app-theme-obsidian #leftPanel {
+            background-color: #0f172a !important;
+            border-right-color: #1e293b !important;
+        }
+        body.app-theme-obsidian #sidebarHeader,
+        body.app-theme-obsidian #leftPanel .bg-white {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+        body.app-theme-obsidian #leftPanel .bg-slate-50 {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        body.app-theme-obsidian #leftPanel h1,
+        body.app-theme-obsidian #leftPanel h2,
+        body.app-theme-obsidian #leftPanel h3,
+        body.app-theme-obsidian #leftPanel label,
+        body.app-theme-obsidian #leftPanel input,
+        body.app-theme-obsidian #leftPanel select,
+        body.app-theme-obsidian #leftPanel textarea {
+            color: #f1f5f9 !important;
+        }
+        body.app-theme-obsidian .glass-panel,
+        body.app-theme-obsidian .callout-box {
+            background: rgba(15, 23, 42, 0.92) !important;
+            border-color: rgba(148, 163, 184, 0.25) !important;
+            color: #f8fafc !important;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5) !important;
+        }
+        body.app-theme-obsidian .callout-box div,
+        body.app-theme-obsidian .callout-box span,
+        body.app-theme-obsidian #totalSumDisplay,
+        body.app-theme-obsidian #globalChartTitle {
+            color: #f8fafc !important;
+        }
+        body.app-theme-obsidian #globalChartSubtitle {
+            color: #94a3b8 !important;
+        }
+
+        /* SPOTLIGHT FOCUS ANIMATION */
+        .callout-box.spotlight-dimmed {
+            opacity: 0.18 !important;
+            filter: grayscale(60%);
+            transition: opacity 0.3s ease, filter 0.3s ease;
+        }
+        .callout-box.spotlight-active {
+            opacity: 1 !important;
+            box-shadow: 0 0 0 2px #cafc03, 0 15px 35px -5px rgba(202, 252, 3, 0.35) !important;
+            transform: translate(-50%, -50%) scale(1.06) !important;
+            z-index: 80 !important;
+        }
+
         @keyframes fadeInScale {
             0% {
                 opacity: 0;
@@ -1049,7 +1115,7 @@
             <div class="flex items-center gap-3"><button id="btnToggleSidebar"
                     class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 border border-slate-200 transition"><i
                         id="burgerIcon" class="ph ph-list text-lg"></i></button></div>
-            <div class="flex items-center gap-1.5 sm:gap-4">
+            <div class="flex items-center gap-1.5 sm:gap-3">
                 <div
                     class="glass-panel px-2 sm:px-3 py-1.5 rounded-full hidden sm:flex items-center gap-2 shadow-sm border border-slate-200">
                     <span class="text-[9px] font-black text-slate-800">ID</span><label
@@ -1060,6 +1126,20 @@
                         </div>
                     </label><span class="text-[9px] font-black text-slate-400">EN</span>
                 </div>
+
+                <!-- Tombol Spotlight Mode (Poin 1) & Sakelar Tema Web -->
+                <button id="btnSpotlightMode" onclick="toggleSpotlightMode()"
+                    class="bg-white hover:bg-amber-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition"
+                    title="Cinematic Spotlight Mode (Sorotan Fokus Presentasi)">
+                    <i class="ph-bold ph-flashlight text-sm md:text-base text-amber-500"></i>
+                    <span class="hidden lg:inline" data-i18n="spotlightBtn">Spotlight</span>
+                </button>
+
+                <button id="btnAppTheme" onclick="cycleAppTheme()"
+                    class="bg-white hover:bg-slate-100 text-slate-600 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"
+                    title="Ganti Tema Studio (Light / Obsidian Dark)">
+                    <i id="appThemeIcon" class="ph-bold ph-moon-stars text-base md:text-lg"></i>
+                </button>
 
                 <!-- Tombol Project Manager (New / Save / Save As / Open) -->
                 <button onclick="openProjectModal()"
@@ -1180,7 +1260,7 @@
                 iconLib: "Koleksi Ikon", applyBtn: "Terapkan", editingSlide: "Mengedit Slide:", editTarget: "Target Edit Data:", presentBtn: "Presentasi", exportBtn: "Ekspor HD", resetBtn: "Reset Data", totalData: "Total Keseluruhan", slidesTitle: "Slides / Scenes", addSlide: "+ Tambah Slide Baru", sSquare: "Kotak Kaku", sRounded: "Sudut Lengkung", sCircle: "Kapsul / Lingkaran", popupColor: "Warna Spesifik", popupZoom: "Zoom / Explode Efek", popupDesc: "Ubah nilai untuk menarik keluar elemen ini.", alignLeft: "Rata Kiri", alignCenter: "Rata Tengah", alignRight: "Rata Kanan",
                 backMain: "Kembali", drillTo: "Breakdown ke:", noDrill: "Tidak Ada (Standar)", createDrill: "➕ Buat Breakdown Baru",
                 popupCallout: "Garis Petunjuk (Callout)", donutCenterToggle: "Info Total Data (Tengah / Badge)", centerLabel: "Label Atas", dataUnit: "Satuan (Unit)", calloutMaster: "Garis Petunjuk (Callout)", calloutHint: "Munculkan kotak info & garis putus-putus otomatis. Anda juga bisa klik elemen chart untuk mengatur satu per satu.", showAllCallout: "Tampilkan Semua", hideAllCallout: "Sembunyikan",
-                projectBtn: "Proyek", projManager: "Manajer Proyek Studio", projName: "Nama Proyek Saat Ini", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Daftar Proyek Tersimpan (Browser)"
+                projectBtn: "Proyek", projManager: "Manajer Proyek Studio", projName: "Nama Proyek Saat Ini", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Daftar Proyek Tersimpan (Browser)", spotlightBtn: "Spotlight"
             },
             en: {
                 brandTitle: "Title & Branding", mainTitle: "Main Title", subTitle: "Subtitle", watermark: "Watermark (Bottom Right)",
@@ -1193,7 +1273,7 @@
                 iconLib: "Icon Library", applyBtn: "Apply", editingSlide: "Editing Slide:", editTarget: "Target Edit Data:", presentBtn: "Present Mode", exportBtn: "Export HD", resetBtn: "Reset Data", totalData: "Grand Total", slidesTitle: "Slides / Scenes", addSlide: "+ Add New Slide", sSquare: "Rigid Square", sRounded: "Rounded Corners", sCircle: "Capsule / Circle", popupColor: "Specific Color", popupZoom: "Zoom / Explode Effect", popupDesc: "Change value to pull this element out.", alignLeft: "Align Left", alignCenter: "Align Center", alignRight: "Align Right",
                 backMain: "Back", drillTo: "Breakdown to:", noDrill: "None (Standard)", createDrill: "➕ Create New Breakdown",
                 popupCallout: "Leader Line (Callout)", donutCenterToggle: "Total Data Info (Center / Badge)", centerLabel: "Top Label", dataUnit: "Unit Label", calloutMaster: "Leader Lines (Callouts)", calloutHint: "Show info boxes & dashed leader lines. You can also click any chart slice/bar to toggle individually.", showAllCallout: "Show All", hideAllCallout: "Hide All",
-                projectBtn: "Project", projManager: "Studio Project Manager", projName: "Current Project Name", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Saved Projects (Browser)"
+                projectBtn: "Project", projManager: "Studio Project Manager", projName: "Current Project Name", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Saved Projects (Browser)", spotlightBtn: "Spotlight"
             }
         };
 
@@ -1207,6 +1287,114 @@
         let globalLang = 'id'; let isPresenting = false; let activeEditGridIndex = 0; let debounceTimer = null; let activeNoteId = null;
         let activePopup = false; let popupDatasetIndex = 0, popupDataIndex = 0, popupRowId = null; let activeElementData = null;
         let drillHistoryStack = [];
+        let isSpotlightMode = false;
+        let spotlightState = { active: false, bIdx: null, datasetIndex: null, dataIndex: null };
+        let appStudioTheme = 'light';
+
+        function toggleSpotlightMode() {
+            isSpotlightMode = !isSpotlightMode;
+            const btn = document.getElementById('btnSpotlightMode');
+            if (btn) {
+                if (isSpotlightMode) {
+                    btn.className = "bg-slate-900 text-[#cafc03] px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-[#cafc03]/50 ring-2 ring-[#cafc03]/30 transition";
+                    showToast("🔦 Spotlight Mode Aktif! Arahkan kursor / klik batang grafik untuk menyorot.");
+                } else {
+                    btn.className = "bg-white hover:bg-amber-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition";
+                    clearSpotlightFocus();
+                    showToast("Spotlight Mode Dimatikan.");
+                }
+            }
+        }
+
+        function setSpotlightFocus(bIdx, datasetIndex, dataIndex) {
+            if (spotlightState.active && spotlightState.bIdx === bIdx && spotlightState.datasetIndex === datasetIndex && spotlightState.dataIndex === dataIndex) return;
+            spotlightState = { active: true, bIdx, datasetIndex, dataIndex };
+            applySpotlightVisuals();
+        }
+
+        function clearSpotlightFocus() {
+            if (!spotlightState.active) return;
+            spotlightState = { active: false, bIdx: null, datasetIndex: null, dataIndex: null };
+            applySpotlightVisuals();
+        }
+
+        function applySpotlightVisuals() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            mainCharts.forEach((chart, cIdx) => {
+                if (!chart || !chart.data || !chart.data.datasets) return;
+                chart.data.datasets.forEach((ds, dIdx) => {
+                    if (!ds._origBg) {
+                        ds._origBg = Array.isArray(ds.backgroundColor) ? [...ds.backgroundColor] : ds.backgroundColor;
+                        ds._origBorder = Array.isArray(ds.borderColor) ? [...ds.borderColor] : ds.borderColor;
+                    }
+                    if (!spotlightState.active || spotlightState.bIdx !== cIdx) {
+                        ds.backgroundColor = Array.isArray(ds._origBg) ? [...ds._origBg] : ds._origBg;
+                        ds.borderColor = Array.isArray(ds._origBorder) ? [...ds._origBorder] : ds._origBorder;
+                    } else {
+                        const cType = slide.bentoCharts[cIdx];
+                        const isTape = cType === 'tape';
+                        if (Array.isArray(ds._origBg)) {
+                            ds.backgroundColor = ds._origBg.map((col, idx) => {
+                                const isMatch = (dIdx === spotlightState.datasetIndex && idx === spotlightState.dataIndex);
+                                return isMatch ? col : hexToRgba(col.startsWith('#') ? col : '#64748b', 15);
+                            });
+                        } else if (typeof ds._origBg === 'string' && ds._origBg.startsWith('#')) {
+                            const isMatch = isTape ? (dIdx === spotlightState.datasetIndex) : (dIdx === spotlightState.datasetIndex);
+                            ds.backgroundColor = isMatch ? ds._origBg : hexToRgba(ds._origBg, 15);
+                        }
+                    }
+                });
+                chart.update('none');
+            });
+
+            // Sorot juga Callout Box & Garis Petunjuk yang sesuai
+            const boxes = document.querySelectorAll('#calloutsContainer .callout-box');
+            const ds = slide.dataSets[spotlightState.bIdx || 0] || slide.dataSets[0];
+            boxes.forEach(box => {
+                if (!spotlightState.active) {
+                    box.classList.remove('spotlight-dimmed', 'spotlight-active');
+                    return;
+                }
+                const bIdx = parseInt(box.dataset.bIdx || 0);
+                const sIdx = parseInt(box.dataset.sIdx || 0);
+                const rowId = box.dataset.rowId;
+                const rIdx = ds.rows.findIndex(r => r.id === rowId);
+                if (bIdx === spotlightState.bIdx && rIdx === spotlightState.dataIndex && (sIdx === spotlightState.datasetIndex || ['pie', 'doughnut', 'polarArea', 'radar'].includes(slide.bentoCharts[bIdx]))) {
+                    box.classList.add('spotlight-active');
+                    box.classList.remove('spotlight-dimmed');
+                } else {
+                    box.classList.add('spotlight-dimmed');
+                    box.classList.remove('spotlight-active');
+                }
+            });
+        }
+
+        function cycleAppTheme() {
+            appStudioTheme = appStudioTheme === 'light' ? 'obsidian' : 'light';
+            const icon = document.getElementById('appThemeIcon');
+            const slide = getActiveSlide();
+            if (appStudioTheme === 'obsidian') {
+                document.body.classList.add('app-theme-obsidian');
+                if (icon) icon.className = "ph-fill ph-sun text-base md:text-lg text-[#cafc03]";
+                if (slide && (slide.bgColor === '#f8fafc' || slide.bgOpacity === 0)) {
+                    slide.bgColor = '#090d16';
+                    slide.bgOpacity = 100;
+                    slide.bentoBgColor = '#1e293b';
+                }
+                showToast("🌙 Tema Studio: Obsidian Dark Elegan");
+            } else {
+                document.body.classList.remove('app-theme-obsidian');
+                if (icon) icon.className = "ph-bold ph-moon-stars text-base md:text-lg";
+                if (slide && slide.bgColor === '#090d16') {
+                    slide.bgColor = '#f8fafc';
+                    slide.bgOpacity = 0;
+                    slide.bentoBgColor = '#ffffff';
+                }
+                showToast("☀️ Tema Studio: Modern Light Elegan");
+            }
+            syncUIToActiveSlide();
+        }
 
         const generateDefaultDataSet = (seed) => ({ series: [{ id: 's_main_' + seed, name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }], rows: [{ id: 'r_1_' + seed, label: 'Jawa Barat', icon: '📍', values: [{ val: 450, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_2_' + seed, label: 'DKI Jakarta', icon: '🏢', values: [{ val: 320, val2: 0, color: '#111827', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_3_' + seed, label: 'Sumatera Utara', icon: '🌴', values: [{ val: 150, val2: 0, color: '#94a3b8', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_4_' + seed, label: 'Kalimantan', icon: '🌲', values: [{ val: 80, val2: 0, color: '#e2e8f0', offset: 0, callout: false, calloutSub: '' }] }] });
         const generateDefaultSlide = (index = 1) => ({ id: 'slide_' + Date.now() + '_' + index, chartTitle: `Slide ${index}`, chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', watermarkText: 'MNC CHANNELS', notes: [], explodedElements: {}, showDonutCenter: true, donutCenterLabel: 'Total Data:', valueUnit: 'unit', bentoLayout: '1', bentoCharts: ['bar-vertical', 'doughnut', 'table'], colorTheme: 'lime', stackMode: 'accumulate', chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, outlineWidth: 1, outlineColor: '#ffffff', borderRadius: 8, showLegend: true, datalabelPosition: 'center', bgColor: '#f8fafc', bgOpacity: 0, bentoBgColor: '#ffffff', bentoBgOpacity: 100, showGridX: false, showGridY: true, showAxisNumbers: true, showAxisCategories: true, axisFontSize: 12, dataSets: [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)] });
@@ -2469,19 +2657,34 @@
             }
 
             const chartOptions = {
-                responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: slide.bentoLayout === '1' ? 10 : 20 }, interaction: { mode: isInclude ? 'index' : 'nearest', intersect: true }, animation: { duration: 1000, delay: blockIndex * 150, easing: 'easeOutQuart', onProgress: () => { renderCalloutsOverlay(); }, onComplete: () => { renderCalloutsOverlay(); } },
+                responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: slide.bentoLayout === '1' ? 10 : 20 }, interaction: { mode: 'nearest', intersect: true }, animation: { duration: 1000, delay: blockIndex * 150, easing: 'easeOutQuart' },
                 plugins: {
-                    legend: { display: slide.showLegend && !isMap && !isTreemap && (blockIndex === 0 || slide.bentoLayout !== '1'), position: 'top', align: 'center', labels: { font: { family: 'Inter', size: 14, weight: 'bold' }, color: '#334155', usePointStyle: true, padding: 16 } },
+                    legend: { display: slide.showLegend && !isMap && !isTreemap && (blockIndex === 0 || slide.bentoLayout !== '1'), position: 'top', align: 'center', labels: { font: { family: 'Inter', size: 14, weight: 'bold' }, color: appStudioTheme === 'obsidian' ? '#e2e8f0' : '#334155', usePointStyle: true, padding: 16 } },
                     tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
-                    datalabels: { display: slide.datalabelPosition !== 'none' && !isRadial && !isMap && !isScatterBubble && !isTreemap, anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelPosition === 'outside' ? '#111827' : '#fff', font: { family: 'Inter', weight: '900', size: 14 }, formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : raw; } if (Array.isArray(v)) return Math.abs(v[1] - v[0]); if (typeof v === 'object') return v.y; return Math.round(v); }, textStrokeColor: slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: slide.datalabelPosition === 'outside' ? 0 : 3 }
+                    datalabels: { display: slide.datalabelPosition !== 'none' && !isRadial && !isMap && !isScatterBubble && !isTreemap, anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelPosition === 'outside' ? (appStudioTheme === 'obsidian' ? '#f8fafc' : '#111827') : '#fff', font: { family: 'Inter', weight: '900', size: 14 }, formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : raw; } if (Array.isArray(v)) return Math.abs(v[1] - v[0]); if (typeof v === 'object') return v.y; return Math.round(v); }, textStrokeColor: slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: slide.datalabelPosition === 'outside' ? 0 : 3 }
                 },
-                scales: {}, onClick: (e, elements, chart) => {
+                scales: {},
+                onHover: (e, elements, chart) => {
+                    if (!isSpotlightMode) return;
+                    const directElements = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
+                    const bIndex = parseInt(chart.canvas.dataset.blockIndex || 0);
+                    if (directElements && directElements.length > 0) {
+                        setSpotlightFocus(bIndex, directElements[0].datasetIndex, directElements[0].index);
+                    } else {
+                        clearSpotlightFocus();
+                    }
+                },
+                onClick: (e, elements, chart) => {
                     const directElements = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
                     if (directElements && directElements.length > 0) {
                         const el = directElements[0];
                         const bIndex = parseInt(chart.canvas.dataset.blockIndex || 0);
+                        if (isSpotlightMode) {
+                            setSpotlightFocus(bIndex, el.datasetIndex, el.index);
+                        }
                         openElementEditor(el.datasetIndex, el.index, e.native.clientX, e.native.clientY, slide.bentoCharts[bIndex], bIndex);
                     } else {
+                        if (isSpotlightMode) clearSpotlightFocus();
                         closeElementPopup();
                     }
                 }
