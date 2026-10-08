@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pro Chart Vision 17.0 - Master Studio</title>
+    <title>Pro Chart Vision 17.2 - Master Studio</title>
 
     <!-- SVG Favicon -->
     <link rel="icon" type="image/svg+xml"
@@ -14,7 +14,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap"
         rel="stylesheet">
 
     <!-- Phosphor Icons -->
@@ -52,6 +53,10 @@
             background-color: #f8fafc;
             color: #0f172a;
             touch-action: manipulation;
+        }
+
+        .font-mono-tech {
+            font-family: 'JetBrains Mono', monospace;
         }
 
         ::-webkit-scrollbar {
@@ -114,9 +119,9 @@
         }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .modal-bg-blur {
@@ -282,28 +287,34 @@
             background-color: #090d16 !important;
             color: #f8fafc !important;
         }
+
         body.app-theme-obsidian #workspaceArea {
             background-color: #090d16 !important;
         }
-        body.app-theme-obsidian #workspaceArea > div:first-child {
+
+        body.app-theme-obsidian #workspaceArea>div:first-child {
             background: rgba(15, 23, 42, 0.85) !important;
             border-bottom-color: rgba(51, 65, 85, 0.5) !important;
         }
+
         body.app-theme-obsidian #leftPanel {
             background-color: #0f172a !important;
             border-right-color: #1e293b !important;
         }
+
         body.app-theme-obsidian #sidebarHeader,
         body.app-theme-obsidian #leftPanel .bg-white {
             background-color: #1e293b !important;
             border-color: #334155 !important;
             color: #f8fafc !important;
         }
+
         body.app-theme-obsidian #leftPanel .bg-slate-50 {
             background-color: #0f172a !important;
             border-color: #334155 !important;
             color: #e2e8f0 !important;
         }
+
         body.app-theme-obsidian #leftPanel h1,
         body.app-theme-obsidian #leftPanel h2,
         body.app-theme-obsidian #leftPanel h3,
@@ -313,19 +324,32 @@
         body.app-theme-obsidian #leftPanel textarea {
             color: #f1f5f9 !important;
         }
+
         body.app-theme-obsidian .glass-panel,
-        body.app-theme-obsidian .callout-box {
-            background: rgba(15, 23, 42, 0.92) !important;
+        body.app-theme-obsidian .callout-box,
+        body.app-theme-obsidian #whatIfPanel {
+            background: rgba(15, 23, 42, 0.94) !important;
             border-color: rgba(148, 163, 184, 0.25) !important;
             color: #f8fafc !important;
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5) !important;
         }
+
+        body.app-theme-obsidian .telemetry-pill {
+            background: rgba(30, 41, 59, 0.85) !important;
+            border-color: rgba(71, 85, 105, 0.5) !important;
+        }
+
+        body.app-theme-obsidian .telemetry-val {
+            color: #f8fafc !important;
+        }
+
         body.app-theme-obsidian .callout-box div,
         body.app-theme-obsidian .callout-box span,
         body.app-theme-obsidian #totalSumDisplay,
         body.app-theme-obsidian #globalChartTitle {
             color: #f8fafc !important;
         }
+
         body.app-theme-obsidian #globalChartSubtitle {
             color: #94a3b8 !important;
         }
@@ -336,7 +360,8 @@
             filter: grayscale(60%);
             transition: opacity 0.3s ease, filter 0.3s ease;
         }
-        .callout-box.spotlight-active {
+
+        body.app-theme-obsidian .callout-box.spotlight-active {
             opacity: 1 !important;
             box-shadow: 0 0 0 2px #cafc03, 0 15px 35px -5px rgba(202, 252, 3, 0.35) !important;
             transform: translate(-50%, -50%) scale(1.06) !important;
@@ -359,6 +384,51 @@
             to {
                 opacity: 1;
                 transform: scale(1) translateY(0);
+            }
+        }
+
+        /* PRESENTATION TOOLS */
+        #laserPointerDot {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: 0 0 15px 4px rgba(239, 68, 68, 0.6);
+            transform: translate(-50%, -50%);
+            display: none;
+            transition: width 0.1s, height 0.1s;
+        }
+
+        #laserPointerDot.active {
+            width: 16px;
+            height: 16px;
+        }
+
+        .tactical-ping {
+            position: fixed;
+            border-radius: 50%;
+            border: 3px solid #ef4444;
+            pointer-events: none;
+            z-index: 9998;
+            transform: translate(-50%, -50%);
+            animation: ping-expand 0.8s ease-out forwards;
+        }
+
+        @keyframes ping-expand {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+
+            100% {
+                width: 120px;
+                height: 120px;
+                opacity: 0;
+                border-width: 1px;
             }
         }
     </style>
@@ -420,17 +490,21 @@
         class="fixed inset-0 z-[190] hidden items-center justify-center modal-bg-blur opacity-0 transition-opacity duration-300 px-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 transition-transform duration-300 flex flex-col max-h-[88vh] border border-slate-100"
             id="projectModalContent">
-            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white shrink-0">
+            <div
+                class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-900 text-white shrink-0">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-[#cafc03] text-slate-900 flex items-center justify-center font-black">
+                    <div
+                        class="w-8 h-8 rounded-xl bg-[#cafc03] text-slate-900 flex items-center justify-center font-black">
                         <i class="ph-bold ph-folder-notch-open text-lg"></i>
                     </div>
                     <div>
-                        <h3 class="font-black text-sm tracking-wide uppercase" data-i18n="projManager">Manajer Proyek Studio</h3>
+                        <h3 class="font-black text-sm tracking-wide uppercase" data-i18n="projManager">Manajer Proyek
+                            Studio</h3>
                         <p class="text-[10px] text-slate-400" id="currentProjectNameLabel">Proyek Aktif: Tanpa Judul</p>
                     </div>
                 </div>
-                <button onclick="closeProjectModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                <button onclick="closeProjectModal()"
+                    class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
                     <i class="ph ph-x text-lg"></i>
                 </button>
             </div>
@@ -438,7 +512,8 @@
             <div class="p-5 overflow-y-auto custom-scrollbar space-y-5">
                 <!-- NAMA PROYEK AKTIF -->
                 <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-                    <label class="block text-[10px] font-black text-slate-500 uppercase mb-1.5" data-i18n="projName">Nama Proyek Saat Ini</label>
+                    <label class="block text-[10px] font-black text-slate-500 uppercase mb-1.5"
+                        data-i18n="projName">Nama Proyek Saat Ini</label>
                     <div class="flex gap-2">
                         <input type="text" id="projectNameInput" placeholder="Ketik nama proyek..."
                             class="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-[#cafc03]">
@@ -453,7 +528,8 @@
                 <div class="grid grid-cols-3 gap-2.5">
                     <button onclick="createNewProjectPrompt()"
                         class="flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/40 transition group text-center">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition">
                             <i class="ph-bold ph-file-plus text-lg"></i>
                         </div>
                         <span class="text-[11px] font-black text-slate-800" data-i18n="newProj">New Project</span>
@@ -462,7 +538,8 @@
 
                     <button onclick="exportProjectFile()"
                         class="flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/40 transition group text-center">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition">
                             <i class="ph-bold ph-download-simple text-lg"></i>
                         </div>
                         <span class="text-[11px] font-black text-slate-800" data-i18n="saveAsFile">Save As (File)</span>
@@ -471,22 +548,26 @@
 
                     <button onclick="document.getElementById('importProjectFileInput').click()"
                         class="flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-2xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50/40 transition group text-center">
-                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center transition">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center transition">
                             <i class="ph-bold ph-upload-simple text-lg"></i>
                         </div>
                         <span class="text-[11px] font-black text-slate-800" data-i18n="openFile">Open File</span>
                         <span class="text-[9px] text-slate-400 leading-tight">Buka file proyek dari perangkat</span>
                     </button>
-                    <input type="file" id="importProjectFileInput" accept=".json,.pcv" class="hidden" onchange="importProjectFile(event)">
+                    <input type="file" id="importProjectFileInput" accept=".json,.pcv" class="hidden"
+                        onchange="importProjectFile(event)">
                 </div>
 
                 <!-- DAFTAR SIMPANAN DI BROWSER (LOCAL SLOTS) -->
                 <div class="space-y-2.5 pt-2 border-t border-slate-100">
                     <div class="flex items-center justify-between">
                         <label class="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1.5">
-                            <i class="ph-bold ph-Archive text-indigo-500"></i> <span data-i18n="savedSlots">Daftar Proyek Tersimpan (Browser)</span>
+                            <i class="ph-bold ph-Archive text-indigo-500"></i> <span data-i18n="savedSlots">Daftar
+                                Proyek Tersimpan (Browser)</span>
                         </label>
-                        <button onclick="saveAsNewSlot()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2.5 py-1 rounded-lg transition">
+                        <button onclick="saveAsNewSlot()"
+                            class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2.5 py-1 rounded-lg transition">
                             + Save As Slot Baru
                         </button>
                     </div>
@@ -534,24 +615,29 @@
         <!-- FITUR BARU: CALLOUT & GARIS PETUNJUK SPESIFIK ELEMEN -->
         <div class="pt-2.5 border-t border-slate-100 space-y-2.5">
             <div class="flex items-center justify-between">
-                <label class="text-[10px] font-black text-emerald-700 uppercase flex items-center gap-1">
+                <label class="text-[10px] font-black text-slate-900 uppercase flex items-center gap-1">
                     <i class="ph-bold ph-Exclude"></i> <span data-i18n="popupCallout">Garis Petunjuk (Callout)</span>
                 </label>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" id="popupCalloutToggle" class="sr-only peer">
-                    <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
+                    <div
+                        class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                    </div>
                 </label>
             </div>
-            <div id="popupCalloutDetails" class="hidden space-y-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
+            <div id="popupCalloutDetails"
+                class="hidden space-y-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
                 <input type="text" id="popupCalloutSubInput" placeholder="Keterangan tambahan (opsional)..."
-                    class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-medium text-slate-700 outline-none focus:ring-1 focus:ring-emerald-500">
-                <p class="text-[8px] text-slate-400 leading-tight">💡 Kotak petunjuk di kanvas bisa di-drag (geser) bebas!</p>
+                    class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-medium text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
+                <p class="text-[8px] text-slate-400 leading-tight">💡 Kotak petunjuk di kanvas bisa di-drag (geser)
+                    bebas!</p>
             </div>
         </div>
         <div id="popupDrillSection" class="pt-2 border-t border-slate-100 hidden">
             <button id="btnPopupDrill"
                 class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 shadow-md transition">
-                <i class="ph-bold ph-arrows-out-simple text-sm"></i> <span id="popupDrillText">Lihat Breakdown Data</span>
+                <i class="ph-bold ph-arrows-out-simple text-sm"></i> <span id="popupDrillText">Lihat Breakdown
+                    Data</span>
             </button>
         </div>
     </div>
@@ -575,7 +661,7 @@
                         Pro Chart</h1>
                     <p id="headerSubtitle"
                         class="text-[10px] font-bold text-slate-400 tracking-widest mt-1.5 uppercase transition-all duration-300 origin-left">
-                        Vision 17 (Ultimate)</p>
+                        Vision 17.2 (Data Science)</p>
                 </div>
             </div>
             <button id="btnCloseMobile"
@@ -583,10 +669,10 @@
                     class="ph ph-x text-lg"></i></button>
         </div>
 
-        <div class="bg-indigo-50 px-5 py-2.5 border-b border-indigo-100 flex items-center justify-between shrink-0">
-            <span class="text-[10px] font-bold text-indigo-800 uppercase tracking-wider flex items-center gap-1.5"><i
+        <div class="bg-lime-50/80 px-5 py-2.5 border-b border-lime-200/80 flex items-center justify-between shrink-0">
+            <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5"><i
                     class="ph-bold ph-pencil-simple"></i> <span data-i18n="editingSlide">Mengedit Slide:</span></span>
-            <span id="activeSlideNameDisplay" class="text-xs font-black text-indigo-900">Slide 1</span>
+            <span id="activeSlideNameDisplay" class="text-xs font-black text-slate-900">Slide 1</span>
         </div>
 
         <div id="dataTargetSelectorPanel"
@@ -623,17 +709,35 @@
                 </button>
                 <div id="accBranding"
                     class="accordion-content px-4 md:px-5 pb-4 md:pb-5 space-y-4 pt-2 border-t border-slate-100">
-                    <div><label class="block text-[10px] font-bold text-slate-700 uppercase mb-2"
-                            data-i18n="mainTitle">Judul Utama</label><input type="text" id="chartTitleInput"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-[10px] font-bold text-slate-700 uppercase" data-i18n="mainTitle">Judul Utama</label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleMainTitle" class="sr-only peer" checked>
+                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            </label>
+                        </div>
+                        <input type="text" id="chartTitleInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
                     </div>
-                    <div><label class="block text-[10px] font-bold text-slate-700 uppercase mb-2"
-                            data-i18n="subTitle">Sub-Judul</label><input type="text" id="chartSubtitleInput"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium text-slate-600 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-[10px] font-bold text-slate-700 uppercase" data-i18n="subTitle">Sub-Judul</label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleSubtitle" class="sr-only peer" checked>
+                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            </label>
+                        </div>
+                        <input type="text" id="chartSubtitleInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium text-slate-600 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
                     </div>
-                    <div><label class="block text-[10px] font-bold text-slate-700 uppercase mb-2"
-                            data-i18n="watermark">Watermark (Kanan Bawah)</label><input type="text" id="watermarkInput"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-[10px] font-bold text-slate-700 uppercase" data-i18n="watermark">Watermark (Kanan Bawah)</label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggleWatermark" class="sr-only peer" checked>
+                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+                            </label>
+                        </div>
+                        <input type="text" id="watermarkInput" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-400 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm transition">
                     </div>
                 </div>
             </div>
@@ -774,7 +878,7 @@
                         <label class="block text-[10px] font-bold text-slate-700 uppercase mb-2"
                             data-i18n="bentoMode">Mode Grid Bento</label>
                         <select id="bentoLayout"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black text-slate-900 focus:ring-2 focus:ring-[#cafc03] outline-none appearance-none shadow-sm border-l-4 border-l-indigo-500 cursor-pointer transition">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black text-slate-900 focus:ring-2 focus:ring-[#cafc03] outline-none appearance-none shadow-sm border-l-4 border-l-[#cafc03] cursor-pointer transition">
                             <option value="1" data-i18n="g1">1 Grid (Standar Penuh)</option>
                             <option value="2-v" data-i18n="g2v">2 Grid (Kiri & Kanan)</option>
                             <option value="2-h" data-i18n="g2h">2 Grid (Atas & Bawah)</option>
@@ -852,7 +956,7 @@
                             title="Hapus Semua Ikon"><i class="ph ph-prohibit"></i> <span data-i18n="clearIcons">Hapus
                                 Semua Ikon</span></button>
                         <button onclick="handlePasteExcel()"
-                            class="bg-green-100 text-green-700 hover:bg-green-200 text-[9px] font-bold px-3 py-2 rounded-xl flex items-center justify-center gap-1 border border-green-200 transition shadow-sm"><i
+                            class="bg-[#cafc03] text-slate-900 hover:bg-[#b5e002] text-[9px] font-bold px-3 py-2 rounded-xl flex items-center justify-center gap-1 border border-[#cafc03] transition shadow-sm"><i
                                 class="ph ph-clipboard-text"></i> <span data-i18n="paste">Paste Data
                                 (Excel/CSV)</span></button>
                     </div>
@@ -919,24 +1023,32 @@
                                 min="0" max="90" value="60"></div>
                     </div>
                     <!-- PENGATURAN TEKS TENGAH DONUT / INFO TOTAL SEMUA CHART -->
-                    <div id="donutCenterConfigContainer" class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
+                    <div id="donutCenterConfigContainer"
+                        class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
                         <div class="flex items-center justify-between">
                             <label class="text-[10px] font-black text-slate-700 uppercase flex items-center gap-1.5">
-                                <i class="ph-bold ph-target text-indigo-600"></i> <span data-i18n="donutCenterToggle">Info Total Data (Tengah / Badge)</span>
+                                <i class="ph-bold ph-target text-indigo-600"></i> <span
+                                    data-i18n="donutCenterToggle">Info Total Data (Tengah / Badge)</span>
                             </label>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="toggleDonutCenter" class="sr-only peer" checked>
-                                <div class="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-slate-900"></div>
+                                <div
+                                    class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                                </div>
                             </label>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1" data-i18n="centerLabel">Label Atas</label>
-                                <input type="text" id="donutCenterLabelInput" placeholder="Total Data:" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1"
+                                    data-i18n="centerLabel">Label Atas</label>
+                                <input type="text" id="donutCenterLabelInput" placeholder="Total Data:"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
                             </div>
                             <div>
-                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1" data-i18n="dataUnit">Satuan (Unit)</label>
-                                <input type="text" id="dataUnitInput" placeholder="unit / Rp / %" class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1"
+                                    data-i18n="dataUnit">Satuan (Unit)</label>
+                                <input type="text" id="dataUnitInput" placeholder="unit / Rp / %"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
                             </div>
                         </div>
                     </div>
@@ -1045,7 +1157,7 @@
                             class="relative inline-flex items-center cursor-pointer"><input type="checkbox"
                                 id="toggleLegend" class="sr-only peer" checked>
                             <div
-                                class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]">
+                                class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
                             </div>
                         </label></div>
                     <div><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1"
@@ -1059,20 +1171,24 @@
                         </select></div>
 
                     <!-- FITUR BARU: KONTROL CEPAT GARIS PETUNJUK (CALLOUT) -->
-                    <div class="p-3 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl space-y-2.5">
+                    <div class="p-3 bg-[#cafc03]/10 border border-[#cafc03]/30 rounded-2xl space-y-2.5">
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-black text-emerald-900 uppercase flex items-center gap-1.5">
-                                <i class="ph-bold ph-git-commit text-emerald-600"></i> <span data-i18n="calloutMaster">Garis Petunjuk (Callout)</span>
+                            <span class="text-[10px] font-black text-slate-900 uppercase flex items-center gap-1.5">
+                                <i class="ph-bold ph-git-commit text-slate-900"></i> <span
+                                    data-i18n="calloutMaster">Garis Petunjuk (Callout)</span>
                             </span>
                         </div>
-                        <p class="text-[9px] text-emerald-700 leading-relaxed" data-i18n="calloutHint">
-                            Munculkan kotak info & garis putus-putus otomatis. Anda juga bisa klik batang/potongan chart untuk mengatur satu per satu.
+                        <p class="text-[9px] text-slate-600 leading-relaxed" data-i18n="calloutHint">
+                            Munculkan kotak info & garis putus-putus otomatis. Anda juga bisa klik batang/potongan chart
+                            untuk mengatur satu per satu.
                         </p>
                         <div class="flex gap-2">
-                            <button onclick="toggleAllCallouts(true)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold py-2 px-2 rounded-xl shadow-sm transition flex items-center justify-center gap-1">
+                            <button onclick="toggleAllCallouts(true)"
+                                class="flex-1 bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 text-[9px] font-bold py-2 px-2 rounded-xl shadow-sm transition flex items-center justify-center gap-1">
                                 <i class="ph-bold ph-eye"></i> <span data-i18n="showAllCallout">Tampilkan Semua</span>
                             </button>
-                            <button onclick="toggleAllCallouts(false)" class="flex-1 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 text-[9px] font-bold py-2 px-2 rounded-xl shadow-sm transition flex items-center justify-center gap-1">
+                            <button onclick="toggleAllCallouts(false)"
+                                class="flex-1 bg-white hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 text-[9px] font-bold py-2 px-2 rounded-xl shadow-sm transition flex items-center justify-center gap-1">
                                 <i class="ph-bold ph-eye-slash"></i> <span data-i18n="hideAllCallout">Sembunyikan</span>
                             </button>
                         </div>
@@ -1084,7 +1200,7 @@
                                 Angka</label><label class="relative inline-flex items-center cursor-pointer"><input
                                     type="checkbox" id="toggleAxisNumbers" class="sr-only peer" checked>
                                 <div
-                                    class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-[16px] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]">
+                                    class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
                                 </div>
                             </label></div>
                         <div class="flex items-center justify-between"><label
@@ -1092,7 +1208,7 @@
                                 Kategori</label><label class="relative inline-flex items-center cursor-pointer"><input
                                     type="checkbox" id="toggleAxisCategories" class="sr-only peer" checked>
                                 <div
-                                    class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-[16px] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#cafc03]">
+                                    class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
                                 </div>
                             </label></div>
                         <div class="pt-3 border-t border-slate-100"><label
@@ -1114,7 +1230,30 @@
             class="hide-on-fullscreen h-16 md:h-20 px-4 md:px-8 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/50 bg-white/70 backdrop-blur-md shadow-sm">
             <div class="flex items-center gap-3"><button id="btnToggleSidebar"
                     class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-600 hover:text-slate-900 border border-slate-200 transition"><i
-                        id="burgerIcon" class="ph ph-list text-lg"></i></button></div>
+                        id="burgerIcon" class="ph ph-list text-lg"></i></button>
+                <div class="flex items-center bg-white rounded-full p-1 shadow-sm border border-slate-200 gap-0.5">
+                    <button id="btnUndoAction" onclick="undoHistory()" disabled
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-lime-100/60 disabled:opacity-30 disabled:pointer-events-none transition"
+                        title="Back / Undo (Ctrl + Z)">
+                        <i class="ph-bold ph-arrow-u-up-left text-sm"></i>
+                    </button>
+                    <button id="btnResetAction" onclick="openResetModal()"
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 hover:text-red-600 hover:bg-red-50 transition"
+                        title="Reset Proyek ke Awal">
+                        <i class="ph-bold ph-arrow-counter-clockwise text-sm"></i>
+                    </button>
+                    <button id="btnRedoAction" onclick="redoHistory()" disabled
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-lime-100/60 disabled:opacity-30 disabled:pointer-events-none transition"
+                        title="Forward / Redo (Ctrl + Y)">
+                        <i class="ph-bold ph-arrow-u-up-right text-sm"></i>
+                    </button>
+                </div>
+                <button id="btnResetChartPan" onclick="resetChartPanPosition()"
+                    class="hidden bg-lime-100 hover:bg-[#cafc03] text-slate-900 px-3 py-1.5 rounded-full text-[10px] font-black items-center gap-1.5 shadow-sm border border-lime-300 transition"
+                    title="Kembalikan Posisi Grafik ke Tengah">
+                    <i class="ph-bold ph-arrows-in-cardinal text-xs"></i> Tengah
+                </button>
+            </div>
             <div class="flex items-center gap-1.5 sm:gap-3">
                 <div
                     class="glass-panel px-2 sm:px-3 py-1.5 rounded-full hidden sm:flex items-center gap-2 shadow-sm border border-slate-200">
@@ -1127,51 +1266,16 @@
                     </label><span class="text-[9px] font-black text-slate-400">EN</span>
                 </div>
 
-                <!-- Tombol Spotlight Mode (Poin 1) & Sakelar Tema Web -->
-                <button id="btnSpotlightMode" onclick="toggleSpotlightMode()"
-                    class="bg-white hover:bg-amber-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition"
-                    title="Cinematic Spotlight Mode (Sorotan Fokus Presentasi)">
-                    <i class="ph-bold ph-flashlight text-sm md:text-base text-amber-500"></i>
-                    <span class="hidden lg:inline" data-i18n="spotlightBtn">Spotlight</span>
-                </button>
-
-                <button id="btnAppTheme" onclick="cycleAppTheme()"
-                    class="bg-white hover:bg-slate-100 text-slate-600 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"
-                    title="Ganti Tema Studio (Light / Obsidian Dark)">
-                    <i id="appThemeIcon" class="ph-bold ph-moon-stars text-base md:text-lg"></i>
-                </button>
-
-                <!-- Tombol Project Manager (New / Save / Save As / Open) -->
-                <button onclick="openProjectModal()"
-                    class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-indigo-200 transition"
-                    title="Project Manager (New, Save, Save As, Open)">
-                    <i class="ph-bold ph-folder-notch-open text-sm md:text-base"></i>
-                    <span class="hidden md:inline" data-i18n="projectBtn">Proyek</span>
-                </button>
-                <button onclick="quickSaveProject()"
-                    class="bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"
-                    title="Quick Save (Simpan Cepat)">
-                    <i class="ph-bold ph-floppy-disk text-base md:text-lg"></i>
-                </button>
-
-                <!-- Tombol Tampil di Mobile (diperkecil w-8 h-8) dan PC (w-10 h-10) -->
-                <button id="btnShareLink"
-                    class="bg-white hover:bg-slate-50 text-slate-600 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"
-                    title="Share Link"><i class="ph ph-link text-base md:text-lg"></i></button>
-                <button id="btnReplayAnim"
-                    class="bg-white hover:bg-slate-50 text-slate-600 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"
-                    title="Play Animasi"><i class="ph-fill ph-play-circle text-lg md:text-xl"></i></button>
-                <button onclick="openResetModal()"
-                    class="bg-white hover:bg-red-50 text-slate-600 hover:text-red-500 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"
-                    title="Reset Project" data-i18n-title="resetBtn"><i
-                        class="ph ph-arrow-counter-clockwise text-base md:text-lg"></i></button>
                 <button id="btnToggleRightPanel"
-                    class="bg-white hover:bg-slate-50 text-slate-600 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-200 transition"><i
-                        class="ph ph-stack text-base md:text-lg"></i></button>
+                    class="bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-md border border-[#cafc03] transition"
+                    title="Buka Studio Tools & Slides">
+                    <i class="ph-bold ph-magic-wand text-base text-slate-900"></i>
+                    <span class="hidden md:inline">Studio Tools</span>
+                </button>
 
                 <button id="btnFullscreen"
-                    class="bg-white hover:bg-green-50 text-green-700 px-3 sm:px-4 py-2 rounded-full text-xs font-bold hidden sm:flex items-center gap-2 shadow-sm border border-green-200 transition"><i
-                        class="ph ph-play text-base"></i> <span class="hidden lg:inline"
+                    class="bg-white hover:bg-[#cafc03]/20 text-slate-900 px-3 sm:px-4 py-2 rounded-full text-xs font-bold hidden sm:flex items-center gap-2 shadow-sm border border-slate-200 hover:border-[#cafc03] transition"><i
+                        class="ph ph-play text-base text-slate-900"></i> <span class="hidden lg:inline"
                         data-i18n="presentBtn">Presentasi</span></button>
                 <button id="btnExport"
                     class="bg-slate-900 hover:bg-slate-800 text-white w-8 h-8 sm:w-auto sm:px-5 sm:py-2 rounded-full text-xs font-bold flex items-center justify-center gap-2 shadow-lg border border-slate-700 transition"><i
@@ -1180,8 +1284,66 @@
             </div>
         </div>
 
+        <!-- PANEL FLOATING "WHAT-IF" SIMULATION SANDBOX (POIN 2 DATA SCIENCE) -->
+        <div id="whatIfPanel"
+            class="fixed md:absolute top-20 md:top-24 left-1/2 -translate-x-1/2 z-[90] bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl shadow-2xl p-4 w-[92%] max-w-md transition-all duration-200 transform origin-top flex flex-col gap-3 hidden-popup">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-xl bg-slate-900 text-[#cafc03] flex items-center justify-center">
+                        <i class="ph-bold ph-Flask text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider" data-i18n="whatIfTitle">
+                            What-If Simulation Sandbox</h4>
+                        <p class="text-[9px] text-slate-400 font-medium" data-i18n="whatIfSub">Simulasi proyeksi &
+                            sensitivitas data real-time (Non-Destruktif)</p>
+                    </div>
+                </div>
+                <button onclick="toggleWhatIfPanel()"
+                    class="w-6 h-6 rounded-lg text-slate-400 hover:text-red-500 flex items-center justify-center transition">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase" data-i18n="simGrowth">Global Growth
+                            Multiplier</span>
+                        <span id="whatIfMultiplierDisplay"
+                            class="font-mono-tech text-xs font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-800">0%
+                            (1.00x)</span>
+                    </div>
+                    <input type="range" id="whatIfSlider" min="-50" max="100" step="5" value="0"
+                        oninput="applyWhatIfMultiplier(this.value)">
+                </div>
+
+                <div class="grid grid-cols-5 gap-1.5">
+                    <button onclick="stepWhatIf(-10)"
+                        class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl py-1.5 text-[10px] font-black font-mono-tech transition">-10%</button>
+                    <button onclick="stepWhatIf(10)"
+                        class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl py-1.5 text-[10px] font-black font-mono-tech transition">+10%</button>
+                    <button onclick="stepWhatIf(25)"
+                        class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl py-1.5 text-[10px] font-black font-mono-tech transition">+25%</button>
+                    <button onclick="triggerMonteCarloJitter()"
+                        class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl py-1.5 text-[10px] font-bold transition flex items-center justify-center gap-1"
+                        title="Simulasi Fluktuasi Acak (Monte Carlo Noise)">
+                        <i class="ph-bold ph-dice-five"></i> Jitter
+                    </button>
+                    <button onclick="resetWhatIfSimulation()"
+                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl py-1.5 text-[10px] font-bold transition">Reset</button>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[10px]">
+                    <span class="text-slate-400 font-medium">💡 Ingin menyimpan hasil simulasi ke data asli?</span>
+                    <button onclick="commitWhatIfToActualData()"
+                        class="font-bold text-indigo-600 hover:underline">Terapkan Permanen</button>
+                </div>
+            </div>
+        </div>
+
         <div
-            class="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 pb-40 md:pb-32 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
+            class="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 pb-44 md:pb-36 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
             <div id="exportTarget"
                 class="relative origin-center flex flex-col bg-transparent transition-all duration-500 p-4 sm:p-8 rounded-3xl overflow-hidden"
                 style="width: 100%; height: 500px;">
@@ -1202,7 +1364,8 @@
                     <div id="bentoWrapper"
                         class="w-full flex-1 box-border relative transition-all duration-500 min-h-0"></div>
                     <!-- LAYER SVG GARIS PETUNJUK & KOTAK CALLOUT INTERAKTIF -->
-                    <svg id="calloutSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none z-[55]" style="overflow: visible;"></svg>
+                    <svg id="calloutSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none z-[55]"
+                        style="overflow: visible;"></svg>
                     <div id="calloutsContainer" class="absolute inset-0 pointer-events-none z-[58]"></div>
                     <div id="notesContainer" class="absolute inset-0 pointer-events-none z-[60]"></div>
                 </div>
@@ -1212,22 +1375,82 @@
             </div>
         </div>
 
+        <!-- HUD TELEMETRY BAR (DATA SCIENCE & GAMIFIED ANALYTICS - POIN 2) -->
         <div
-            class="hide-on-fullscreen absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-4 py-3 shadow-xl flex items-center gap-4 z-10 w-[92%] md:w-[80%] max-w-4xl border border-white/40 pointer-events-auto">
-            <div class="flex items-center gap-3 pr-4 border-r border-slate-200 shrink-0">
-                <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03] shrink-0">
-                    <i class="ph ph-sigma text-lg"></i>
+            class="hide-on-fullscreen absolute bottom-3 md:bottom-5 left-1/2 -translate-x-1/2 glass-panel rounded-2xl px-4 py-2.5 shadow-xl flex flex-col gap-2 z-10 w-[95%] md:w-[88%] max-w-5xl border border-white/50 pointer-events-auto">
+
+            <!-- BARIS ATAS: METRIK ILMIAH INSTAN (MEAN, MEDIAN, STD DEV, MVP, ANOMALY ALERT) -->
+            <div
+                class="flex items-center justify-between gap-2 border-b border-slate-200/70 pb-2 overflow-x-auto custom-scrollbar">
+                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <span
+                        class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-900 text-[#cafc03] flex items-center gap-1 shrink-0">
+                        <i class="ph-fill ph-cpu"></i> HUD TELEMETRY
+                    </span>
+
+                    <div
+                        class="telemetry-pill flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-lg">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase">MEAN (&mu;)</span>
+                        <span id="hudMeanDisplay"
+                            class="telemetry-val font-mono-tech text-[11px] font-extrabold text-slate-800">0</span>
+                    </div>
+
+                    <div
+                        class="telemetry-pill flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-lg">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase">MEDIAN</span>
+                        <span id="hudMedianDisplay"
+                            class="telemetry-val font-mono-tech text-[11px] font-extrabold text-slate-800">0</span>
+                    </div>
+
+                    <div class="telemetry-pill flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-lg"
+                        title="Simpangan Baku (Standard Deviation)">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase">STD DEV (&sigma;)</span>
+                        <span id="hudStdDevDisplay"
+                            class="telemetry-val font-mono-tech text-[11px] font-extrabold text-slate-800">0</span>
+                    </div>
+
+                    <div id="hudMvpBadge"
+                        class="telemetry-pill hidden sm:flex items-center gap-1.5 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-lg">
+                        <span class="text-[10px]">👑</span>
+                        <span class="text-[9px] font-bold text-amber-700 uppercase">MVP:</span>
+                        <span id="hudMvpDisplay"
+                            class="font-mono-tech text-[10px] font-extrabold text-amber-900 truncate max-w-[110px]">-</span>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase" data-i18n="totalData">Total Keseluruhan</p>
-                    <h4 class="text-lg font-black text-slate-800" id="totalSumDisplay">0</h4>
+
+                <!-- INDIKATOR OUTLIER / ANOMALY RADAR -->
+                <div id="hudAnomalyBadge" onclick="toggleAnalyticsRadar()"
+                    class="cursor-pointer shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 transition hover:scale-105"
+                    title="Klik untuk menampilkan/menyembunyikan Garis Tren & Radar Anomali di grafik">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="hudAnomalyText" class="font-mono-tech">NORMAL DISTRIBUTION</span>
                 </div>
             </div>
-            <div class="flex-1 flex gap-3 overflow-x-auto custom-scrollbar" id="percentageContainer"></div>
+
+            <!-- BARIS BAWAH: GRAND TOTAL & SHARE PROPORSI KATEGORI -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2.5 pr-4 border-r border-slate-200 shrink-0">
+                    <div
+                        class="w-7 h-7 rounded-full bg-slate-900 flex items-center justify-center text-[#cafc03] shrink-0">
+                        <i class="ph ph-sigma text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <p class="text-[8px] font-bold text-slate-400 uppercase" data-i18n="totalData">Total
+                                Keseluruhan</p>
+                            <span id="simActiveTag"
+                                class="hidden text-[8px] font-black px-1.5 py-0.2 rounded bg-[#cafc03] text-slate-900 uppercase">SIM</span>
+                        </div>
+                        <h4 class="text-sm sm:text-base font-black text-slate-800 font-mono-tech leading-tight"
+                            id="totalSumDisplay">0</h4>
+                    </div>
+                </div>
+                <div class="flex-1 flex gap-2.5 overflow-x-auto custom-scrollbar py-0.5" id="percentageContainer"></div>
+            </div>
         </div>
 
         <div id="rightLayerPanel"
-            class="absolute right-4 md:right-8 top-24 w-[90%] sm:w-[260px] max-h-[calc(100vh-120px)] z-[60] flex flex-col bg-white/95 backdrop-blur-xl border border-slate-100 shadow-2xl rounded-3xl shrink-0 overflow-hidden hide-on-fullscreen transition-all duration-400 transform origin-top-right opacity-0 scale-95 pointer-events-none">
+            class="fixed right-4 md:right-8 top-24 w-[90%] sm:w-[260px] max-h-[calc(100vh-120px)] z-[60] flex flex-col bg-white/95 backdrop-blur-xl border border-slate-100 shadow-2xl rounded-3xl shrink-0 overflow-hidden hide-on-fullscreen transition-all duration-400 transform origin-top-right opacity-0 scale-95 pointer-events-none">
             <div id="rightLayerPanelHeader"
                 class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0 cursor-move group">
                 <h3 class="text-[11px] font-black text-slate-800 tracking-widest uppercase group-hover:text-indigo-600 transition-colors select-none"
@@ -1236,6 +1459,51 @@
                     class="text-slate-400 hover:text-red-500 bg-white w-7 h-7 rounded-lg shadow-sm border border-slate-200 flex items-center justify-center transition shrink-0"><i
                         class="ph ph-x text-sm"></i></button>
             </div>
+            <div id="studioToolsGrid" class="grid grid-cols-4 gap-2 p-3 border-b border-slate-100 bg-slate-50/50">
+                <button id="btnAnalyticsRadar" onclick="toggleAnalyticsRadar()"
+                    class="w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-indigo-50 hover:border-indigo-200 transition group"
+                    title="Trend & Radar">
+                    <i class="ph-bold ph-chart-line-up text-lg text-slate-500 group-hover:text-indigo-600"></i>
+                </button>
+                <button id="btnWhatIfSandbox" onclick="toggleWhatIfPanel()"
+                    class="relative w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-emerald-50 hover:border-emerald-200 transition group"
+                    title="What-If Sandbox">
+                    <i class="ph-bold ph-sliders-horizontal text-lg text-slate-500 group-hover:text-emerald-600"></i>
+                    <span id="whatIfActiveBadge"
+                        class="hidden w-2 h-2 rounded-full bg-[#cafc03] ring-2 ring-white absolute top-1.5 right-1.5"></span>
+                </button>
+                <button id="btnSpotlightMode" onclick="toggleSpotlightMode()"
+                    class="w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-amber-50 hover:border-amber-200 transition group"
+                    title="Spotlight Mode">
+                    <i class="ph-bold ph-flashlight text-lg text-slate-500 group-hover:text-amber-500"></i>
+                </button>
+                <button id="btnAppTheme" onclick="cycleAppTheme()"
+                    class="w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-slate-100 transition group"
+                    title="Ubah Tema Studio">
+                    <i id="appThemeIcon"
+                        class="ph-bold ph-moon-stars text-lg text-slate-500 group-hover:text-slate-800"></i>
+                </button>
+                <button onclick="openProjectModal()"
+                    class="w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-indigo-50 transition group"
+                    title="Project Manager">
+                    <i class="ph-bold ph-folder-notch-open text-lg text-slate-500 group-hover:text-indigo-600"></i>
+                </button>
+                <button onclick="quickSaveProject()"
+                    class="w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-emerald-50 transition group"
+                    title="Quick Save">
+                    <i class="ph-bold ph-floppy-disk text-lg text-slate-500 group-hover:text-emerald-600"></i>
+                </button>
+                <button id="btnShareLink"
+                    class="w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-slate-50 transition group"
+                    title="Share Link">
+                    <i class="ph ph-link text-lg text-slate-500 group-hover:text-slate-800"></i>
+                </button>
+                <button id="btnReplayAnim"
+                    class="w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-slate-50 transition group"
+                    title="Replay Animasi">
+                    <i class="ph-fill ph-play-circle text-lg text-slate-500 group-hover:text-slate-800"></i>
+                </button>
+            </div>
             <div class="p-3 shrink-0 border-b border-slate-100">
                 <button id="btnAddSlide"
                     class="w-full bg-slate-900 hover:bg-slate-800 text-[#cafc03] py-2.5 rounded-xl text-[10px] font-bold uppercase transition shadow-md"
@@ -1243,6 +1511,22 @@
             </div>
             <div class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scrollbar" id="slideListContainer"></div>
         </div>
+    </div>
+
+    <!-- PRESENTATION TOOLS -->
+    <div id="laserPointerDot"></div>
+    <div id="presenterQuickDock"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-slate-900/95 backdrop-blur-xl border border-slate-700 p-2 rounded-2xl shadow-2xl flex items-center gap-2 transition-all duration-300 translate-y-24 opacity-0 pointer-events-none">
+        <button id="btnLaserMode"
+            class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-slate-800 transition"
+            title="Laser Pointer (L)">
+            <i class="ph-bold ph-target text-lg"></i>
+        </button>
+        <button id="btnExitPresent"
+            class="px-4 h-10 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white font-bold text-[10px] uppercase tracking-wider transition"
+            title="Keluar (Esc)">
+            Akhiri Presentasi
+        </button>
     </div>
 
     <script>
@@ -1260,7 +1544,8 @@
                 iconLib: "Koleksi Ikon", applyBtn: "Terapkan", editingSlide: "Mengedit Slide:", editTarget: "Target Edit Data:", presentBtn: "Presentasi", exportBtn: "Ekspor HD", resetBtn: "Reset Data", totalData: "Total Keseluruhan", slidesTitle: "Slides / Scenes", addSlide: "+ Tambah Slide Baru", sSquare: "Kotak Kaku", sRounded: "Sudut Lengkung", sCircle: "Kapsul / Lingkaran", popupColor: "Warna Spesifik", popupZoom: "Zoom / Explode Efek", popupDesc: "Ubah nilai untuk menarik keluar elemen ini.", alignLeft: "Rata Kiri", alignCenter: "Rata Tengah", alignRight: "Rata Kanan",
                 backMain: "Kembali", drillTo: "Breakdown ke:", noDrill: "Tidak Ada (Standar)", createDrill: "➕ Buat Breakdown Baru",
                 popupCallout: "Garis Petunjuk (Callout)", donutCenterToggle: "Info Total Data (Tengah / Badge)", centerLabel: "Label Atas", dataUnit: "Satuan (Unit)", calloutMaster: "Garis Petunjuk (Callout)", calloutHint: "Munculkan kotak info & garis putus-putus otomatis. Anda juga bisa klik elemen chart untuk mengatur satu per satu.", showAllCallout: "Tampilkan Semua", hideAllCallout: "Sembunyikan",
-                projectBtn: "Proyek", projManager: "Manajer Proyek Studio", projName: "Nama Proyek Saat Ini", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Daftar Proyek Tersimpan (Browser)", spotlightBtn: "Spotlight"
+                projectBtn: "Proyek", projManager: "Manajer Proyek Studio", projName: "Nama Proyek Saat Ini", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Daftar Proyek Tersimpan (Browser)", spotlightBtn: "Spotlight",
+                radarBtn: "Trend & Radar", whatIfBtn: "What-If", whatIfTitle: "What-If Simulation Sandbox", whatIfSub: "Simulasi proyeksi & sensitivitas data real-time (Non-Destruktif)", simGrowth: "Global Growth Multiplier"
             },
             en: {
                 brandTitle: "Title & Branding", mainTitle: "Main Title", subTitle: "Subtitle", watermark: "Watermark (Bottom Right)",
@@ -1273,7 +1558,8 @@
                 iconLib: "Icon Library", applyBtn: "Apply", editingSlide: "Editing Slide:", editTarget: "Target Edit Data:", presentBtn: "Present Mode", exportBtn: "Export HD", resetBtn: "Reset Data", totalData: "Grand Total", slidesTitle: "Slides / Scenes", addSlide: "+ Add New Slide", sSquare: "Rigid Square", sRounded: "Rounded Corners", sCircle: "Capsule / Circle", popupColor: "Specific Color", popupZoom: "Zoom / Explode Effect", popupDesc: "Change value to pull this element out.", alignLeft: "Align Left", alignCenter: "Align Center", alignRight: "Align Right",
                 backMain: "Back", drillTo: "Breakdown to:", noDrill: "None (Standard)", createDrill: "➕ Create New Breakdown",
                 popupCallout: "Leader Line (Callout)", donutCenterToggle: "Total Data Info (Center / Badge)", centerLabel: "Top Label", dataUnit: "Unit Label", calloutMaster: "Leader Lines (Callouts)", calloutHint: "Show info boxes & dashed leader lines. You can also click any chart slice/bar to toggle individually.", showAllCallout: "Show All", hideAllCallout: "Hide All",
-                projectBtn: "Project", projManager: "Studio Project Manager", projName: "Current Project Name", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Saved Projects (Browser)", spotlightBtn: "Spotlight"
+                projectBtn: "Project", projManager: "Studio Project Manager", projName: "Current Project Name", saveBtn: "Save", newProj: "New Project", saveAsFile: "Save As (File)", openFile: "Open File", savedSlots: "Saved Projects (Browser)", spotlightBtn: "Spotlight",
+                radarBtn: "Trend & Radar", whatIfBtn: "What-If", whatIfTitle: "What-If Simulation Sandbox", whatIfSub: "Real-time projection & sensitivity sandbox (Non-Destructive)", simGrowth: "Global Growth Multiplier"
             }
         };
 
@@ -1290,6 +1576,186 @@
         let isSpotlightMode = false;
         let spotlightState = { active: false, bIdx: null, datasetIndex: null, dataIndex: null };
         let appStudioTheme = 'light';
+
+        // STATE FITUR POIN 2: DATA SCIENCE & GAMIFIED ANALYTICS
+        let isAnalyticsRadarActive = false;
+        let whatIfState = {
+            panelOpen: false,
+            multiplierPct: 0, // -50% s/d +100%
+            jitterMap: {}     // menyimpan faktor random per row_series saat tombol Jitter ditekan
+        };
+
+        // Helper kalkulasi nilai setelah simulasi What-If
+        function getEffectiveValue(rawVal, rowId, sIdx) {
+            if (rawVal === null || rawVal === undefined || rawVal === '') return null;
+            let num = Number(rawVal);
+            if (isNaN(num)) return null;
+            const mult = 1 + (whatIfState.multiplierPct / 100);
+            const jitterKey = `${rowId}_${sIdx}`;
+            const jitter = whatIfState.jitterMap[jitterKey] !== undefined ? whatIfState.jitterMap[jitterKey] : 1;
+            return Math.round(num * mult * jitter * 100) / 100;
+        }
+
+        // Helper statistik Data Science untuk array angka
+        function computeDataScienceStats(valuesWithMeta) {
+            const valid = valuesWithMeta.filter(item => item.val !== null && !isNaN(item.val));
+            const n = valid.length;
+            if (n === 0) {
+                return { count: 0, sum: 0, mean: 0, median: 0, stdDev: 0, mvp: null, minItem: null, slope: 0, intercept: 0, anomalies: [] };
+            }
+            const nums = valid.map(x => x.val);
+            const sum = nums.reduce((a, b) => a + b, 0);
+            const mean = sum / n;
+
+            const sorted = [...nums].sort((a, b) => a - b);
+            const mid = Math.floor(n / 2);
+            const median = n % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+
+            const variance = nums.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0) / n;
+            const stdDev = Math.sqrt(variance);
+
+            let mvp = valid[0];
+            let minItem = valid[0];
+            valid.forEach(item => {
+                if (item.val > mvp.val) mvp = item;
+                if (item.val < minItem.val) minItem = item;
+            });
+
+            // Regresi Linear sederhana (y = mx + c) berdasarkan urutan indeks (0..n-1)
+            let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+            valid.forEach((item, idx) => {
+                sumX += idx;
+                sumY += item.val;
+                sumXY += idx * item.val;
+                sumXX += idx * idx;
+            });
+            const denom = (n * sumXX - sumX * sumX);
+            const slope = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
+            const intercept = (sumY - slope * sumX) / n;
+
+            // Deteksi Outlier / Anomaly (Z-Score >= 1.45 untuk sampel kecil agar responsif dalam presentasi)
+            const zThreshold = n <= 5 ? 1.35 : 1.65;
+            const anomalies = [];
+            if (stdDev > 0) {
+                valid.forEach(item => {
+                    const z = (item.val - mean) / stdDev;
+                    if (Math.abs(z) >= zThreshold) {
+                        anomalies.push({ ...item, zScore: z, type: z > 0 ? 'HIGH_SPIKE' : 'LOW_DROP' });
+                    }
+                });
+            }
+
+            return { count: n, sum, mean, median, stdDev, mvp, minItem, slope, intercept, anomalies };
+        }
+
+        function toggleAnalyticsRadar() {
+            isAnalyticsRadarActive = !isAnalyticsRadarActive;
+            const btn = document.getElementById('btnAnalyticsRadar');
+            if (btn) {
+                if (isAnalyticsRadarActive) {
+                    btn.className = "bg-indigo-600 text-white px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-indigo-500 ring-2 ring-indigo-400/30 transition";
+                    showToast("📡 Auto-Trendline & Anomaly Radar Diaktifkan!");
+                } else {
+                    btn.className = "bg-white hover:bg-indigo-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition";
+                    showToast("Trendline & Anomaly Radar Dimatikan.");
+                }
+            }
+            mainCharts.forEach(c => c && c.update && c.update());
+        }
+
+        function toggleWhatIfPanel() {
+            whatIfState.panelOpen = !whatIfState.panelOpen;
+            const panel = document.getElementById('whatIfPanel');
+            if (panel) {
+                panel.classList.toggle('hidden-popup', !whatIfState.panelOpen);
+            }
+        }
+
+        function updateWhatIfBadgeUI() {
+            const isSimActive = whatIfState.multiplierPct !== 0 || Object.keys(whatIfState.jitterMap).length > 0;
+            const badge = document.getElementById('whatIfActiveBadge');
+            const simTag = document.getElementById('simActiveTag');
+            const btn = document.getElementById('btnWhatIfSandbox');
+            const disp = document.getElementById('whatIfMultiplierDisplay');
+            const slider = document.getElementById('whatIfSlider');
+
+            if (slider) slider.value = whatIfState.multiplierPct;
+            if (disp) {
+                const mult = (1 + whatIfState.multiplierPct / 100).toFixed(2);
+                const sign = whatIfState.multiplierPct > 0 ? '+' : '';
+                disp.innerText = `${sign}${whatIfState.multiplierPct}% (${mult}x)`;
+                disp.className = `font-mono-tech text-xs font-black px-2 py-0.5 rounded-md ${whatIfState.multiplierPct > 0 ? 'bg-emerald-100 text-emerald-800' : (whatIfState.multiplierPct < 0 ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-800')}`;
+            }
+
+            if (badge) badge.classList.toggle('hidden', !isSimActive);
+            if (simTag) simTag.classList.toggle('hidden', !isSimActive);
+            if (btn) {
+                if (isSimActive) {
+                    btn.className = "bg-slate-900 text-[#cafc03] px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-[#cafc03]/50 transition relative";
+                } else {
+                    btn.className = "bg-white hover:bg-lime-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition relative";
+                }
+            }
+        }
+
+        function applyWhatIfMultiplier(val) {
+            whatIfState.multiplierPct = parseInt(val) || 0;
+            updateWhatIfBadgeUI();
+            if (debounceTimer) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => { updateVisualizations(); }, 40);
+        }
+
+        function stepWhatIf(deltaPct) {
+            let nextVal = Math.max(-50, Math.min(100, whatIfState.multiplierPct + deltaPct));
+            applyWhatIfMultiplier(nextVal);
+        }
+
+        function triggerMonteCarloJitter() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            slide.dataSets.forEach(ds => {
+                ds.rows.forEach(r => {
+                    r.values.forEach((v, sIdx) => {
+                        // Fluktuasi acak antara -18% hingga +22%
+                        const randFactor = 0.82 + (Math.random() * 0.40);
+                        whatIfState.jitterMap[`${r.id}_${sIdx}`] = randFactor;
+                    });
+                });
+            });
+            updateWhatIfBadgeUI();
+            updateVisualizations();
+            showToast("🎲 Simulasi Monte Carlo Jitter diterapkan!");
+        }
+
+        function resetWhatIfSimulation() {
+            whatIfState.multiplierPct = 0;
+            whatIfState.jitterMap = {};
+            updateWhatIfBadgeUI();
+            updateVisualizations();
+            showToast("Simulasi What-If direset ke data asli.");
+        }
+
+        function commitWhatIfToActualData() {
+            const isSimActive = whatIfState.multiplierPct !== 0 || Object.keys(whatIfState.jitterMap).length > 0;
+            if (!isSimActive) return showToast("Tidak ada simulasi aktif untuk diterapkan.");
+            const slide = getActiveSlide();
+            slide.dataSets.forEach(ds => {
+                ds.rows.forEach(r => {
+                    r.values.forEach((v, sIdx) => {
+                        if (v && v.val !== null && v.val !== undefined) {
+                            v.val = Math.round(getEffectiveValue(v.val, r.id, sIdx));
+                        }
+                    });
+                });
+            });
+            whatIfState.multiplierPct = 0;
+            whatIfState.jitterMap = {};
+            updateWhatIfBadgeUI();
+            renderDataInputs();
+            updateVisualizations();
+            saveState();
+            showToast("✅ Hasil simulasi disimpan permanen ke data utama!");
+        }
 
         function toggleSpotlightMode() {
             isSpotlightMode = !isSpotlightMode;
@@ -1402,6 +1868,7 @@
 
         const els = {
             langToggle: document.getElementById('langToggle'), activeSlideNameDisplay: document.getElementById('activeSlideNameDisplay'), chartTitleInput: document.getElementById('chartTitleInput'), chartSubtitleInput: document.getElementById('chartSubtitleInput'), watermarkInput: document.getElementById('watermarkInput'),
+            toggleMainTitle: document.getElementById('toggleMainTitle'), toggleSubtitle: document.getElementById('toggleSubtitle'), toggleWatermark: document.getElementById('toggleWatermark'),
             noteTextInput: document.getElementById('noteTextInput'), noteAlignSelect: document.getElementById('noteAlignSelect'), noteColor: document.getElementById('noteColor'), noteColorText: document.getElementById('noteColorText'), noteBgColor: document.getElementById('noteBgColor'), noteBorderColor: document.getElementById('noteBorderColor'), btnClearNoteBg: document.getElementById('btnClearNoteBg'), btnNoteBorderClear: document.getElementById('btnNoteBorderClear'), noteShapeSelect: document.getElementById('noteShapeSelect'), noteSizeSlider: document.getElementById('noteSizeSlider'), noteSizeDisplay: document.getElementById('noteSizeDisplay'), noteBgOpacitySlider: document.getElementById('noteBgOpacitySlider'), noteBgOpacityDisplay: document.getElementById('noteBgOpacityDisplay'), btnAddNote: document.getElementById('btnAddNote'), btnDeleteNote: document.getElementById('btnDeleteNote'), btnInsertNoteIcon: document.getElementById('btnInsertNoteIcon'), notesContainer: document.getElementById('notesContainer'),
             bentoLayout: document.getElementById('bentoLayout'), bentoChart1: document.getElementById('bentoChart1'), bentoChart2: document.getElementById('bentoChart2'), bentoChart3: document.getElementById('bentoChart3'), bentoGrid2Container: document.getElementById('bentoGrid2Container'), bentoGrid3Container: document.getElementById('bentoGrid3Container'), colorTheme: document.getElementById('colorTheme'), stackMode: document.getElementById('stackMode'), stackModeContainer: document.getElementById('stackModeContainer'), seriesContainer: document.getElementById('seriesContainer'), btnAddOverlay: document.getElementById('btnAddOverlay'), overlayEnginePanel: document.getElementById('overlayEnginePanel'), dataRowsContainer: document.getElementById('dataRowsContainer'), btnAddRow: document.getElementById('btnAddRow'), btnRemoveRow: document.getElementById('btnRemoveRow'), rowCountDisplay: document.getElementById('rowCountDisplay'),
             chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), donutCutoutContainer: document.getElementById('donutCutoutContainer'), elementShadowSlider: document.getElementById('elementShadowSlider'), elementShadowDisplay: document.getElementById('elementShadowDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), outlineWidthSlider: document.getElementById('outlineWidthSlider'), outlineWidthDisplay: document.getElementById('outlineWidthDisplay'), outlineColor: document.getElementById('outlineColor'), outlineColorText: document.getElementById('outlineColorText'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'),
@@ -1504,6 +1971,7 @@
 
         document.addEventListener('mousedown', (e) => {
             const ep = document.getElementById('elementPopup'); if (activePopup && ep && !ep.classList.contains('hidden-popup')) { if (!ep.contains(e.target) && e.target.tagName !== 'CANVAS') closeElementPopup(); }
+            const wif = document.getElementById('whatIfPanel'); if (whatIfState.panelOpen && wif && !wif.classList.contains('hidden-popup')) { if (!wif.contains(e.target) && !e.target.closest('#btnWhatIfSandbox')) toggleWhatIfPanel(); }
             const iconModal = document.getElementById('iconModal'); const iconModalContent = document.getElementById('iconModalContent'); if (iconModal && !iconModal.classList.contains('hidden')) { if (!iconModalContent.contains(e.target) && !e.target.closest('#btnInsertNoteIcon') && !e.target.closest('button[onclick="closeIconModal()"]')) closeIconModal(); }
             const projModal = document.getElementById('projectModal'); const projModalContent = document.getElementById('projectModalContent'); if (projModal && !projModal.classList.contains('hidden')) { if (!projModalContent.contains(e.target) && !e.target.closest('button[onclick="openProjectModal()"]')) closeProjectModal(); }
             if (activeNoteId && !e.target.closest('.draggable-note') && !e.target.closest('#leftPanel') && !e.target.closest('#iconModal')) { activeNoteId = null; document.querySelectorAll('.draggable-note').forEach(el => el.classList.remove('active-note')); syncNoteController(); }
@@ -1650,7 +2118,7 @@
             try {
                 const nameInput = document.getElementById('projectNameInput');
                 if (nameInput && nameInput.value.trim()) currentProjectName = nameInput.value.trim();
-                const dataStr = JSON.stringify({ projectName: currentProjectName, version: '17.0', slides: appSlides, lang: globalLang }, null, 2);
+                const dataStr = JSON.stringify({ projectName: currentProjectName, version: '17.2', slides: appSlides, lang: globalLang }, null, 2);
                 const blob = new Blob([dataStr], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1700,7 +2168,7 @@
         // FUNGSI MODAL RESET CUSTOM UI
         function openResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10); }
         function closeResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.add('opacity-0'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300); }
-        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); currentProjectName = 'Proyek Baru'; appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; drillHistoryStack = []; updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); saveState(); showToast("New Project berhasil dibuat!"); }
+        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); currentProjectName = 'Proyek Baru'; appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; drillHistoryStack = []; whatIfState.multiplierPct = 0; whatIfState.jitterMap = {}; updateWhatIfBadgeUI(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); saveState(); showToast("New Project berhasil dibuat!"); }
 
         // FUNGSI INTERACTIVE DRILL-DOWN (BREAKDOWN DATA AREA)
         function updateDrillBackUI() {
@@ -1756,11 +2224,20 @@
             if (isSidebarOpen) { isSidebarOpen = false; applySidebarState(); }
             if (isRightPanelOpen) { isRightPanelOpen = false; applyRightPanelState(); }
             if (activeSlideIndex !== 0) switchSlide(0); else { if (els.exportTarget) { els.exportTarget.classList.remove('chart-wrapper-transition'); void els.exportTarget.offsetWidth; els.exportTarget.classList.add('chart-wrapper-transition'); } syncUIToActiveSlide(); }
+            if (typeof presenterDock !== 'undefined' && presenterDock) {
+                presenterDock.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+                document.body.style.cursor = 'default';
+            }
         }
         function exitPresentationUI() {
             if (!isPresenting) return; isPresenting = false; document.body.classList.remove('is-fullscreen'); const slide = getActiveSlide();
             if (els.exportTarget && slide) { els.exportTarget.style.transform = `scale(${slide.chartScale / 100})`; els.exportTarget.style.width = slide.chartWidth + '%'; els.exportTarget.style.height = slide.chartHeight + 'px'; }
             if (!isMobile) { isSidebarOpen = true; applySidebarState(); } setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); }, 500);
+            if (typeof isLaserMode !== 'undefined' && isLaserMode) toggleLaserMode();
+            if (typeof presenterDock !== 'undefined' && presenterDock) {
+                presenterDock.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+                document.body.style.cursor = 'default';
+            }
         }
         if (els.btnFullscreen) els.btnFullscreen.addEventListener('click', () => { const elem = document.documentElement; if (!document.fullscreenElement) { if (elem.requestFullscreen) elem.requestFullscreen(); enterPresentationUI(); } });
         function nextSlide() { if (activeSlideIndex < appSlides.length - 1) switchSlide(activeSlideIndex + 1); }
@@ -1967,7 +2444,65 @@
 
         function showToast(msg, isError = false) { const toast = document.getElementById('toastNotification'), msgEl = document.getElementById('toastMessage'), iconEl = document.getElementById('toastIcon'); if (!toast || !msgEl || !iconEl) return; msgEl.innerText = msg; if (isError) { toast.classList.replace('bg-slate-900', 'bg-red-600'); iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-white"></i>'; } else { toast.classList.replace('bg-red-600', 'bg-slate-900'); iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-lime-400"></i>'; } toast.classList.remove('translate-y-20', 'opacity-0'); setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000); }
 
-        function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ projectName: currentProjectName, slides: appSlides, lang: globalLang })); }
+        let historyUndoStack = [];
+        let historyRedoStack = [];
+        let isPerformingUndoRedo = false;
+        let lastSavedSnapshot = '';
+
+        function updateUndoRedoButtonsUI() {
+            const btnUndo = document.getElementById('btnUndoAction');
+            const btnRedo = document.getElementById('btnRedoAction');
+            if(btnUndo) btnUndo.disabled = historyUndoStack.length === 0;
+            if(btnRedo) btnRedo.disabled = historyRedoStack.length === 0;
+        }
+
+        function undoHistory() {
+            if (historyUndoStack.length === 0) return;
+            isPerformingUndoRedo = true;
+            let currentSnap = JSON.stringify(appSlides);
+            historyRedoStack.push(currentSnap);
+            let prevSnap = historyUndoStack.pop();
+            appSlides = JSON.parse(prevSnap);
+            lastSavedSnapshot = prevSnap;
+            syncUIToActiveSlide();
+            renderSlideList();
+            renderDataInputs();
+            saveState();
+            isPerformingUndoRedo = false;
+            updateUndoRedoButtonsUI();
+            showToast('⏪ Undo (Kembali)');
+        }
+
+        function redoHistory() {
+            if (historyRedoStack.length === 0) return;
+            isPerformingUndoRedo = true;
+            let currentSnap = JSON.stringify(appSlides);
+            historyUndoStack.push(currentSnap);
+            let nextSnap = historyRedoStack.pop();
+            appSlides = JSON.parse(nextSnap);
+            lastSavedSnapshot = nextSnap;
+            syncUIToActiveSlide();
+            renderSlideList();
+            renderDataInputs();
+            saveState();
+            isPerformingUndoRedo = false;
+            updateUndoRedoButtonsUI();
+            showToast('⏩ Redo (Maju)');
+        }
+
+        function saveState() {
+            const currentSnapshot = JSON.stringify(appSlides);
+            if (!isPerformingUndoRedo && currentSnapshot !== lastSavedSnapshot) {
+                if (lastSavedSnapshot !== '') {
+                    historyUndoStack.push(lastSavedSnapshot);
+                    if (historyUndoStack.length > 35) historyUndoStack.shift();
+                }
+                historyRedoStack = [];
+                lastSavedSnapshot = currentSnapshot;
+                updateUndoRedoButtonsUI();
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ projectName: currentProjectName, slides: appSlides, lang: globalLang })); 
+        }
         function loadState() {
             try {
                 if (window.location.hash && window.location.hash.startsWith('#v=')) { const compressed = window.location.hash.substring(3); const decompressed = LZString.decompressFromEncodedURIComponent(compressed); if (decompressed) { const parsed = JSON.parse(decompressed); if (parsed && parsed.length > 0) { appSlides = parsed; showToast('Proyek dimuat dari Link!'); history.replaceState(null, null, ' '); return; } } }
@@ -2049,7 +2584,7 @@
         document.getElementById('mobileOverlay')?.addEventListener('click', () => { isSidebarOpen = false; applySidebarState(); });
         if (els.btnCloseMobile) els.btnCloseMobile.addEventListener('click', () => { isSidebarOpen = false; applySidebarState(); });
 
-        function applyRightPanelState() { if (!els.rightLayerPanel) return; if (isRightPanelOpen) { els.rightLayerPanel.classList.remove('pointer-events-none', 'opacity-0', 'scale-95'); if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.add('bg-slate-900', 'text-[#cafc03]'); } else { els.rightLayerPanel.classList.add('pointer-events-none', 'opacity-0', 'scale-95'); if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.remove('bg-slate-900', 'text-[#cafc03]'); } }
+        function applyRightPanelState() { if (!els.rightLayerPanel) return; if (isRightPanelOpen) { els.rightLayerPanel.classList.remove('pointer-events-none', 'opacity-0', 'scale-95'); if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.add('ring-2', 'ring-[#cafc03]', 'bg-slate-900', 'text-[#cafc03]'); } else { els.rightLayerPanel.classList.add('pointer-events-none', 'opacity-0', 'scale-95'); if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.remove('ring-2', 'ring-[#cafc03]', 'bg-slate-900', 'text-[#cafc03]'); } }
         if (els.btnToggleSidebar) els.btnToggleSidebar.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; applySidebarState(); }); if (els.btnToggleRightPanel) els.btnToggleRightPanel.addEventListener('click', () => { isRightPanelOpen = !isRightPanelOpen; applyRightPanelState(); renderSlideList(); }); if (els.btnCloseRightPanel) els.btnCloseRightPanel.addEventListener('click', () => { isRightPanelOpen = false; applyRightPanelState(); }); window.addEventListener('resize', () => { let wasMobile = isMobile; isMobile = window.innerWidth < 768; if (wasMobile !== isMobile) { isSidebarOpen = !isMobile; applySidebarState(); } mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); });
 
         function handleSidebarScroll(el) { const sidebarHeader = document.getElementById('sidebarHeader'); const logoIcon = document.getElementById('logoIcon'); const headerTitle = document.getElementById('headerTitle'); const headerSubtitle = document.getElementById('headerSubtitle'); if (sidebarHeader) { if (el.scrollTop > 15) { sidebarHeader.classList.replace('p-5', 'py-3'); sidebarHeader.classList.replace('md:p-6', 'px-5'); if (logoIcon) { logoIcon.classList.replace('w-10', 'w-8'); logoIcon.classList.replace('h-10', 'h-8'); } if (headerTitle) { headerTitle.classList.replace('text-xl', 'text-base'); } if (headerSubtitle) { headerSubtitle.style.opacity = '0'; headerSubtitle.style.height = '0'; headerSubtitle.style.marginTop = '0'; headerSubtitle.style.transform = 'scaleY(0)'; } } else { sidebarHeader.classList.replace('py-3', 'p-5'); sidebarHeader.classList.replace('px-5', 'md:p-6'); if (logoIcon) { logoIcon.classList.replace('w-8', 'w-10'); logoIcon.classList.replace('h-8', 'h-10'); } if (headerTitle) { headerTitle.classList.replace('text-base', 'text-xl'); } if (headerSubtitle) { headerSubtitle.style.opacity = '1'; headerSubtitle.style.height = 'auto'; headerSubtitle.style.marginTop = '6px'; headerSubtitle.style.transform = 'scaleY(1)'; } } } }
@@ -2075,6 +2610,9 @@
                 const slide = getActiveSlide(); if (!slide) return;
                 if (els.activeSlideNameDisplay) els.activeSlideNameDisplay.innerText = slide.chartTitle || `Slide ${activeSlideIndex + 1}`;
                 if (els.chartTitleInput) els.chartTitleInput.value = slide.chartTitle || ''; if (els.chartSubtitleInput) els.chartSubtitleInput.value = slide.chartSubtitle || ''; if (els.watermarkInput) els.watermarkInput.value = slide.watermarkText || '';
+                if (els.toggleMainTitle) els.toggleMainTitle.checked = slide.showMainTitle !== false;
+                if (els.toggleSubtitle) els.toggleSubtitle.checked = slide.showSubtitle !== false;
+                if (els.toggleWatermark) els.toggleWatermark.checked = slide.showWatermark !== false;
                 if (slide.notes && slide.notes.length > 0) { if (!slide.notes.find(n => n.id === activeNoteId)) activeNoteId = slide.notes[0].id; } else { activeNoteId = null; } syncNoteController();
                 if (els.bentoLayout) els.bentoLayout.value = slide.bentoLayout; if (els.bentoChart1) els.bentoChart1.value = slide.bentoCharts[0]; if (els.bentoChart2) els.bentoChart2.value = slide.bentoCharts[1]; if (els.bentoChart3) els.bentoChart3.value = slide.bentoCharts[2];
                 if (els.bentoGrid2Container) els.bentoGrid2Container.style.display = slide.bentoLayout === '1' ? 'none' : 'block'; if (els.bentoGrid3Container) els.bentoGrid3Container.style.display = slide.bentoLayout === '3' ? 'block' : 'none'; if (els.dataTargetSelectorPanel) els.dataTargetSelectorPanel.style.display = slide.bentoLayout === '1' ? 'none' : 'flex'; if (els.tabGrid1) els.tabGrid1.style.display = (slide.bentoLayout === '2-h' || slide.bentoLayout === '2-v' || slide.bentoLayout === '3') ? 'block' : 'none'; if (els.tabGrid2) els.tabGrid2.style.display = slide.bentoLayout === '3' ? 'block' : 'none';
@@ -2106,6 +2644,9 @@
 
         const syncAndRender = (prop, value) => { const s = getActiveSlide(); if (s) { s[prop] = value; triggerVisUpdateWithDebounce(); } };
         if (els.chartTitleInput) els.chartTitleInput.addEventListener('input', (e) => { const slide = getActiveSlide(); slide.chartTitle = e.target.value; if (els.activeSlideNameDisplay) els.activeSlideNameDisplay.innerText = e.target.value || `Slide ${activeSlideIndex + 1}`; renderSlideList(); renderDataInputs(); triggerVisUpdateWithDebounce(); }); if (els.chartSubtitleInput) els.chartSubtitleInput.addEventListener('input', (e) => syncAndRender('chartSubtitle', e.target.value)); if (els.watermarkInput) els.watermarkInput.addEventListener('input', (e) => syncAndRender('watermarkText', e.target.value));
+        if (els.toggleMainTitle) els.toggleMainTitle.addEventListener('change', (e) => syncAndRender('showMainTitle', e.target.checked));
+        if (els.toggleSubtitle) els.toggleSubtitle.addEventListener('change', (e) => syncAndRender('showSubtitle', e.target.checked));
+        if (els.toggleWatermark) els.toggleWatermark.addEventListener('change', (e) => syncAndRender('showWatermark', e.target.checked));
         if (els.bentoLayout) els.bentoLayout.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.bentoLayout = e.target.value; if (e.target.value === '1') activeEditGridIndex = 0; if ((e.target.value === '2-h' || e.target.value === '2-v') && activeEditGridIndex > 1) activeEditGridIndex = 0; syncUIToActiveSlide(); });[els.bentoChart1, els.bentoChart2, els.bentoChart3].forEach((el, index) => { if (el) el.addEventListener('change', (e) => { getActiveSlide().bentoCharts[index] = e.target.value; forceRecolor(getActiveSlide().colorTheme, getActiveSlide()); syncUIToActiveSlide(); }); });
         if (els.colorTheme) els.colorTheme.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.colorTheme = e.target.value; forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide(); }); if (els.stackMode) els.stackMode.addEventListener('change', (e) => syncAndRender('stackMode', e.target.value));
 
@@ -2158,7 +2699,7 @@
                         <div class="flex items-center gap-2">
                             <button onclick="openIconFor('${row.id}')" class="w-8 h-8 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-lg shadow-sm hover:border-[#cafc03] transition">${row.icon}</button>
                             <input type="text" value="${row.label}" onchange="updateRowLabel('${row.id}', this.value)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-none shadow-sm focus:ring-2 focus:ring-[#cafc03] transition">
-                            <button onclick="toggleRowCallout('${row.id}')" title="Tampilkan Garis Petunjuk (Callout)" class="w-8 h-8 shrink-0 rounded-xl border flex items-center justify-center transition shadow-sm ${hasCallout ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-400 border-slate-200 hover:text-slate-700'}">
+                            <button onclick="toggleRowCallout('${row.id}')" title="Tampilkan Garis Petunjuk (Callout)" class="w-8 h-8 shrink-0 rounded-xl border flex items-center justify-center transition shadow-sm ${hasCallout ? 'bg-[#cafc03] text-slate-900 border-[#cafc03]' : 'bg-white text-slate-400 border-slate-200 hover:text-slate-700'}">
                                 <i class="ph-bold ph-chat-teardrop-text text-sm"></i>
                             </button>
                         </div>
@@ -2239,122 +2780,249 @@
             },
             afterDatasetsDraw: (chart) => {
                 if (chart.__hasShadow) chart.ctx.restore();
-                // RENDER INFORMASI TOTAL DATA (TENGAH DONUT / RADIAL / BADGE CHART LAINNYA)
+                // RENDER INFORMASI TOTAL DATA & AUTO-TRENDLINE + ANOMALY RADAR (POIN 2 DATA SCIENCE)
                 try {
                     const slide = getActiveSlide();
-                    if (!slide || slide.showDonutCenter === false) return;
+                    if (!slide) return;
                     const bIdx = parseInt(chart.canvas.dataset.blockIndex || 0);
                     const cType = slide.bentoCharts[bIdx];
                     if (cType === 'table' || cType === 'wordCloud' || cType === 'choropleth-world' || cType === 'choropleth-indo') return;
 
                     const ds = slide.dataSets[bIdx] || slide.dataSets[0];
-                    let total = 0;
-                    ds.rows.forEach(r => {
-                        let v = parseFloat(r.values[0]?.val);
-                        if (!isNaN(v)) total += v;
-                    });
+                    const itemsMeta = ds.rows.map((r, rIdx) => ({
+                        rIdx,
+                        label: r.label,
+                        icon: r.icon || '',
+                        val: getEffectiveValue(r.values[0]?.val, r.id, 0)
+                    }));
+                    const stats = computeDataScienceStats(itemsMeta);
+                    const total = stats.sum;
 
                     const labelTop = slide.donutCenterLabel !== undefined ? slide.donutCenterLabel : 'Total Data:';
                     const unitStr = slide.valueUnit !== undefined ? slide.valueUnit : '';
-                    const formattedTotal = total.toLocaleString('id-ID');
+                    const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1;
+                    const formattedTotal = Math.round(total * prog).toLocaleString('id-ID');
 
                     const isRadialType = ['pie', 'doughnut', 'polarArea', 'radar', 'concentric', 'windrose'].includes(cType);
 
-                    if (isRadialType) {
-                        const meta = chart.getDatasetMeta(0);
-                        if (!meta || !meta.data || meta.data.length === 0) return;
-                        const firstElem = meta.data[0];
-                        let centerX = firstElem.x;
-                        let centerY = firstElem.y;
-                        if (cType === 'radar' && chart.scales && chart.scales.r) {
-                            centerX = chart.scales.r.xCenter;
-                            centerY = chart.scales.r.yCenter;
+                    // 1. GAMBAR INFO TOTAL DATA (TENGAH DONUT / BADGE KANAN ATAS)
+                    if (slide.showDonutCenter !== false) {
+                        if (isRadialType) {
+                            const meta = chart.getDatasetMeta(0);
+                            if (meta && meta.data && meta.data.length > 0) {
+                                const firstElem = meta.data[0];
+                                let centerX = firstElem.x;
+                                let centerY = firstElem.y;
+                                if (cType === 'radar' && chart.scales && chart.scales.r) {
+                                    centerX = chart.scales.r.xCenter;
+                                    centerY = chart.scales.r.yCenter;
+                                }
+                                if (centerX !== undefined && centerY !== undefined) {
+                                    const innerR = firstElem.innerRadius || 0;
+                                    const outerR = firstElem.outerRadius || 80;
+                                    const isHollowDonut = (cType === 'doughnut' || cType === 'concentric') && slide.donutCutout >= 30 && innerR >= 28;
+
+                                    const ctx = chart.ctx;
+                                    ctx.save();
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+
+                                    const refRadius = isHollowDonut ? innerR : Math.min(outerR * 0.55, 58);
+                                    const baseFontSize = Math.max(11, Math.min(22, Math.floor(refRadius / 2.8)));
+                                    const subFontSize = Math.max(9, Math.floor(baseFontSize * 0.65));
+
+                                    if (!isHollowDonut) {
+                                        const pillW = Math.max(88, formattedTotal.length * (baseFontSize * 0.68) + 28);
+                                        const pillH = (labelTop ? subFontSize + 4 : 0) + baseFontSize + (unitStr ? subFontSize + 4 : 0) + 16;
+                                        const rx = centerX - pillW / 2;
+                                        const ry = centerY - pillH / 2;
+                                        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+                                        ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
+                                        ctx.shadowBlur = 10;
+                                        ctx.beginPath();
+                                        if (ctx.roundRect) ctx.roundRect(rx, ry, pillW, pillH, 14);
+                                        else ctx.rect(rx, ry, pillW, pillH);
+                                        ctx.fill();
+                                        ctx.shadowBlur = 0;
+                                        ctx.strokeStyle = 'rgba(226, 232, 240, 0.9)';
+                                        ctx.lineWidth = 1.5;
+                                        ctx.stroke();
+                                    }
+
+                                    if (labelTop) {
+                                        ctx.font = `600 ${subFontSize}px Inter, sans-serif`;
+                                        ctx.fillStyle = appStudioTheme === 'obsidian' && isHollowDonut ? '#94a3b8' : '#475569';
+                                        ctx.fillText(labelTop, centerX, centerY - (unitStr ? baseFontSize * 0.85 : baseFontSize * 0.55));
+                                    }
+
+                                    ctx.font = `900 ${baseFontSize}px Inter, sans-serif`;
+                                    ctx.fillStyle = appStudioTheme === 'obsidian' && isHollowDonut ? '#f8fafc' : '#0f172a';
+                                    ctx.fillText(formattedTotal, centerX, centerY + (labelTop && !unitStr ? subFontSize * 0.4 : 0));
+
+                                    if (unitStr) {
+                                        ctx.font = `800 ${subFontSize + 1}px Inter, sans-serif`;
+                                        ctx.fillStyle = appStudioTheme === 'obsidian' && isHollowDonut ? '#cbd5e1' : '#1e293b';
+                                        ctx.fillText(unitStr, centerX, centerY + baseFontSize * 0.85);
+                                    }
+                                    ctx.restore();
+                                }
+                            }
+                        } else {
+                            const area = chart.chartArea;
+                            if (area) {
+                                const ctx = chart.ctx;
+                                ctx.save();
+                                const summaryText = `${labelTop ? labelTop + ' ' : ''}${formattedTotal}${unitStr ? ' ' + unitStr : ''}`;
+                                ctx.font = `800 11px Inter, sans-serif`;
+                                const textW = ctx.measureText(summaryText).width;
+                                const padX = 12;
+                                const boxW = textW + padX * 2;
+                                const boxH = 26;
+                                const boxX = Math.max(area.left, area.right - boxW - 6);
+                                const boxY = Math.max(4, area.top - 6);
+
+                                ctx.fillStyle = appStudioTheme === 'obsidian' ? 'rgba(30, 41, 59, 0.92)' : 'rgba(255, 255, 255, 0.92)';
+                                ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
+                                ctx.shadowBlur = 8;
+                                ctx.beginPath();
+                                if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 999);
+                                else ctx.rect(boxX, boxY, boxW, boxH);
+                                ctx.fill();
+                                ctx.shadowBlur = 0;
+                                ctx.strokeStyle = appStudioTheme === 'obsidian' ? '#475569' : '#cbd5e1';
+                                ctx.lineWidth = 1;
+                                ctx.stroke();
+
+                                ctx.fillStyle = appStudioTheme === 'obsidian' ? '#f8fafc' : '#0f172a';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(summaryText, boxX + boxW / 2, boxY + boxH / 2 + 0.5);
+                                ctx.restore();
+                            }
                         }
-                        if (centerX === undefined || centerY === undefined) return;
-
-                        const innerR = firstElem.innerRadius || 0;
-                        const outerR = firstElem.outerRadius || 80;
-                        const isHollowDonut = (cType === 'doughnut' || cType === 'concentric') && slide.donutCutout >= 30 && innerR >= 28;
-
-                        const ctx = chart.ctx;
-                        ctx.save();
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-
-                        const refRadius = isHollowDonut ? innerR : Math.min(outerR * 0.55, 58);
-                        const baseFontSize = Math.max(11, Math.min(22, Math.floor(refRadius / 2.8)));
-                        const subFontSize = Math.max(9, Math.floor(baseFontSize * 0.65));
-
-                        // Jika bukan Donut berlubang (misal Pie / Polar / Radar), beri lencana (badge) bulat putih elegan di tengah
-                        if (!isHollowDonut) {
-                            const pillW = Math.max(88, formattedTotal.length * (baseFontSize * 0.68) + 28);
-                            const pillH = (labelTop ? subFontSize + 4 : 0) + baseFontSize + (unitStr ? subFontSize + 4 : 0) + 16;
-                            const rx = centerX - pillW / 2;
-                            const ry = centerY - pillH / 2;
-                            ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-                            ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
-                            ctx.shadowBlur = 10;
-                            ctx.beginPath();
-                            if (ctx.roundRect) ctx.roundRect(rx, ry, pillW, pillH, 14);
-                            else ctx.rect(rx, ry, pillW, pillH);
-                            ctx.fill();
-                            ctx.shadowBlur = 0;
-                            ctx.strokeStyle = 'rgba(226, 232, 240, 0.9)';
-                            ctx.lineWidth = 1.5;
-                            ctx.stroke();
-                        }
-
-                        if (labelTop) {
-                            ctx.font = `600 ${subFontSize}px Inter, sans-serif`;
-                            ctx.fillStyle = '#475569';
-                            ctx.fillText(labelTop, centerX, centerY - (unitStr ? baseFontSize * 0.85 : baseFontSize * 0.55));
-                        }
-
-                        ctx.font = `900 ${baseFontSize}px Inter, sans-serif`;
-                        ctx.fillStyle = '#0f172a';
-                        ctx.fillText(formattedTotal, centerX, centerY + (labelTop && !unitStr ? subFontSize * 0.4 : 0));
-
-                        if (unitStr) {
-                            ctx.font = `800 ${subFontSize + 1}px Inter, sans-serif`;
-                            ctx.fillStyle = '#1e293b';
-                            ctx.fillText(unitStr, centerX, centerY + baseFontSize * 0.85);
-                        }
-                        ctx.restore();
-                    } else {
-                        // Untuk Bar, Line, Area, Waterfall, Gantt, Tape, Treemap: Tampilkan kapsul Info Total di kanan atas chartArea
-                        const area = chart.chartArea;
-                        if (!area) return;
-                        const ctx = chart.ctx;
-                        ctx.save();
-
-                        const summaryText = `${labelTop ? labelTop + ' ' : ''}${formattedTotal}${unitStr ? ' ' + unitStr : ''}`;
-                        ctx.font = `800 11px Inter, sans-serif`;
-                        const textW = ctx.measureText(summaryText).width;
-                        const padX = 12;
-                        const boxW = textW + padX * 2;
-                        const boxH = 26;
-                        const boxX = Math.max(area.left, area.right - boxW - 6);
-                        const boxY = Math.max(4, area.top - 6);
-
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-                        ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
-                        ctx.shadowBlur = 8;
-                        ctx.beginPath();
-                        if (ctx.roundRect) ctx.roundRect(boxX, boxY, boxW, boxH, 999);
-                        else ctx.rect(boxX, boxY, boxW, boxH);
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
-                        ctx.strokeStyle = '#cbd5e1';
-                        ctx.lineWidth = 1;
-                        ctx.stroke();
-
-                        ctx.fillStyle = '#0f172a';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(summaryText, boxX + boxW / 2, boxY + boxH / 2 + 0.5);
-                        ctx.restore();
                     }
-                } catch (e) { console.error("Total Data Info Render Error:", e); }
+
+                    // 2. AUTO-TRENDLINE (MEAN + LINEAR REGRESSION) & ANOMALY RADAR OVERLAY
+                    if (isAnalyticsRadarActive && stats.count >= 2 && cType !== 'treemap') {
+                        const ctx = chart.ctx;
+                        const area = chart.chartArea;
+                        const meta = chart.getDatasetMeta(0);
+
+                        if (!isRadialType && area && chart.scales) {
+                            const isHorizontal = cType === 'bar-horizontal' || cType === 'gantt' || cType === 'tape';
+                            const valScale = isHorizontal ? chart.scales.x : chart.scales.y;
+
+                            if (valScale) {
+                                ctx.save();
+                                // A. Garis Mean (Rata-rata) Putus-putus
+                                const meanPixel = valScale.getPixelForValue(stats.mean);
+                                if (meanPixel >= (isHorizontal ? area.left : area.top) && meanPixel <= (isHorizontal ? area.right : area.bottom)) {
+                                    ctx.beginPath();
+                                    ctx.setLineDash([6, 4]);
+                                    ctx.lineWidth = 1.8;
+                                    ctx.strokeStyle = '#6366f1'; // Indigo
+                                    if (isHorizontal) {
+                                        ctx.moveTo(meanPixel, area.top);
+                                        ctx.lineTo(meanPixel, area.bottom);
+                                    } else {
+                                        ctx.moveTo(area.left, meanPixel);
+                                        ctx.lineTo(area.right, meanPixel);
+                                    }
+                                    ctx.stroke();
+
+                                    // Label Badge MEAN
+                                    const meanTag = `MEAN: ${Math.round(stats.mean).toLocaleString('id-ID')}`;
+                                    ctx.font = '800 9px "JetBrains Mono", monospace';
+                                    const tw = ctx.measureText(meanTag).width + 10;
+                                    const tx = isHorizontal ? meanPixel - tw / 2 : area.left + 8;
+                                    const ty = isHorizontal ? area.bottom - 20 : meanPixel - 18;
+                                    ctx.setLineDash([]);
+                                    ctx.fillStyle = '#4f46e5';
+                                    ctx.beginPath();
+                                    if (ctx.roundRect) ctx.roundRect(tx, ty, tw, 15, 4);
+                                    else ctx.rect(tx, ty, tw, 15);
+                                    ctx.fill();
+                                    ctx.fillStyle = '#ffffff';
+                                    ctx.textAlign = 'left';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillText(meanTag, tx + 5, ty + 8);
+                                }
+
+                                // B. Garis Regresi Linear (Trendline) untuk Grafik Vertikal
+                                if (!isHorizontal && meta && meta.data && meta.data.length >= 2) {
+                                    const firstEl = meta.data[0];
+                                    const lastIdx = meta.data.length - 1;
+                                    const lastEl = meta.data[lastIdx];
+                                    const yStart = valScale.getPixelForValue(stats.intercept);
+                                    const yEnd = valScale.getPixelForValue(stats.slope * lastIdx + stats.intercept);
+
+                                    ctx.beginPath();
+                                    ctx.setLineDash([3, 3]);
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeStyle = stats.slope >= 0 ? '#10b981' : '#f43f5e';
+                                    ctx.moveTo(firstEl.x, yStart);
+                                    ctx.lineTo(lastEl.x, yEnd);
+                                    ctx.stroke();
+                                }
+                                ctx.restore();
+                            }
+                        }
+
+                        // C. Radar Ring & Badge untuk MVP dan Outlier/Anomalies
+                        if (meta && meta.data) {
+                            ctx.save();
+                            meta.data.forEach((el, idx) => {
+                                if (!el || el.x === undefined || el.y === undefined) return;
+                                const isMvp = stats.mvp && stats.mvp.rIdx === idx;
+                                const anomalyObj = stats.anomalies.find(a => a.rIdx === idx);
+
+                                if (anomalyObj || isMvp) {
+                                    let px = el.x, py = el.y;
+                                    if (isRadialType && el.startAngle !== undefined) {
+                                        const midA = (el.startAngle + el.endAngle) / 2;
+                                        const rad = (el.outerRadius || 60) * 0.75;
+                                        px = el.x + Math.cos(midA) * rad;
+                                        py = el.y + Math.sin(midA) * rad;
+                                    }
+
+                                    const ringColor = anomalyObj
+                                        ? (anomalyObj.type === 'HIGH_SPIKE' ? '#ef4444' : '#f59e0b')
+                                        : '#eab308';
+
+                                    // Lingkaran Radar Target
+                                    ctx.beginPath();
+                                    ctx.setLineDash([3, 2]);
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeStyle = ringColor;
+                                    ctx.arc(px, py, 16, 0, Math.PI * 2);
+                                    ctx.stroke();
+
+                                    // Tag Lencana Kecil di Atas Titik
+                                    const badgeLabel = anomalyObj
+                                        ? `⚠ Z:${anomalyObj.zScore > 0 ? '+' : ''}${anomalyObj.zScore.toFixed(1)}`
+                                        : `👑 MVP`;
+                                    ctx.font = '800 8.5px "JetBrains Mono", monospace';
+                                    const bw = ctx.measureText(badgeLabel).width + 8;
+                                    ctx.setLineDash([]);
+                                    ctx.fillStyle = anomalyObj ? '#0f172a' : '#fef08a';
+                                    ctx.beginPath();
+                                    if (ctx.roundRect) ctx.roundRect(px - bw / 2, py - 30, bw, 14, 4);
+                                    else ctx.rect(px - bw / 2, py - 30, bw, 14);
+                                    ctx.fill();
+                                    ctx.strokeStyle = ringColor;
+                                    ctx.lineWidth = 1;
+                                    ctx.stroke();
+
+                                    ctx.fillStyle = anomalyObj ? '#f8fafc' : '#713f12';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'middle';
+                                    ctx.fillText(badgeLabel, px, py - 23);
+                                }
+                            });
+                            ctx.restore();
+                        }
+                    }
+                } catch (e) { console.error("Total Data & Radar Info Render Error:", e); }
             }
         };
         const barExplodePlugin = { id: 'barExplode', beforeUpdate(chart) { }, afterUpdate(chart) { try { const isBar = chart.config.type === 'bar'; const isLine = chart.config.type === 'line'; if (!isBar && !isLine) return; chart.data.datasets.forEach((dataset, i) => { if (!dataset.customOffsets) return; const meta = chart.getDatasetMeta(i); meta.data.forEach((el, index) => { let offsetPercent = dataset.customOffsets[index] || 0; if (offsetPercent > 0) { let scale = 1 + (offsetPercent / 100); if (isBar && el.width !== undefined && el.height !== undefined) { if (chart.options.indexAxis === 'y') { let dh = el.height * (scale - 1); el.height += dh; el.y -= dh / 2; } else { let dw = el.width * (scale - 1); el.width += dw; el.x -= dw / 2; } } else if (isLine && el.options && el.options.radius !== undefined) { el.options.radius *= scale; el.options.borderWidth *= scale; } } }); }); } catch (e) { console.error('Explode plugin err:', e); } } };
@@ -2447,12 +3115,12 @@
                 const ds = slide.dataSets[bIdx] || slide.dataSets[0];
                 const isMultiSeries = ds.series.length > 1;
 
-                // Hitung total per-series untuk persentase masing-masing layer/cincin
+                // Hitung total per-series (mengikuti nilai simulasi What-If jika aktif)
                 const seriesTotals = ds.series.map((s, sIdx) => {
                     let t = 0;
                     ds.rows.forEach(r => {
-                        let v = parseFloat(r.values[sIdx]?.val);
-                        if (!isNaN(v)) t += v;
+                        let v = getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx);
+                        if (v !== null && !isNaN(v)) t += v;
                     });
                     return t;
                 });
@@ -2462,7 +3130,6 @@
                         if (!valObj || !valObj.callout || valObj.val === null || valObj.val === undefined) return;
                         if (sIdx >= ds.series.length) return;
 
-                        // Tentukan datasetIndex & dataIndex sesuai tipe chart
                         let chartDatasetIdx = sIdx;
                         let chartDataIdx = rIdx;
                         if (cType === 'tape') {
@@ -2472,7 +3139,7 @@
                             chartDatasetIdx = (ds.series.length - 1) - sIdx;
                             chartDataIdx = rIdx;
                         } else if (['pie', 'doughnut', 'polarArea', 'radar'].includes(cType) && cType !== 'concentric') {
-                            if (sIdx > 0) return; // Chart radial tunggal hanya merender series 0
+                            if (sIdx > 0) return;
                             chartDatasetIdx = 0;
                             chartDataIdx = rIdx;
                         }
@@ -2487,7 +3154,7 @@
                         const boxY = (valObj.calloutY / 100) * wHeight;
 
                         const total = seriesTotals[sIdx] || 0;
-                        const numVal = Number(valObj.val) || 0;
+                        const numVal = getEffectiveValue(valObj.val, row.id, sIdx) || 0;
                         const pctRaw = total > 0 ? (numVal / total) * 100 : 0;
                         const pctFormatted = pctRaw < 1 && pctRaw > 0 ? pctRaw.toFixed(2).replace('.', ',') : (pctRaw % 1 === 0 ? pctRaw.toFixed(0) : pctRaw.toFixed(1).replace('.', ','));
                         const unitStr = slide.valueUnit ? ` ${slide.valueUnit}` : '';
@@ -2509,7 +3176,7 @@
                                 ${seriesBadge}
                             </div>
                             <div class="text-xs sm:text-[13px] text-slate-900 leading-tight mt-0.5">
-                                <span class="font-black">${numVal.toLocaleString('id-ID')}${unitStr}</span>
+                                <span class="font-black font-mono-tech">${Math.round(numVal).toLocaleString('id-ID')}${unitStr}</span>
                                 <span class="font-normal text-slate-600"> (${pctFormatted}%)</span>
                             </div>
                             ${valObj.calloutSub ? `<div class="text-[9px] text-slate-500 mt-1 pt-1 border-t border-slate-100 leading-tight">${valObj.calloutSub}</div>` : ''}
@@ -2523,7 +3190,6 @@
                         const dotX = isBoxRight ? (boxX - boxWidth / 2 - 4) : (boxX + boxWidth / 2 + 4);
                         const dotY = boxY;
 
-                        // Buat jalur garis putus-putus siku-siku (Orthogonal L-shape / Z-shape seperti Big Alpha)
                         let pathD = '';
                         const dy = Math.abs(dotY - anchor.ay);
                         const dx = Math.abs(dotX - anchor.ax);
@@ -2537,14 +3203,13 @@
                         const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                         pathEl.setAttribute('d', pathD);
                         pathEl.setAttribute('fill', 'none');
-                        pathEl.setAttribute('stroke', '#334155');
+                        pathEl.setAttribute('stroke', appStudioTheme === 'obsidian' ? '#94a3b8' : '#334155');
                         pathEl.setAttribute('stroke-width', '1.6');
                         pathEl.setAttribute('stroke-dasharray', '5,5');
                         pathEl.setAttribute('stroke-linecap', 'round');
                         pathEl.setAttribute('stroke-linejoin', 'round');
                         svg.appendChild(pathEl);
 
-                        // Titik Bulatan Berwarna sesuai warna spesifik layer/elemen tersebut
                         const circleEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                         circleEl.setAttribute('cx', dotX);
                         circleEl.setAttribute('cy', dotY);
@@ -2625,6 +3290,8 @@
             let oWidth = slide.outlineWidth !== undefined ? slide.outlineWidth : 1; let oColor = slide.outlineColor || '#ffffff';
             let dlPos = { anchor: 'center', align: 'center' }; if (slide.datalabelPosition === 'end') dlPos = { anchor: 'end', align: 'start' }; else if (slide.datalabelPosition === 'start') dlPos = { anchor: 'start', align: 'end' }; else if (slide.datalabelPosition === 'outside') dlPos = { anchor: 'end', align: 'end' };
             let globalBaseType = 'bar'; if (isWordCloud) globalBaseType = 'wordCloud'; else if (isMap) globalBaseType = 'choropleth'; else if (isTreemap) globalBaseType = 'treemap'; else if (isRadial || isScatterBubble) globalBaseType = (isConcentric ? 'doughnut' : (isWindrose ? 'polarArea' : cType)); else if (cType === 'line' || cType === 'area') globalBaseType = 'line';
+            let maxExplodeOffset = 0; ds.rows.forEach(r => r.values.forEach(v => { if((v?.offset || 0) > maxExplodeOffset) maxExplodeOffset = v.offset; }));
+            let extraPad = Math.round(maxExplodeOffset * 0.45);
 
             if (isMap) {
                 let features = [];
@@ -2633,35 +3300,37 @@
                     else { if (!mapCache.indo) { const res = await fetch('https://cdn.jsdelivr.net/gh/superpikar/indonesia-geojson@master/indonesia-province.json'); mapCache.indo = await res.json(); } features = mapCache.indo.features; }
                 } catch (e) { console.error("Map Load Error:", e); showToast("Gagal memuat peta. Cek koneksi Anda.", true); }
 
-                let userRowDict = {}; ds.rows.forEach(r => userRowDict[r.label.replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim()] = r); let mapDataArr = [], mapLabels = []; features.forEach(f => { let fname = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim(); let matchedRow = userRowDict[fname]; if (!matchedRow) { for (let key in userRowDict) { if (fname.includes(key) || key.includes(fname)) { matchedRow = userRowDict[key]; break; } } } mapLabels.push(f.properties.name || f.properties.NAME_1 || f.id || "Unknown"); let val = (matchedRow && matchedRow.values[0] && matchedRow.values[0].val !== undefined) ? Number(matchedRow.values[0].val) : 0; mapDataArr.push({ feature: f, value: isNaN(val) ? 0 : val }); }); labels = mapLabels; datasets = [{ label: ds.series[0]?.name || 'Data Utama', outline: features, data: mapDataArr, backgroundColor: (c) => { let f = c.raw?.feature; if (f) { let n = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim(); let mr = userRowDict[n]; if (!mr) { for (let k in userRowDict) if (n.includes(k) || k.includes(n)) { mr = userRowDict[k]; break; } } return mr && mr.values[0] ? mr.values[0].color : 'rgba(200, 200, 200, 0.15)'; } return 'rgba(200, 200, 200, 0.15)'; }, borderColor: oColor, borderWidth: oWidth }];
+                let userRowDict = {}; ds.rows.forEach(r => userRowDict[r.label.replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim()] = r); let mapDataArr = [], mapLabels = []; features.forEach(f => { let fname = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim(); let matchedRow = userRowDict[fname]; if (!matchedRow) { for (let key in userRowDict) { if (fname.includes(key) || key.includes(fname)) { matchedRow = userRowDict[key]; break; } } } mapLabels.push(f.properties.name || f.properties.NAME_1 || f.id || "Unknown"); let val = (matchedRow && matchedRow.values[0] && matchedRow.values[0].val !== undefined) ? getEffectiveValue(matchedRow.values[0].val, matchedRow.id, 0) : 0; mapDataArr.push({ feature: f, value: isNaN(val) ? 0 : val }); }); labels = mapLabels; datasets = [{ label: ds.series[0]?.name || 'Data Utama', outline: features, data: mapDataArr, backgroundColor: (c) => { let f = c.raw?.feature; if (f) { let n = (f.properties.name || f.properties.NAME_1 || f.properties.Propinsi || f.id || "").replace(/[^a-zA-Z0-9 ]/g, "").toLowerCase().trim(); let mr = userRowDict[n]; if (!mr) { for (let k in userRowDict) if (n.includes(k) || k.includes(n)) { mr = userRowDict[k]; break; } } return mr && mr.values[0] ? mr.values[0].color : 'rgba(200, 200, 200, 0.15)'; } return 'rgba(200, 200, 200, 0.15)'; }, borderColor: oColor, borderWidth: oWidth }];
             } else if (isWordCloud) {
-                datasets = [{ label: ds.series[0]?.name || 'Word Cloud', data: ds.rows.map(r => r.values[0]?.val || 0), color: ds.rows.map(r => r.values[0]?.color || '#000'), fontFamily: 'Inter' }];
+                datasets = [{ label: ds.series[0]?.name || 'Word Cloud', data: ds.rows.map(r => getEffectiveValue(r.values[0]?.val, r.id, 0) || 0), color: ds.rows.map(r => r.values[0]?.color || '#000'), fontFamily: 'Inter' }];
             } else if (isTreemap) {
-                let treeData = ds.rows.map(r => ({ name: r.label, value: r.values[0]?.val || 0, color: r.values[0]?.color || '#ccc' })); datasets = [{ label: ds.series[0]?.name || 'Tree Map', tree: treeData, key: 'value', groups: ['name'], backgroundColor: (ctx) => ctx.raw?.color || '#ccc', borderColor: oColor, borderWidth: oWidth, spacing: slide.chartSpacing > 0 ? 1 : 0, captions: { display: false }, labels: { display: true, font: { family: 'Inter', size: 14, weight: 'bold' }, color: '#fff', formatter: (ctx) => ctx.raw?.g || '' } }];
+                let treeData = ds.rows.map(r => ({ name: r.label, value: getEffectiveValue(r.values[0]?.val, r.id, 0) || 0, color: r.values[0]?.color || '#ccc' })); datasets = [{ label: ds.series[0]?.name || 'Tree Map', tree: treeData, key: 'value', groups: ['name'], backgroundColor: (ctx) => ctx.raw?.color || '#ccc', borderColor: oColor, borderWidth: oWidth, spacing: slide.chartSpacing > 0 ? 1 : 0, captions: { display: false }, labels: { display: true, font: { family: 'Inter', size: 14, weight: 'bold' }, color: '#fff', formatter: (ctx) => ctx.raw?.g || '' } }];
             } else if (isRadial) {
                 if (isConcentric || isWindrose) {
-                    if (isWindrose) { let totalSeries = ds.series.length; for (let sIdx = totalSeries - 1; sIdx >= 0; sIdx--) { let dataArr = []; ds.rows.forEach(r => { let sum = 0; if (stackLogic === 'accumulate') { for (let i = 0; i <= sIdx; i++) sum += (r.values[i]?.val || 0); } else { sum = r.values[sIdx]?.val || 0; } dataArr.push(sum); }); let bgColors = ds.rows.map(r => r.values[sIdx]?.color || '#000'); if (stackLogic === 'accumulate') bgColors = ds.rows.map(r => hexToRgba(r.values[sIdx]?.color || '#000', 100 - (sIdx * 15))); else bgColors = ds.rows.map(r => hexToRgba(r.values[sIdx]?.color || '#000', 50)); datasets.push({ label: ds.series[sIdx].name, data: dataArr, backgroundColor: bgColors, borderColor: oColor, borderWidth: oWidth, offset: ds.rows.map(r => (r.values[sIdx]?.offset || 0) * 0.5), hoverOffset: 15 }); } }
-                    else { ds.series.forEach((s, sIdx) => { datasets.push({ label: s.name, data: ds.rows.map(r => r.values[sIdx]?.val || 0), backgroundColor: ds.rows.map(r => r.values[sIdx]?.color || '#000'), borderColor: oColor, borderWidth: oWidth, offset: ds.rows.map(r => (r.values[sIdx]?.offset || 0) * 0.5), hoverOffset: 15 }); }); }
-                } else { let rColors = ds.rows.map(r => r.values[0]?.color || '#000'); let rOffsets = ds.rows.map(r => (r.values[0]?.offset || 0) * 0.5); let dsConfig = { label: ds.series[0]?.name || 'Data', data: ds.rows.map(r => r.values[0]?.val || 0), backgroundColor: rColors, borderColor: cType === 'radar' ? rColors[0] : oColor, borderWidth: oWidth, offset: rOffsets, hoverOffset: 15 }; if (cType === 'radar') { dsConfig.backgroundColor = hexToRgba(rColors[0], 20); dsConfig.fill = true; dsConfig.borderWidth = Math.max(oWidth, 3); } datasets = [dsConfig]; }
+                    if (isWindrose) { let totalSeries = ds.series.length; for (let sIdx = totalSeries - 1; sIdx >= 0; sIdx--) { let dataArr = []; ds.rows.forEach(r => { let sum = 0; if (stackLogic === 'accumulate') { for (let i = 0; i <= sIdx; i++) sum += (getEffectiveValue(r.values[i]?.val, r.id, i) || 0); } else { sum = getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx) || 0; } dataArr.push(sum); }); let bgColors = ds.rows.map(r => r.values[sIdx]?.color || '#000'); if (stackLogic === 'accumulate') bgColors = ds.rows.map(r => hexToRgba(r.values[sIdx]?.color || '#000', 100 - (sIdx * 15))); else bgColors = ds.rows.map(r => hexToRgba(r.values[sIdx]?.color || '#000', 50)); datasets.push({ label: ds.series[sIdx].name, data: dataArr, backgroundColor: bgColors, borderColor: oColor, borderWidth: oWidth, offset: ds.rows.map(r => (r.values[sIdx]?.offset || 0) * 0.5), hoverOffset: 15 }); } }
+                    else { 
+                        ds.series.forEach((s, sIdx) => { datasets.push({ label: s.name, data: ds.rows.map(r => getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx) || 0), backgroundColor: ds.rows.map(r => r.values[sIdx]?.color || '#000'), borderColor: oColor, borderWidth: Math.max(oWidth, 3), weight: 1, spacing: 4, offset: ds.rows.map(r => (r.values[sIdx]?.offset || 0) * 0.35), hoverOffset: 15 }); }); 
+                    }
+                } else { let rColors = ds.rows.map(r => r.values[0]?.color || '#000'); let rOffsets = ds.rows.map(r => (r.values[0]?.offset || 0) * 0.5); let dsConfig = { label: ds.series[0]?.name || 'Data', data: ds.rows.map(r => getEffectiveValue(r.values[0]?.val, r.id, 0) || 0), backgroundColor: rColors, borderColor: cType === 'radar' ? rColors[0] : oColor, borderWidth: oWidth, offset: rOffsets, hoverOffset: 15 }; if (cType === 'radar') { dsConfig.backgroundColor = hexToRgba(rColors[0], 20); dsConfig.fill = true; dsConfig.borderWidth = Math.max(oWidth, 3); } datasets = [dsConfig]; }
             } else if (isTape) {
                 labels = ds.series.map(s => s.name);
-                let seriesTotals = ds.series.map((s, sIdx) => { return ds.rows.reduce((sum, r) => sum + (Number(r.values[sIdx]?.val) || 0), 0); });
-                ds.rows.forEach((r, rIdx) => { let dataArr = []; let rawArr = []; ds.series.forEach((s, sIdx) => { let v = r.values[sIdx]?.val; if (v === null || v === "" || v === undefined) { dataArr.push(null); rawArr.push(null); } else { let num = Number(v); rawArr.push(num); dataArr.push(seriesTotals[sIdx] > 0 ? (num / seriesTotals[sIdx]) * 100 : 0); } }); datasets.push({ label: r.icon + ' ' + r.label, type: 'bar', indexAxis: 'y', data: dataArr, rawValues: rawArr, backgroundColor: r.values[0]?.color || '#000', borderColor: oColor, borderWidth: oWidth, borderRadius: Math.max(slide.borderRadius, 0), stack: 'Stack 0', customOffsets: ds.series.map((s, sIdx) => r.values[sIdx]?.offset || 0) }); });
+                let seriesTotals = ds.series.map((s, sIdx) => { return ds.rows.reduce((sum, r) => sum + (getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx) || 0), 0); });
+                ds.rows.forEach((r, rIdx) => { let dataArr = []; let rawArr = []; ds.series.forEach((s, sIdx) => { let num = getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx); if (num === null) { dataArr.push(null); rawArr.push(null); } else { rawArr.push(num); dataArr.push(seriesTotals[sIdx] > 0 ? (num / seriesTotals[sIdx]) * 100 : 0); } }); datasets.push({ label: r.icon + ' ' + r.label, type: 'bar', indexAxis: 'y', data: dataArr, rawValues: rawArr, backgroundColor: r.values[0]?.color || '#000', borderColor: oColor, borderWidth: oWidth, borderRadius: Math.max(slide.borderRadius, 0), stack: 'Stack 0', customOffsets: ds.series.map((s, sIdx) => r.values[sIdx]?.offset || 0) }); });
             } else {
                 ds.series.forEach((s, sIdx) => {
                     let parsedType = s.type === 'auto' ? globalBaseType : s.type; if (parsedType === 'area') parsedType = 'line'; let isLine = parsedType === 'line', isFillArea = s.type === 'area' || (s.type === 'auto' && cType === 'area'); let dataArr = [], colorArr = [];
-                    ds.rows.forEach((r, rIdx) => { let v = r.values[sIdx] || { val: 0, val2: 0, color: '#000' }; colorArr.push(v.color); let val1 = v.val !== null && v.val !== "" && v.val !== undefined ? Number(v.val) : null; let val2 = v.val2 !== null && v.val2 !== "" && v.val2 !== undefined ? Number(v.val2) : null; if (isScatterBubble) dataArr.push(val1 !== null ? { x: labels[rIdx], y: val1, r: Math.max(3, (val2 || 0) / 5) } : null); else if (isFloatingBar) dataArr.push(val1 !== null && val2 !== null ? [Math.min(val1, val2), Math.max(val1, val2)] : null); else dataArr.push(val1); });
+                    ds.rows.forEach((r, rIdx) => { let v = r.values[sIdx] || { val: 0, val2: 0, color: '#000' }; colorArr.push(v.color); let val1 = getEffectiveValue(v.val, r.id, sIdx); let val2 = v.val2 !== null && v.val2 !== "" && v.val2 !== undefined ? Number(v.val2) : null; if (isScatterBubble) dataArr.push(val1 !== null ? { x: labels[rIdx], y: val1, r: Math.max(3, (val2 || 0) / 5) } : null); else if (isFloatingBar) dataArr.push(val1 !== null && val2 !== null ? [Math.min(val1, val2), Math.max(val1, val2)] : null); else dataArr.push(val1); });
                     let bgColor = isLine && !isFillArea ? 'transparent' : colorArr; let borderColor = isLine ? colorArr[0] : oColor; if (isLine && ds.series.length === 1 && colorArr.length > 1) borderColor = colorArr[0]; if (isFillArea) bgColor = hexToRgba(colorArr[0], 20);
                     datasets.push({ label: s.name, type: parsedType, indexAxis: isHorizontal ? 'y' : 'x', data: dataArr, backgroundColor: bgColor, borderColor: borderColor, borderWidth: isLine ? Math.max(oWidth, 3) : oWidth, fill: isFillArea, tension: 0.4, borderRadius: slide.borderRadius, grouped: isGrouped, stack: isStacked ? 'Stack 0' : undefined, order: s.zIndex === 'front' ? 0 : 2, xAxisID: isHorizontal ? (s.axis === 'y2' ? 'xRight' : 'x') : 'x', yAxisID: isHorizontal ? 'y' : (s.axis === 'y2' ? 'yRight' : 'y'), customOffsets: ds.rows.map(r => r.values[sIdx]?.offset || 0) });
                 });
             }
 
             const chartOptions = {
-                responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: slide.bentoLayout === '1' ? 10 : 20 }, interaction: { mode: 'nearest', intersect: true }, animation: { duration: 1000, delay: blockIndex * 150, easing: 'easeOutQuart' },
+                responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: (slide.bentoLayout === '1' ? 10 : 20) + extraPad }, interaction: { mode: 'nearest', intersect: true }, animation: { duration: 900, delay: blockIndex * 120, easing: 'easeOutQuart' },
                 plugins: {
                     legend: { display: slide.showLegend && !isMap && !isTreemap && (blockIndex === 0 || slide.bentoLayout !== '1'), position: 'top', align: 'center', labels: { font: { family: 'Inter', size: 14, weight: 'bold' }, color: appStudioTheme === 'obsidian' ? '#e2e8f0' : '#334155', usePointStyle: true, padding: 16 } },
                     tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
-                    datalabels: { display: slide.datalabelPosition !== 'none' && !isRadial && !isMap && !isScatterBubble && !isTreemap, anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelPosition === 'outside' ? (appStudioTheme === 'obsidian' ? '#f8fafc' : '#111827') : '#fff', font: { family: 'Inter', weight: '900', size: 14 }, formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : raw; } if (Array.isArray(v)) return Math.abs(v[1] - v[0]); if (typeof v === 'object') return v.y; return Math.round(v); }, textStrokeColor: slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: slide.datalabelPosition === 'outside' ? 0 : 3 }
+                    datalabels: { display: slide.datalabelPosition !== 'none' && !isRadial && !isMap && !isScatterBubble && !isTreemap, anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelPosition === 'outside' ? (appStudioTheme === 'obsidian' ? '#f8fafc' : '#111827') : '#fff', font: { family: 'Inter', weight: '900', size: 14 }, formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : Math.round(raw * prog); } if (Array.isArray(v)) return Math.round(Math.abs(v[1] - v[0]) * prog); if (typeof v === 'object') return Math.round(v.y * prog); return Math.round(v * prog); }, textStrokeColor: slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)', textStrokeWidth: slide.datalabelPosition === 'outside' ? 0 : 3 }
                 },
                 scales: {},
                 onHover: (e, elements, chart) => {
@@ -2702,7 +3371,7 @@
                 else { chartOptions.scales.x = { type: catAxisType || 'category', display: displayCategory, stacked: isStacked, grid: { display: slide.showGridX, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; chartOptions.scales.y = { type: 'linear', display: displayNumbers, position: 'left', stacked: isStacked, grid: { display: slide.showGridY, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; if (hasSecondaryAxis) chartOptions.scales.yRight = { type: 'linear', position: 'right', display: displayNumbers, stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize }, color: '#64748b' } }; }
             } else if (isRadial) {
                 if (cType !== 'radar' && cType !== 'polarArea' && !isWindrose) delete chartOptions.scales; chartOptions.cutout = cType === 'doughnut' || isConcentric ? slide.donutCutout + '%' : 0; if (cType !== 'radar') chartOptions.elements = { arc: { borderRadius: slide.borderRadius, borderWidth: oWidth, borderColor: oColor } };
-                chartOptions.plugins.datalabels = { display: slide.datalabelPosition !== 'none', color: '#fff', font: { weight: 'bold', size: 14 }, textStrokeColor: 'rgba(0,0,0,0.5)', textStrokeWidth: 2, formatter: (value, ctx) => { if (isWindrose || isConcentric || cType === 'polarArea') { if (isWindrose && stackLogic === 'accumulate') { let actualValue = value; let nextDataset = ctx.chart.data.datasets[ctx.datasetIndex + 1]; if (nextDataset) actualValue -= nextDataset.data[ctx.dataIndex]; return Math.round(actualValue); } return Math.round(value); } let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += (d || 0)); return sum === 0 ? '0%' : Math.round((value / sum) * 100) + '%'; } };
+                chartOptions.plugins.datalabels = { display: slide.datalabelPosition !== 'none', clamp: true, anchor: 'center', align: 'center', color: '#fff', font: { weight: 'bold', size: 14 }, textStrokeColor: 'rgba(0,0,0,0.5)', textStrokeWidth: 2, formatter: (value, ctx) => { if (value === 0 && (ctx.chart.config.type === 'doughnut' || ctx.chart.config.type === 'pie')) return null; const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1; if (isWindrose || isConcentric || cType === 'polarArea') { if (isWindrose && stackLogic === 'accumulate') { let actualValue = value; let nextDataset = ctx.chart.data.datasets[ctx.datasetIndex + 1]; if (nextDataset) actualValue -= nextDataset.data[ctx.dataIndex]; return Math.round(actualValue * prog); } return Math.round(value * prog); } let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += (d || 0)); return sum === 0 ? '0%' : Math.round(((value * prog) / sum) * 100) + '%'; } };
             }
             if (!isRadial && !isMap && !isTreemap) { chartOptions.barPercentage = isTape ? 1 : slide.chartThickness / 100; chartOptions.categoryPercentage = isTape ? 1 : 0.8; }
             return { datasets, labels, chartOptions, globalBaseType };
@@ -2713,22 +3382,56 @@
                 const slide = getActiveSlide(); const ds = getActiveDataSet();
                 if (!slide || !ds || !els.percentageContainer || !els.totalSumDisplay) return;
                 els.percentageContainer.innerHTML = '';
-                let total = 0;
-                ds.rows.forEach(r => { let val = parseFloat(r.values[0]?.val); if (!isNaN(val)) total += val; });
 
-                els.totalSumDisplay.innerText = total.toLocaleString('id-ID');
+                const itemsMeta = ds.rows.map((r, rIdx) => ({
+                    rIdx,
+                    id: r.id,
+                    label: r.label,
+                    icon: r.icon || '',
+                    val: getEffectiveValue(r.values[0]?.val, r.id, 0)
+                }));
+
+                const stats = computeDataScienceStats(itemsMeta);
+                const total = stats.sum;
+
+                els.totalSumDisplay.innerText = Math.round(total).toLocaleString('id-ID');
+
+                // Update HUD Telemetry Bar (Mean, Median, Std Dev, MVP, Anomaly Alert)
+                const meanEl = document.getElementById('hudMeanDisplay');
+                const medianEl = document.getElementById('hudMedianDisplay');
+                const stdDevEl = document.getElementById('hudStdDevDisplay');
+                const mvpEl = document.getElementById('hudMvpDisplay');
+                const anomalyBadge = document.getElementById('hudAnomalyBadge');
+                const anomalyText = document.getElementById('hudAnomalyText');
+
+                if (meanEl) meanEl.innerText = stats.mean.toLocaleString('id-ID', { maximumFractionDigits: 1 });
+                if (medianEl) medianEl.innerText = stats.median.toLocaleString('id-ID', { maximumFractionDigits: 1 });
+                if (stdDevEl) stdDevEl.innerText = `±${stats.stdDev.toLocaleString('id-ID', { maximumFractionDigits: 1 })}`;
+                if (mvpEl) mvpEl.innerText = stats.mvp ? `${stats.mvp.icon} ${stats.mvp.label} (${Math.round(stats.mvp.val)})` : '-';
+
+                if (anomalyBadge && anomalyText) {
+                    if (stats.anomalies.length > 0) {
+                        const topAnomaly = stats.anomalies[0];
+                        anomalyBadge.className = "cursor-pointer shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 transition hover:scale-105";
+                        anomalyBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span><span id="hudAnomalyText" class="font-mono-tech">⚠ ${stats.anomalies.length} OUTLIER (${topAnomaly.label} Z:${topAnomaly.zScore > 0 ? '+' : ''}${topAnomaly.zScore.toFixed(1)})</span>`;
+                    } else {
+                        anomalyBadge.className = "cursor-pointer shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 transition hover:scale-105";
+                        anomalyBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span id="hudAnomalyText" class="font-mono-tech">✓ NORMAL DISTRIBUTION</span>`;
+                    }
+                }
 
                 if (total > 0) {
-                    ds.rows.forEach(r => {
-                        let val = parseFloat(r.values[0]?.val);
-                        if (isNaN(val) || val <= 0) return;
+                    ds.rows.forEach((r, rIdx) => {
+                        let val = getEffectiveValue(r.values[0]?.val, r.id, 0);
+                        if (val === null || isNaN(val) || val <= 0) return;
                         let pct = Math.round((val / total) * 100);
                         let color = r.values[0]?.color || '#000';
+                        const isMvp = stats.mvp && stats.mvp.rIdx === rIdx;
                         const hasDrill = r.drillTarget && appSlides.some(s => s.id === r.drillTarget);
                         const div = document.createElement('div');
-                        div.className = `flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border ${hasDrill ? 'border-indigo-300 cursor-pointer hover:bg-indigo-50' : 'border-slate-100'} shadow-sm whitespace-nowrap shrink-0 transition-transform hover:scale-105`;
+                        div.className = `flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border ${isMvp ? 'border-amber-300 bg-amber-50/40' : (hasDrill ? 'border-indigo-300 cursor-pointer hover:bg-indigo-50' : 'border-slate-100')} shadow-sm whitespace-nowrap shrink-0 transition-transform hover:scale-105`;
                         if (hasDrill) div.onclick = () => drillDownTo(r.drillTarget);
-                        div.innerHTML = `<div class="w-2.5 h-2.5 rounded-full" style="background-color: ${color}"></div><span class="text-[10px] font-bold text-slate-700">${r.icon} ${r.label}</span><span class="text-[11px] font-black text-slate-900 ml-1">${pct}%</span>${hasDrill ? '<i class="ph-bold ph-arrow-up-right text-indigo-600 text-[10px]"></i>' : ''}`;
+                        div.innerHTML = `${isMvp ? '<span class="text-[10px]" title="Top Metric (MVP)">👑</span>' : `<div class="w-2 h-2 rounded-full" style="background-color: ${color}"></div>`}<span class="text-[10px] font-bold text-slate-700">${r.icon} ${r.label}</span><span class="text-[10px] font-black font-mono-tech text-slate-900 ml-0.5">${pct}%</span>${hasDrill ? '<i class="ph-bold ph-arrow-up-right text-indigo-600 text-[10px]"></i>' : ''}`;
                         els.percentageContainer.appendChild(div);
                     });
                 }
@@ -2742,8 +3445,24 @@
                 const slide = getActiveSlide(); if (!slide || !els.exportTarget || !els.canvasWrapper) return;
                 if (!isPresenting) { els.exportTarget.style.transform = `scale(${slide.chartScale / 100})`; els.exportTarget.style.width = slide.chartWidth + '%'; els.exportTarget.style.height = slide.chartHeight + 'px'; }
                 els.exportTarget.style.backgroundColor = hexToRgba(slide.bgColor || '#f8fafc', slide.bgOpacity || 0); els.canvasWrapper.style.backgroundColor = 'transparent';
-                if (slide.chartTitle || slide.chartSubtitle) { els.globalHeader.style.display = 'flex'; els.globalTitle.innerText = slide.chartTitle || ''; els.globalTitle.style.display = slide.chartTitle ? 'block' : 'none'; els.globalSubtitle.innerText = slide.chartSubtitle || ''; els.globalSubtitle.style.display = slide.chartSubtitle ? 'block' : 'none'; } else { els.globalHeader.style.display = 'none'; }
-                if (slide.watermarkText) { els.globalWatermark.innerText = slide.watermarkText; els.globalWatermark.style.display = 'block'; } else { els.globalWatermark.style.display = 'none'; }
+                let titleActive = (slide.showMainTitle !== false) && slide.chartTitle;
+                let subtitleActive = (slide.showSubtitle !== false) && slide.chartSubtitle;
+                if (titleActive || subtitleActive) { 
+                    els.globalHeader.style.display = 'flex'; 
+                    els.globalTitle.innerText = slide.chartTitle || ''; 
+                    els.globalTitle.style.display = titleActive ? 'block' : 'none'; 
+                    els.globalSubtitle.innerText = slide.chartSubtitle || ''; 
+                    els.globalSubtitle.style.display = subtitleActive ? 'block' : 'none'; 
+                } else { 
+                    els.globalHeader.style.display = 'none'; 
+                }
+                let watermarkActive = (slide.showWatermark !== false) && slide.watermarkText;
+                if (watermarkActive) { 
+                    els.globalWatermark.innerText = slide.watermarkText; 
+                    els.globalWatermark.style.display = 'block'; 
+                } else { 
+                    els.globalWatermark.style.display = 'none'; 
+                }
 
                 let numCharts = slide.bentoLayout === '1' ? 1 : (slide.bentoLayout.startsWith('2') ? 2 : 3); let preparedConfigs = [];
                 for (let i = 0; i < numCharts; i++) { let cType = slide.bentoCharts[i] || 'bar-vertical'; if (cType !== 'table') { preparedConfigs.push(await prepareChartConfig(cType, i, slide)); } else { preparedConfigs.push({ isTable: true, index: i }); } }
@@ -2769,7 +3488,7 @@
                             const rowClickAttr = hasDrill ? `onclick="drillDownTo('${r.drillTarget}')" class="hover:bg-indigo-50/80 cursor-pointer transition group"` : `class="hover:bg-white/80 transition"`;
                             const drillBadge = hasDrill ? `<span class="ml-auto text-[9px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold group-hover:bg-indigo-600 group-hover:text-white transition">🔍 Detail</span>` : '';
                             tableHTML += `<tr ${rowClickAttr}><td class="${tablePad} font-bold text-slate-800 flex items-center gap-2"><span>${r.icon}</span> <span>${r.label}</span> ${drillBadge}</td>`;
-                            ds.series.forEach((s, sIdx) => { let v = r.values[sIdx]; let valText = v && v.val !== null ? v.val : '-'; if (slide.bentoCharts[i] === 'waterfall' || slide.bentoCharts[i] === 'gantt' || slide.bentoCharts[i] === 'tape') valText = (v && v.val !== null ? v.val : '-') + ' - ' + (v && v.val2 !== null ? v.val2 : '-'); tableHTML += `<td class="${tablePad} font-medium" style="color: ${v ? v.color : '#000'}">${valText}</td>`; }); tableHTML += `</tr>`;
+                            ds.series.forEach((s, sIdx) => { let v = r.values[sIdx]; let effVal = v ? getEffectiveValue(v.val, r.id, sIdx) : null; let valText = effVal !== null ? Math.round(effVal).toLocaleString('id-ID') : '-'; if (slide.bentoCharts[i] === 'waterfall' || slide.bentoCharts[i] === 'gantt' || slide.bentoCharts[i] === 'tape') valText = (effVal !== null ? Math.round(effVal) : '-') + ' - ' + (v && v.val2 !== null ? v.val2 : '-'); tableHTML += `<td class="${tablePad} font-mono-tech font-bold" style="color: ${v ? v.color : '#000'}">${valText}</td>`; }); tableHTML += `</tr>`;
                         }); tableHTML += `</tbody></table>`;
                         tableWrapper.innerHTML = tableHTML; card.appendChild(tableWrapper); mainCharts.push({ resize: () => { } });
                     } else {
@@ -2781,13 +3500,328 @@
                     els.bentoWrapper.appendChild(card);
                 }
                 renderNotes();
+                applyChartPanTransform();
                 renderCalloutsOverlay();
                 setTimeout(() => renderCalloutsOverlay(), 150);
                 setTimeout(() => renderCalloutsOverlay(), 550);
                 renderPercentageWidgets();
                 saveState();
+
+                // Odometer sweep trigger
+                startDefaultOdometerSweep();
             } catch (err) { console.error("Rendering Failed:", err); }
         }
+
+        /* =========================================
+           PRESENTER & DATA SCIENCE EXTENSIONS
+           ========================================= */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSfx(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'ping') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(880, now);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.3);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'laser') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            }
+        }
+
+        // Odometer Logic
+        function startDefaultOdometerSweep() {
+            window.__raceProgress = 0;
+            let start = null;
+            const duration = 1200;
+            function step(timestamp) {
+                if (!start) start = timestamp;
+                const progress = timestamp - start;
+                let t = Math.min(progress / duration, 1);
+                const easeOutQuart = 1 - Math.pow(1 - t, 4);
+                window.__raceProgress = easeOutQuart;
+                if (mainCharts && mainCharts.length > 0) {
+                    mainCharts.forEach(c => {
+                        if (c && typeof c.update === 'function') c.update('none');
+                    });
+                }
+                if (t < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        // Laser & Ping Logic
+        let isLaserMode = false;
+        const laserDot = document.getElementById('laserPointerDot');
+        const presenterDock = document.getElementById('presenterQuickDock');
+
+        function toggleLaserMode() {
+            isLaserMode = !isLaserMode;
+            if (isLaserMode) {
+                document.body.style.cursor = 'none';
+                laserDot.style.display = 'block';
+                document.getElementById('btnLaserMode').classList.add('bg-red-500', 'text-white');
+                document.getElementById('btnLaserMode').classList.remove('text-slate-400');
+            } else {
+                document.body.style.cursor = 'default';
+                laserDot.style.display = 'none';
+                document.getElementById('btnLaserMode').classList.remove('bg-red-500', 'text-white');
+                document.getElementById('btnLaserMode').classList.add('text-slate-400');
+            }
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (isLaserMode) {
+                laserDot.style.left = e.clientX + 'px';
+                laserDot.style.top = e.clientY + 'px';
+            }
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (isLaserMode && e.button === 0) { // Left click
+                laserDot.classList.add('active');
+                playSfx('laser');
+            }
+            if (isPresenting && e.button === 2) { // Right click tactical ping
+                e.preventDefault();
+                playSfx('ping');
+                const ping = document.createElement('div');
+                ping.className = 'tactical-ping';
+                ping.style.left = e.clientX + 'px';
+                ping.style.top = e.clientY + 'px';
+                document.body.appendChild(ping);
+                setTimeout(() => ping.remove(), 800);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isLaserMode) laserDot.classList.remove('active');
+        });
+
+        document.addEventListener('contextmenu', (e) => {
+            if (isPresenting) e.preventDefault();
+        });
+
+        // Presenter Mode Overrides (Refactored to native UI functions)
+        if (document.getElementById('btnExitPresent')) {
+            document.getElementById('btnExitPresent').onclick = () => {
+                if (document.fullscreenElement) document.exitFullscreen();
+            };
+        }
+        if (document.getElementById('btnLaserMode')) {
+            document.getElementById('btnLaserMode').onclick = (e) => {
+                e.stopPropagation();
+                toggleLaserMode();
+            };
+        }
+
+        let panStartX = 0, panStartY = 0;
+        let isPanningCanvas = false;
+        let isDraggingElement = false;
+        let draggedElementInfo = null;
+        let isSpaceDown = false;
+        
+        function applyChartPanTransform() {
+            const slide = getActiveSlide();
+            if(!slide) return;
+            slide.chartPanX = slide.chartPanX || 0;
+            slide.chartPanY = slide.chartPanY || 0;
+            
+            if(els.bentoWrapper) {
+                els.bentoWrapper.style.transform = `translate(${slide.chartPanX}px, ${slide.chartPanY}px)`;
+            }
+            const btnPanReset = document.getElementById('btnResetChartPan');
+            if(btnPanReset) {
+                if(slide.chartPanX !== 0 || slide.chartPanY !== 0) {
+                    btnPanReset.classList.replace('hidden', 'flex');
+                } else {
+                    btnPanReset.classList.replace('flex', 'hidden');
+                }
+            }
+        }
+
+        function resetChartPanPosition() {
+            const slide = getActiveSlide();
+            if(slide) {
+                slide.chartPanX = 0;
+                slide.chartPanY = 0;
+                applyChartPanTransform();
+                saveState();
+            }
+        }
+
+        function updateChartOffsets(chartId) {
+            const slide = getActiveSlide();
+            const chart = mainCharts[chartId];
+            if(!slide || !chart) return;
+            const cType = slide.bentoCharts[chartId] || 'bar-vertical';
+            const ds = slide.dataSets[chartId] || slide.dataSets[0];
+            
+            if(cType === 'concentric') {
+                ds.series.forEach((s, sIdx) => {
+                    if(chart.data.datasets[sIdx]) {
+                        chart.data.datasets[sIdx].offset = ds.rows.map(r => (r.values[sIdx]?.offset || 0) * 0.35);
+                    }
+                });
+            } else if(cType === 'windrose') {
+                let totalSeries = ds.series.length;
+                for (let sIdx = totalSeries - 1; sIdx >= 0; sIdx--) {
+                    let dIdx = totalSeries - 1 - sIdx;
+                    if(chart.data.datasets[dIdx]) {
+                        chart.data.datasets[dIdx].offset = ds.rows.map(r => (r.values[sIdx]?.offset || 0) * 0.5);
+                    }
+                }
+            } else {
+                if(chart.data.datasets[0]) {
+                    chart.data.datasets[0].offset = ds.rows.map(r => (r.values[0]?.offset || 0) * 0.5);
+                }
+            }
+            
+            let maxExplodeOffset = 0;
+            ds.rows.forEach(r => r.values.forEach(v => { if((v?.offset || 0) > maxExplodeOffset) maxExplodeOffset = v.offset; }));
+            let extraPad = Math.round(maxExplodeOffset * 0.45);
+            chart.options.layout.padding = (slide.bentoLayout === '1' ? 10 : 20) + extraPad;
+            
+            chart.update('none');
+        }
+
+        window.addEventListener('keydown', e => { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') isSpaceDown = true; });
+        window.addEventListener('keyup', e => { if (e.code === 'Space') isSpaceDown = false; });
+
+        document.addEventListener('mousedown', (e) => {
+            const wrap = document.getElementById('bentoWrapper');
+            if(!wrap || !wrap.contains(e.target)) return;
+            const isClickable = e.target.closest('button') || e.target.closest('input') || e.target.closest('.draggable-note') || e.target.closest('.callout-box');
+            if(isClickable) return;
+            
+            const isCanvas = e.target.tagName === 'CANVAS';
+            let isEmptySpace = !isCanvas;
+            
+            if(isCanvas) {
+                const chartId = e.target.dataset.blockIndex;
+                const chart = mainCharts[chartId];
+                if(chart) {
+                    const elements = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                    if(elements.length === 0) {
+                        isEmptySpace = true;
+                    } else if (!isSpaceDown && !e.shiftKey && e.button === 0) {
+                        const el = elements[0];
+                        const meta = chart.getDatasetMeta(el.datasetIndex);
+                        const arc = meta.data[el.index];
+                        if(arc && arc.x !== undefined && arc.y !== undefined && (chart.config.type === 'doughnut' || chart.config.type === 'pie' || chart.config.type === 'polarArea')) {
+                            const rect = e.target.getBoundingClientRect();
+                            const mouseX = e.clientX - rect.left;
+                            const mouseY = e.clientY - rect.top;
+                            const startDist = Math.hypot(mouseX - arc.x, mouseY - arc.y);
+                            
+                            const slide = getActiveSlide();
+                            let cType = slide.bentoCharts[chartId] || 'bar-vertical';
+                            let ds = slide.dataSets[chartId] || slide.dataSets[0];
+                            let sIdx = 0;
+                            if (cType === 'concentric') sIdx = el.datasetIndex;
+                            else if (cType === 'windrose') sIdx = ds.series.length - 1 - el.datasetIndex;
+                            else sIdx = 0;
+                            
+                            let rIdx = el.index;
+                            
+                            draggedElementInfo = {
+                                chartId, slide, ds, rIdx, sIdx, startDist, 
+                                startOffset: (ds.rows[rIdx].values[sIdx].offset || 0),
+                                arcX: arc.x, arcY: arc.y, rect
+                            };
+                            isDraggingElement = true;
+                            document.body.style.cursor = 'row-resize';
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if(e.button === 1 || e.shiftKey || isSpaceDown) {
+                isPanningCanvas = true;
+                panStartX = e.clientX;
+                panStartY = e.clientY;
+                const slide = getActiveSlide();
+                if(slide) {
+                    slide.chartPanX = slide.chartPanX || 0;
+                    slide.chartPanY = slide.chartPanY || 0;
+                }
+                document.body.style.cursor = 'grabbing';
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if(isDraggingElement && draggedElementInfo) {
+                const info = draggedElementInfo;
+                const mouseX = e.clientX - info.rect.left;
+                const mouseY = e.clientY - info.rect.top;
+                const currentDist = Math.hypot(mouseX - info.arcX, mouseY - info.arcY);
+                const diff = currentDist - info.startDist;
+                
+                let newOffset = Math.max(0, Math.min(200, info.startOffset + diff * 1.5));
+                info.ds.rows[info.rIdx].values[info.sIdx].offset = newOffset;
+                updateChartOffsets(info.chartId);
+                return;
+            }
+            if(!isPanningCanvas) return;
+            const slide = getActiveSlide();
+            if(!slide) return;
+            const dx = e.clientX - panStartX;
+            const dy = e.clientY - panStartY;
+            slide.chartPanX += dx;
+            slide.chartPanY += dy;
+            panStartX = e.clientX;
+            panStartY = e.clientY;
+            applyChartPanTransform();
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if(isDraggingElement) {
+                isDraggingElement = false;
+                draggedElementInfo = null;
+                document.body.style.cursor = 'default';
+                saveState();
+                renderDataInputs();
+            }
+            if(isPanningCanvas) {
+                isPanningCanvas = false;
+                document.body.style.cursor = 'default';
+                saveState();
+            }
+        });
+
+        // Global Keybindings
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.ctrlKey && e.key.toLowerCase() === 'z') {
+                if (e.shiftKey) redoHistory();
+                else undoHistory();
+                e.preventDefault();
+                return;
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+                redoHistory();
+                e.preventDefault();
+                return;
+            }
+            if (e.key.toLowerCase() === 'l' && isPresenting) {
+                toggleLaserMode();
+            }
+            if (e.key === 'Escape' && isPresenting) {
+                if (document.fullscreenElement) document.exitFullscreen();
+            }
+        });
 
         window.addEventListener('DOMContentLoaded', () => { loadState(); applySidebarState(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); translatePage(); populateIcons(); });
     </script>
