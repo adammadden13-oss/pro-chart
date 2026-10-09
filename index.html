@@ -272,9 +272,10 @@
             resize: both;
         }
         
-        .draggable-note img {
+        .draggable-note img, .draggable-note video {
             max-width: 100%;
-            height: auto;
+            max-height: 250px;
+            object-fit: contain;
             border-radius: 4px;
             display: inline-block;
         }
@@ -707,24 +708,8 @@
             <span id="activeSlideNameDisplay" class="text-xs font-black text-slate-900">Slide 1</span>
         </div>
 
-        <div id="dataTargetSelectorPanel"
-            class="bg-slate-900 px-5 py-3 border-b border-slate-800 flex flex-col gap-2 shrink-0 transition-all duration-300 hidden">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><i
-                    class="ph-bold ph-target"></i> <span data-i18n="editTarget">Target Edit Data:</span></span>
-            <div class="flex bg-slate-800 rounded-lg p-1 gap-1" id="gridTabContainer">
-                <button onclick="setActiveEditGrid(0)" id="tabGrid0"
-                    class="flex-1 py-1.5 text-[10px] font-bold rounded-md bg-[#cafc03] text-slate-900 transition">Grid 1
-                    (Utama)</button>
-                <button onclick="setActiveEditGrid(1)" id="tabGrid1"
-                    class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-slate-400 hover:text-white transition hidden">Grid
-                    2</button>
-                <button onclick="setActiveEditGrid(2)" id="tabGrid2"
-                    class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-slate-400 hover:text-white transition hidden">Grid
-                    3</button>
-            </div>
-        </div>
 
-        <div id="settingsScrollArea" class="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 pb-32 relative custom-scrollbar"
+        <div id="settingsScrollArea" class="flex-1 min-h-0 overflow-y-auto p-4 md:p-5 space-y-4 pb-32 relative custom-scrollbar"
             onscroll="handleSidebarScroll(this)">
 
             <!-- 1. JUDUL & BRANDING -->
@@ -823,22 +808,29 @@
                             data-i18n="noteSelected">TEKS CATATAN TERPILIH</label>
                         <!-- NEW RICH TEXT TOOLBAR -->
                         <div id="noteRichToolbar" class="flex flex-wrap items-center gap-1 mb-1.5 p-1 bg-white border border-slate-200 rounded-lg shadow-sm transition">
-                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('bold', false, null)" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center font-bold" title="Bold"><i class="ph-bold ph-text-b"></i></button>
-                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('italic', false, null)" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center font-italic" title="Italic"><i class="ph-bold ph-text-italic"></i></button>
-                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('underline', false, null)" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center underline" title="Underline"><i class="ph-bold ph-text-underline"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('bold', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" data-command="bold" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center font-bold" title="Bold (Ctrl+B)"><i class="ph-bold ph-text-b"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('italic', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" data-command="italic" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center font-italic" title="Italic (Ctrl+I)"><i class="ph-bold ph-text-italic"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('underline', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" data-command="underline" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center underline" title="Underline (Ctrl+U)"><i class="ph-bold ph-text-underline"></i></button>
                             <div class="w-px h-5 bg-slate-200 mx-1"></div>
-                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('justifyLeft', false, null)" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Left"><i class="ph-bold ph-text-align-left"></i></button>
-                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('justifyCenter', false, null)" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Center"><i class="ph-bold ph-text-align-center"></i></button>
-                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('justifyRight', false, null)" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Right"><i class="ph-bold ph-text-align-right"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('justifyLeft', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" data-command="justifyLeft" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Left"><i class="ph-bold ph-text-align-left"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('justifyCenter', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" data-command="justifyCenter" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Center"><i class="ph-bold ph-text-align-center"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('justifyRight', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" data-command="justifyRight" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Right"><i class="ph-bold ph-text-align-right"></i></button>
                             <div class="w-px h-5 bg-slate-200 mx-1"></div>
                             <div class="relative flex items-center justify-center w-7 h-7 rounded hover:bg-slate-100 overflow-hidden cursor-pointer" title="Text Color" onmousedown="event.preventDefault();">
                                 <i class="ph-fill ph-palette text-slate-700 pointer-events-none"></i>
-                                <input type="color" onchange="document.execCommand('foreColor', false, this.value)" class="absolute inset-0 w-[200%] h-[200%] -top-2 -left-2 opacity-0 cursor-pointer">
+                                <input type="color" onchange="document.execCommand('foreColor', false, this.value); window.syncActiveNoteText();" class="absolute inset-0 w-[200%] h-[200%] -top-2 -left-2 opacity-0 cursor-pointer">
                             </div>
                             <div class="w-px h-5 bg-slate-200 mx-1"></div>
-                            <button onmousedown="event.preventDefault();" onclick="let url=prompt('Masukkan URL Link:', 'https://'); if(url) document.execCommand('createLink', false, url);" class="w-7 h-7 rounded hover:bg-slate-100 text-indigo-500 flex items-center justify-center" title="Insert Link"><i class="ph-bold ph-link"></i></button>
-                            <input type="file" id="noteImageInput" accept="image/*" style="display:none" onchange="const f=this.files[0]; if(f){ const r=new FileReader(); r.onload=e=>document.execCommand('insertImage', false, e.target.result); r.readAsDataURL(f); this.value=''; }">
+                            <button onmousedown="event.preventDefault();" onclick="let url=prompt('Masukkan URL Link:', 'https://'); if(url) { document.execCommand('createLink', false, url); window.syncActiveNoteText(); }" class="w-7 h-7 rounded hover:bg-slate-100 text-indigo-500 flex items-center justify-center" title="Insert Link"><i class="ph-bold ph-link"></i></button>
+                            <input type="file" id="noteImageInput" accept="image/*" style="display:none" onchange="const f=this.files[0]; if(f){ const r=new FileReader(); r.onload=ev=>{ const img=new Image(); img.onload=()=>{ const canvas=document.createElement('canvas'); let w=img.width, h=img.height; const MAX=800; if(w>MAX||h>MAX){ if(w>h){h*=MAX/w;w=MAX;}else{w*=MAX/h;h=MAX;} } canvas.width=w; canvas.height=h; canvas.getContext('2d').drawImage(img,0,0,w,h); document.execCommand('insertHTML', false, `<img src='${canvas.toDataURL('image/jpeg', 0.5)}' style='max-width:100%; border-radius: 4px;'>`); const slide = getActiveSlide(); const note = slide?.notes?.find(n => n.id === activeNoteId); if(note){window.syncActiveNoteText();} }; img.src=ev.target.result; }; r.readAsDataURL(f); this.value=''; }">
                             <button onmousedown="event.preventDefault();" onclick="document.getElementById('noteImageInput').click()" class="w-7 h-7 rounded hover:bg-slate-100 text-indigo-500 flex items-center justify-center" title="Insert Image"><i class="ph-bold ph-image"></i></button>
+                            <div class="w-px h-5 bg-slate-200 mx-1"></div>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('insertUnorderedList', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Bullet List"><i class="ph-bold ph-list-bullets"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="document.execCommand('insertOrderedList', false, null); updateNoteToolbarState(); window.syncActiveNoteText();" class="note-fmt-btn w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Numbered List"><i class="ph-bold ph-list-numbers"></i></button>
+                            <div class="w-px h-5 bg-slate-200 mx-1"></div>
+                            <button onmousedown="event.preventDefault();" onclick="updateActiveNoteProp('valign', 'flex-start')" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Top"><i class="ph-bold ph-align-top"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="updateActiveNoteProp('valign', 'center')" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Middle"><i class="ph-bold ph-align-center-vertical"></i></button>
+                            <button onmousedown="event.preventDefault();" onclick="updateActiveNoteProp('valign', 'flex-end')" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-700 flex items-center justify-center" title="Align Bottom"><i class="ph-bold ph-align-bottom"></i></button>
                         </div>
                         <div id="noteTextInput" contenteditable="true"
                             class="w-full min-h-[60px] max-h-[120px] overflow-y-auto bg-[#f8fafc] border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium text-slate-600 focus:ring-2 focus:ring-[#cafc03] outline-none shadow-sm custom-scrollbar transition"
@@ -1014,6 +1006,22 @@
                 </button>
                 <div id="accInput"
                     class="accordion-content px-4 md:px-5 pb-4 md:pb-5 space-y-4 pt-2 border-t border-slate-100">
+                    <div id="dataTargetSelectorPanel"
+                        class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col gap-2 transition-all duration-300 hidden mb-2">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><i
+                                class="ph-bold ph-target"></i> <span data-i18n="editTarget">Target Edit Data:</span></span>
+                        <div class="flex bg-slate-800 rounded-lg p-1 gap-1" id="gridTabContainer">
+                            <button onclick="setActiveEditGrid(0)" id="tabGrid0"
+                                class="flex-1 py-1.5 text-[10px] font-bold rounded-md bg-[#cafc03] text-slate-900 transition">Grid 1
+                                (Utama)</button>
+                            <button onclick="setActiveEditGrid(1)" id="tabGrid1"
+                                class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-slate-400 hover:text-white transition hidden">Grid
+                                2</button>
+                            <button onclick="setActiveEditGrid(2)" id="tabGrid2"
+                                class="flex-1 py-1.5 text-[10px] font-bold rounded-md text-slate-400 hover:text-white transition hidden">Grid
+                                3</button>
+                        </div>
+                    </div>
                     <div class="flex justify-end gap-2 mb-4">
                         <button onclick="clearAllIcons()"
                             class="bg-slate-100 text-slate-600 hover:bg-slate-200 text-[9px] font-bold px-3 py-2 rounded-xl flex items-center justify-center gap-1 border border-slate-200 transition shadow-sm"
@@ -1047,7 +1055,7 @@
                                     class="ph ph-plus"></i></button>
                         </div>
                     </div>
-                    <div id="dataRowsContainer" class="space-y-4"></div>
+                    <div id="dataRowsContainer" class="space-y-4 max-h-[450px] overflow-y-auto custom-scrollbar pr-2 pb-2"></div>
                 </div>
             </div>
 
@@ -1282,6 +1290,30 @@
                             data-i18n="showLegend">Tampilkan Legenda</label><label
                             class="relative inline-flex items-center cursor-pointer"><input type="checkbox"
                                 id="toggleLegend" class="sr-only peer" checked>
+                            <div
+                                class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                            </div>
+                        </label></div>
+                    <div class="flex items-center justify-between"><label class="text-[11px] font-bold text-slate-700"
+                            data-i18n="showTrendline">Tampilkan Trendline</label><label
+                            class="relative inline-flex items-center cursor-pointer"><input type="checkbox"
+                                id="toggleTrendline" class="sr-only peer">
+                            <div
+                                class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                            </div>
+                        </label></div>
+                    <div class="flex items-center justify-between"><label class="text-[11px] font-bold text-slate-700"
+                            data-i18n="showOutliers">Deteksi Anomali</label><label
+                            class="relative inline-flex items-center cursor-pointer"><input type="checkbox"
+                                id="toggleOutliers" class="sr-only peer">
+                            <div
+                                class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
+                            </div>
+                        </label></div>
+                    <div class="flex items-center justify-between"><label class="text-[11px] font-bold text-slate-700"
+                            data-i18n="showCrossFilter">Interactive Slicer</label><label
+                            class="relative inline-flex items-center cursor-pointer"><input type="checkbox"
+                                id="toggleCrossFilter" class="sr-only peer">
                             <div
                                 class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
                             </div>
@@ -1743,7 +1775,7 @@
                     class="w-full bg-slate-900 hover:bg-slate-800 text-[#cafc03] py-2.5 rounded-xl text-[10px] font-bold uppercase transition shadow-md"
                     data-i18n="addSlide">+ Tambah Slide Baru</button>
             </div>
-            <div class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scrollbar" id="slideListContainer"></div>
+            <div class="flex-1 min-h-0 overflow-y-auto p-3 space-y-2.5 custom-scrollbar" id="slideListContainer"></div>
         </div>
     </div>
 
@@ -1776,6 +1808,11 @@
                 title="Zoom In (Ctrl + +)">
                 <i class="ph-bold ph-plus text-lg"></i>
             </button>
+            <button id="btnResetPresentView"
+                class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                title="Reset View (Zoom & Pan)">
+                <i class="ph-bold ph-arrows-in-cardinal text-lg"></i>
+            </button>
             <div class="h-6 w-px bg-slate-700 mx-1"></div>
             <button id="btnDeviceMode"
                 class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition"
@@ -1797,7 +1834,7 @@
     </div>
 
     <script>
-        const chartTypeOptionsHTML = `<optgroup label="Standar & Fundamental" data-i18n-opt="Standard & Fundamental"><option value="bar-vertical">Bar Vertical (Batang)</option><option value="bar-horizontal">Bar Horizontal (Mendatar)</option><option value="line">Line Chart (Garis Tren)</option><option value="area">Area Soundwave</option><option value="pie">Pie Chart (Kue)</option><option value="doughnut">Donut Chart</option></optgroup><optgroup label="Analisis Spesial" data-i18n-opt="Special Analysis"><option value="polarArea">Polar Area (Radar Melingkar)</option><option value="radar">Radar Chart (Jaring Laba)</option><option value="waterfall">Waterfall Chart (Air Terjun)</option><option value="scatter">Scatter Plot (Sebaran)</option><option value="bubble">Bubble Chart (Gelembung)</option><option value="gantt">Timeline / Gantt Chart</option><option value="table" class="font-bold text-indigo-600 bg-indigo-50">Tabel Data (Bento Grid)</option></optgroup><optgroup label="Eksotik & Lanjutan" data-i18n-opt="Exotic & Advanced"><option value="concentric">Concentric Diagram (Donut Berlapis)</option><option value="windrose">Windrose / Fan Chart</option><option value="tape">Tape Diagram (Pita Persentase)</option><option value="treemap">Tree Map (Peta Pohon Blok)</option><option value="wordCloud">Word Cloud (Awan Teks)</option><option value="choropleth-world">Peta Dunia (Geospasial)</option><option value="choropleth-indo">Peta Indonesia (Geospasial)</option></optgroup>`;
+        const chartTypeOptionsHTML = `<optgroup label="Standar & Fundamental" data-i18n-opt="Standard & Fundamental"><option value="bar-vertical">Bar Vertical (Batang)</option><option value="bar-horizontal">Bar Horizontal (Mendatar)</option><option value="line">Line Chart (Garis Tren)</option><option value="area">Area Soundwave</option><option value="pie">Pie Chart (Kue)</option><option value="doughnut">Donut Chart</option></optgroup><optgroup label="Analisis Spesial" data-i18n-opt="Special Analysis"><option value="polarArea">Polar Area (Radar Melingkar)</option><option value="radar">Radar Chart (Jaring Laba)</option><option value="waterfall">Waterfall Chart (Air Terjun)</option><option value="scatter">Scatter Plot (Sebaran)</option><option value="bubble">Bubble Chart (Gelembung)</option><option value="gantt">Timeline / Gantt Chart</option><option value="table" class="font-bold text-indigo-600 bg-indigo-50">Tabel Data (Bento Grid)</option></optgroup><optgroup label="Eksotik & Lanjutan" data-i18n-opt="Exotic & Advanced"><option value="concentric">Concentric Diagram (Donut Berlapis)</option><option value="windrose">Windrose / Fan Chart</option><option value="tape">Tape Diagram (Pita Persentase)</option><option value="treemap">Tree Map (Peta Pohon Blok)</option><option value="wordCloud">Word Cloud (Awan Teks)</option><option value="choropleth-world">Peta Dunia (Geospasial)</option><option value="choropleth-indo">Peta Indonesia (Geospasial)</option></optgroup><optgroup label="Media & Bebas" data-i18n-opt="Media & Freeform"><option value="none">None (Kosong / Media Preview)</option></optgroup>`;
 
         const translations = {
             id: {
@@ -2130,7 +2167,7 @@
         }
 
         const generateDefaultDataSet = (seed) => ({ series: [{ id: 's_main_' + seed, name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }], rows: [{ id: 'r_1_' + seed, label: 'Jawa Barat', icon: '📍', values: [{ val: 450, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_2_' + seed, label: 'DKI Jakarta', icon: '🏢', values: [{ val: 320, val2: 0, color: '#111827', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_3_' + seed, label: 'Sumatera Utara', icon: '🌴', values: [{ val: 150, val2: 0, color: '#94a3b8', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_4_' + seed, label: 'Kalimantan', icon: '🌲', values: [{ val: 80, val2: 0, color: '#e2e8f0', offset: 0, callout: false, calloutSub: '' }] }] });
-        const generateDefaultSlide = (index = 1) => ({ id: 'slide_' + Date.now() + '_' + index, chartTitle: `Slide ${index}`, chartTitleAlign: 'center', chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', chartSubtitleAlign: 'center', watermarkText: 'MNC CHANNELS', watermarkAlign: 'right', notes: [], explodedElements: {}, showDonutCenter: true, donutCenterLabel: 'Total Data:', valueUnit: 'unit', bentoLayout: '1', bentoCharts: ['bar-vertical', 'doughnut', 'table'], colorTheme: 'lime', stackMode: 'accumulate', chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, outlineWidth: 1, outlineColor: '#ffffff', borderRadius: 8, showLegend: true, datalabelPosition: 'center', bgType: 'solid', bgColor: '#f8fafc', bgColor2: '#e2e8f0', bgOpacity: 0, bentoBgColor: '#ffffff', bentoBgOpacity: 100, showGridX: false, showGridY: true, showAxisNumbers: true, showAxisCategories: true, axisFontSize: 12, dataSets: [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)] });
+        const generateDefaultSlide = (index = 1) => ({ id: 'slide_' + Date.now() + '_' + index, chartTitle: `Slide ${index}`, chartTitleAlign: 'center', chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', chartSubtitleAlign: 'center', watermarkText: 'MNC CHANNELS', watermarkAlign: 'right', notes: [], explodedElements: {}, showDonutCenter: true, donutCenterLabel: 'Total Data:', valueUnit: 'unit', bentoLayout: '1', bentoCharts: ['bar-vertical', 'doughnut', 'table'], colorTheme: 'lime', stackMode: 'accumulate', chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, outlineWidth: 1, outlineColor: '#ffffff', borderRadius: 8, showLegend: true, showTrendline: false, showOutliers: false, showCrossFilter: false, datalabelPosition: 'center', bgType: 'solid', bgColor: '#f8fafc', bgColor2: '#e2e8f0', bgOpacity: 0, bentoBgColor: '#ffffff', bentoBgOpacity: 100, showGridX: false, showGridY: true, showAxisNumbers: true, showAxisCategories: true, axisFontSize: 12, dataSets: [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)] });
         let appSlides = [generateDefaultSlide(1)]; let activeSlideIndex = 0;
 
         const els = {
@@ -2139,7 +2176,7 @@
             noteTextInput: document.getElementById('noteTextInput'), noteColor: document.getElementById('noteColor'), noteColorText: document.getElementById('noteColorText'), noteBgColor: document.getElementById('noteBgColor'), noteBorderColor: document.getElementById('noteBorderColor'), btnClearNoteBg: document.getElementById('btnClearNoteBg'), btnNoteBorderClear: document.getElementById('btnNoteBorderClear'), noteBorderStyleSelect: document.getElementById('noteBorderStyleSelect'), noteRadiusSlider: document.getElementById('noteRadiusSlider'), noteRadiusDisplay: document.getElementById('noteRadiusDisplay'), noteSizeSlider: document.getElementById('noteSizeSlider'), noteSizeDisplay: document.getElementById('noteSizeDisplay'), noteBgOpacitySlider: document.getElementById('noteBgOpacitySlider'), noteBgOpacityDisplay: document.getElementById('noteBgOpacityDisplay'), btnAddNote: document.getElementById('btnAddNote'), btnDeleteNote: document.getElementById('btnDeleteNote'), btnInsertNoteIcon: document.getElementById('btnInsertNoteIcon'), notesContainer: document.getElementById('notesContainer'),
             bentoLayout: document.getElementById('bentoLayout'), bentoChart1: document.getElementById('bentoChart1'), bentoChart2: document.getElementById('bentoChart2'), bentoChart3: document.getElementById('bentoChart3'), bentoGrid2Container: document.getElementById('bentoGrid2Container'), bentoGrid3Container: document.getElementById('bentoGrid3Container'), colorTheme: document.getElementById('colorTheme'), stackMode: document.getElementById('stackMode'), stackModeContainer: document.getElementById('stackModeContainer'), seriesContainer: document.getElementById('seriesContainer'), btnAddOverlay: document.getElementById('btnAddOverlay'), overlayEnginePanel: document.getElementById('overlayEnginePanel'), dataRowsContainer: document.getElementById('dataRowsContainer'), btnAddRow: document.getElementById('btnAddRow'), btnRemoveRow: document.getElementById('btnRemoveRow'), rowCountDisplay: document.getElementById('rowCountDisplay'),
             chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), donutCutoutContainer: document.getElementById('donutCutoutContainer'), elementShadowSlider: document.getElementById('elementShadowSlider'), elementShadowDisplay: document.getElementById('elementShadowDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), outlineWidthSlider: document.getElementById('outlineWidthSlider'), outlineWidthDisplay: document.getElementById('outlineWidthDisplay'), outlineColor: document.getElementById('outlineColor'), outlineColorText: document.getElementById('outlineColorText'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'),
-            toggleLegend: document.getElementById('toggleLegend'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'), toggleAxisNumbers: document.getElementById('toggleAxisNumbers'), toggleAxisCategories: document.getElementById('toggleAxisCategories'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
+            toggleLegend: document.getElementById('toggleLegend'), toggleTrendline: document.getElementById('toggleTrendline'), toggleOutliers: document.getElementById('toggleOutliers'), toggleCrossFilter: document.getElementById('toggleCrossFilter'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'), toggleAxisNumbers: document.getElementById('toggleAxisNumbers'), toggleAxisCategories: document.getElementById('toggleAxisCategories'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
             bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), bentoBgColor: document.getElementById('bentoBgColor'), bentoBgColorText: document.getElementById('bentoBgColorText'), bentoBgOpacitySlider: document.getElementById('bentoBgOpacitySlider'), bentoBgOpacityDisplay: document.getElementById('bentoBgOpacityDisplay'), bentoBgControlPanel: document.getElementById('bentoBgControlPanel'), bentoOpacityWrapper: document.getElementById('bentoOpacityWrapper'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'),
             bgMediaInput: document.getElementById('bgMediaInput'), btnClearBgMedia: document.getElementById('btnClearBgMedia'), bgMediaImg: document.getElementById('bgMediaImg'), bgMediaVideo: document.getElementById('bgMediaVideo'),
             exportTarget: document.getElementById('exportTarget'), globalHeader: document.getElementById('globalChartHeader'), globalTitle: document.getElementById('globalChartTitle'), globalSubtitle: document.getElementById('globalChartSubtitle'), globalWatermark: document.getElementById('globalWatermark'), canvasWrapper: document.getElementById('canvasWrapper'), bentoWrapper: document.getElementById('bentoWrapper'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), btnFullscreen: document.getElementById('btnFullscreen'), leftPanel: document.getElementById('leftPanel'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), btnCloseMobile: document.getElementById('btnCloseMobile'), burgerIcon: document.getElementById('burgerIcon'), rightLayerPanel: document.getElementById('rightLayerPanel'), slideListContainer: document.getElementById('slideListContainer'), btnAddSlide: document.getElementById('btnAddSlide'), btnToggleRightPanel: document.getElementById('btnToggleRightPanel'), btnCloseRightPanel: document.getElementById('btnCloseRightPanel'), rightPanelDragHandle: document.getElementById('rightLayerPanelHeader'), dataTargetSelectorPanel: document.getElementById('dataTargetSelectorPanel'), tabGrid0: document.getElementById('tabGrid0'), tabGrid1: document.getElementById('tabGrid1'), tabGrid2: document.getElementById('tabGrid2'), sidebarHeader: document.getElementById('sidebarHeader'), elementPopup: document.getElementById('elementPopup'), popupIcon: document.getElementById('popupIcon'), popupTitle: document.getElementById('popupTitle'), popupSubtitle: document.getElementById('popupSubtitle'), popupColorInput: document.getElementById('popupColorInput'), popupColorText: document.getElementById('popupColorText'), popupExplodeSlider: document.getElementById('popupExplodeSlider'), popupExplodeDisplay: document.getElementById('popupExplodeDisplay')
@@ -2191,19 +2228,36 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
 
         let isDraggingNote = false; let dragStartX = 0, dragStartY = 0; let noteStartX = 0, noteStartY = 0; let draggedNoteObj = null; let draggedNoteEl = null;
 
+        let noteResizeTimeout = null;
         const noteResizeObserver = new ResizeObserver(entries => {
+            let changed = false;
             for (let entry of entries) {
                 const noteEl = entry.target;
                 if (!noteEl.dataset.id) continue;
                 const slide = getActiveSlide();
                 const noteObj = slide?.notes?.find(n => n.id === noteEl.dataset.id);
-                if (noteObj && noteEl.style.width && noteEl.style.height) {
-                    noteObj.width = parseInt(noteEl.style.width);
-                    noteObj.height = parseInt(noteEl.style.height);
-                    if (activeNoteId === noteObj.id) {
-                        // Resizing handled visually; no sliders to update for width/height anymore
+                if (noteObj) {
+                    const w = noteEl.offsetWidth;
+                    const h = noteEl.offsetHeight;
+                    if (w > 0 && h > 0) {
+                        const newW = Math.round(w);
+                        const newH = Math.round(h);
+                        // Prevent infinite resize loops from sub-pixel rendering by allowing 2px margin of error
+                        if (Math.abs((noteObj.width || 0) - newW) > 2 || Math.abs((noteObj.height || 0) - newH) > 2) {
+                            noteObj.width = newW;
+                            noteObj.height = newH;
+                            noteEl.style.width = newW + 'px';
+                            noteEl.style.height = newH + 'px';
+                            changed = true;
+                        }
                     }
                 }
+            }
+            if (changed) {
+                clearTimeout(noteResizeTimeout);
+                noteResizeTimeout = setTimeout(() => {
+                    saveState();
+                }, 500);
             }
         });
 
@@ -2235,7 +2289,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             slide.notes.forEach(note => {
                 const div = document.createElement('div'); div.className = `draggable-note absolute whitespace-pre-wrap font-['Inter'] ${note.id === activeNoteId ? 'active-note' : ''}`; div.dataset.id = note.id; div.innerHTML = note.text; div.style.textAlign = note.align || 'center'; div.style.color = note.color || '#64748b'; div.style.fontSize = (note.size || 12) + 'px';
                 if (note.width > 0) { div.style.width = note.width + 'px'; div.style.whiteSpace = 'normal'; }
-                if (note.height > 0) { div.style.height = note.height + 'px'; div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.justifyContent = 'center'; }
+                if (note.height > 0) { div.style.height = note.height + 'px'; div.style.display = 'flex'; div.style.flexDirection = 'column'; div.style.justifyContent = note.valign || 'center'; }
 
                 let bgOp = note.bgOpacity !== undefined ? note.bgOpacity : 85;
                 if (note.bgColor === 'transparent' || !note.bgColor) { div.style.backgroundColor = 'transparent'; div.style.backdropFilter = 'none'; div.style.webkitBackdropFilter = 'none'; }
@@ -2255,13 +2309,13 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 }
                 div.style.borderRadius = note.shape !== undefined ? (note.shape.toString().includes('px') ? note.shape : note.shape + 'px') : '12px';
 
-                let posX = note.x !== undefined ? note.x : 50; let posY = note.y !== undefined ? note.y : 50; div.style.left = posX + '%'; div.style.top = posY + '%'; div.style.transform = `translate(-${posX}%, -${posY}%)`; els.notesContainer.appendChild(div);
+                let posX = note.x !== undefined ? note.x : 50; let posY = note.y !== undefined ? note.y : 50; div.style.left = posX + '%'; div.style.top = posY + '%'; div.style.transform = `translate(-${posX}%, -${posY}%)`; els.notesContainer.appendChild(div); noteResizeObserver.observe(div);
             });
         }
 
         function startNoteDrag(e) { 
             const noteEl = e.target.closest('.draggable-note'); 
-            if (!noteEl) return; 
+            if (!noteEl || noteEl.isContentEditable) return; 
             const rect = noteEl.getBoundingClientRect();
             const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
             const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
@@ -2270,16 +2324,191 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 document.querySelectorAll('.draggable-note').forEach(el => { if (el.dataset.id === activeNoteId) el.classList.add('active-note'); else el.classList.remove('active-note'); });
                 return;
             }
-            isDraggingNote = true; draggedNoteEl = noteEl; activeNoteId = noteEl.dataset.id; syncNoteController(); document.querySelectorAll('.draggable-note').forEach(el => { if (el.dataset.id === activeNoteId) el.classList.add('active-note'); else el.classList.remove('active-note'); }); const slide = getActiveSlide(); draggedNoteObj = slide.notes.find(n => n.id === activeNoteId); dragStartX = clientX; dragStartY = clientY; noteStartX = draggedNoteObj.x; noteStartY = draggedNoteObj.y; draggedNoteEl.classList.add('grabbing'); e.preventDefault(); 
+            isDraggingNote = true; draggedNoteEl = noteEl; activeNoteId = noteEl.dataset.id; syncNoteController(); document.querySelectorAll('.draggable-note').forEach(el => { if (el.dataset.id === activeNoteId) el.classList.add('active-note'); else el.classList.remove('active-note'); }); const slide = getActiveSlide(); draggedNoteObj = slide.notes.find(n => n.id === activeNoteId); dragStartX = clientX; dragStartY = clientY; noteStartX = draggedNoteObj.x; noteStartY = draggedNoteObj.y; draggedNoteEl.classList.add('grabbing'); 
         }
         function dragNoteMove(e) { if (!isDraggingNote || !draggedNoteObj || !draggedNoteEl) return; e.preventDefault(); let clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX; let clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY; let dx = clientX - dragStartX; let dy = clientY - dragStartY; let targetRect = els.exportTarget.getBoundingClientRect(); let newPosX = noteStartX + (dx / targetRect.width * 100); let newPosY = noteStartY + (dy / targetRect.height * 100); newPosX = Math.max(0, Math.min(100, newPosX)); newPosY = Math.max(0, Math.min(100, newPosY)); draggedNoteEl.style.left = newPosX + '%'; draggedNoteEl.style.top = newPosY + '%'; draggedNoteEl.style.transform = `translate(-${newPosX}%, -${newPosY}%)`; }
         function endNoteDrag() { if (!isDraggingNote || !draggedNoteObj || !draggedNoteEl) return; isDraggingNote = false; draggedNoteEl.classList.remove('grabbing'); let currentLeft = parseFloat(draggedNoteEl.style.left); let currentTop = parseFloat(draggedNoteEl.style.top); if (!isNaN(currentLeft)) draggedNoteObj.x = currentLeft; if (!isNaN(currentTop)) draggedNoteObj.y = currentTop; draggedNoteEl = null; draggedNoteObj = null; saveState(); }
 
-        if (els.notesContainer) { els.notesContainer.addEventListener('mousedown', startNoteDrag); els.notesContainer.addEventListener('touchstart', startNoteDrag, { passive: false }); }
+        if (els.notesContainer) { 
+            els.notesContainer.addEventListener('mousedown', startNoteDrag); 
+            els.notesContainer.addEventListener('touchstart', startNoteDrag, { passive: false }); 
+            els.notesContainer.addEventListener('dblclick', (e) => {
+                const noteEl = e.target.closest('.draggable-note');
+                if (noteEl) {
+                    activeNoteId = noteEl.dataset.id;
+                    document.querySelectorAll('.draggable-note').forEach(el => { if (el.dataset.id === activeNoteId) el.classList.add('active-note'); else el.classList.remove('active-note'); });
+                    populateNoteEditor();
+                    
+                    noteEl.contentEditable = 'true';
+                    noteEl.style.userSelect = 'text';
+                    noteEl.style.webkitUserSelect = 'text';
+                    noteEl.style.cursor = 'text';
+                    setTimeout(() => {
+                        noteEl.focus();
+                        const selection = window.getSelection();
+                        const range = document.createRange();
+                        range.selectNodeContents(noteEl);
+                        range.collapse(false);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }, 10);
+                    
+                    noteEl.oninput = () => {
+                        const slide = getActiveSlide();
+                        const noteObj = slide?.notes?.find(n => n.id === activeNoteId);
+                        if (noteObj) noteObj.text = noteEl.innerHTML;
+                        if (els.noteTextInput) els.noteTextInput.innerHTML = noteEl.innerHTML;
+                    };
+                    noteEl.onblur = () => {
+                        noteEl.contentEditable = 'false';
+                        noteEl.style.userSelect = 'none';
+                        noteEl.style.webkitUserSelect = 'none';
+                        noteEl.style.cursor = 'grab';
+                        saveState();
+                    };
+                    
+                    const accNotes = document.getElementById('accNotes');
+                    if (accNotes && accNotes.classList.contains('collapsed')) {
+                        toggleAccordion('accNotes', accNotes.previousElementSibling);
+                    }
+                }
+            });
+        }
         document.addEventListener('mousemove', dragNoteMove); document.addEventListener('touchmove', dragNoteMove, { passive: false }); document.addEventListener('mouseup', endNoteDrag); document.addEventListener('touchend', endNoteDrag);
 
         const updateActiveNoteProp = (prop, val) => { const slide = getActiveSlide(); const note = slide?.notes?.find(n => n.id === activeNoteId); if (note) { note[prop] = val; renderNotes(); saveState(); } };
-        if (els.noteTextInput) els.noteTextInput.addEventListener('input', (e) => updateActiveNoteProp('text', e.target.innerHTML));
+        window.syncActiveNoteText = () => {
+            const slide = getActiveSlide();
+            const note = slide?.notes?.find(n => n.id === activeNoteId);
+            if (!note) return;
+            const activeNoteEl = document.querySelector(`.draggable-note[data-id="${activeNoteId}"]`);
+            if (activeNoteEl && activeNoteEl.isContentEditable) {
+                note.text = activeNoteEl.innerHTML;
+                if (document.getElementById('noteTextInput')) document.getElementById('noteTextInput').innerHTML = note.text;
+            } else {
+                if (document.getElementById('noteTextInput')) note.text = document.getElementById('noteTextInput').innerHTML;
+                if (activeNoteEl) activeNoteEl.innerHTML = note.text;
+            }
+            saveState();
+        };
+        if (els.noteTextInput) {
+            els.noteTextInput.addEventListener('paste', (e) => {
+                const items = (e.clipboardData || window.clipboardData).items;
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const file = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width; let height = img.height;
+                                const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                                if (width > height) {
+                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                const compressed = canvas.toDataURL('image/jpeg', 0.7);
+                                document.execCommand('insertHTML', false, `<img src="${compressed}" style="max-width:100%; border-radius: 4px;">`);
+                                updateActiveNoteProp('text', els.noteTextInput.innerHTML);
+                            };
+                            img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        return;
+                    }
+                }
+            });
+            els.noteTextInput.addEventListener('drop', (e) => {
+                const items = e.dataTransfer.items;
+                if (!items) return;
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        e.preventDefault();
+                        const file = item.getAsFile();
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width; let height = img.height;
+                                const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                                if (width > height) {
+                                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                                } else {
+                                    if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                                }
+                                canvas.width = width; canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                const compressed = canvas.toDataURL('image/jpeg', 0.7);
+                                document.execCommand('insertHTML', false, `<img src="${compressed}" style="max-width:100%; border-radius: 4px;">`);
+                                updateActiveNoteProp('text', els.noteTextInput.innerHTML);
+                            };
+                            img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        return;
+                    }
+                }
+            });
+            els.noteTextInput.addEventListener('input', (e) => updateActiveNoteProp('text', e.target.innerHTML));
+            
+            window.updateNoteToolbarState = () => {
+                const commands = ['bold', 'italic', 'underline', 'justifyLeft', 'justifyCenter', 'justifyRight'];
+                commands.forEach(cmd => {
+                    const btn = document.querySelector(`.note-fmt-btn[data-command="${cmd}"]`);
+                    if(btn) {
+                        if(document.queryCommandState(cmd)) {
+                            btn.classList.add('bg-indigo-100', 'text-indigo-700');
+                            btn.classList.remove('text-slate-700', 'hover:bg-slate-100');
+                        } else {
+                            btn.classList.remove('bg-indigo-100', 'text-indigo-700');
+                            btn.classList.add('text-slate-700', 'hover:bg-slate-100');
+                        }
+                    }
+                });
+            };
+            
+            els.noteTextInput.addEventListener('keyup', window.updateNoteToolbarState);
+            els.noteTextInput.addEventListener('mouseup', window.updateNoteToolbarState);
+            els.noteTextInput.addEventListener('keydown', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    let cmd = null;
+                    if (e.key === 'b' || e.key === 'B') cmd = 'bold';
+                    else if (e.key === 'i' || e.key === 'I') cmd = 'italic';
+                    else if (e.key === 'u' || e.key === 'U') cmd = 'underline';
+                    
+                    if (cmd) {
+                        e.preventDefault();
+                        document.execCommand(cmd, false, null);
+                        window.updateNoteToolbarState();
+                        updateActiveNoteProp('text', els.noteTextInput.innerHTML);
+                    }
+                }
+            });
+            els.notesContainer.addEventListener('keydown', (e) => {
+                if (e.target.isContentEditable && (e.ctrlKey || e.metaKey)) {
+                    let cmd = null;
+                    if (e.key === 'b' || e.key === 'B') cmd = 'bold';
+                    else if (e.key === 'i' || e.key === 'I') cmd = 'italic';
+                    else if (e.key === 'u' || e.key === 'U') cmd = 'underline';
+                    
+                    if (cmd) {
+                        e.preventDefault();
+                        document.execCommand(cmd, false, null);
+                        window.updateNoteToolbarState();
+                    }
+                }
+            });
+        }
         if (els.noteColor) els.noteColor.addEventListener('input', (e) => { if (els.noteColorText) els.noteColorText.innerText = e.target.value; updateActiveNoteProp('color', e.target.value); });
         if (els.noteSizeSlider) els.noteSizeSlider.addEventListener('input', (e) => { if (els.noteSizeDisplay) els.noteSizeDisplay.innerText = e.target.value + 'px'; updateActiveNoteProp('size', parseInt(e.target.value)); });
         document.getElementById('noteBgColor')?.addEventListener('input', (e) => { updateActiveNoteProp('bgColor', e.target.value); });
@@ -2554,19 +2783,28 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
         document.addEventListener('fullscreenchange', handleFullscreenChange); document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
         function enterPresentationUI() {
-            isPresenting = true; document.body.classList.add('is-fullscreen'); activeEditGridIndex = 0;
-            presentZoomScale = 1;
             if (els.exportTarget) { 
+                const originalWidth = els.exportTarget.offsetWidth;
+                const originalHeight = els.exportTarget.offsetHeight;
                 els.exportTarget.dataset.originalStyle = els.exportTarget.getAttribute('style') || '';
-                els.exportTarget.style.transform = `scale(${presentZoomScale})`; 
-                els.exportTarget.style.width = '100vw'; 
-                els.exportTarget.style.height = '100vh';
-                els.exportTarget.style.maxWidth = '100vw';
-                els.exportTarget.style.maxHeight = '100vh';
+                els.exportTarget.style.setProperty('width', originalWidth + 'px', 'important');
+                els.exportTarget.style.setProperty('height', originalHeight + 'px', 'important');
+                els.exportTarget.style.maxWidth = 'none';
+                els.exportTarget.style.maxHeight = 'none';
                 els.exportTarget.style.aspectRatio = 'auto';
                 els.exportTarget.style.borderRadius = '0';
-                els.exportTarget.style.margin = '0';
+                els.exportTarget.style.margin = 'auto';
+                
+                const scaleX = window.innerWidth / originalWidth;
+                const scaleY = window.innerHeight / originalHeight;
+                presentZoomScale = Math.min(scaleX, scaleY);
+                els.exportTarget.style.transform = `scale(${presentZoomScale})`; 
+                els.exportTarget.style.transformOrigin = 'center center';
+            } else {
+                presentZoomScale = 1;
             }
+            isPresenting = true; document.body.classList.add('is-fullscreen'); activeEditGridIndex = 0;
+            
             if (isSidebarOpen) { isSidebarOpen = false; applySidebarState(); }
             if (isRightPanelOpen) { isRightPanelOpen = false; applyRightPanelState(); }
             if (activeSlideIndex !== 0) switchSlide(0); else { if (els.exportTarget) { els.exportTarget.classList.remove('chart-wrapper-transition'); void els.exportTarget.offsetWidth; els.exportTarget.classList.add('chart-wrapper-transition'); } syncUIToActiveSlide(); }
@@ -2578,6 +2816,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
         function exitPresentationUI() {
             if (!isPresenting) return; isPresenting = false; document.body.classList.remove('is-fullscreen'); document.body.classList.remove('portrait-mode'); const slide = getActiveSlide();
             presentZoomScale = 1;
+            resetChartPanPosition();
             if (els.exportTarget && slide) { 
                 if (els.exportTarget.dataset.originalStyle !== undefined) {
                     els.exportTarget.setAttribute('style', els.exportTarget.dataset.originalStyle);
@@ -2883,13 +3122,48 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 lastSavedSnapshot = currentSnapshot;
                 updateUndoRedoButtonsUI();
             }
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
-                projectName: currentProjectName, 
-                slides: appSlides, 
-                lang: globalLang,
-                activeSlideIndex: activeSlideIndex,
-                activeEditGridIndex: activeEditGridIndex
-            })); 
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
+                    projectName: currentProjectName, 
+                    slides: appSlides, 
+                    lang: globalLang,
+                    activeSlideIndex: activeSlideIndex,
+                    activeEditGridIndex: activeEditGridIndex
+                }));
+            } catch(e) {
+                console.error("Save State Error:", e);
+                if (e.name === 'QuotaExceededError' || (e.message && e.message.toLowerCase().includes('quota'))) {
+                    showToast("Penyimpanan penuh! Menghapus gambar besar otomatis...", true);
+                    appSlides.forEach(s => {
+                        if (s.bgMediaUrl && s.bgMediaUrl.length > 500000) s.bgMediaUrl = null;
+                        if (s.bentoMedia) {
+                            for(let k in s.bentoMedia) {
+                                if (s.bentoMedia[k] && s.bentoMedia[k].url && s.bentoMedia[k].url.length > 500000) s.bentoMedia[k] = null;
+                            }
+                        }
+                        if (s.notes) {
+                            s.notes.forEach(n => {
+                                if (n.text) {
+                                    n.text = n.text.replace(/<img[^>]+src="data:image\/[^"]{500000,}"[^>]*>/g, '<div style="color:red;font-size:10px;text-align:center;">[Gambar dihapus karena memori browser penuh]</div>');
+                                }
+                            });
+                        }
+                    });
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
+                            projectName: currentProjectName, 
+                            slides: appSlides, 
+                            lang: globalLang,
+                            activeSlideIndex: activeSlideIndex,
+                            activeEditGridIndex: activeEditGridIndex
+                        }));
+                        setTimeout(() => showToast("Memori berhasil dibersihkan. Silakan upload ulang media.", false), 2000);
+                        if(window.triggerVisUpdateWithDebounce) triggerVisUpdateWithDebounce();
+                    } catch(err) {
+                        showToast("Gagal mengosongkan memori. Hapus slide yang tidak diperlukan.", true);
+                    }
+                }
+            } 
         }
         function loadState() {
             try {
@@ -3038,7 +3312,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 if (els.colorTheme) els.colorTheme.value = slide.colorTheme; if (els.stackMode) els.stackMode.value = slide.stackMode || 'accumulate';
                 if (els.chartScale) { els.chartScale.value = slide.chartScale; els.chartScaleDisplay.innerText = slide.chartScale + '%'; } if (els.chartWidth) { els.chartWidth.value = slide.chartWidth; els.chartWidthDisplay.innerText = slide.chartWidth + '%'; } if (els.chartHeight) { els.chartHeight.value = slide.chartHeight; els.chartHeightDisplay.innerText = slide.chartHeight + 'px'; } if (els.donutCutout) { els.donutCutout.value = slide.donutCutout; els.donutCutoutDisplay.innerText = slide.donutCutout + '%'; } if (els.elementShadowSlider) { els.elementShadowSlider.value = slide.elementShadow || 0; els.elementShadowDisplay.innerText = (slide.elementShadow || 0) + 'px'; } if (els.chartThickness) { els.chartThickness.value = slide.chartThickness; els.chartThicknessDisplay.innerText = slide.chartThickness + '%'; }
                 if (els.outlineWidthSlider) { els.outlineWidthSlider.value = slide.outlineWidth === undefined ? 1 : slide.outlineWidth; if (els.outlineWidthDisplay) els.outlineWidthDisplay.innerText = (slide.outlineWidth === undefined ? 1 : slide.outlineWidth) + 'px'; } if (els.outlineColor) { els.outlineColor.value = slide.outlineColor || '#ffffff'; if (els.outlineColorText) els.outlineColorText.innerText = slide.outlineColor || '#ffffff'; } if (els.borderRadiusSlider) { els.borderRadiusSlider.value = slide.borderRadius; els.borderRadiusDisplay.innerText = slide.borderRadius + 'px'; }
-                if (els.toggleLegend) els.toggleLegend.checked = slide.showLegend; if (els.datalabelPositionSelect) els.datalabelPositionSelect.value = slide.datalabelPosition || 'center'; if (els.toggleAxisNumbers) els.toggleAxisNumbers.checked = slide.showAxisNumbers; if (els.toggleAxisCategories) els.toggleAxisCategories.checked = slide.showAxisCategories; if (els.axisFontSizeSlider) { els.axisFontSizeSlider.value = slide.axisFontSize; els.axisFontSizeDisplay.innerText = slide.axisFontSize + 'px'; }
+                if (els.toggleLegend) els.toggleLegend.checked = slide.showLegend; if (els.toggleTrendline) els.toggleTrendline.checked = !!slide.showTrendline; if (els.toggleOutliers) els.toggleOutliers.checked = !!slide.showOutliers; if (els.toggleCrossFilter) els.toggleCrossFilter.checked = !!slide.showCrossFilter; if (els.datalabelPositionSelect) els.datalabelPositionSelect.value = slide.datalabelPosition || 'center'; if (els.toggleAxisNumbers) els.toggleAxisNumbers.checked = slide.showAxisNumbers; if (els.toggleAxisCategories) els.toggleAxisCategories.checked = slide.showAxisCategories; if (els.axisFontSizeSlider) { els.axisFontSizeSlider.value = slide.axisFontSize; els.axisFontSizeDisplay.innerText = slide.axisFontSize + 'px'; }
                 if (els.bgColor) { els.bgColor.value = slide.bgColor || '#f8fafc'; els.bgColorText.innerText = slide.bgColor || '#f8fafc'; }
                 const bgType = slide.bgType || 'solid';
                 ['bgTypeSolid', 'bgTypeGradient', 'bgTypePattern'].forEach(id => {
@@ -3138,12 +3412,12 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
 
         function syncUIPartialToGrid() {
             try {
-                const slide = getActiveSlide(); const ds = getActiveDataSet(); if (!slide || !ds) return; let primaryType = slide.bentoCharts[activeEditGridIndex]; let isMap = primaryType === 'choropleth-world' || primaryType === 'choropleth-indo'; let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'concentric', 'windrose'].includes(primaryType); let isWordCloud = primaryType === 'wordCloud'; let isTable = primaryType === 'table'; let isTreemap = primaryType === 'treemap'; let isTape = primaryType === 'tape';
+                const slide = getActiveSlide(); const ds = getActiveDataSet(); if (!slide || !ds) return; let primaryType = slide.bentoCharts[activeEditGridIndex]; let isMap = primaryType === 'choropleth-world' || primaryType === 'choropleth-indo'; let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'concentric', 'windrose'].includes(primaryType); let isWordCloud = primaryType === 'wordCloud'; let isTable = primaryType === 'table'; let isTreemap = primaryType === 'treemap'; let isTape = primaryType === 'tape'; let isNone = primaryType === 'none';
                 if (els.donutCutoutContainer) els.donutCutoutContainer.style.display = (primaryType === 'doughnut' || primaryType === 'concentric') ? 'block' : 'none';
                 const dcContainer = document.getElementById('donutCenterConfigContainer');
-                if (dcContainer) dcContainer.style.display = isTable ? 'none' : 'block';
-                if (els.stackModeContainer) els.stackModeContainer.style.display = (primaryType === 'gantt' || (isRadial && primaryType !== 'windrose') || isWordCloud || isMap || isTable || isTreemap || isTape) ? 'none' : 'block';
-                if (els.overlayEnginePanel) { els.overlayEnginePanel.style.display = (isRadial && primaryType !== 'concentric' && primaryType !== 'windrose') || isWordCloud || isMap || isTreemap ? 'none' : 'block'; const panelTitle = els.overlayEnginePanel.querySelector('h3'); const btnAddText = document.querySelector('#btnAddOverlay span'); if (isTable) { if (panelTitle) panelTitle.innerText = "MANAJEMEN KOLOM TABEL"; if (btnAddText) btnAddText.innerText = "+ Tambah Kolom"; } else if (primaryType === 'concentric' || primaryType === 'windrose') { if (panelTitle) panelTitle.innerText = primaryType === 'concentric' ? "LAPISAN CINCIN (RINGS)" : "LAPISAN KIPAS (BANDS)"; if (btnAddText) btnAddText.innerText = primaryType === 'concentric' ? "+ Tambah Cincin" : "+ Tambah Kipas"; } else { if (panelTitle) panelTitle.innerText = "MESIN MULTI-LAPIS"; if (btnAddText) btnAddText.innerText = "+ Tambah Layer"; } }
+                if (dcContainer) dcContainer.style.display = (isTable || isNone) ? 'none' : 'block';
+                if (els.stackModeContainer) els.stackModeContainer.style.display = (primaryType === 'gantt' || (isRadial && primaryType !== 'windrose') || isWordCloud || isMap || isTable || isTreemap || isTape || isNone) ? 'none' : 'block';
+                if (els.overlayEnginePanel) { els.overlayEnginePanel.style.display = (isRadial && primaryType !== 'concentric' && primaryType !== 'windrose') || isWordCloud || isMap || isTreemap || isNone ? 'none' : 'block'; const panelTitle = els.overlayEnginePanel.querySelector('h3'); const btnAddText = document.querySelector('#btnAddOverlay span'); if (isTable) { if (panelTitle) panelTitle.innerText = "MANAJEMEN KOLOM TABEL"; if (btnAddText) btnAddText.innerText = "+ Tambah Kolom"; } else if (primaryType === 'concentric' || primaryType === 'windrose') { if (panelTitle) panelTitle.innerText = primaryType === 'concentric' ? "LAPISAN CINCIN (RINGS)" : "LAPISAN KIPAS (BANDS)"; if (btnAddText) btnAddText.innerText = primaryType === 'concentric' ? "+ Tambah Cincin" : "+ Tambah Kipas"; } else { if (panelTitle) panelTitle.innerText = "MESIN MULTI-LAPIS"; if (btnAddText) btnAddText.innerText = "+ Tambah Layer"; } }
                 if (els.rowCountDisplay) els.rowCountDisplay.innerText = ds.rows.length; renderMultiLayerEngine(); renderDataInputs(); renderPercentageWidgets();
             } catch (e) { console.error("SyncPartial Error:", e); }
         }
@@ -3172,7 +3446,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
         }
 
  if (els.bentoBgColor) els.bentoBgColor.addEventListener('input', (e) => { if (els.bentoBgColorText) els.bentoBgColorText.innerText = e.target.value; syncAndRender('bentoBgColor', e.target.value); }); if (els.outlineColor) els.outlineColor.addEventListener('input', (e) => { if (els.outlineColorText) els.outlineColorText.innerText = e.target.value; syncAndRender('outlineColor', e.target.value); });
-        const toggles = { 'toggleLegend': 'showLegend', 'toggleAxisNumbers': 'showAxisNumbers', 'toggleAxisCategories': 'showAxisCategories', 'toggleGridX': 'showGridX', 'toggleGridY': 'showGridY', 'toggleDonutCenter': 'showDonutCenter' }; Object.keys(toggles).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => syncAndRender(toggles[id], e.target.checked)); });
+        const toggles = { 'toggleLegend': 'showLegend', 'toggleTrendline': 'showTrendline', 'toggleOutliers': 'showOutliers', 'toggleCrossFilter': 'showCrossFilter', 'toggleAxisNumbers': 'showAxisNumbers', 'toggleAxisCategories': 'showAxisCategories', 'toggleGridX': 'showGridX', 'toggleGridY': 'showGridY', 'toggleDonutCenter': 'showDonutCenter' }; Object.keys(toggles).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => syncAndRender(toggles[id], e.target.checked)); });
         document.getElementById('donutCenterLabelInput')?.addEventListener('input', (e) => syncAndRender('donutCenterLabel', e.target.value));
         document.getElementById('dataUnitInput')?.addEventListener('input', (e) => syncAndRender('valueUnit', e.target.value));
 
@@ -3180,16 +3454,56 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             els.bgMediaInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const slide = getActiveSlide();
-                    if (slide) {
-                        slide.bgMediaUrl = ev.target.result;
-                        slide.bgMediaType = file.type.startsWith('video/') ? 'video' : 'image';
-                        triggerVisUpdateWithDebounce();
+                
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            const MAX_WIDTH = 1280;
+                            const MAX_HEIGHT = 720;
+                            if (width > height) {
+                                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                            } else {
+                                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                            }
+                            canvas.width = width; canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            // Compress to jpeg 0.5 quality to save localStorage space
+                            const compressed = canvas.toDataURL('image/jpeg', 0.5);
+                            const slide = getActiveSlide();
+                            if (slide) {
+                                slide.bgMediaUrl = compressed;
+                                slide.bgMediaType = 'image';
+                                triggerVisUpdateWithDebounce();
+                                saveState();
+                            }
+                        };
+                        img.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('video/')) {
+                    if (file.size > 2 * 1024 * 1024) { // 2MB limit for video to save localStorage space
+                        showToast("Video terlalu besar! Maksimal 2MB untuk mencegah memori browser penuh.", true);
+                        return;
                     }
-                };
-                reader.readAsDataURL(file);
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const slide = getActiveSlide();
+                        if (slide) {
+                            slide.bgMediaUrl = ev.target.result;
+                            slide.bgMediaType = 'video';
+                            triggerVisUpdateWithDebounce();
+                            saveState();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+                
                 e.target.value = '';
             });
         }
@@ -3200,6 +3514,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                     slide.bgMediaUrl = null;
                     slide.bgMediaType = null;
                     triggerVisUpdateWithDebounce();
+                    saveState();
                 }
             });
         }
@@ -3235,9 +3550,9 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
 
         function renderMultiLayerEngine() {
             try {
-                const slide = getActiveSlide(); const ds = getActiveDataSet(); if (!slide || !ds || !els.seriesContainer) return; let primaryType = slide.bentoCharts[activeEditGridIndex]; let isTable = primaryType === 'table'; let isConcentric = primaryType === 'concentric'; let isTape = primaryType === 'tape'; els.seriesContainer.innerHTML = '';
+                const slide = getActiveSlide(); const ds = getActiveDataSet(); if (!slide || !ds || !els.seriesContainer) return; let primaryType = slide.bentoCharts[activeEditGridIndex]; let isTable = primaryType === 'table'; let isNone = primaryType === 'none'; let isConcentric = primaryType === 'concentric'; let isTape = primaryType === 'tape'; els.seriesContainer.innerHTML = '';
                 ds.series.forEach((s, index) => {
-                    const div = document.createElement('div'); div.className = "bg-white p-3 rounded-2xl border border-slate-200 flex flex-col gap-2 shadow-sm relative transition-all hover:border-slate-300"; let isMain = index === 0; let typeOptions = `<option value="auto">SESUAI TIPE UTAMA</option><option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>`; let deleteBtn = isMain ? `` : `<button class="w-8 h-8 flex items-center justify-center rounded-xl border border-red-100 text-red-500 hover:bg-red-50 transition shrink-0" onclick="removeSeries(${index})"><i class="ph ph-x"></i></button>`; let extraControls = isTable || isConcentric || isTape ? '' : `<div class="grid grid-cols-3 gap-1 mt-2 pl-8"><select onchange="updateSeriesProp(${index}, 'type', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600">${typeOptions.replace(`value="${s.type}"`, `value="${s.type}" selected`)}</select><select onchange="updateSeriesProp(${index}, 'zIndex', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600"><option value="front" ${s.zIndex === 'front' ? 'selected' : ''}>DEPAN</option><option value="back" ${s.zIndex === 'back' ? 'selected' : ''}>BELAKANG</option></select><select onchange="updateSeriesProp(${index}, 'axis', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600"><option value="y" ${s.axis === 'y' ? 'selected' : ''}>KIRI/BAWAH</option><option value="y2" ${s.axis === 'y2' ? 'selected' : ''}>KANAN/ATAS</option></select></div>`;
+                    const div = document.createElement('div'); div.className = "bg-white p-3 rounded-2xl border border-slate-200 flex flex-col gap-2 shadow-sm relative transition-all hover:border-slate-300"; let isMain = index === 0; let typeOptions = `<option value="auto">SESUAI TIPE UTAMA</option><option value="bar">BAR (BATANG)</option><option value="line">LINE (GARIS)</option><option value="area">AREA</option>`; let deleteBtn = isMain ? `` : `<button class="w-8 h-8 flex items-center justify-center rounded-xl border border-red-100 text-red-500 hover:bg-red-50 transition shrink-0" onclick="removeSeries(${index})"><i class="ph ph-x"></i></button>`; let extraControls = isTable || isNone || isConcentric || isTape ? '' : `<div class="grid grid-cols-3 gap-1 mt-2 pl-8"><select onchange="updateSeriesProp(${index}, 'type', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600">${typeOptions.replace(`value="${s.type}"`, `value="${s.type}" selected`)}</select><select onchange="updateSeriesProp(${index}, 'zIndex', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600"><option value="front" ${s.zIndex === 'front' ? 'selected' : ''}>DEPAN</option><option value="back" ${s.zIndex === 'back' ? 'selected' : ''}>BELAKANG</option></select><select onchange="updateSeriesProp(${index}, 'axis', this.value)" class="bg-white border border-slate-200 rounded-lg px-1 py-1.5 text-[8px] font-bold text-slate-600"><option value="y" ${s.axis === 'y' ? 'selected' : ''}>KIRI/BAWAH</option><option value="y2" ${s.axis === 'y2' ? 'selected' : ''}>KANAN/ATAS</option></select></div>`;
                     div.innerHTML = `<div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0" style="background-color: ${isMain ? '#cafc03' : '#e2e8f0'}">${isMain ? '*' : (index)}</div><input type="text" value="${s.name}" onchange="updateSeriesName(${index}, this.value)" class="flex-1 min-w-0 bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs font-bold text-slate-800 outline-none">${deleteBtn}</div>${extraControls}`; els.seriesContainer.appendChild(div);
                 });
             } catch (e) { console.error("MultiLayer render failed", e); }
@@ -4076,6 +4391,13 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
 
         async function prepareChartConfig(cType, blockIndex, slide) {
             let ds = slide.dataSets[blockIndex];
+            if (slide.showCrossFilter && window.activeCrossFilterLabel) {
+                let filtered = ds.rows.filter(r => r.label === window.activeCrossFilterLabel);
+                if (filtered.length > 0) {
+                    ds = JSON.parse(JSON.stringify(ds));
+                    ds.rows = filtered;
+                }
+            }
             if (!ds || !ds.series || !ds.rows || ds.series.length === 0 || ds.rows.length === 0) {
                 ds = generateDefaultDataSet(blockIndex + 1);
                 slide.dataSets[blockIndex] = ds;
@@ -4120,6 +4442,66 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                     datasets.push({ label: s.name, type: parsedType, indexAxis: isHorizontal ? 'y' : 'x', data: dataArr, backgroundColor: bgColor, borderColor: borderColor, borderWidth: isLine ? (slide.lineBorderWidth || 3) : oWidth, fill: isFillArea, tension: 0.4, borderRadius: slide.borderRadius, grouped: isGrouped, stack: isStacked ? 'Stack 0' : undefined, order: s.zIndex === 'front' ? 0 : 2, xAxisID: isHorizontal ? (s.axis === 'y2' ? 'xRight' : 'x') : 'x', yAxisID: isHorizontal ? 'y' : (s.axis === 'y2' ? 'yRight' : 'y'), customOffsets: ds.rows.map(r => r.values[sIdx]?.offset || 0) });
                 });
             }
+            if (slide.showOutliers && !isMap && !isWordCloud && !isTreemap) {
+                datasets.forEach(dsConf => {
+                    if (dsConf.type === 'bar' || dsConf.type === 'line' || dsConf.type === 'scatter') {
+                        let validVals = [];
+                        dsConf.data.forEach(val => { let y = typeof val === 'number' ? val : (val && val.y !== undefined ? val.y : null); if (y !== null && !isNaN(y)) validVals.push(y); });
+                        if (validVals.length > 2) {
+                            let mean = validVals.reduce((a, b) => a + b, 0) / validVals.length;
+                            let variance = validVals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / validVals.length;
+                            let stdDev = Math.sqrt(variance);
+                            if (stdDev > 0) {
+                                let originalBg = dsConf.backgroundColor; let originalBorder = dsConf.borderColor;
+                                let newBg = [], newBorder = [], newRadius = [];
+                                dsConf.data.forEach((val, i) => {
+                                    let y = typeof val === 'number' ? val : (val && val.y !== undefined ? val.y : null);
+                                    let isOutlier = y !== null && !isNaN(y) && Math.abs((y - mean) / stdDev) >= 1.5; // using 1.5 for better visual demo
+                                    let currentBg = Array.isArray(originalBg) ? (originalBg[i] || originalBg[0]) : originalBg;
+                                    let currentBorder = Array.isArray(originalBorder) ? (originalBorder[i] || originalBorder[0]) : originalBorder;
+                                    if (isOutlier) { newBg.push('#ef4444'); newBorder.push('#991b1b'); newRadius.push(dsConf.type === 'line' || dsConf.type === 'scatter' ? 8 : 0); } 
+                                    else { newBg.push(currentBg); newBorder.push(currentBorder); newRadius.push(dsConf.type === 'line' ? 0 : (dsConf.type === 'scatter' ? (val && val.r ? val.r : 3) : 0)); }
+                                });
+                                dsConf.backgroundColor = newBg; dsConf.borderColor = newBorder;
+                                if (dsConf.type === 'line' || dsConf.type === 'scatter') { dsConf.pointRadius = newRadius; dsConf.pointHoverRadius = newRadius.map(r => r > 0 ? r + 2 : 4); dsConf.pointBackgroundColor = newBg; dsConf.pointBorderColor = newBorder; }
+                            }
+                        }
+                    }
+                });
+            }
+            if (slide.showTrendline && !isMap && !isWordCloud && !isTreemap && !isRadial && !isFloatingBar) {
+                let baseDs = datasets.find(d => d.type === 'bar' || d.type === 'line' || d.type === 'scatter');
+                if (baseDs && baseDs.data.length > 1) {
+                    let n = 0; let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                    let validPoints = [];
+                    baseDs.data.forEach((val, idx) => {
+                        let y = null, x = null;
+                        if (typeof val === 'number') { y = val; x = idx; } else if (val && typeof val === 'object' && val.y !== undefined) { y = val.y; x = idx; }
+                        if (y !== null && !isNaN(y)) { n++; sumX += x; sumY += y; sumXY += x * y; sumX2 += x * x; validPoints.push(x); }
+                    });
+                    if (n > 1) {
+                        let denominator = (n * sumX2 - sumX * sumX);
+                        if (denominator !== 0) {
+                            let m = (n * sumXY - sumX * sumY) / denominator;
+                            let b = (sumY - m * sumX) / n;
+                            let fullTrendData = labels.map((_, i) => m * i + b);
+                            datasets.push({
+                                label: 'Trendline (' + baseDs.label + ')',
+                                type: 'line',
+                                data: fullTrendData,
+                                borderColor: slide.outlineColor || '#ef4444',
+                                borderWidth: Math.max(oWidth, 3),
+                                borderDash: [5, 5],
+                                backgroundColor: 'transparent',
+                                fill: false,
+                                pointRadius: 0,
+                                tension: 0,
+                                order: -1
+                            });
+                        }
+                    }
+                }
+            }
 
             const chartOptions = {
                 responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: (slide.bentoLayout === '1' ? 10 : 20) + extraPad }, interaction: { mode: 'nearest', intersect: true }, animation: { duration: 900, delay: blockIndex * 120, easing: 'easeOutQuart' },
@@ -4144,13 +4526,28 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                     if (directElements && directElements.length > 0) {
                         const el = directElements[0];
                         const bIndex = parseInt(chart.canvas.dataset.blockIndex || 0);
+                        if (slide.showCrossFilter) {
+                            let clickedLabel = chart.data.labels[el.index];
+                            if (window.activeCrossFilterLabel === clickedLabel) {
+                                window.activeCrossFilterLabel = null;
+                            } else {
+                                window.activeCrossFilterLabel = clickedLabel;
+                            }
+                            renderChart(true);
+                            return;
+                        }
                         if (isSpotlightMode) {
                             setSpotlightFocus(bIndex, el.datasetIndex, el.index);
                         }
                         openElementEditor(el.datasetIndex, el.index, e.native.clientX, e.native.clientY, slide.bentoCharts[bIndex], bIndex);
                     } else {
                         if (isSpotlightMode) clearSpotlightFocus();
-                        closeElementPopup();
+                        if (slide.showCrossFilter && window.activeCrossFilterLabel) {
+                            window.activeCrossFilterLabel = null;
+                            renderChart(true);
+                        } else {
+                            closeElementPopup();
+                        }
                     }
                 }
             };
@@ -4337,10 +4734,12 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 for (let i = 0; i < numCharts; i++) { 
                     try {
                         let cType = slide.bentoCharts[i] || 'bar-vertical'; 
-                        if (cType !== 'table') { 
-                            preparedConfigs.push(await prepareChartConfig(cType, i, slide)); 
-                        } else { 
+                        if (cType === 'table') { 
                             preparedConfigs.push({ isTable: true, index: i }); 
+                        } else if (cType === 'none') {
+                            preparedConfigs.push({ isNone: true, index: i });
+                        } else { 
+                            preparedConfigs.push(await prepareChartConfig(cType, i, slide)); 
                         } 
                     } catch (err) {
                         console.error('Error preparing chart config:', err);
@@ -4378,6 +4777,105 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                             ds.series.forEach((s, sIdx) => { let v = r.values[sIdx]; let effVal = v ? getEffectiveValue(v.val, r.id, sIdx) : null; let valText = effVal !== null ? formatChartNumber(effVal, slide) : '-'; if (slide.bentoCharts[i] === 'waterfall' || slide.bentoCharts[i] === 'gantt' || slide.bentoCharts[i] === 'tape') valText = (effVal !== null ? Math.round(effVal) : '-') + ' - ' + (v && v.val2 !== null ? v.val2 : '-'); tableHTML += `<td class="${tablePad} font-mono-tech font-bold" style="color: ${v ? v.color : '#000'}">${valText}</td>`; }); tableHTML += `</tr>`;
                         }); tableHTML += `</tbody></table>`;
                         tableWrapper.innerHTML = tableHTML; card.appendChild(tableWrapper); mainCharts.push({ resize: () => { } });
+                    } else if (config.isNone) {
+                        const mediaWrapper = document.createElement('div');
+                        mediaWrapper.className = 'w-full h-full flex items-center justify-center relative overflow-hidden group';
+                        let currentMedia = slide.bentoMedia && slide.bentoMedia[i] ? slide.bentoMedia[i] : null;
+                        if (currentMedia) {
+                            if (currentMedia.type === 'image') {
+                                mediaWrapper.innerHTML = `<img src="${currentMedia.url}" class="max-w-full max-h-full object-contain pointer-events-none rounded-xl" />`;
+                            } else if (currentMedia.type === 'video') {
+                                mediaWrapper.innerHTML = `<video src="${currentMedia.url}" class="max-w-full max-h-full rounded-xl" autoplay loop muted playsinline controls></video>`;
+                            }
+                        } else {
+                            mediaWrapper.innerHTML = `<div class="text-slate-400 font-medium text-sm border-2 border-dashed border-slate-300 rounded-xl p-8 flex flex-col items-center gap-2"><i class="ph ph-image text-3xl"></i> Preview Media Kosong</div>`;
+                        }
+                        if (!isPresenting) {
+                            const btnContainer = document.createElement('div');
+                            btnContainer.className = 'absolute bottom-4 right-4 flex items-center gap-2 transition-opacity z-10';
+                            
+                            if (currentMedia) {
+                                const btnClear = document.createElement('button');
+                                btnClear.className = 'bg-red-500 text-white rounded-xl px-3 py-2 text-xs font-bold flex items-center gap-2 shadow-lg cursor-pointer hover:bg-red-600 transition';
+                                btnClear.innerHTML = '<i class="ph ph-trash"></i> Hapus';
+                                btnClear.onclick = (e) => {
+                                    e.stopPropagation();
+                                    slide.bentoMedia[i] = null;
+                                    triggerVisUpdateWithDebounce();
+                                    saveState();
+                                };
+                                btnContainer.appendChild(btnClear);
+                            }
+                            
+                            const btnUpload = document.createElement('button');
+                            btnUpload.className = 'bg-slate-800 text-white rounded-xl px-3 py-2 text-xs font-bold flex items-center gap-2 shadow-lg cursor-pointer hover:bg-slate-900 transition';
+                            btnUpload.innerHTML = '<i class="ph ph-upload-simple"></i> Upload Media';
+                            btnUpload.onclick = (e) => {
+                                e.stopPropagation();
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*,video/*';
+                                input.onchange = (ev) => {
+                                    const file = ev.target.files[0];
+                                    if (file) {
+                                        const type = file.type.startsWith('video') ? 'video' : 'image';
+                                        
+                                        if (type === 'video' && file.size > 2 * 1024 * 1024) {
+                                            showToast('Ukuran video maksimal 2MB untuk menjaga performa.', 'error');
+                                            return;
+                                        }
+
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            const dataUrl = e.target.result;
+                                            
+                                            if (type === 'image') {
+                                                const img = new Image();
+                                                img.onload = () => {
+                                                    const canvas = document.createElement('canvas');
+                                                    let width = img.width;
+                                                    let height = img.height;
+                                                    const MAX_DIMENSION = 800;
+                                                    
+                                                    if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                                                        if (width > height) {
+                                                            height = (height / width) * MAX_DIMENSION;
+                                                            width = MAX_DIMENSION;
+                                                        } else {
+                                                            width = (width / height) * MAX_DIMENSION;
+                                                            height = MAX_DIMENSION;
+                                                        }
+                                                    }
+                                                    
+                                                    canvas.width = width;
+                                                    canvas.height = height;
+                                                    const ctx = canvas.getContext('2d');
+                                                    ctx.drawImage(img, 0, 0, width, height);
+                                                    
+                                                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                                                    slide.bentoMedia = slide.bentoMedia || {};
+                                                    slide.bentoMedia[i] = { url: compressedDataUrl, type };
+                                                    triggerVisUpdateWithDebounce();
+                                                    saveState();
+                                                };
+                                                img.src = dataUrl;
+                                            } else {
+                                                slide.bentoMedia = slide.bentoMedia || {};
+                                                slide.bentoMedia[i] = { url: dataUrl, type };
+                                                triggerVisUpdateWithDebounce();
+                                                saveState();
+                                            }
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                };
+                                input.click();
+                            };
+                            btnContainer.appendChild(btnUpload);
+                            mediaWrapper.appendChild(btnContainer);
+                        }
+                        card.appendChild(mediaWrapper);
+                        mainCharts.push({ resize: () => { } });
                     } else {
                         const canvasContainer = document.createElement('div'); canvasContainer.className = 'flex-1 relative w-full h-full flex flex-col justify-center min-h-0 pointer-events-none';
                         const canvasEl = document.createElement('canvas'); canvasEl.className = 'pointer-events-auto'; canvasEl.dataset.blockIndex = i; canvasContainer.appendChild(canvasEl); card.appendChild(canvasContainer);
@@ -4659,11 +5157,29 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             els.exportTarget.style.transform = `scale(${presentZoomScale})`;
             applyChartPanTransform();
         }
+        
+        window.addEventListener('wheel', (e) => {
+            if (isPresenting) {
+                if (e.ctrlKey || e.metaKey || !isPanningCanvas) {
+                    // Zoom with wheel
+                    e.preventDefault();
+                    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+                    updatePresentationZoom(delta);
+                }
+            }
+        }, { passive: false });
 
         if (document.getElementById('btnZoomIn')) {
             document.getElementById('btnZoomIn').onclick = (e) => {
                 e.stopPropagation();
                 updatePresentationZoom(0.1);
+            };
+        }
+        if (document.getElementById('btnResetPresentView')) {
+            document.getElementById('btnResetPresentView').onclick = (e) => {
+                e.stopPropagation();
+                updatePresentationZoom(0, 1);
+                resetChartPanPosition();
             };
         }
         if (document.getElementById('btnZoomOut')) {
@@ -4685,9 +5201,15 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             slide.chartPanX = slide.chartPanX || 0;
             slide.chartPanY = slide.chartPanY || 0;
             
+            const transformVal = `translate(${slide.chartPanX}px, ${slide.chartPanY}px)`;
+            
             if(els.bentoWrapper) {
-                els.bentoWrapper.style.transform = `translate(${slide.chartPanX}px, ${slide.chartPanY}px)`;
+                els.bentoWrapper.style.transform = transformVal;
             }
+            if(els.notesContainer) els.notesContainer.style.transform = transformVal;
+            if(els.calloutsContainer) els.calloutsContainer.style.transform = transformVal;
+            if(els.calloutSvgLayer) els.calloutSvgLayer.style.transform = transformVal;
+
             const btnPanReset = document.getElementById('btnResetChartPan');
             if(btnPanReset) {
                 if(slide.chartPanX !== 0 || slide.chartPanY !== 0) {
@@ -4743,8 +5265,18 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             chart.update('none');
         }
 
-        window.addEventListener('keydown', e => { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') isSpaceDown = true; });
-        window.addEventListener('keyup', e => { if (e.code === 'Space') isSpaceDown = false; });
+        window.addEventListener('keydown', e => { 
+            if ((e.code === 'Space' || e.code === 'KeyH' || e.key.toLowerCase() === 'h') && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                isSpaceDown = true;
+                if (!isPanningCanvas) document.body.style.cursor = 'grab';
+            }
+        });
+        window.addEventListener('keyup', e => { 
+            if (e.code === 'Space' || e.code === 'KeyH' || e.key.toLowerCase() === 'h') {
+                isSpaceDown = false;
+                if (!isPanningCanvas) document.body.style.cursor = 'default';
+            }
+        });
 
         document.addEventListener('mousedown', (e) => {
             const wrap = document.getElementById('bentoWrapper');
@@ -4796,7 +5328,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 }
             }
 
-            if(e.button === 1 || e.shiftKey || isSpaceDown) {
+            if(e.button === 1 || e.shiftKey || isSpaceDown || (isPresenting && e.button === 0)) {
                 isPanningCanvas = true;
                 panStartX = e.clientX;
                 panStartY = e.clientY;
