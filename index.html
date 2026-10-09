@@ -1551,7 +1551,7 @@
         </div>
 
         <div
-            class="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 pb-44 md:pb-36 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
+            class="flex-1 overflow-auto flex items-center justify-center p-4 md:p-8 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
             <div id="exportTarget"
                 class="relative origin-center flex flex-col bg-transparent transition-all duration-500 p-4 sm:p-8 rounded-3xl overflow-hidden"
                 style="width: 100%; height: 500px;">
@@ -1587,7 +1587,7 @@
 
         <!-- HUD TELEMETRY BAR (DATA SCIENCE & GAMIFIED ANALYTICS - POIN 2) -->
         <div id="hudTelemetryDock"
-            class="absolute bottom-3 md:bottom-5 left-1/2 -translate-x-1/2 glass-panel rounded-2xl p-1 shadow-xl flex flex-col z-[80] w-[95%] md:w-[88%] max-w-5xl border border-white/50 pointer-events-auto transition-all duration-300">
+            class="relative shrink-0 mx-auto mt-2 mb-3 md:mb-5 glass-panel rounded-2xl p-1 shadow-xl flex flex-col z-[80] w-[95%] md:w-[88%] max-w-5xl border border-white/50 pointer-events-auto transition-all duration-300">
             
             <!-- HEADER / DRAG HANDLE -->
             <div id="hudDockHeader" class="w-full flex items-center justify-between px-3 py-1 cursor-move group">
@@ -4616,10 +4616,12 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 hudStartY = e.clientY;
                 
                 const rect = hudDock.getBoundingClientRect();
-                hudInitLeft = rect.left;
-                hudInitTop = rect.top;
+                const parentRect = hudDock.parentElement.getBoundingClientRect();
+                hudInitLeft = rect.left - parentRect.left;
+                hudInitTop = rect.top - parentRect.top;
                 
-                hudDock.classList.remove('transition-all', 'duration-300', 'bottom-3', 'md:bottom-5', 'left-1/2', '-translate-x-1/2');
+                hudDock.classList.remove('transition-all', 'duration-300', 'relative', 'mx-auto', 'mt-2', 'mb-3', 'md:mb-5', 'shrink-0');
+                hudDock.classList.add('absolute');
                 hudDock.style.left = hudInitLeft + 'px';
                 hudDock.style.top = hudInitTop + 'px';
                 hudDock.style.bottom = 'auto';
