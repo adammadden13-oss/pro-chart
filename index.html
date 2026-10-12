@@ -2067,6 +2067,105 @@
                                 class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900">
                             </div>
                         </label></div>
+
+                    <!-- FITUR: PENGATURAN GAYA & POSISI LEGENDA -->
+                    <div id="legendSettingsPanel" class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black text-slate-800 uppercase flex items-center gap-1.5">
+                                <i class="ph-bold ph-faders text-slate-700"></i>
+                                <span>Gaya & Posisi Legenda</span>
+                            </span>
+                        </div>
+
+                        <!-- POSISI LEGENDA (ATAS, BAWAH, KIRI, KANAN) -->
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Letak Posisi</label>
+                            <div class="flex bg-slate-200/70 rounded-lg p-0.5 border border-slate-200">
+                                <button type="button" id="btnLegendPosTop" onclick="setLegendPosition('top')" class="flex-1 py-1 text-[9px] font-bold rounded bg-white shadow-sm text-indigo-600 transition" title="Atas (Top)">Atas</button>
+                                <button type="button" id="btnLegendPosBottom" onclick="setLegendPosition('bottom')" class="flex-1 py-1 text-[9px] font-bold rounded text-slate-500 hover:text-slate-800 transition" title="Bawah (Bottom)">Bawah</button>
+                                <button type="button" id="btnLegendPosLeft" onclick="setLegendPosition('left')" class="flex-1 py-1 text-[9px] font-bold rounded text-slate-500 hover:text-slate-800 transition" title="Kiri (Left)">Kiri</button>
+                                <button type="button" id="btnLegendPosRight" onclick="setLegendPosition('right')" class="flex-1 py-1 text-[9px] font-bold rounded text-slate-500 hover:text-slate-800 transition" title="Kanan (Right)">Kanan</button>
+                            </div>
+                        </div>
+
+                        <!-- PERATAAN (ALIGN) -->
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Perataan (Align)</label>
+                            <div class="flex bg-slate-200/70 rounded-lg p-0.5 border border-slate-200">
+                                <button type="button" id="btnLegendAlignStart" onclick="setLegendAlign('start')" class="flex-1 py-1 text-[9px] font-bold rounded text-slate-500 hover:text-slate-800 transition" title="Kiri / Awal (Start)">Kiri / Awal</button>
+                                <button type="button" id="btnLegendAlignCenter" onclick="setLegendAlign('center')" class="flex-1 py-1 text-[9px] font-bold rounded bg-white shadow-sm text-indigo-600 transition" title="Tengah (Center)">Tengah</button>
+                                <button type="button" id="btnLegendAlignEnd" onclick="setLegendAlign('end')" class="flex-1 py-1 text-[9px] font-bold rounded text-slate-500 hover:text-slate-800 transition" title="Kanan / Akhir (End)">Kanan / Akhir</button>
+                            </div>
+                        </div>
+
+                        <!-- UKURAN FONT & KETEBALAN -->
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60">
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1 flex items-center justify-between">
+                                    <span>Ukuran Font</span>
+                                    <span class="slider-val-box" title="Geser slider atau ketik angka langsung">
+                                        <input type="number" id="legendFontSizeInput" min="8" max="32" value="14" class="slider-val-input w-6">
+                                        <span class="slider-val-unit">PX</span>
+                                        <span id="legendFontSizeDisplay" class="hidden">14px</span>
+                                    </span>
+                                </label>
+                                <input type="range" id="legendFontSizeSlider" min="8" max="32" value="14" class="mt-1">
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Ketebalan Font</label>
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    <select id="legendFontWeightSelect" class="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
+                                        <option value="normal">Normal</option>
+                                        <option value="500">Medium</option>
+                                        <option value="bold">Tebal</option>
+                                        <option value="900">Ekstra Tebal</option>
+                                    </select>
+                                    <button id="btnLegendItalic" type="button" onclick="toggleLegendItalic()" class="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:border-[#cafc03] shrink-0" title="Miring (Italic)">
+                                        <i class="ph-bold ph-text-italic text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BENTUK SIMBOL & JARAK (PADDING) -->
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60">
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Bentuk Simbol</label>
+                                <select id="legendPointStyleSelect" class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
+                                    <option value="circle">Bulat (Circle)</option>
+                                    <option value="rect">Kotak (Rectangle)</option>
+                                    <option value="rectRounded">Kotak Membulat</option>
+                                    <option value="triangle">Segitiga</option>
+                                    <option value="star">Bintang</option>
+                                    <option value="box">Balok Standar</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1 flex items-center justify-between">
+                                    <span>Jarak Item</span>
+                                    <span class="slider-val-box" title="Geser slider atau ketik angka langsung">
+                                        <input type="number" id="legendPaddingInput" min="4" max="48" value="16" class="slider-val-input w-6">
+                                        <span class="slider-val-unit">PX</span>
+                                        <span id="legendPaddingDisplay" class="hidden">16px</span>
+                                    </span>
+                                </label>
+                                <input type="range" id="legendPaddingSlider" min="4" max="48" value="16" class="mt-1">
+                            </div>
+                        </div>
+
+                        <!-- WARNA FONT LEGENDA -->
+                        <div class="pt-2 border-t border-slate-200/60">
+                            <label class="block text-[8px] font-bold text-slate-400 uppercase mb-1">Warna Font Legenda</label>
+                            <div class="flex items-center gap-2">
+                                <select id="legendColorModeSelect" class="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
+                                    <option value="auto">Otomatis Kontras</option>
+                                    <option value="custom">Warna Custom</option>
+                                </select>
+                                <input type="color" id="legendCustomColorInput" value="#334155" class="w-6 h-6 rounded cursor-pointer border border-slate-200 shrink-0">
+                                <span id="legendCustomColorText" class="text-[9px] font-mono-tech text-slate-500 w-12 shrink-0">#334155</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="flex items-center justify-between"><label class="text-[11px] font-bold text-slate-700"
                             data-i18n="showTrendline">Tampilkan Trendline</label><label
                             class="relative inline-flex items-center cursor-pointer"><input type="checkbox"
@@ -2309,25 +2408,28 @@
                 </div>
 
                 <button id="btnToggleRightPanel"
-                    class="bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 px-3 md:px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-xs border border-[#cafc03] transition"
-                    title="Buka Studio Tools & Slides">
-                    <i class="ph-bold ph-magic-wand text-sm text-slate-900"></i>
-                    <span class="hidden md:inline">Studio Tools</span>
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 flex items-center justify-center shadow-xs border border-[#b5e002]/50 transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer relative group"
+                    title="Studio Tools & Slides (Layers)" aria-label="Studio Tools & Slides">
+                    <i class="ph-bold ph-magic-wand text-lg text-slate-900 transition-colors"></i>
                 </button>
 
                 <button id="btnFullscreen"
-                    class="bg-white hover:bg-[#cafc03]/20 text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold hidden sm:flex items-center gap-1.5 shadow-2xs border border-slate-200 hover:border-[#cafc03] transition"><i
-                        class="ph ph-play text-sm text-slate-900"></i> <span class="hidden lg:inline"
-                        data-i18n="presentBtn">Presentasi</span></button>
-                <button id="btnMultiSlideExport" onclick="openMultiSlideExportModal()"
-                    class="bg-rose-600 hover:bg-rose-700 text-white w-7 h-7 sm:w-auto sm:px-3 sm:py-1.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs border border-rose-500 transition"
-                    title="Ekspor Seluruh Slide ke PDF Presentation Deck (Point 2)">
-                    <i class="ph-bold ph-file-pdf text-sm"></i> <span class="hidden lg:inline">PDF Deck</span>
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 hover:border-slate-300 shadow-xs flex items-center justify-center transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer relative group"
+                    title="Mode Presentasi (Layar Penuh)" aria-label="Mode Presentasi">
+                    <i class="ph-bold ph-play text-base text-slate-800 transition-colors"></i>
                 </button>
+
+                <button id="btnMultiSlideExport" onclick="openMultiSlideExportModal()"
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-rose-600 hover:bg-rose-700 text-white border border-rose-500 shadow-xs flex items-center justify-center transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer relative group"
+                    title="Ekspor PDF Presentation Deck" aria-label="Ekspor PDF Deck">
+                    <i class="ph-bold ph-file-pdf text-lg text-white transition-colors"></i>
+                </button>
+
                 <button id="btnExport"
-                    class="bg-slate-900 hover:bg-slate-800 text-white w-7 h-7 sm:w-auto sm:px-4 sm:py-1.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 shadow-md border border-slate-700 transition"><i
-                        class="ph ph-download-simple text-sm"></i> <span class="hidden sm:inline"
-                        data-i18n="exportBtn">Ekspor HD</span></button>
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 shadow-xs flex items-center justify-center transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer relative group"
+                    title="Ekspor Gambar HD (PNG)" aria-label="Ekspor HD">
+                    <i class="ph-bold ph-download-simple text-lg text-white transition-colors"></i>
+                </button>
             </div>
         </div>
 
@@ -2742,6 +2844,25 @@
         const themes = { lime: ['#cafc03', '#111827', '#94a3b8', '#e2e8f0', '#334155'], default: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], corporate: ['#0f172a', '#1e3a8a', '#1d4ed8', '#3b82f6', '#93c5fd'], earth: ['#064e3b', '#047857', '#059669', '#10b981', '#34d399'], sunset: ['#991b1b', '#b91c1c', '#dc2626', '#ef4444', '#f87171'], monochrome: ['#171717', '#404040', '#737373', '#a3a3a3', '#d4d4d4'] };
         const defaultIcons = ["🚀", "💡", "🔥", "📈", "📍", "🏢", "🌴", "🌲", "🍎", "⭐", "💰", "📊", "⚙️", "🤖", "⚡", "✅", "❌", "⚠", "🛒", "📦", "🎯", "🏆", "🍔", "🍕", "🚗", "✈️", "📱", "💻", "🏠", "🎁"];
         function hexToRgba(hex, opacity) { if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return 'transparent'; let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${isNaN(r) ? 0 : r}, ${isNaN(g) ? 0 : g}, ${isNaN(b) ? 0 : b}, ${opacity / 100})`; }
+        function getAutoContrastColor(colorStr) {
+            if (!colorStr || typeof colorStr !== 'string') return '#ffffff';
+            let hex = colorStr.trim();
+            if (hex.startsWith('rgb')) {
+                const rgb = hex.match(/\d+/g);
+                if (rgb && rgb.length >= 3) {
+                    const yiq = ((parseInt(rgb[0]) * 299) + (parseInt(rgb[1]) * 587) + (parseInt(rgb[2]) * 114)) / 1000;
+                    return yiq >= 165 ? '#0f172a' : '#ffffff';
+                }
+            }
+            if (hex.startsWith('#')) hex = hex.slice(1);
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            if (hex.length !== 6) return '#ffffff';
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+            return yiq >= 165 ? '#0f172a' : '#ffffff';
+        }
 
         let mainCharts = []; let activeIconInput = null; let mapCache = { world: null, indo: null }; const STORAGE_KEY = 'ProChart_Vision_V17_Master';
         const SAVED_PROJECTS_KEY = 'ProChart_Vision_Saved_Slots';
@@ -3083,7 +3204,7 @@
         }
 
         const generateDefaultDataSet = (seed) => ({ series: [{ id: 's_main_' + seed, name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' }], rows: [{ id: 'r_1_' + seed, label: 'Jawa Barat', icon: '📍', values: [{ val: 450, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_2_' + seed, label: 'DKI Jakarta', icon: '🏢', values: [{ val: 320, val2: 0, color: '#111827', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_3_' + seed, label: 'Sumatera Utara', icon: '🌴', values: [{ val: 150, val2: 0, color: '#94a3b8', offset: 0, callout: false, calloutSub: '' }] }, { id: 'r_4_' + seed, label: 'Kalimantan', icon: '🌲', values: [{ val: 80, val2: 0, color: '#e2e8f0', offset: 0, callout: false, calloutSub: '' }] }] });
-        const generateDefaultSlide = (index = 1) => ({ id: 'slide_' + Date.now() + '_' + index, chartTitle: `Slide ${index}`, chartTitleAlign: 'center', chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', chartSubtitleAlign: 'center', watermarkText: 'MNC CHANNELS', watermarkAlign: 'right', notes: [], explodedElements: {}, showDonutCenter: true, donutCenterLabel: 'Total Data:', valueUnit: 'unit', bentoLayout: '1', bentoCharts: ['bar-vertical', 'doughnut', 'table'], colorTheme: 'lime', stackMode: 'accumulate', chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, outlineWidth: 1, outlineColor: '#ffffff', borderRadius: 8, showLegend: true, showTrendline: false, showOutliers: false, showCrossFilter: false, datalabelPosition: 'center', bgType: 'solid', bgColor: '#f8fafc', bgColor2: '#e2e8f0', bgOpacity: 0, bentoBgColor: '#ffffff', bentoBgOpacity: 100, showGridX: false, showGridY: true, showAxisNumbers: true, showAxisCategories: true, axisFontSize: 12, dataSets: [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)] });
+        const generateDefaultSlide = (index = 1) => ({ id: 'slide_' + Date.now() + '_' + index, chartTitle: `Slide ${index}`, chartTitleAlign: 'center', chartSubtitle: 'Visualisasi Cerdas by Pro Chart Vision', chartSubtitleAlign: 'center', watermarkText: 'MNC CHANNELS', watermarkAlign: 'right', notes: [], explodedElements: {}, showDonutCenter: true, donutCenterLabel: 'Total Data:', valueUnit: 'unit', bentoLayout: '1', bentoCharts: ['bar-vertical', 'doughnut', 'table'], colorTheme: 'lime', stackMode: 'accumulate', chartScale: 100, chartWidth: 100, chartHeight: 500, donutCutout: 60, elementShadow: 0, chartThickness: 100, outlineWidth: 1, outlineColor: '#ffffff', borderRadius: 8, showLegend: true, legendPosition: 'top', legendAlign: 'center', legendFontSize: 14, legendFontWeight: 'bold', legendItalic: false, legendColorMode: 'auto', legendCustomColor: '#334155', legendPointStyle: 'circle', legendPadding: 16, showTrendline: false, showOutliers: false, showCrossFilter: false, datalabelPosition: 'center', bgType: 'solid', bgColor: '#f8fafc', bgColor2: '#e2e8f0', bgOpacity: 0, bentoBgColor: '#ffffff', bentoBgOpacity: 100, showGridX: false, showGridY: true, showAxisNumbers: true, showAxisCategories: true, axisFontSize: 12, dataSets: [generateDefaultDataSet(1), generateDefaultDataSet(2), generateDefaultDataSet(3)] });
         let appSlides = [generateDefaultSlide(1)]; let activeSlideIndex = 0;
 
         const els = {
@@ -3092,7 +3213,7 @@
             noteTextInput: document.getElementById('noteTextInput'), noteColor: document.getElementById('noteColor'), noteColorText: document.getElementById('noteColorText'), noteBgColor: document.getElementById('noteBgColor'), noteBorderColor: document.getElementById('noteBorderColor'), btnClearNoteBg: document.getElementById('btnClearNoteBg'), btnNoteBorderClear: document.getElementById('btnNoteBorderClear'), noteBorderStyleSelect: document.getElementById('noteBorderStyleSelect'), noteRadiusSlider: document.getElementById('noteRadiusSlider'), noteRadiusDisplay: document.getElementById('noteRadiusDisplay'), noteSizeSlider: document.getElementById('noteSizeSlider'), noteSizeDisplay: document.getElementById('noteSizeDisplay'), noteBgOpacitySlider: document.getElementById('noteBgOpacitySlider'), noteBgOpacityDisplay: document.getElementById('noteBgOpacityDisplay'), btnAddNote: document.getElementById('btnAddNote'), btnDeleteNote: document.getElementById('btnDeleteNote'), btnInsertNoteIcon: document.getElementById('btnInsertNoteIcon'), notesContainer: document.getElementById('notesContainer'),
             bentoLayout: document.getElementById('bentoLayout'), bentoChart1: document.getElementById('bentoChart1'), bentoChart2: document.getElementById('bentoChart2'), bentoChart3: document.getElementById('bentoChart3'), bentoGrid2Container: document.getElementById('bentoGrid2Container'), bentoGrid3Container: document.getElementById('bentoGrid3Container'), colorTheme: document.getElementById('colorTheme'), stackMode: document.getElementById('stackMode'), stackModeContainer: document.getElementById('stackModeContainer'), seriesContainer: document.getElementById('seriesContainer'), btnAddOverlay: document.getElementById('btnAddOverlay'), overlayEnginePanel: document.getElementById('overlayEnginePanel'), dataRowsContainer: document.getElementById('dataRowsContainer'), btnAddRow: document.getElementById('btnAddRow'), btnRemoveRow: document.getElementById('btnRemoveRow'), rowCountDisplay: document.getElementById('rowCountDisplay'),
             chartScale: document.getElementById('chartScale'), chartScaleDisplay: document.getElementById('chartScaleDisplay'), chartWidth: document.getElementById('chartWidth'), chartWidthDisplay: document.getElementById('chartWidthDisplay'), chartHeight: document.getElementById('chartHeight'), chartHeightDisplay: document.getElementById('chartHeightDisplay'), donutCutout: document.getElementById('donutCutout'), donutCutoutDisplay: document.getElementById('donutCutoutDisplay'), donutCutoutContainer: document.getElementById('donutCutoutContainer'), elementShadowSlider: document.getElementById('elementShadowSlider'), elementShadowDisplay: document.getElementById('elementShadowDisplay'), chartThickness: document.getElementById('chartThickness'), chartThicknessDisplay: document.getElementById('chartThicknessDisplay'), outlineWidthSlider: document.getElementById('outlineWidthSlider'), outlineWidthDisplay: document.getElementById('outlineWidthDisplay'), outlineColor: document.getElementById('outlineColor'), outlineColorText: document.getElementById('outlineColorText'), borderRadiusSlider: document.getElementById('borderRadiusSlider'), borderRadiusDisplay: document.getElementById('borderRadiusDisplay'),
-            toggleLegend: document.getElementById('toggleLegend'), toggleTrendline: document.getElementById('toggleTrendline'), toggleOutliers: document.getElementById('toggleOutliers'), toggleCrossFilter: document.getElementById('toggleCrossFilter'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'), toggleAxisNumbers: document.getElementById('toggleAxisNumbers'), toggleAxisCategories: document.getElementById('toggleAxisCategories'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
+            toggleLegend: document.getElementById('toggleLegend'), legendSettingsPanel: document.getElementById('legendSettingsPanel'), legendFontSizeSlider: document.getElementById('legendFontSizeSlider'), legendFontSizeDisplay: document.getElementById('legendFontSizeDisplay'), legendPaddingSlider: document.getElementById('legendPaddingSlider'), legendPaddingDisplay: document.getElementById('legendPaddingDisplay'), toggleTrendline: document.getElementById('toggleTrendline'), toggleOutliers: document.getElementById('toggleOutliers'), toggleCrossFilter: document.getElementById('toggleCrossFilter'), datalabelPositionSelect: document.getElementById('datalabelPositionSelect'), toggleAxisNumbers: document.getElementById('toggleAxisNumbers'), toggleAxisCategories: document.getElementById('toggleAxisCategories'), axesControlPanel: document.getElementById('axesControlPanel'), axisFontSizeSlider: document.getElementById('axisFontSizeSlider'), axisFontSizeDisplay: document.getElementById('axisFontSizeDisplay'),
             bgColor: document.getElementById('bgColor'), bgColorText: document.getElementById('bgColorText'), bgOpacitySlider: document.getElementById('bgOpacitySlider'), bgOpacityDisplay: document.getElementById('bgOpacityDisplay'), bentoBgColor: document.getElementById('bentoBgColor'), bentoBgColorText: document.getElementById('bentoBgColorText'), bentoBgOpacitySlider: document.getElementById('bentoBgOpacitySlider'), bentoBgOpacityDisplay: document.getElementById('bentoBgOpacityDisplay'), bentoBgControlPanel: document.getElementById('bentoBgControlPanel'), bentoOpacityWrapper: document.getElementById('bentoOpacityWrapper'), gridControlPanel: document.getElementById('gridControlPanel'), toggleGridX: document.getElementById('toggleGridX'), toggleGridY: document.getElementById('toggleGridY'),
             bgMediaInput: document.getElementById('bgMediaInput'), btnClearBgMedia: document.getElementById('btnClearBgMedia'), bgMediaImg: document.getElementById('bgMediaImg'), bgMediaVideo: document.getElementById('bgMediaVideo'),
             exportTarget: document.getElementById('exportTarget'), globalHeader: document.getElementById('globalChartHeader'), globalTitle: document.getElementById('globalChartTitle'), globalSubtitle: document.getElementById('globalChartSubtitle'), globalWatermark: document.getElementById('globalWatermark'), canvasWrapper: document.getElementById('canvasWrapper'), bentoWrapper: document.getElementById('bentoWrapper'), percentageContainer: document.getElementById('percentageContainer'), totalSumDisplay: document.getElementById('totalSumDisplay'), btnExport: document.getElementById('btnExport'), btnFullscreen: document.getElementById('btnFullscreen'), leftPanel: document.getElementById('leftPanel'), leftPanelDragHandle: document.getElementById('leftPanelDragHandle'), btnResetLeftDockPos: document.getElementById('btnResetLeftDockPos'), btnMinimizeLeftPanel: document.getElementById('btnMinimizeLeftPanel'), btnCloseLeftPanel: document.getElementById('btnCloseLeftPanel'), slideEditingSubheader: document.getElementById('slideEditingSubheader'), btnToggleSidebar: document.getElementById('btnToggleSidebar'), btnCloseMobile: document.getElementById('btnCloseMobile'), burgerIcon: document.getElementById('burgerIcon'), rightLayerPanel: document.getElementById('rightLayerPanel'), slideListContainer: document.getElementById('slideListContainer'), btnAddSlide: document.getElementById('btnAddSlide'), btnToggleRightPanel: document.getElementById('btnToggleRightPanel'), btnCloseRightPanel: document.getElementById('btnCloseRightPanel'), rightPanelDragHandle: document.getElementById('rightLayerPanelHeader'), dataTargetSelectorPanel: document.getElementById('dataTargetSelectorPanel'), tabGrid0: document.getElementById('tabGrid0'), tabGrid1: document.getElementById('tabGrid1'), tabGrid2: document.getElementById('tabGrid2'), sidebarHeader: document.getElementById('sidebarHeader'), elementPopup: document.getElementById('elementPopup'), popupIcon: document.getElementById('popupIcon'), popupTitle: document.getElementById('popupTitle'), popupSubtitle: document.getElementById('popupSubtitle'), popupColorInput: document.getElementById('popupColorInput'), popupColorText: document.getElementById('popupColorText'), popupExplodeSlider: document.getElementById('popupExplodeSlider'), popupExplodeDisplay: document.getElementById('popupExplodeDisplay')
@@ -5412,6 +5533,8 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             if (!exportTarget) return;
 
             try {
+                window.isExporting = true;
+                window.__raceProgress = 1;
                 if (!window.jspdf || !window.jspdf.jsPDF) {
                     throw new Error("Pustaka jsPDF belum termuat!");
                 }
@@ -5436,7 +5559,17 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                     if (progressBar) progressBar.style.width = `${pct}%`;
 
                     switchSlide(slideIdx, false);
-                    await new Promise(resolve => setTimeout(resolve, 450));
+                    window.__raceProgress = 1;
+                    if (mainCharts && mainCharts.length > 0) {
+                        mainCharts.forEach(c => { 
+                            if (c) {
+                                if (typeof c.stop === 'function') c.stop();
+                                if (typeof c.update === 'function') c.update('none');
+                            }
+                        });
+                    }
+                    if (typeof renderCalloutsOverlay === 'function') renderCalloutsOverlay();
+                    await new Promise(resolve => setTimeout(resolve, 400));
 
                     const originalTransform = exportTarget.style.transform;
                     exportTarget.style.transform = 'scale(1)';
@@ -5449,19 +5582,43 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
 
                     exportTarget.style.transform = originalTransform;
 
-                    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
                     if (i > 0) {
                         doc.addPage(isLandscape ? [pageWidth, pageHeight] : 'a4', isLandscape ? 'landscape' : 'portrait');
                     }
 
-                    doc.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
+                    // Preservasi aspek rasio agar grafik proporsional sempurna (tidak gepeng / terdistorsi)
+                    const imgW = canvas.width;
+                    const imgH = canvas.height;
+                    const imgRatio = imgW / imgH;
+                    const pageRatio = pageWidth / pageHeight;
+
+                    let drawW = pageWidth;
+                    let drawH = pageHeight;
+                    let drawX = 0;
+                    let drawY = 0;
+
+                    if (imgRatio > pageRatio) {
+                        drawW = pageWidth;
+                        drawH = pageWidth / imgRatio;
+                        drawY = (pageHeight - drawH) / 2;
+                    } else {
+                        drawH = pageHeight;
+                        drawW = pageHeight * imgRatio;
+                        drawX = (pageWidth - drawW) / 2;
+                    }
+
+                    doc.setFillColor(255, 255, 255);
+                    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+                    doc.addImage(imgData, 'JPEG', drawX, drawY, drawW, drawH, undefined, 'FAST');
 
                     if (includePageNumbers) {
-                        doc.setFontSize(14);
+                        doc.setFontSize(11);
                         doc.setTextColor(148, 163, 184);
                         const pageStr = `Slide ${i + 1} dari ${selectedIndices.length}`;
-                        doc.text(pageStr, pageWidth - 140, pageHeight - 30);
+                        // Letakkan di pojok kiri bawah agar tidak menabrak watermark di pojok kanan bawah
+                        doc.text(pageStr, 40, pageHeight - 24);
                     }
                 }
 
@@ -5481,6 +5638,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 console.error("PDF Export Error:", err);
                 showToast("Gagal mengekspor PDF: " + err.message, true);
             } finally {
+                window.isExporting = false;
                 if (btn) btn.disabled = false;
                 switchSlide(originalSlideIndex, false);
             }
@@ -5491,11 +5649,25 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             els.btnExport.addEventListener('click', async () => {
                 const target = document.getElementById('exportTarget'); if (!target) return;
                 const originalTransform = target.style.transform; target.style.transform = 'scale(1)';
+                window.isExporting = true;
+                window.__raceProgress = 1;
+                if (mainCharts && mainCharts.length > 0) {
+                    mainCharts.forEach(c => { 
+                        if (c) {
+                            if (typeof c.stop === 'function') c.stop();
+                            if (typeof c.update === 'function') c.update('none');
+                        }
+                    });
+                }
+                if (typeof renderCalloutsOverlay === 'function') renderCalloutsOverlay();
                 try {
-                    const canvas = await html2canvas(target, { scale: 3, useCORS: true, backgroundColor: null });
+                    const canvas = await html2canvas(target, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
                     const link = document.createElement('a'); link.download = `Pro_Chart_Export_${Date.now()}.png`; link.href = canvas.toDataURL('image/png'); link.click();
                     showToast('Grafik berhasil diekspor (HD)!');
-                } catch (e) { console.error('Export failed:', e); showToast('Gagal mengekspor grafik.', true); } finally { target.style.transform = originalTransform; }
+                } catch (e) { console.error('Export failed:', e); showToast('Gagal mengekspor grafik.', true); } finally { 
+                    window.isExporting = false;
+                    target.style.transform = originalTransform; 
+                }
             });
         }
         function handleFullscreenChange() { if (!document.fullscreenElement && !document.webkitIsFullScreen) { if (isPresenting) exitPresentationUI(); } }
@@ -6358,10 +6530,28 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             if (isRightPanelOpen) { 
                 if (typeof bringFloatingPanelToFront === 'function') bringFloatingPanelToFront(els.rightLayerPanel);
                 els.rightLayerPanel.classList.remove('pointer-events-none', 'opacity-0', 'scale-95'); 
-                if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.add('ring-2', 'ring-[#cafc03]', 'bg-slate-900', 'text-[#cafc03]'); 
+                if (els.btnToggleRightPanel) {
+                    els.btnToggleRightPanel.classList.add('ring-2', 'ring-[#cafc03]', 'bg-slate-900', 'hover:bg-slate-800', 'text-[#cafc03]', 'shadow-[0_0_15px_rgba(202,252,3,0.4)]'); 
+                    els.btnToggleRightPanel.classList.remove('bg-[#cafc03]', 'hover:bg-[#b5e002]', 'text-slate-900');
+                    const icon = els.btnToggleRightPanel.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('text-slate-900');
+                        icon.classList.add('text-[#cafc03]');
+                        icon.style.filter = 'drop-shadow(0 0 6px rgba(202,252,3,0.85))';
+                    }
+                }
             } else { 
                 els.rightLayerPanel.classList.add('pointer-events-none', 'opacity-0', 'scale-95'); 
-                if (els.btnToggleRightPanel) els.btnToggleRightPanel.classList.remove('ring-2', 'ring-[#cafc03]', 'bg-slate-900', 'text-[#cafc03]'); 
+                if (els.btnToggleRightPanel) {
+                    els.btnToggleRightPanel.classList.remove('ring-2', 'ring-[#cafc03]', 'bg-slate-900', 'hover:bg-slate-800', 'text-[#cafc03]', 'shadow-[0_0_15px_rgba(202,252,3,0.4)]'); 
+                    els.btnToggleRightPanel.classList.add('bg-[#cafc03]', 'hover:bg-[#b5e002]', 'text-slate-900');
+                    const icon = els.btnToggleRightPanel.querySelector('i');
+                    if (icon) {
+                        icon.classList.add('text-slate-900');
+                        icon.classList.remove('text-[#cafc03]');
+                        icon.style.filter = '';
+                    }
+                }
             } 
         }
         if (els.btnToggleSidebar) els.btnToggleSidebar.addEventListener('click', () => { isSidebarOpen = !isSidebarOpen; applySidebarState(); saveState(); }); if (els.btnToggleRightPanel) els.btnToggleRightPanel.addEventListener('click', () => { isRightPanelOpen = !isRightPanelOpen; applyRightPanelState(); renderSlideList(); saveState(); }); if (els.btnCloseRightPanel) els.btnCloseRightPanel.addEventListener('click', () => { isRightPanelOpen = false; applyRightPanelState(); saveState(); }); window.addEventListener('resize', () => { mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); });
@@ -6881,6 +7071,51 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 const tDelta = document.getElementById('toggleVersusDelta');
                 if (tDelta) tDelta.checked = slide.showVersusDelta !== false;
 
+                if (els.toggleLegend) els.toggleLegend.checked = slide.showLegend !== false;
+                const legPanel = document.getElementById('legendSettingsPanel');
+                if (legPanel) legPanel.style.display = slide.showLegend !== false ? 'block' : 'none';
+                const legPos = slide.legendPosition || 'top';
+                ['top', 'bottom', 'left', 'right'].forEach(p => {
+                    const btn = document.getElementById('btnLegendPos' + p.charAt(0).toUpperCase() + p.slice(1));
+                    if (btn) {
+                        if (legPos === p) {
+                            btn.classList.add('bg-white', 'shadow-sm', 'text-indigo-600', 'font-bold');
+                            btn.classList.remove('text-slate-500', 'hover:text-slate-800');
+                        } else {
+                            btn.classList.remove('bg-white', 'shadow-sm', 'text-indigo-600', 'font-bold');
+                            btn.classList.add('text-slate-500', 'hover:text-slate-800');
+                        }
+                    }
+                });
+                const legAlign = slide.legendAlign || 'center';
+                ['start', 'center', 'end'].forEach(a => {
+                    const btn = document.getElementById('btnLegendAlign' + a.charAt(0).toUpperCase() + a.slice(1));
+                    if (btn) {
+                        if (legAlign === a) {
+                            btn.classList.add('bg-white', 'shadow-sm', 'text-indigo-600', 'font-bold');
+                            btn.classList.remove('text-slate-500', 'hover:text-slate-800');
+                        } else {
+                            btn.classList.remove('bg-white', 'shadow-sm', 'text-indigo-600', 'font-bold');
+                            btn.classList.add('text-slate-500', 'hover:text-slate-800');
+                        }
+                    }
+                });
+                setSliderValWithInput(document.getElementById('legendFontSizeSlider'), 'legendFontSizeInput', document.getElementById('legendFontSizeDisplay'), slide.legendFontSize !== undefined ? slide.legendFontSize : 14, 'px');
+                setSliderValWithInput(document.getElementById('legendPaddingSlider'), 'legendPaddingInput', document.getElementById('legendPaddingDisplay'), slide.legendPadding !== undefined ? slide.legendPadding : 16, 'px');
+                const legWeightSel = document.getElementById('legendFontWeightSelect');
+                if (legWeightSel) legWeightSel.value = slide.legendFontWeight || 'bold';
+                const legPointSel = document.getElementById('legendPointStyleSelect');
+                if (legPointSel) legPointSel.value = slide.legendPointStyle || 'circle';
+                const legColorModeSel = document.getElementById('legendColorModeSelect');
+                if (legColorModeSel) legColorModeSel.value = slide.legendColorMode || 'auto';
+                applyBtnStyle('btnLegendItalic', slide.legendItalic);
+                const legColorInp = document.getElementById('legendCustomColorInput');
+                const legColorTxt = document.getElementById('legendCustomColorText');
+                if (legColorInp && legColorTxt) {
+                    legColorInp.value = slide.legendCustomColor || (appStudioTheme === 'obsidian' ? '#e2e8f0' : '#334155');
+                    legColorTxt.innerText = legColorInp.value;
+                }
+
                 if (typeof updateCanvasExecutiveBanner === 'function') updateCanvasExecutiveBanner();
 
                 triggerVisUpdateWithDebounce();
@@ -6921,7 +7156,9 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             { el: els.bentoBgOpacitySlider, input: document.getElementById('bentoBgOpacityInput'), prop: 'bentoBgOpacity', disp: els.bentoBgOpacityDisplay, unit: '%' },
             { el: document.getElementById('lineBorderWidthSlider'), input: document.getElementById('lineBorderWidthInput'), prop: 'lineBorderWidth', disp: document.getElementById('lineBorderWidthDisplay'), unit: 'px' },
             { el: document.getElementById('datalabelSizeSlider'), input: document.getElementById('datalabelSizeInput'), prop: 'datalabelSize', disp: document.getElementById('datalabelSizeDisplay'), unit: 'px' },
-            { el: document.getElementById('datalabelStrokeWidthSlider'), input: document.getElementById('datalabelStrokeWidthInput'), prop: 'datalabelStrokeWidth', disp: document.getElementById('datalabelStrokeWidthDisplay'), unit: 'px' }
+            { el: document.getElementById('datalabelStrokeWidthSlider'), input: document.getElementById('datalabelStrokeWidthInput'), prop: 'datalabelStrokeWidth', disp: document.getElementById('datalabelStrokeWidthDisplay'), unit: 'px' },
+            { el: document.getElementById('legendFontSizeSlider'), input: document.getElementById('legendFontSizeInput'), prop: 'legendFontSize', disp: document.getElementById('legendFontSizeDisplay'), unit: 'px' },
+            { el: document.getElementById('legendPaddingSlider'), input: document.getElementById('legendPaddingInput'), prop: 'legendPadding', disp: document.getElementById('legendPaddingDisplay'), unit: 'px' }
         ];
 
         sliderBinds.forEach(b => {
@@ -6970,7 +7207,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
         }
 
  if (els.bentoBgColor) els.bentoBgColor.addEventListener('input', (e) => { if (els.bentoBgColorText) els.bentoBgColorText.innerText = e.target.value; syncAndRender('bentoBgColor', e.target.value); }); if (els.outlineColor) els.outlineColor.addEventListener('input', (e) => { if (els.outlineColorText) els.outlineColorText.innerText = e.target.value; syncAndRender('outlineColor', e.target.value); });
-        const toggles = { 'toggleLegend': 'showLegend', 'toggleTrendline': 'showTrendline', 'toggleOutliers': 'showOutliers', 'toggleCrossFilter': 'showCrossFilter', 'toggleAxisNumbers': 'showAxisNumbers', 'toggleAxisCategories': 'showAxisCategories', 'toggleGridX': 'showGridX', 'toggleGridY': 'showGridY', 'toggleDonutCenter': 'showDonutCenter' }; Object.keys(toggles).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => syncAndRender(toggles[id], e.target.checked)); });
+        const toggles = { 'toggleLegend': 'showLegend', 'toggleTrendline': 'showTrendline', 'toggleOutliers': 'showOutliers', 'toggleCrossFilter': 'showCrossFilter', 'toggleAxisNumbers': 'showAxisNumbers', 'toggleAxisCategories': 'showAxisCategories', 'toggleGridX': 'showGridX', 'toggleGridY': 'showGridY', 'toggleDonutCenter': 'showDonutCenter' }; Object.keys(toggles).forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => { syncAndRender(toggles[id], e.target.checked); if (id === 'toggleLegend') { const legPanel = document.getElementById('legendSettingsPanel'); if (legPanel) legPanel.style.display = e.target.checked ? 'block' : 'none'; } }); });
         document.getElementById('donutCenterLabelInput')?.addEventListener('input', (e) => syncAndRender('donutCenterLabel', e.target.value));
         document.getElementById('dataUnitInput')?.addEventListener('input', (e) => syncAndRender('valueUnit', e.target.value));
 
@@ -7049,7 +7286,24 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             syncUIToActiveSlide();
             triggerVisUpdateWithDebounce();
         }
-        ['decimalPlacesSelect','datalabelWeightSelect','datalabelColorModeSelect','versusDeltaModeSelect'].forEach(id => {
+
+        function setLegendPosition(pos) {
+            syncAndRender('legendPosition', pos);
+            syncUIToActiveSlide();
+        }
+        function setLegendAlign(align) {
+            syncAndRender('legendAlign', align);
+            syncUIToActiveSlide();
+        }
+        function toggleLegendItalic() {
+            const slide = getActiveSlide(); if(!slide) return;
+            slide.legendItalic = !slide.legendItalic;
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+        }
+
+        ['decimalPlacesSelect','datalabelWeightSelect','datalabelColorModeSelect','versusDeltaModeSelect','legendFontWeightSelect','legendPointStyleSelect','legendColorModeSelect'].forEach(id => {
             document.getElementById(id)?.addEventListener('change', (e) => syncAndRender(id.replace('Select',''), e.target.value));
         });
 
@@ -7059,6 +7313,13 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             syncAndRender('datalabelCustomColor', e.target.value);
             const slide = getActiveSlide();
             if (slide && slide.datalabelColorMode !== 'custom') { slide.datalabelColorMode = 'custom'; syncUIToActiveSlide(); }
+        });
+        document.getElementById('legendCustomColorInput')?.addEventListener('input', (e) => {
+            const text = document.getElementById('legendCustomColorText');
+            if (text) text.innerText = e.target.value;
+            syncAndRender('legendCustomColor', e.target.value);
+            const slide = getActiveSlide();
+            if (slide && slide.legendColorMode !== 'custom') { slide.legendColorMode = 'custom'; syncUIToActiveSlide(); }
         });
         document.getElementById('datalabelStrokeColorInput')?.addEventListener('input', (e) => syncAndRender('datalabelStrokeColor', e.target.value));
         document.getElementById('toggleVersusDelta')?.addEventListener('change', (e) => syncAndRender('showVersusDelta', e.target.checked));
@@ -7527,45 +7788,59 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             const offsetY = (canvasRect.top - wrapperRect.top) / (scaleRatio || 1);
 
             let anchorX = el.x, anchorY = el.y;
+            let elbowX = el.x, elbowY = el.y;
             let defaultBoxX = el.x, defaultBoxY = el.y;
             let side = 'right';
+            const isRadial = ['pie', 'doughnut', 'polarArea', 'concentric', 'windrose'].includes(cType);
 
-            if (['pie', 'doughnut', 'polarArea', 'concentric', 'windrose'].includes(cType)) {
+            if (isRadial) {
                 const startA = el.startAngle !== undefined ? el.startAngle : 0;
                 const endA = el.endAngle !== undefined ? el.endAngle : 0;
                 const midAngle = (startA + endA) / 2;
-                const innerR = el.innerRadius || 0;
                 const outerR = el.outerRadius || 80;
-                const midR = innerR > 0 ? (innerR + outerR) / 2 : outerR * 0.75;
-                anchorX = el.x + Math.cos(midAngle) * midR;
-                anchorY = el.y + Math.sin(midAngle) * midR;
                 const cosA = Math.cos(midAngle);
                 const sinA = Math.sin(midAngle);
+                
+                // Point on outer rim of slice
+                anchorX = el.x + cosA * (outerR + 2);
+                anchorY = el.y + sinA * (outerR + 2);
+
+                // Elbow point radiates 28px outward away from circle center
+                const spreadStep = (datasetIndex * 24);
+                elbowX = el.x + cosA * (outerR + 28 + spreadStep);
+                elbowY = el.y + sinA * (outerR + 28 + spreadStep);
+
                 side = cosA >= 0 ? 'right' : 'left';
-                const spreadStep = (datasetIndex * 26);
-                const outDist = outerR + 50 + spreadStep;
-                defaultBoxX = el.x + (cosA >= 0 ? Math.max(cosA * outDist, outerR * 0.7 + 45 + spreadStep) : Math.min(cosA * outDist, -outerR * 0.7 - 45 - spreadStep));
-                defaultBoxY = el.y + sinA * (outerR + 30 + spreadStep);
+                const outDist = outerR + 65 + spreadStep;
+                defaultBoxX = el.x + cosA * outDist + (cosA >= 0 ? 60 : -60);
+                defaultBoxY = el.y + sinA * (outDist * 0.85);
             } else if (cType === 'bar-horizontal' || cType === 'gantt' || cType === 'tape') {
                 anchorX = el.x;
                 anchorY = el.y;
-                defaultBoxX = el.x + 80;
+                elbowX = el.x + 35;
+                elbowY = el.y;
+                defaultBoxX = el.x + 85;
                 defaultBoxY = el.y - 22 + (datasetIndex * 22);
                 side = 'right';
             } else {
                 anchorX = el.x;
                 anchorY = el.y;
-                defaultBoxX = el.x + (dataIndex % 2 === 0 ? -65 : 65);
-                defaultBoxY = el.y - 50 - (datasetIndex * 24);
+                elbowX = el.x;
+                elbowY = el.y - 25;
+                defaultBoxX = el.x + (dataIndex % 2 === 0 ? -75 : 75);
+                defaultBoxY = el.y - 55 - (datasetIndex * 24);
                 side = dataIndex % 2 === 0 ? 'left' : 'right';
             }
 
             return {
                 ax: offsetX + anchorX,
                 ay: offsetY + anchorY,
-                defX: Math.max(10, Math.min(90, ((offsetX + defaultBoxX) / wWidth) * 100)),
-                defY: Math.max(10, Math.min(90, ((offsetY + defaultBoxY) / wHeight) * 100)),
-                side
+                ex: offsetX + elbowX,
+                ey: offsetY + elbowY,
+                defX: Math.max(8, Math.min(92, ((offsetX + defaultBoxX) / wWidth) * 100)),
+                defY: Math.max(8, Math.min(92, ((offsetY + defaultBoxY) / wHeight) * 100)),
+                side,
+                isRadial
             };
         }
 
@@ -7626,8 +7901,11 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                         const anchor = getChartElementAnchor(chart, cType, chartDatasetIdx, chartDataIdx, wrapperRect);
                         if (!anchor) return;
 
-                        if (valObj.calloutX === undefined) valObj.calloutX = anchor.defX;
-                        if (valObj.calloutY === undefined) valObj.calloutY = anchor.defY;
+                        if (valObj.calloutX === undefined || !valObj._calloutUserMoved) {
+                            valObj.calloutX = anchor.defX;
+                            valObj.calloutY = anchor.defY;
+                            valObj._lastChartType = cType;
+                        }
 
                         const boxX = (valObj.calloutX / 100) * wWidth;
                         const boxY = (valObj.calloutY / 100) * wHeight;
@@ -7641,7 +7919,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                         const seriesBadge = isMultiSeries ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 ml-1">${ds.series[sIdx]?.name || ''}</span>` : '';
 
                         const boxEl = document.createElement('div');
-                        boxEl.className = 'callout-box group absolute bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl shadow-md border border-slate-200/90 font-[\'Inter\'] min-w-[145px] max-w-[240px] cursor-move pointer-events-auto transition-all duration-150';
+                        boxEl.className = 'callout-box group absolute bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl shadow-md border border-slate-200/90 font-[\'Inter\'] min-w-[160px] max-w-[320px] cursor-move pointer-events-auto transition-all duration-150';
                         boxEl.style.left = valObj.calloutX + '%';
                         boxEl.style.top = valObj.calloutY + '%';
                         boxEl.style.transform = 'translate(-50%, -50%)';
@@ -7650,16 +7928,16 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                         boxEl.dataset.sIdx = sIdx;
 
                         boxEl.innerHTML = `
-                            <div class="text-[11px] font-medium text-slate-700 leading-snug flex items-center justify-between gap-1">
-                                <span class="truncate">${row.icon ? row.icon + ' ' : ''}${row.label}:</span>
+                            <div class="text-[11px] font-semibold text-slate-800 leading-snug flex items-center justify-between gap-2 whitespace-nowrap">
+                                <span class="flex items-center gap-1">${row.icon ? row.icon + ' ' : ''}<span>${row.label}</span></span>
                                 <div class="flex items-center gap-1 shrink-0">
                                     ${seriesBadge}
-                                    <button type="button" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); removeCalloutBubble(${bIdx}, '${row.id}', ${sIdx})" class="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-150 w-6 h-6 rounded-lg bg-slate-100 hover:bg-rose-500 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer shadow-sm ml-1" title="Hapus Bubble Callout (Delete)">
-                                        <i class="ph-bold ph-x text-xs"></i>
+                                    <button type="button" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); removeCalloutBubble(${bIdx}, '${row.id}', ${sIdx})" class="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-150 w-5 h-5 rounded-md bg-slate-100 hover:bg-rose-500 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer shadow-xs ml-0.5" title="Hapus Bubble Callout">
+                                        <i class="ph-bold ph-x text-[10px]"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div class="text-xs sm:text-[13px] text-slate-900 leading-tight mt-0.5">
+                            <div class="text-xs sm:text-[13px] text-slate-900 leading-tight mt-0.5 whitespace-nowrap">
                                 <span class="font-black font-mono-tech">${Math.round(numVal).toLocaleString('id-ID')}${unitStr}</span>
                                 <span class="font-normal text-slate-600"> (${pctFormatted}%)</span>
                             </div>
@@ -7675,13 +7953,19 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                         const dotY = boxY;
 
                         let pathD = '';
-                        const dy = Math.abs(dotY - anchor.ay);
-                        const dx = Math.abs(dotX - anchor.ax);
-                        if (dy > dx * 0.6) {
-                            pathD = `M ${anchor.ax} ${anchor.ay} L ${anchor.ax} ${dotY} L ${dotX} ${dotY}`;
+                        if (anchor.isRadial) {
+                            const ex = anchor.ex !== undefined ? anchor.ex : anchor.ax;
+                            const ey = anchor.ey !== undefined ? anchor.ey : anchor.ay;
+                            pathD = `M ${anchor.ax} ${anchor.ay} L ${ex} ${ey} L ${dotX} ${dotY}`;
                         } else {
-                            const midX = anchor.ax + (dotX - anchor.ax) * 0.35;
-                            pathD = `M ${anchor.ax} ${anchor.ay} L ${midX} ${dotY} L ${dotX} ${dotY}`;
+                            const dy = Math.abs(dotY - anchor.ay);
+                            const dx = Math.abs(dotX - anchor.ax);
+                            if (dy > dx * 0.6) {
+                                pathD = `M ${anchor.ax} ${anchor.ay} L ${anchor.ax} ${dotY} L ${dotX} ${dotY}`;
+                            } else {
+                                const midX = anchor.ax + (dotX - anchor.ax) * 0.35;
+                                pathD = `M ${anchor.ax} ${anchor.ay} L ${midX} ${dotY} L ${dotX} ${dotY}`;
+                            }
                         }
 
                         const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -7694,10 +7978,21 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                         pathEl.setAttribute('stroke-linejoin', 'round');
                         svg.appendChild(pathEl);
 
+                        // Slice anchor connector dot
+                        const anchorDotEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        anchorDotEl.setAttribute('cx', anchor.ax);
+                        anchorDotEl.setAttribute('cy', anchor.ay);
+                        anchorDotEl.setAttribute('r', '3.5');
+                        anchorDotEl.setAttribute('fill', valObj.color || '#cafc03');
+                        anchorDotEl.setAttribute('stroke', '#0f172a');
+                        anchorDotEl.setAttribute('stroke-width', '1.5');
+                        svg.appendChild(anchorDotEl);
+
+                        // Box target dot
                         const circleEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                         circleEl.setAttribute('cx', dotX);
                         circleEl.setAttribute('cy', dotY);
-                        circleEl.setAttribute('r', '5.5');
+                        circleEl.setAttribute('r', '4.5');
                         circleEl.setAttribute('fill', valObj.color || '#0f172a');
                         circleEl.setAttribute('stroke', '#ffffff');
                         circleEl.setAttribute('stroke-width', '1.5');
@@ -7891,6 +8186,7 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             } else {
                 draggedCalloutInfo.valObj.calloutX = newX;
                 draggedCalloutInfo.valObj.calloutY = newY;
+                draggedCalloutInfo.valObj._calloutUserMoved = true;
             }
             renderCalloutsOverlay();
         }
@@ -8029,9 +8325,31 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
             const chartOptions = {
                 responsive: true, maintainAspectRatio: false, indexAxis: isHorizontal ? 'y' : 'x', layout: { padding: (slide.bentoLayout === '1' ? 10 : 20) + extraPad }, interaction: { mode: 'nearest', intersect: true }, animation: { duration: 900, delay: blockIndex * 120, easing: 'easeOutQuart' },
                 plugins: {
-                    legend: { display: slide.showLegend && !isTreemap && (blockIndex === 0 || slide.bentoLayout !== '1'), position: 'top', align: 'center', labels: { font: { family: 'Inter', size: 14, weight: 'bold' }, color: appStudioTheme === 'obsidian' ? '#e2e8f0' : '#334155', usePointStyle: true, padding: 16 } },
+                    legend: { display: slide.showLegend !== false && !isTreemap && (blockIndex === 0 || slide.bentoLayout !== '1'), position: slide.legendPosition || 'top', align: slide.legendAlign || 'center', labels: { font: { family: 'Inter', size: slide.legendFontSize !== undefined ? Number(slide.legendFontSize) : 14, weight: slide.legendFontWeight || 'bold', style: slide.legendItalic ? 'italic' : 'normal' }, color: slide.legendColorMode === 'custom' ? (slide.legendCustomColor || '#334155') : (appStudioTheme === 'obsidian' ? '#e2e8f0' : '#334155'), usePointStyle: slide.legendPointStyle !== 'box', pointStyle: (slide.legendPointStyle && slide.legendPointStyle !== 'box') ? slide.legendPointStyle : undefined, padding: slide.legendPadding !== undefined ? Number(slide.legendPadding) : 16 } },
                     tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { size: 14, family: 'Inter' }, bodyFont: { size: 13, family: 'Inter' }, padding: 12, cornerRadius: 8, displayColors: true },
-                    datalabels: { display: slide.datalabelPosition !== 'none' && !isRadial && cType !== 'scatter' && cType !== 'bubble' && !isTreemap, anchor: dlPos.anchor, align: dlPos.align, color: slide.datalabelColorMode === 'custom' ? slide.datalabelCustomColor : (slide.datalabelPosition === 'outside' ? (appStudioTheme === 'obsidian' ? '#f8fafc' : '#111827') : '#fff'), font: { family: 'Inter', size: slide.datalabelSize || 13, weight: String(slide.datalabelWeight || '900'), style: slide.datalabelItalic ? 'italic' : 'normal' }, formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : formatChartNumber(raw * prog, slide); } if (Array.isArray(v)) return formatChartNumber(Math.abs(v[1] - v[0]) * prog, slide); if (typeof v === 'object') return formatChartNumber(v.y * prog, slide); return formatChartNumber(v * prog, slide); }, textStrokeColor: slide.datalabelStrokeColor || (slide.datalabelPosition === 'outside' ? 'transparent' : 'rgba(0,0,0,0.4)'), textStrokeWidth: slide.datalabelStrokeWidth !== undefined ? slide.datalabelStrokeWidth : (slide.datalabelPosition === 'outside' ? 0 : 2) }
+                    datalabels: {
+                        display: slide.datalabelPosition !== 'none' && !isRadial && cType !== 'scatter' && cType !== 'bubble' && !isTreemap,
+                        anchor: dlPos.anchor,
+                        align: dlPos.align,
+                        color: (ctx) => {
+                            if (slide.datalabelColorMode === 'custom') return slide.datalabelCustomColor || '#334155';
+                            if (slide.datalabelPosition === 'outside') return appStudioTheme === 'obsidian' ? '#f8fafc' : '#111827';
+                            const bg = ctx.dataset.backgroundColor;
+                            const col = Array.isArray(bg) ? bg[ctx.dataIndex] : bg;
+                            return getAutoContrastColor(col);
+                        },
+                        font: { family: 'Inter', size: slide.datalabelSize || 13, weight: String(slide.datalabelWeight || '900'), style: slide.datalabelItalic ? 'italic' : 'normal' },
+                        formatter: (v, ctx) => { if (v === null || v === undefined || v === "") return null; const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1; if (isTape) { let raw = ctx.dataset.rawValues[ctx.dataIndex]; return raw === null || raw === "" ? null : formatChartNumber(raw * prog, slide); } if (Array.isArray(v)) return formatChartNumber(Math.abs(v[1] - v[0]) * prog, slide); if (typeof v === 'object') return formatChartNumber(v.y * prog, slide); return formatChartNumber(v * prog, slide); },
+                        textStrokeColor: (ctx) => {
+                            if (slide.datalabelStrokeColor) return slide.datalabelStrokeColor;
+                            if (slide.datalabelPosition === 'outside') return 'transparent';
+                            const bg = ctx.dataset.backgroundColor;
+                            const col = Array.isArray(bg) ? bg[ctx.dataIndex] : bg;
+                            const tc = getAutoContrastColor(col);
+                            return tc === '#ffffff' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)';
+                        },
+                        textStrokeWidth: slide.datalabelStrokeWidth !== undefined ? slide.datalabelStrokeWidth : (slide.datalabelPosition === 'outside' ? 0 : 2)
+                    }
                 },
                 scales: {},
                 onHover: (e, elements, chart) => {
@@ -8088,8 +8406,56 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                 if (isHorizontal) { chartOptions.scales.y = { type: catAxisType || 'category', display: displayCategory, stacked: isStacked, grid: { display: slide.showGridY, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; chartOptions.scales.x = { type: 'linear', display: displayNumbers, stacked: isStacked, grid: { display: slide.showGridX, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; if (hasSecondaryAxis) chartOptions.scales.xRight = { type: 'linear', position: 'top', display: displayNumbers, stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize }, color: '#64748b' } }; }
                 else { chartOptions.scales.x = { type: catAxisType || 'category', display: displayCategory, stacked: isStacked, grid: { display: slide.showGridX, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; chartOptions.scales.y = { type: 'linear', display: displayNumbers, position: 'left', stacked: isStacked, grid: { display: slide.showGridY, color: '#e2e8f0', drawBorder: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize, weight: '500' }, color: '#64748b' } }; if (hasSecondaryAxis) chartOptions.scales.yRight = { type: 'linear', position: 'right', display: displayNumbers, stacked: isStacked, grid: { display: false }, ticks: { font: { family: 'Inter', size: slide.axisFontSize }, color: '#64748b' } }; }
             } else if (isRadial) {
-                if (cType !== 'radar' && cType !== 'polarArea' && !isWindrose) delete chartOptions.scales; chartOptions.cutout = cType === 'doughnut' || isConcentric ? slide.donutCutout + '%' : 0; if (cType !== 'radar') chartOptions.elements = { arc: { borderRadius: slide.borderRadius, borderWidth: oWidth, borderColor: oColor } };
-                chartOptions.plugins.datalabels = { display: slide.datalabelPosition !== 'none', clamp: true, anchor: 'center', align: 'center', color: slide.datalabelColorMode === 'custom' ? slide.datalabelCustomColor : '#fff', font: { family: 'Inter', size: slide.datalabelSize || 13, weight: String(slide.datalabelWeight || '900'), style: slide.datalabelItalic ? 'italic' : 'normal' }, textStrokeColor: slide.datalabelStrokeColor || 'rgba(0,0,0,0.5)', textStrokeWidth: slide.datalabelStrokeWidth !== undefined ? slide.datalabelStrokeWidth : 2, formatter: (value, ctx) => { if (value === 0 && (ctx.chart.config.type === 'doughnut' || ctx.chart.config.type === 'pie')) return null; const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1; if (isWindrose || isConcentric || cType === 'polarArea') { if (isWindrose && stackLogic === 'accumulate') { let actualValue = value; let nextDataset = ctx.chart.data.datasets[ctx.datasetIndex + 1]; if (nextDataset) actualValue -= nextDataset.data[ctx.dataIndex]; return formatChartNumber(actualValue * prog, slide); } return formatChartNumber(value * prog, slide); } let sum = 0; ctx.chart.data.datasets[0].data.map(d => sum += (d || 0)); return sum === 0 ? '0%' : formatChartNumber(((value * prog) / sum) * 100, Object.assign({}, slide, {decimalPlaces: slide.decimalPlaces === 'auto' ? 1 : slide.decimalPlaces})) + '%'; } };
+                if (cType !== 'radar' && cType !== 'polarArea' && !isWindrose) delete chartOptions.scales;
+                chartOptions.cutout = cType === 'doughnut' || isConcentric ? slide.donutCutout + '%' : 0;
+                if (isConcentric) {
+                    chartOptions.circumference = 360;
+                    chartOptions.rotation = 0;
+                }
+                if (cType !== 'radar') chartOptions.elements = { arc: { borderRadius: slide.borderRadius, borderWidth: oWidth, borderColor: oColor } };
+                chartOptions.plugins.datalabels = {
+                    display: slide.datalabelPosition !== 'none',
+                    clamp: true,
+                    anchor: 'center',
+                    align: 'center',
+                    color: (ctx) => {
+                        if (slide.datalabelColorMode === 'custom') return slide.datalabelCustomColor || '#fff';
+                        const bg = ctx.dataset.backgroundColor;
+                        const col = Array.isArray(bg) ? bg[ctx.dataIndex] : bg;
+                        return getAutoContrastColor(col);
+                    },
+                    font: (ctx) => {
+                        let baseSize = slide.datalabelSize || 13;
+                        if (isConcentric && ctx.datasetIndex > 0) {
+                            baseSize = Math.max(9, Math.round(baseSize - (ctx.datasetIndex * 2)));
+                        }
+                        return { family: 'Inter', size: baseSize, weight: String(slide.datalabelWeight || '900'), style: slide.datalabelItalic ? 'italic' : 'normal' };
+                    },
+                    textStrokeColor: (ctx) => {
+                        if (slide.datalabelStrokeColor) return slide.datalabelStrokeColor;
+                        const bg = ctx.dataset.backgroundColor;
+                        const col = Array.isArray(bg) ? bg[ctx.dataIndex] : bg;
+                        const tc = getAutoContrastColor(col);
+                        return tc === '#ffffff' ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.8)';
+                    },
+                    textStrokeWidth: slide.datalabelStrokeWidth !== undefined ? slide.datalabelStrokeWidth : 2,
+                    formatter: (value, ctx) => {
+                        if (value === 0 && (ctx.chart.config.type === 'doughnut' || ctx.chart.config.type === 'pie')) return null;
+                        const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1;
+                        if (isWindrose || isConcentric || cType === 'polarArea') {
+                            if (isWindrose && stackLogic === 'accumulate') {
+                                let actualValue = value;
+                                let nextDataset = ctx.chart.data.datasets[ctx.datasetIndex + 1];
+                                if (nextDataset) actualValue -= nextDataset.data[ctx.dataIndex];
+                                return formatChartNumber(actualValue * prog, slide);
+                            }
+                            return formatChartNumber(value * prog, slide);
+                        }
+                        let sum = 0;
+                        ctx.chart.data.datasets[0].data.map(d => sum += (d || 0));
+                        return sum === 0 ? '0%' : formatChartNumber(((value * prog) / sum) * 100, Object.assign({}, slide, {decimalPlaces: slide.decimalPlaces === 'auto' ? 1 : slide.decimalPlaces})) + '%';
+                    }
+                };
             }
             if (!isRadial && !isTreemap) { chartOptions.barPercentage = isTape ? 1 : slide.chartThickness / 100; chartOptions.categoryPercentage = isTape ? 1 : 0.8; }
             return { datasets, labels, chartOptions, globalBaseType };
@@ -8455,6 +8821,10 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
 
         // Odometer Logic
         function startDefaultOdometerSweep() {
+            if (window.isExporting) {
+                window.__raceProgress = 1;
+                return;
+            }
             window.__raceProgress = 0;
             let start = null;
             const duration = 1200;
@@ -8469,7 +8839,17 @@ const getActiveSlide = () => appSlides[activeSlideIndex]; const getActiveDataSet
                         if (c && typeof c.update === 'function') c.update('none');
                     });
                 }
-                if (t < 1) requestAnimationFrame(step);
+                if (t < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    window.__raceProgress = 1;
+                    if (mainCharts && mainCharts.length > 0) {
+                        mainCharts.forEach(c => {
+                            if (c && typeof c.update === 'function') c.update('none');
+                        });
+                    }
+                    if (typeof renderCalloutsOverlay === 'function') renderCalloutsOverlay();
+                }
             }
             requestAnimationFrame(step);
         }
