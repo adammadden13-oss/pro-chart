@@ -1397,6 +1397,260 @@
         </div>
     </div>
 
+
+    <!-- MODAL EXCEL & DATA HUB (MULTI-SHEET, RAW DATA INSPECTOR & AUTO-PIVOT) -->
+    <div id="rawImportModal"
+        class="fixed inset-0 z-[195] hidden items-center justify-center bg-slate-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300 px-3 py-4"
+        onclick="if(event.target === this) closeRawImportModal()">
+        <div class="bg-white/95 backdrop-blur-2xl border border-slate-200/90 rounded-3xl w-full max-w-5xl max-h-[92vh] h-[88vh] flex flex-col overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800 window-modal-box"
+            id="rawImportModalContent">
+            
+            <!-- HEADER / DRAG HANDLE -->
+            <div id="rawImportModalDragHandle"
+                class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-white/80 shrink-0 window-drag-handle group select-none">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
+                        <i class="ph-fill ph-file-xls text-2xl"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-sm font-black text-slate-900 uppercase tracking-wider">Excel & Data Hub</h3>
+                            <span id="rawImportSheetCountBadge" class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full">0 Sheets</span>
+                            <span id="rawImportModeBadge" class="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2 py-0.5 rounded-full">⚡ Auto-Pivot Ready</span>
+                        </div>
+                        <span id="rawImportFileNameDisplay" class="text-[11px] text-slate-500 font-mono truncate max-w-md">Belum ada file dipilih</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="rawImportModalPinBtn"
+                        class="text-slate-400 hover:text-indigo-600 p-1.5 rounded-xl hover:bg-slate-100 transition"
+                        title="Pin Jendela"><i class="ph ph-push-pin text-base"></i></button>
+                    <button type="button" id="rawImportModalMaxBtn"
+                        class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition"
+                        title="Perbesar / Perkecil"><i class="ph ph-corners-out text-base"></i></button>
+                    <button type="button" onclick="closeRawImportModal()"
+                        class="text-slate-400 hover:text-red-500 p-1.5 rounded-xl hover:bg-slate-100 transition"
+                        title="Tutup (Esc)"><i class="ph ph-x text-lg"></i></button>
+                </div>
+            </div>
+
+            <!-- SHEET SELECTION TABS BAR -->
+            <div class="bg-slate-50/80 border-b border-slate-200/80 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
+                <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar flex-1 py-0.5" id="rawImportSheetTabsContainer">
+                    <!-- Dynamic Sheet Pill Buttons -->
+                </div>
+                <div class="shrink-0 flex items-center gap-1.5">
+                    <button type="button" onclick="document.getElementById('workbenchFileInput').click()"
+                        class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition shadow-2xs">
+                        <i class="ph-bold ph-folder-open text-xs"></i> <span>Ganti File</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-TAB SWITCHER: (1) DIRECT IMPORT vs (2) AUTO-PIVOT -->
+            <div class="px-5 pt-3 pb-2 bg-white flex items-center justify-between border-b border-slate-100 shrink-0 gap-3">
+                <div class="flex items-center gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/60">
+                    <button type="button" id="subtab-pivot-btn" onclick="switchImportSubTab('pivot')"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-slate-900 text-[#cafc03] shadow-sm">
+                        <i class="ph-bold ph-lightning text-xs"></i> <span>⚡ Auto-Pivot & Agregasi (Rekomendasi)</span>
+                    </button>
+                    <button type="button" id="subtab-direct-btn" onclick="switchImportSubTab('direct')"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+                        <i class="ph-bold ph-table text-xs"></i> <span>📋 Impor Langsung & Filter Baris</span>
+                    </button>
+                </div>
+                <div class="text-[11px] text-slate-400 font-mono hidden sm:flex items-center gap-2">
+                    <span id="rawSheetTotalRowsDisplay">0 baris</span>
+                    <span>•</span>
+                    <span id="rawSheetTotalColsDisplay">0 kolom</span>
+                </div>
+            </div>
+
+            <!-- CONFIGURATION CONTROLS -->
+            <div class="p-4 bg-slate-50/50 border-b border-slate-200/70 shrink-0 flex flex-col gap-3">
+                <!-- PANEL A: AUTO-PIVOT CONTROLS -->
+                <div id="pivotControlsPanel" class="flex flex-col gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                        <!-- 1. GROUP BY / SUMBU X -->
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-tag text-indigo-500"></i> Kelompokkan (Sumbu X)
+                            </label>
+                            <select id="pivotGroupColSelect" onchange="runPivotCalculation()"
+                                class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 font-medium outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-2xs">
+                            </select>
+                        </div>
+
+                        <!-- 2. VALUE / SUMBU Y -->
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-currency-dollar text-emerald-500"></i> Nilai Dihitung (Sumbu Y)
+                            </label>
+                            <select id="pivotValColSelect" onchange="runPivotCalculation()"
+                                class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 font-medium outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-2xs">
+                            </select>
+                        </div>
+
+                        <!-- 3. AGGREGATION FORMULA -->
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-calculator text-amber-500"></i> Rumus Agregasi
+                            </label>
+                            <select id="pivotAggFuncSelect" onchange="runPivotCalculation()"
+                                class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 font-bold outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-2xs">
+                                <option value="SUM">SUM (Total Penjumlahan)</option>
+                                <option value="COUNT">COUNT (Jumlah Transaksi)</option>
+                                <option value="AVERAGE">AVERAGE (Rata-rata)</option>
+                                <option value="MAX">MAX (Nilai Tertinggi)</option>
+                                <option value="MIN">MIN (Nilai Terendah)</option>
+                            </select>
+                        </div>
+
+                        <!-- 4. SECONDARY BREAKDOWN / SERIES -->
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-stack text-blue-500"></i> Pecah Series (Opsional)
+                            </label>
+                            <select id="pivotSeriesColSelect" onchange="runPivotCalculation()"
+                                class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 font-medium outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-2xs">
+                                <option value="-1">[ 1 Series Saja / Tunggal ]</option>
+                            </select>
+                        </div>
+
+                        <!-- 5. SORT ORDER -->
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-sort-descending text-purple-500"></i> Urutkan (Ranking)
+                            </label>
+                            <select id="pivotSortSelect" onchange="runPivotCalculation()"
+                                class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 font-medium outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-2xs">
+                                <option value="desc">Tertinggi → Terendah (Top)</option>
+                                <option value="asc">Terendah → Tertinggi</option>
+                                <option value="original">Urutan Asli</option>
+                            </select>
+                        </div>
+
+                        <!-- 6. TOP N LIMIT -->
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-funnel text-rose-500"></i> Batas Top Kategori
+                            </label>
+                            <select id="pivotTopNSelect" onchange="runPivotCalculation()"
+                                class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 font-medium outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 shadow-2xs">
+                                <option value="all">Semua Kategori</option>
+                                <option value="5">Top 5 (+ 'Lainnya')</option>
+                                <option value="10" selected>Top 10 (+ 'Lainnya')</option>
+                                <option value="15">Top 15 (+ 'Lainnya')</option>
+                                <option value="20">Top 20 (+ 'Lainnya')</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- PIVOT MINI INSIGHT CARD -->
+                    <div id="pivotInsightBanner" class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div class="flex items-center gap-2 text-indigo-900 font-medium">
+                            <i class="ph-fill ph-sparkle text-indigo-600 text-sm"></i>
+                            <span id="pivotInsightSummaryText">Memproses data mentah...</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-[11px] font-mono text-indigo-700">
+                            <span id="pivotTotalRowsProcessed">0 baris diolah</span>
+                            <span>•</span>
+                            <span id="pivotGrandTotalVal">Total: 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL B: DIRECT IMPORT CONTROLS -->
+                <div id="directControlsPanel" class="hidden flex-col gap-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1 shadow-2xs">
+                                <span class="text-[10px] font-black text-slate-500 uppercase">Header di Baris:</span>
+                                <input type="number" id="directHeaderRowInput" value="1" min="1"
+                                    onchange="updateDirectImportPreview()"
+                                    class="w-12 text-center text-xs font-bold text-slate-800 outline-none border-b border-indigo-500">
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-2.5 py-1 shadow-2xs">
+                                <span class="text-[10px] font-black text-slate-500 uppercase">Ambil Baris:</span>
+                                <input type="number" id="directRowStartInput" value="2" min="1"
+                                    onchange="updateDirectImportPreview()"
+                                    class="w-12 text-center text-xs font-bold text-slate-800 outline-none border-b border-indigo-500">
+                                <span class="text-xs text-slate-400">s/d</span>
+                                <input type="number" id="directRowEndInput" placeholder="Akhir"
+                                    onchange="updateDirectImportPreview()"
+                                    class="w-16 text-center text-xs font-bold text-slate-800 outline-none border-b border-indigo-500">
+                            </div>
+                        </div>
+
+                        <!-- QUICK SHORTCUT BUTTONS -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button type="button" onclick="setDirectRangePreset('all')"
+                                class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-xl text-[10px] font-bold transition shadow-2xs">
+                                ⚡ Semua Baris
+                            </button>
+                            <button type="button" onclick="setDirectRangePreset('skipLast')"
+                                class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-xl text-[10px] font-bold transition shadow-2xs"
+                                title="Potong 1 baris terakhir (biasanya baris TOTAL/CATATAN)">
+                                ⚡ Abaikan Baris Total Terakhir
+                            </button>
+                            <button type="button" onclick="setDirectRangePreset('top10')"
+                                class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-xl text-[10px] font-bold transition shadow-2xs">
+                                ⚡ Top 10
+                            </button>
+                            <button type="button" onclick="setDirectRangePreset('top20')"
+                                class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-xl text-[10px] font-bold transition shadow-2xs">
+                                ⚡ Top 20
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLE PREVIEW CONTAINER -->
+            <div class="flex-1 min-h-0 overflow-auto bg-white p-3 custom-scrollbar" id="rawImportTableWrapper">
+                <div id="rawImportTableContent" class="w-full">
+                    <!-- Dynamic Preview Table -->
+                </div>
+            </div>
+
+            <!-- FOOTER TOOLBAR -->
+            <div class="flex items-center justify-between p-3.5 sm:p-4 border-t border-slate-100 bg-white shrink-0 gap-3">
+                <div class="flex items-center gap-2">
+                    <span id="rawImportSummaryStatus" class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <i class="ph-bold ph-check-circle text-emerald-600"></i> Siap diterapkan ke grafik
+                    </span>
+                    <span id="rawImportRowCountBadge" class="bg-slate-100 text-slate-700 text-[10px] font-mono px-2 py-0.5 rounded-lg">
+                        0 baris siap
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeRawImportModal()"
+                        class="px-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-bold transition shadow-2xs">
+                        Batal
+                    </button>
+                    <button type="button" onclick="applyRawImportToWorkbench()"
+                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 shadow-md transition">
+                        <i class="ph-bold ph-check-fat text-sm"></i> <span>Terapkan ke Chart & Workbench</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resize corner -->
+            <div id="rawImportModalResizeCorner" class="window-resize-corner"
+                title="Tarik untuk mengatur lebar & tinggi jendela">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="10" cy="10" r="1.5" fill="#94a3b8" />
+                    <circle cx="6" cy="10" r="1.5" fill="#94a3b8" />
+                    <circle cx="10" cy="6" r="1.5" fill="#94a3b8" />
+                    <circle cx="2" cy="10" r="1.5" fill="#cbd5e1" />
+                    <circle cx="6" cy="6" r="1.5" fill="#cbd5e1" />
+                    <circle cx="10" cy="2" r="1.5" fill="#cbd5e1" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+
     <!-- POPUP ZOOM / EXPLODE & DRILL-DOWN INTERAKTIF -->
     <div id="elementPopup"
         class="fixed z-[100] bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-2xl p-4 w-[280px] transition-all duration-200 transform origin-top-left flex flex-col gap-3 hidden-popup">
@@ -4480,6 +4734,16 @@
                 minW: 460,
                 minH: 400
             });
+            makeModalDraggableAndResizable({
+                modalId: 'rawImportModal',
+                boxId: 'rawImportModalContent',
+                handleId: 'rawImportModalDragHandle',
+                resizeCornerId: 'rawImportModalResizeCorner',
+                maxBtnId: 'rawImportModalMaxBtn',
+                pinBtnId: 'rawImportModalPinBtn',
+                minW: 550,
+                minH: 420
+            });
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initModalWindowSystems);
@@ -6038,7 +6302,7 @@
 
                 showToast(`🎉 PDF Presentasi (${selectedIndices.length} Slide) berhasil diekspor!`);
                 setTimeout(() => {
-                    closeMultiSlideExportModal();
+                    closeMultiSlideExportModal(); closeRawImportModal();
                 }, 1000);
 
             } catch (err) {
@@ -6285,7 +6549,15 @@
                 ds.series.forEach((s, sIdx) => { let val = rowData[sIdx + 1]; let numVal = val !== undefined && val !== null && val !== '' ? Number(String(val).replace(',', '.').replace(/[^0-9.-]/g, '')) : null; newRow.values.push({ val: numVal, val2: 0, color: '#000', offset: 0, callout: false, calloutSub: '' }); });
                 ds.rows.push(newRow);
             }
-            const slide = getActiveSlide(); forceRecolor(slide.colorTheme, slide); syncUIPartialToGrid(); triggerVisUpdateWithDebounce(); showToast("Data berhasil di-paste!");
+            const slide = getActiveSlide();
+            forceRecolor(slide.colorTheme, slide);
+            syncUIPartialToGrid();
+            triggerVisUpdateWithDebounce();
+            renderWorkbenchFromActiveDataSet();
+            renderDataInputs();
+            renderPercentageWidgets();
+            saveState(); // <-- PENTING: Tersimpan langsung ke localStorage, aman dari refresh!
+            showToast("✅ Data berhasil diterapkan & tersimpan otomatis!");
         }
 
         function clearAllIcons() {
@@ -10001,7 +10273,7 @@
                 closeHistoryDiffModal();
                 closeExecutiveNarrativeModal();
                 closeDrillDeepDiveModal();
-                closeMultiSlideExportModal();
+                closeMultiSlideExportModal(); closeRawImportModal();
             }
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
@@ -10121,16 +10393,10 @@
                 const csvText = await resp.text();
                 if (!csvText || !csvText.trim()) throw new Error("Data CSV kosong!");
 
-                // Parse CSV using SheetJS
+                // Parse CSV using SheetJS and open modal
                 const wb = XLSX.read(csvText, { type: 'string' });
-                const sheetName = wb.SheetNames[0];
-                const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
-                if (!rows || rows.length < 2) throw new Error("Struktur data tidak valid (minimal 1 header dan 1 baris).");
-
-                saveState();
-                processImportedArray(rows);
-                renderWorkbenchFromActiveDataSet();
-                showToast("✅ Berhasil sinkronisasi Google Sheet / CSV!");
+                openRawImportModal(wb, "Google Sheet / CSV");
+                showToast("✅ Berhasil mengunduh Google Sheet! Silakan periksa atau Auto-Pivot data.");
             } catch (err) {
                 console.error("GSheets Sync Error:", err);
                 showToast("⚠️ Gagal sync URL: Jika Google Sheet private/CORS, gunakan Publish to Web (CSV) atau tombol Upload/Paste!", true);
@@ -10142,6 +10408,666 @@
             if (fileInput) fileInput.click();
         }
 
+
+        // ============================================================
+        // EXCEL & DATA HUB: MULTI-SHEET, INSPECTOR & AUTO-PIVOT ENGINE
+        // ============================================================
+        let currentImportWorkbook = null;
+        let currentImportFileName = 'Dataset';
+        let currentActiveSheetName = '';
+        let currentRawSheetData = [];
+        let currentImportSubTab = 'pivot';
+        let currentPreparedImportData = [];
+
+        function openRawImportModal(workbook, fileName = 'File Excel') {
+            if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+                showToast("File tidak berisi sheet yang valid!", true);
+                return;
+            }
+            currentImportWorkbook = workbook;
+            currentImportFileName = fileName;
+
+            const modal = document.getElementById('rawImportModal');
+            if (!modal) return;
+
+            const fnDisplay = document.getElementById('rawImportFileNameDisplay');
+            if (fnDisplay) fnDisplay.textContent = fileName;
+
+            const countBadge = document.getElementById('rawImportSheetCountBadge');
+            if (countBadge) countBadge.textContent = `${workbook.SheetNames.length} Sheet${workbook.SheetNames.length > 1 ? 's' : ''}`;
+
+            renderSheetTabs(workbook.SheetNames);
+
+            const targetSheet = workbook.SheetNames.includes(currentActiveSheetName) ? currentActiveSheetName : workbook.SheetNames[0];
+            selectSheetForImport(targetSheet);
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                document.getElementById('rawImportModalContent')?.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function openRawImportModalManual() {
+            if (currentImportWorkbook && currentImportWorkbook.SheetNames && currentImportWorkbook.SheetNames.length > 0) {
+                openRawImportModal(currentImportWorkbook, currentImportFileName);
+                return;
+            }
+            const ds = getActiveDataSet();
+            if (ds && ds.rows && ds.rows.length > 0) {
+                const headers = ['Kategori', ...ds.series.map(s => s.name)];
+                const aoa = [headers];
+                ds.rows.forEach(r => {
+                    const row = [(r.icon ? (r.icon + ' ') : '') + (r.label || '')];
+                    ds.series.forEach((s, sIdx) => {
+                        row.push(r.values[sIdx]?.val ?? '');
+                    });
+                    aoa.push(row);
+                });
+                const ws = XLSX.utils.aoa_to_sheet(aoa);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Workbench_Active");
+                openRawImportModal(wb, "Data Workbench Saat Ini");
+            } else {
+                importWorkbenchExcelFile();
+            }
+        }
+
+        function closeRawImportModal() {
+            const modal = document.getElementById('rawImportModal');
+            if (!modal) return;
+            modal.classList.add('opacity-0');
+            document.getElementById('rawImportModalContent')?.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function renderSheetTabs(sheetNames) {
+            const container = document.getElementById('rawImportSheetTabsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            sheetNames.forEach(name => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `rawSheetTab_${name.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+                btn.className = `sheet-tab-pill px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 ${
+                    name === currentActiveSheetName 
+                        ? 'bg-slate-900 text-[#cafc03] shadow-xs' 
+                        : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`;
+                btn.innerHTML = `<i class="ph-bold ph-table text-xs"></i> <span>${escapeHtml(name)}</span>`;
+                btn.onclick = () => selectSheetForImport(name);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectSheetForImport(sheetName) {
+            if (!currentImportWorkbook || !currentImportWorkbook.Sheets[sheetName]) return;
+            currentActiveSheetName = sheetName;
+
+            document.querySelectorAll('.sheet-tab-pill').forEach(btn => {
+                btn.className = 'sheet-tab-pill px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-white text-slate-700 hover:bg-slate-100 border border-slate-200';
+            });
+            const activeBtn = document.getElementById(`rawSheetTab_${sheetName.replace(/[^a-zA-Z0-9_-]/g, '_')}`);
+            if (activeBtn) {
+                activeBtn.className = 'sheet-tab-pill px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-900 text-[#cafc03] shadow-xs';
+            }
+
+            const worksheet = currentImportWorkbook.Sheets[sheetName];
+            const raw = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+            
+            let lastNonEmpty = raw.length - 1;
+            while (lastNonEmpty >= 0 && (!raw[lastNonEmpty] || raw[lastNonEmpty].every(c => c === '' || c === null || c === undefined))) {
+                lastNonEmpty--;
+            }
+            currentRawSheetData = raw.slice(0, lastNonEmpty + 1);
+
+            const totalRows = currentRawSheetData.length;
+            const totalCols = totalRows > 0 ? (currentRawSheetData[0]?.length || 0) : 0;
+
+            const rDisp = document.getElementById('rawSheetTotalRowsDisplay');
+            if (rDisp) rDisp.textContent = `${totalRows.toLocaleString('id-ID')} baris`;
+            const cDisp = document.getElementById('rawSheetTotalColsDisplay');
+            if (cDisp) cDisp.textContent = `${totalCols} kolom`;
+
+            const dirH = document.getElementById('directHeaderRowInput');
+            const dirS = document.getElementById('directRowStartInput');
+            const dirE = document.getElementById('directRowEndInput');
+            if (dirH) dirH.value = 1;
+            if (dirS) dirS.value = 2;
+            if (dirE) dirE.value = totalRows;
+
+            populatePivotDropdowns();
+
+            if (currentImportSubTab === 'pivot') {
+                runPivotCalculation();
+            } else {
+                updateDirectImportPreview();
+            }
+        }
+
+        function switchImportSubTab(mode) {
+            currentImportSubTab = mode;
+            const pivotBtn = document.getElementById('subtab-pivot-btn');
+            const directBtn = document.getElementById('subtab-direct-btn');
+            const pivotPanel = document.getElementById('pivotControlsPanel');
+            const directPanel = document.getElementById('directControlsPanel');
+
+            if (mode === 'pivot') {
+                if (pivotBtn) {
+                    pivotBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-slate-900 text-[#cafc03] shadow-sm';
+                }
+                if (directBtn) {
+                    directBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+                }
+                if (pivotPanel) pivotPanel.classList.remove('hidden');
+                if (directPanel) directPanel.classList.add('hidden');
+                runPivotCalculation();
+            } else {
+                if (directBtn) {
+                    directBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-slate-900 text-[#cafc03] shadow-sm';
+                }
+                if (pivotBtn) {
+                    pivotBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+                }
+                if (directPanel) directPanel.classList.remove('hidden');
+                if (pivotPanel) pivotPanel.classList.add('hidden');
+                updateDirectImportPreview();
+            }
+        }
+
+        function populatePivotDropdowns() {
+            if (!currentRawSheetData || currentRawSheetData.length === 0) return;
+            const headerRow = currentRawSheetData[0] || [];
+
+            const groupSelect = document.getElementById('pivotGroupColSelect');
+            const valSelect = document.getElementById('pivotValColSelect');
+            const seriesSelect = document.getElementById('pivotSeriesColSelect');
+            if (!groupSelect || !valSelect || !seriesSelect) return;
+
+            groupSelect.innerHTML = '';
+            valSelect.innerHTML = '';
+            seriesSelect.innerHTML = '<option value="-1">[ 1 Series Saja / Tunggal ]</option>';
+
+            const numScores = headerRow.map((_, colIdx) => {
+                let numCount = 0;
+                let totalCount = 0;
+                for (let r = 1; r < Math.min(currentRawSheetData.length, 30); r++) {
+                    const v = currentRawSheetData[r]?.[colIdx];
+                    if (v !== undefined && v !== null && v !== '') {
+                        totalCount++;
+                        const clean = String(v).replace(',', '.').replace(/[^0-9.-]/g, '');
+                        if (clean !== '' && !isNaN(Number(clean))) numCount++;
+                    }
+                }
+                return totalCount > 0 ? (numCount / totalCount) : 0;
+            });
+
+            let bestGroupIdx = 0;
+            let bestValIdx = -1;
+
+            headerRow.forEach((colName, idx) => {
+                const cleanName = (colName !== undefined && colName !== null && String(colName).trim() !== '') 
+                    ? String(colName).trim() 
+                    : `Kolom ${idx + 1}`;
+                const isNumeric = numScores[idx] > 0.6;
+
+                const optG = document.createElement('option');
+                optG.value = idx;
+                optG.textContent = `${cleanName} ${isNumeric ? '(123)' : '(Abc)'}`;
+                groupSelect.appendChild(optG);
+
+                const optV = document.createElement('option');
+                optV.value = idx;
+                optV.textContent = `${cleanName} ${isNumeric ? '★ (Angka)' : '(Teks)'}`;
+                valSelect.appendChild(optV);
+
+                const optS = document.createElement('option');
+                optS.value = idx;
+                optS.textContent = `${cleanName}`;
+                seriesSelect.appendChild(optS);
+
+                if (bestValIdx === -1 && isNumeric) {
+                    bestValIdx = idx;
+                }
+            });
+
+            for (let i = 0; i < headerRow.length; i++) {
+                if (numScores[i] <= 0.6) {
+                    bestGroupIdx = i;
+                    break;
+                }
+            }
+            if (bestValIdx === -1) {
+                bestValIdx = Math.min(1, headerRow.length - 1);
+            }
+            if (bestGroupIdx === bestValIdx && headerRow.length > 1) {
+                bestValIdx = (bestGroupIdx + 1) % headerRow.length;
+            }
+
+            groupSelect.value = bestGroupIdx;
+            valSelect.value = bestValIdx;
+        }
+
+        function runPivotCalculation() {
+            if (!currentRawSheetData || currentRawSheetData.length < 2) {
+                renderEmptyImportPreview("Tidak ada cukup data untuk di-pivot (minimal 1 header dan 1 baris).");
+                return;
+            }
+
+            const gIdx = parseInt(document.getElementById('pivotGroupColSelect')?.value) || 0;
+            const vIdx = parseInt(document.getElementById('pivotValColSelect')?.value) || 1;
+            const agg = document.getElementById('pivotAggFuncSelect')?.value || 'SUM';
+            const sIdx = parseInt(document.getElementById('pivotSeriesColSelect')?.value ?? -1);
+            const sortMode = document.getElementById('pivotSortSelect')?.value || 'desc';
+            const topNSetting = document.getElementById('pivotTopNSelect')?.value || '10';
+
+            const headerRow = currentRawSheetData[0] || [];
+            const gName = headerRow[gIdx] ? String(headerRow[gIdx]).trim() : `Kolom ${gIdx + 1}`;
+            const vName = headerRow[vIdx] ? String(headerRow[vIdx]).trim() : `Kolom ${vIdx + 1}`;
+            const sName = (sIdx >= 0 && headerRow[sIdx]) ? String(headerRow[sIdx]).trim() : '';
+
+            let totalRawRowsProcessed = 0;
+            let grandTotalSum = 0;
+
+            if (sIdx < 0) {
+                const groupMap = new Map();
+
+                for (let r = 1; r < currentRawSheetData.length; r++) {
+                    const row = currentRawSheetData[r];
+                    if (!row || row.length === 0) continue;
+
+                    const gRaw = row[gIdx];
+                    const gKey = (gRaw !== undefined && gRaw !== null && String(gRaw).trim() !== '')
+                        ? String(gRaw).trim()
+                        : '(Tanpa Kategori)';
+
+                    const vRaw = row[vIdx];
+                    let num = 0;
+                    if (vRaw !== undefined && vRaw !== null && vRaw !== '') {
+                        const clean = String(vRaw).replace(',', '.').replace(/[^0-9.-]/g, '');
+                        num = clean !== '' && !isNaN(Number(clean)) ? Number(clean) : 0;
+                    }
+
+                    totalRawRowsProcessed++;
+                    grandTotalSum += num;
+
+                    if (!groupMap.has(gKey)) {
+                        groupMap.set(gKey, {
+                            sum: num,
+                            count: 1,
+                            min: num,
+                            max: num,
+                            firstIdx: r
+                        });
+                    } else {
+                        const entry = groupMap.get(gKey);
+                        entry.sum += num;
+                        entry.count += 1;
+                        entry.min = Math.min(entry.min, num);
+                        entry.max = Math.max(entry.max, num);
+                    }
+                }
+
+                let groups = [];
+                groupMap.forEach((entry, key) => {
+                    let finalVal = 0;
+                    if (agg === 'SUM') finalVal = entry.sum;
+                    else if (agg === 'COUNT') finalVal = entry.count;
+                    else if (agg === 'AVERAGE') finalVal = entry.count > 0 ? (entry.sum / entry.count) : 0;
+                    else if (agg === 'MAX') finalVal = entry.max;
+                    else if (agg === 'MIN') finalVal = entry.min;
+
+                    groups.push({
+                        key: key,
+                        val: finalVal,
+                        count: entry.count,
+                        firstIdx: entry.firstIdx
+                    });
+                });
+
+                if (sortMode === 'desc') {
+                    groups.sort((a, b) => b.val - a.val);
+                } else if (sortMode === 'asc') {
+                    groups.sort((a, b) => a.val - b.val);
+                } else {
+                    groups.sort((a, b) => a.firstIdx - b.firstIdx);
+                }
+
+                let finalGroups = groups;
+                if (topNSetting !== 'all') {
+                    const limit = parseInt(topNSetting) || 10;
+                    if (groups.length > limit) {
+                        const top = groups.slice(0, limit);
+                        const rest = groups.slice(limit);
+                        let restVal = 0;
+                        let restCount = 0;
+                        if (agg === 'SUM' || agg === 'COUNT') {
+                            restVal = rest.reduce((acc, g) => acc + g.val, 0);
+                        } else if (agg === 'AVERAGE') {
+                            const totalSum = rest.reduce((acc, g) => acc + (g.val * g.count), 0);
+                            restCount = rest.reduce((acc, g) => acc + g.count, 0);
+                            restVal = restCount > 0 ? (totalSum / restCount) : 0;
+                        } else if (agg === 'MAX') {
+                            restVal = Math.max(...rest.map(g => g.val));
+                        } else if (agg === 'MIN') {
+                            restVal = Math.min(...rest.map(g => g.val));
+                        }
+                        top.push({
+                            key: 'Lainnya (Others)',
+                            val: restVal,
+                            count: restCount,
+                            isOther: true
+                        });
+                        finalGroups = top;
+                    }
+                }
+
+                const seriesHeader = `${vName} (${agg})`;
+                currentPreparedImportData = [
+                    [gName, seriesHeader],
+                    ...finalGroups.map(g => [g.key, g.val])
+                ];
+
+                const top1 = finalGroups[0];
+                const banner = document.getElementById('pivotInsightSummaryText');
+                if (banner) {
+                    if (top1) {
+                        const pct = grandTotalSum > 0 && agg === 'SUM' 
+                            ? ((top1.val / grandTotalSum) * 100).toFixed(1) + '%' 
+                            : `${top1.val.toLocaleString('id-ID')}`;
+                        banner.innerHTML = `🏆 Teratas: <strong class="text-indigo-950 font-black">${escapeHtml(top1.key)}</strong> (${pct} dari total • ${finalGroups.length} kategori pivot)`;
+                    } else {
+                        banner.textContent = "Data pivot berhasil dikomputasi.";
+                    }
+                }
+
+                const rowsDisp = document.getElementById('pivotTotalRowsProcessed');
+                if (rowsDisp) rowsDisp.textContent = `${totalRawRowsProcessed.toLocaleString('id-ID')} baris mentah`;
+
+                const totalDisp = document.getElementById('pivotGrandTotalVal');
+                if (totalDisp) totalDisp.textContent = `Total Nilai: ${grandTotalSum.toLocaleString('id-ID', { maximumFractionDigits: 1 })}`;
+
+                renderPivotPreviewTable(gName, [seriesHeader], finalGroups.map(g => ({ key: g.key, vals: [g.val] })), agg);
+            } else {
+                const seriesSet = new Set();
+                const matrixMap = new Map();
+
+                for (let r = 1; r < currentRawSheetData.length; r++) {
+                    const row = currentRawSheetData[r];
+                    if (!row || row.length === 0) continue;
+
+                    const gRaw = row[gIdx];
+                    const gKey = (gRaw !== undefined && gRaw !== null && String(gRaw).trim() !== '') ? String(gRaw).trim() : '(Tanpa Kategori)';
+
+                    const sRaw = row[sIdx];
+                    const sKey = (sRaw !== undefined && sRaw !== null && String(sRaw).trim() !== '') ? String(sRaw).trim() : '(Lainnya)';
+
+                    const vRaw = row[vIdx];
+                    let num = 0;
+                    if (vRaw !== undefined && vRaw !== null && vRaw !== '') {
+                        const clean = String(vRaw).replace(',', '.').replace(/[^0-9.-]/g, '');
+                        num = clean !== '' && !isNaN(Number(clean)) ? Number(clean) : 0;
+                    }
+
+                    totalRawRowsProcessed++;
+                    grandTotalSum += num;
+                    seriesSet.add(sKey);
+
+                    if (!matrixMap.has(gKey)) {
+                        matrixMap.set(gKey, new Map());
+                    }
+                    const sMap = matrixMap.get(gKey);
+                    if (!sMap.has(sKey)) {
+                        sMap.set(sKey, { sum: num, count: 1, min: num, max: num });
+                    } else {
+                        const item = sMap.get(sKey);
+                        item.sum += num;
+                        item.count += 1;
+                        item.min = Math.min(item.min, num);
+                        item.max = Math.max(item.max, num);
+                    }
+                }
+
+                const seriesList = Array.from(seriesSet).slice(0, 8);
+                let groupRows = [];
+
+                matrixMap.forEach((sMap, gKey) => {
+                    let rowVals = [];
+                    let rowTotal = 0;
+                    seriesList.forEach(sKey => {
+                        const item = sMap.get(sKey);
+                        let v = 0;
+                        if (item) {
+                            if (agg === 'SUM') v = item.sum;
+                            else if (agg === 'COUNT') v = item.count;
+                            else if (agg === 'AVERAGE') v = item.count > 0 ? (item.sum / item.count) : 0;
+                            else if (agg === 'MAX') v = item.max;
+                            else if (agg === 'MIN') v = item.min;
+                        }
+                        rowVals.push(v);
+                        rowTotal += v;
+                    });
+                    groupRows.push({ key: gKey, vals: rowVals, total: rowTotal });
+                });
+
+                if (sortMode === 'desc') groupRows.sort((a, b) => b.total - a.total);
+                else if (sortMode === 'asc') groupRows.sort((a, b) => a.total - b.total);
+
+                if (topNSetting !== 'all') {
+                    const limit = parseInt(topNSetting) || 10;
+                    groupRows = groupRows.slice(0, limit);
+                }
+
+                currentPreparedImportData = [
+                    [gName, ...seriesList],
+                    ...groupRows.map(gr => [gr.key, ...gr.vals])
+                ];
+
+                const banner = document.getElementById('pivotInsightSummaryText');
+                if (banner) banner.innerHTML = `Multi-Series Pivot: <strong class="text-indigo-950">${seriesList.length} Series</strong> dipecah dari kolom <strong>${escapeHtml(sName)}</strong>.`;
+
+                renderPivotPreviewTable(gName, seriesList, groupRows, agg);
+            }
+
+            const status = document.getElementById('rawImportSummaryStatus');
+            if (status) status.innerHTML = `<i class="ph-bold ph-check-circle text-emerald-600"></i> Siap diterapkan: <strong>${currentPreparedImportData.length - 1} baris hasil pivot</strong>`;
+            const countBadge = document.getElementById('rawImportRowCountBadge');
+            if (countBadge) countBadge.textContent = `${currentPreparedImportData.length - 1} data baris`;
+        }
+
+        function renderPivotPreviewTable(categoryName, seriesHeaders, rows, agg) {
+            const container = document.getElementById('rawImportTableContent');
+            if (!container) return;
+
+            if (!rows || rows.length === 0) {
+                renderEmptyImportPreview("Hasil pivot kosong.");
+                return;
+            }
+
+            let html = `
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-2xs">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-900 text-white sticky top-0 z-10 select-none">
+                        <tr>
+                            <th class="py-2.5 px-3 text-[10px] font-mono font-black text-slate-400 w-12 text-center uppercase">#</th>
+                            <th class="py-2.5 px-3 font-black text-[11px] tracking-wider uppercase">${escapeHtml(categoryName)} (Kategori)</th>
+            `;
+            seriesHeaders.forEach(s => {
+                html += `<th class="py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-[#cafc03]">${escapeHtml(s)}</th>`;
+            });
+            html += `</tr></thead><tbody class="divide-y divide-slate-100 bg-white font-mono">`;
+
+            rows.forEach((row, idx) => {
+                const isOdd = idx % 2 === 1;
+                html += `
+                <tr class="hover:bg-indigo-50/40 transition ${isOdd ? 'bg-slate-50/50' : 'bg-white'}">
+                    <td class="py-2 px-3 text-center text-slate-400 text-[10px]">${idx + 1}</td>
+                    <td class="py-2 px-3 font-bold font-sans text-slate-800 flex items-center gap-1.5">
+                        ${idx === 0 ? '<span class="text-xs">🏆</span>' : '<span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>'}
+                        <span>${escapeHtml(row.key)}</span>
+                    </td>
+                `;
+                row.vals.forEach(v => {
+                    const formatted = (typeof v === 'number') 
+                        ? v.toLocaleString('id-ID', { maximumFractionDigits: (v % 1 !== 0 ? 2 : 0) })
+                        : v;
+                    html += `<td class="py-2 px-3 text-right font-bold text-slate-700">${formatted}</td>`;
+                });
+                html += `</tr>`;
+            });
+
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+        }
+
+        function updateDirectImportPreview() {
+            if (!currentRawSheetData || currentRawSheetData.length === 0) {
+                renderEmptyImportPreview("Sheet kosong.");
+                return;
+            }
+
+            const headerInput = document.getElementById('directHeaderRowInput');
+            const startInput = document.getElementById('directRowStartInput');
+            const endInput = document.getElementById('directRowEndInput');
+
+            const hRow = Math.max(1, parseInt(headerInput?.value) || 1);
+            const sRow = Math.max(1, parseInt(startInput?.value) || (hRow + 1));
+            const maxRow = currentRawSheetData.length;
+            const eRow = Math.min(maxRow, Math.max(sRow, parseInt(endInput?.value) || maxRow));
+
+            const headerData = currentRawSheetData[hRow - 1] || [];
+            const slicedData = currentRawSheetData.slice(sRow - 1, eRow);
+
+            currentPreparedImportData = [
+                headerData,
+                ...slicedData
+            ];
+
+            const container = document.getElementById('rawImportTableContent');
+            if (!container) return;
+
+            let html = `
+            <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-2xs max-h-[50vh]">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-900 text-white sticky top-0 z-10 select-none">
+                        <tr>
+                            <th class="py-2.5 px-3 text-[10px] font-mono font-black text-slate-400 w-16 text-center uppercase">Baris</th>
+                            <th class="py-2.5 px-3 text-[10px] font-mono font-black text-slate-400 w-20 text-center uppercase">Status</th>
+            `;
+            const colCount = Math.max(headerData.length, currentRawSheetData[0]?.length || 0);
+            for (let c = 0; c < Math.min(colCount, 12); c++) {
+                const hLabel = headerData[c] !== undefined && headerData[c] !== '' ? String(headerData[c]) : `Kolom ${c + 1}`;
+                html += `<th class="py-2.5 px-3 font-black text-[11px] tracking-wider text-slate-200 uppercase truncate max-w-[150px]">${escapeHtml(hLabel)}</th>`;
+            }
+            html += `</tr></thead><tbody class="divide-y divide-slate-100 bg-white font-mono text-[11px]">`;
+
+            const previewLimit = Math.min(currentRawSheetData.length, 80);
+            for (let r = 0; r < previewLimit; r++) {
+                const rowNum = r + 1;
+                const row = currentRawSheetData[r] || [];
+                const isHeader = rowNum === hRow;
+                const isIncluded = rowNum >= sRow && rowNum <= eRow;
+
+                let rowClass = 'bg-white text-slate-700';
+                let badge = '<span class="bg-slate-100 text-slate-400 text-[9px] px-1.5 py-0.5 rounded font-black">SKIP</span>';
+
+                if (isHeader) {
+                    rowClass = 'bg-emerald-50 text-emerald-950 font-bold border-y-2 border-emerald-400';
+                    badge = '<span class="bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded-full font-black">HEADER</span>';
+                } else if (isIncluded) {
+                    rowClass = 'bg-indigo-50/40 text-slate-800 font-medium';
+                    badge = '<span class="bg-indigo-100 text-indigo-700 text-[9px] px-2 py-0.5 rounded-full font-black">DATA</span>';
+                } else {
+                    rowClass = 'opacity-40 bg-slate-50 text-slate-400';
+                }
+
+                html += `
+                <tr class="hover:bg-slate-100/60 transition ${rowClass}">
+                    <td class="py-1.5 px-3 text-center font-bold font-mono">${rowNum}</td>
+                    <td class="py-1.5 px-2 text-center">${badge}</td>
+                `;
+                for (let c = 0; c < Math.min(colCount, 12); c++) {
+                    const val = row[c] !== undefined ? String(row[c]) : '';
+                    html += `<td class="py-1.5 px-3 truncate max-w-[150px]">${escapeHtml(val)}</td>`;
+                }
+                html += `</tr>`;
+            }
+
+            if (currentRawSheetData.length > previewLimit) {
+                html += `<tr><td colspan="${colCount + 2}" class="py-2 text-center text-slate-400 bg-slate-50 text-xs italic">... dan ${(currentRawSheetData.length - previewLimit).toLocaleString('id-ID')} baris data berikutnya di bawah ...</td></tr>`;
+            }
+
+            html += `</tbody></table></div>`;
+            container.innerHTML = html;
+
+            const status = document.getElementById('rawImportSummaryStatus');
+            if (status) status.innerHTML = `<i class="ph-bold ph-check-circle text-emerald-600"></i> Siap impor <strong>${slicedData.length.toLocaleString('id-ID')} baris data</strong> (Baris ${sRow} s/d ${eRow})`;
+            const countBadge = document.getElementById('rawImportRowCountBadge');
+            if (countBadge) countBadge.textContent = `${slicedData.length} baris data`;
+        }
+
+        function setDirectRangePreset(preset) {
+            const headerInput = document.getElementById('directHeaderRowInput');
+            const startInput = document.getElementById('directRowStartInput');
+            const endInput = document.getElementById('directRowEndInput');
+            const maxRow = currentRawSheetData.length;
+            const hRow = parseInt(headerInput?.value) || 1;
+
+            if (preset === 'all') {
+                if (startInput) startInput.value = hRow + 1;
+                if (endInput) endInput.value = maxRow;
+            } else if (preset === 'skipLast') {
+                if (startInput) startInput.value = hRow + 1;
+                if (endInput) endInput.value = Math.max(hRow + 1, maxRow - 1);
+                showToast("Baris terakhir (Total / Footer) dilewati.");
+            } else if (preset === 'top10') {
+                if (startInput) startInput.value = hRow + 1;
+                if (endInput) endInput.value = Math.min(maxRow, hRow + 10);
+            } else if (preset === 'top20') {
+                if (startInput) startInput.value = hRow + 1;
+                if (endInput) endInput.value = Math.min(maxRow, hRow + 20);
+            }
+            updateDirectImportPreview();
+        }
+
+        function renderEmptyImportPreview(message) {
+            const container = document.getElementById('rawImportTableContent');
+            if (container) {
+                container.innerHTML = `
+                <div class="p-8 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
+                    <i class="ph-bold ph-file-dashed text-3xl"></i>
+                    <span class="text-xs font-bold">${escapeHtml(message)}</span>
+                </div>`;
+            }
+        }
+
+        function applyRawImportToWorkbench() {
+            if (!currentPreparedImportData || currentPreparedImportData.length < 2) {
+                showToast("Data yang dipilih kosong atau tidak memiliki baris data!", true);
+                return;
+            }
+
+            const slide = getActiveSlide();
+            if (slide) {
+                slide.lastImportMeta = {
+                    fileName: currentImportFileName,
+                    sheetName: currentActiveSheetName,
+                    subTab: currentImportSubTab,
+                    rowCount: currentPreparedImportData.length - 1,
+                    timestamp: Date.now()
+                };
+            }
+
+            saveState();
+            processImportedArray(currentPreparedImportData);
+            closeRawImportModal();
+            showToast(`✅ Berhasil menerapkan ${currentPreparedImportData.length - 1} data baris ke Chart & Workbench!`);
+        }
+
         function handleWorkbenchFileChange(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
@@ -10150,16 +11076,7 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                    if (!rows || rows.length < 2) {
-                        return showToast("File Excel/CSV kosong atau tidak memiliki data!", true);
-                    }
-                    saveState();
-                    processImportedArray(rows);
-                    renderWorkbenchFromActiveDataSet();
-                    showToast(`✅ Berhasil import file ${file.name}!`);
+                    openRawImportModal(workbook, file.name);
                 } catch (err) {
                     console.error("File Import Error:", err);
                     showToast("Gagal membaca file: " + err.message, true);
@@ -10181,10 +11098,12 @@
                     rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
                 }
                 if (!rows || rows.length < 2) return showToast("Format data clipboard tidak valid!", true);
-                saveState();
-                processImportedArray(rows);
-                renderWorkbenchFromActiveDataSet();
-                showToast("✅ Berhasil paste data ke Workbench & Grafik!");
+                
+                // Build a virtual workbook so user can inspect and auto-pivot clipboard data too
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Clipboard_Data");
+                openRawImportModal(wb, "Data Clipboard");
             } catch (err) {
                 console.error(err);
                 showToast("Gagal membaca clipboard. Berikan izin clipboard di browser.", true);
@@ -12005,6 +12924,11 @@
                     <input type="file" id="workbenchFileInput" accept=".xlsx, .xls, .csv" class="hidden"
                         onchange="handleWorkbenchFileChange(event)">
                     <div class="flex items-center gap-2 flex-wrap">
+                        <button type="button" onclick="openRawImportModalManual()"
+                            class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-900 border border-indigo-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                            title="Buka Alat Auto-Pivot & Raw Data Inspector">
+                            <i class="ph-bold ph-lightning text-indigo-600"></i> <span>⚡ Auto-Pivot & Sheets Hub</span>
+                        </button>
                         <button onclick="importWorkbenchExcelFile()"
                             class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
                             title="Import file XLSX / CSV dari komputer">
