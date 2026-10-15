@@ -770,6 +770,10 @@
         #rightLayerPanel.panel-compact #rightLayerPanelHeader {
             padding: 0.45rem 0.65rem !important;
         }
+        #studioToolsGrid button {
+            border-radius: 0.75rem !important;
+            aspect-ratio: 1 / 1 !important;
+        }
         #rightLayerPanel.panel-compact #studioToolsGrid {
             padding: 0.35rem !important;
             gap: 0.25rem !important;
@@ -1035,7 +1039,7 @@
 
     <!-- POPUP MODAL: VERSUS 2 TANGGAL / PERIODE (A VS B) -->
     <div id="versusDateModal" class="hidden fixed inset-0 z-[280] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeVersusDateModal()">
-        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-md p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center gap-2.5">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-bold shadow-md">
@@ -1043,7 +1047,7 @@
                     </div>
                     <div>
                         <h4 class="text-sm font-black text-slate-900 tracking-tight">Versus 2 Tanggal / Periode</h4>
-                        <p class="text-[11px] text-slate-400 font-medium">Bandingkan 2 tanggal secara head-to-head</p>
+                        <p class="text-[11px] text-slate-400 font-medium">Bandingkan 2 tanggal atau rentang periode secara head-to-head</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeVersusDateModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
@@ -1052,26 +1056,157 @@
             </div>
 
             <div class="flex flex-col gap-3.5">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Tanggal A (Basis / Periode Awal):
-                    </label>
-                    <select id="versusDateASelect" class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
-                    </select>
+                <!-- PRESET CEPAT 1-KLIK (WoW, MoM) -->
+                <div class="p-3 bg-amber-50/80 border border-amber-200/90 rounded-2xl flex flex-col gap-2 shadow-2xs">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                            <i class="ph-bold ph-lightning text-amber-600 text-sm"></i> Pilihan Versus Periode Cepat (1-Klik):
+                        </span>
+                        <span class="text-[9px] font-mono text-amber-700 bg-amber-100/70 px-1.5 py-0.5 rounded">Auto-Calculated</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="applyVersusWoW()"
+                            class="px-2.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-amber-100/70 text-slate-800 hover:text-amber-950 border border-amber-200/80 transition flex items-center gap-2 shadow-2xs text-left cursor-pointer group"
+                            title="Bandingkan 1 minggu terupdate versus 1 minggu sebelumnya (Week on Week)">
+                            <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 group-hover:scale-105 transition">
+                                <i class="ph-bold ph-calendar-blank"></i>
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="font-black text-slate-900 text-xs group-hover:text-amber-900">Versus WoW</span>
+                                <span class="text-[9px] text-slate-500 truncate">1 Mgg Kini vs Lalu</span>
+                            </div>
+                        </button>
+                        <button type="button" onclick="applyVersusMoM()"
+                            class="px-2.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-indigo-100/70 text-slate-800 hover:text-indigo-950 border border-indigo-200/80 transition flex items-center gap-2 shadow-2xs text-left cursor-pointer group"
+                            title="Bandingkan bulan ini versus bulan sebelumnya (Month on Month)">
+                            <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 group-hover:scale-105 transition">
+                                <i class="ph-bold ph-calendar"></i>
+                            </div>
+                            <div class="flex flex-col min-w-0">
+                                <span class="font-black text-slate-900 text-xs group-hover:text-indigo-900">Versus MoM</span>
+                                <span class="text-[9px] text-slate-500 truncate">Bulan Ini vs Lalu</span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Tanggal B (Pembanding / Periode Akhir):
-                    </label>
-                    <select id="versusDateBSelect" class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
-                    </select>
+                <div class="flex items-center gap-2 my-0.5">
+                    <div class="flex-1 h-px bg-slate-200"></div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Atau Pilih Periode Manual</span>
+                    <div class="flex-1 h-px bg-slate-200"></div>
                 </div>
 
-                <div class="p-3 bg-amber-50/80 border border-amber-200/70 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900">
+                <!-- MODE SWITCHER: RENTANG PERIODE (A vs B) vs 2 TANGGAL TUNGGAL -->
+                <div class="p-1 bg-slate-100 rounded-2xl flex items-center gap-1 border border-slate-200/80">
+                    <button type="button" id="btnVersusModeRange" onclick="setVersusMode('range')"
+                        class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-xs cursor-pointer">
+                        <i class="ph-bold ph-calendar-plus text-sm text-amber-600"></i>
+                        <span>Rentang Periode (A vs B)</span>
+                    </button>
+                    <button type="button" id="btnVersusModeSingle" onclick="setVersusMode('single')"
+                        class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 cursor-pointer">
+                        <i class="ph-bold ph-calendar-blank text-sm"></i>
+                        <span>2 Tanggal Tunggal</span>
+                    </button>
+                </div>
+
+                <!-- SECTION 1: RENTANG PERIODE (A VS B) -->
+                <div id="versusRangeDateSection" class="flex flex-col gap-3">
+                    <!-- PERIODE A -->
+                    <div class="p-3 bg-blue-50/60 border border-blue-200/80 rounded-2xl flex flex-col gap-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Periode A (Basis / Periode Awal):
+                            </label>
+                            <span id="versusRangeASummary" class="text-[10px] font-mono text-blue-800 bg-blue-100 px-2 py-0.5 rounded-md font-bold">0 tanggal</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] font-semibold text-slate-500 block mb-1">Dari Tanggal:</span>
+                                <select id="versusRangeAStartSelect" onchange="updateVersusRangeSummary()"
+                                    class="w-full bg-white border border-blue-200/90 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-blue-600 transition cursor-pointer">
+                                </select>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-semibold text-slate-500 block mb-1">Sampai Tanggal:</span>
+                                <select id="versusRangeAEndSelect" onchange="updateVersusRangeSummary()"
+                                    class="w-full bg-white border border-blue-200/90 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-blue-600 transition cursor-pointer">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PERIODE B -->
+                    <div class="p-3 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl flex flex-col gap-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Periode B (Pembanding / Periode Akhir):
+                            </label>
+                            <span id="versusRangeBSummary" class="text-[10px] font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md font-bold">0 tanggal</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] font-semibold text-slate-500 block mb-1">Dari Tanggal:</span>
+                                <select id="versusRangeBStartSelect" onchange="updateVersusRangeSummary()"
+                                    class="w-full bg-white border border-emerald-200/90 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-emerald-600 transition cursor-pointer">
+                                </select>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-semibold text-slate-500 block mb-1">Sampai Tanggal:</span>
+                                <select id="versusRangeBEndSelect" onchange="updateVersusRangeSummary()"
+                                    class="w-full bg-white border border-emerald-200/90 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:border-emerald-600 transition cursor-pointer">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QUICK RANGE HELPERS -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Set Cepat:</span>
+                        <button type="button" onclick="setVersusQuickRange(7)"
+                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer" title="7 Hari Terakhir vs 7 Hari Sebelumnya">
+                            7 Hari vs 7 Hari
+                        </button>
+                        <button type="button" onclick="setVersusQuickRange(14)"
+                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer" title="14 Hari Terakhir vs 14 Hari Sebelumnya">
+                            14 Hari vs 14 Hari
+                        </button>
+                        <button type="button" onclick="setVersusQuickRange('split')"
+                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer" title="Bagi dua data tanggal secara seimbang">
+                            Bagi 2 Rata
+                        </button>
+                        <button type="button" onclick="syncVersusRangeBDuration()"
+                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 transition cursor-pointer"
+                            title="Atur durasi Periode B persis sama banyak hari dengan Periode A">
+                            🔄 Samakan Durasi B = A
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: 2 TANGGAL TUNGGAL -->
+                <div id="versusSingleDateSection" class="hidden flex flex-col gap-3">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Tanggal A (Basis / Periode Awal):
+                        </label>
+                        <select id="versusDateASelect" onchange="updateVersusRangeSummary()" class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Tanggal B (Pembanding / Periode Akhir):
+                        </label>
+                        <select id="versusDateBSelect" onchange="updateVersusRangeSummary()" class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- PREVIEW & INFO BOX -->
+                <div id="versusInfoBox" class="p-3 bg-amber-50/80 border border-amber-200/70 rounded-2xl flex items-start gap-2.5 text-xs text-amber-900">
                     <i class="ph-bold ph-sparkle text-amber-600 text-base shrink-0 mt-0.5"></i>
-                    <div class="text-[11px] leading-relaxed">
-                        Tabel akan otomatis menyaring <strong>hanya 2 tanggal ini</strong> dan mengaktifkan kolom <strong>Selisih Δ (±)</strong> serta <strong>Rata-rata (x̄)</strong>.
+                    <div id="versusInfoContent" class="text-[11px] leading-relaxed">
+                        Tabel akan otomatis mengelompokkan data ke <strong>Periode A</strong> dan <strong>Periode B</strong> serta mengaktifkan kolom <strong>Selisih Δ (±)</strong> dan <strong>Rata-rata (x̄)</strong>.
                     </div>
                 </div>
             </div>
@@ -1080,7 +1215,7 @@
                 <button type="button" onclick="closeVersusDateModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition">
                     Batal
                 </button>
-                <button type="button" onclick="applyVersus2Dates()" class="px-5 py-2.5 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-[#cafc03] flex items-center justify-center transition shadow-md">
+                <button type="button" onclick="applyVersus2Dates()" class="px-5 py-2.5 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-[#cafc03] flex items-center justify-center transition shadow-md cursor-pointer">
                     <span>Terapkan Versus (A vs B)</span>
                 </button>
             </div>
@@ -1098,10 +1233,10 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h4 class="text-sm font-black text-slate-900 tracking-tight">Pilih Tanggal & Filter</h4>
+                            <h4 id="burgerFilterModalTitle" class="text-sm font-black text-slate-900 tracking-tight">Pilih Nilai & Filter</h4>
                             <span id="burgerFilterColBadge" class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-black uppercase"></span>
                         </div>
-                        <p class="text-[11px] text-slate-400 font-medium">Lihat dan centang tanggal langsung dalam grid tanpa perlu menggeser/slide ke samping</p>
+                        <p id="burgerFilterModalSubtitle" class="text-[11px] text-slate-400 font-medium">Lihat dan centang nilai langsung dalam grid tanpa perlu menggeser/slide ke samping</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeBurgerFilterModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
@@ -1634,6 +1769,17 @@
                     <!-- Dynamic Sheet Pill Buttons -->
                 </div>
                 <div class="shrink-0 flex items-center gap-1.5 flex-wrap">
+                    <!-- POOL / DAFTAR FILE EXCEL YANG SUDAH PERNAH DIUPLOAD (SWITCHING INSTAN TANPA UPLOAD ULANG) -->
+                    <div id="pivotSourceFileSelectorContainer"
+                        class="hidden items-center gap-1.5 bg-white border border-indigo-200/90 rounded-xl px-2.5 py-1 text-xs shadow-2xs group hover:border-indigo-400 transition"
+                        title="Beralih ke file Excel lain yang sudah pernah di-upload tanpa perlu upload ulang">
+                        <i class="ph-bold ph-files text-indigo-600 text-sm"></i>
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">File:</span>
+                        <select id="pivotSourceFileSelect" onchange="switchPivotSourceFile(this.value)"
+                            class="text-xs font-bold text-slate-800 bg-transparent border-none outline-none cursor-pointer max-w-[180px] sm:max-w-[260px] truncate">
+                        </select>
+                    </div>
+
                     <button type="button" onclick="document.getElementById('workbenchFileInput').click()"
                         class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs"
                         title="Upload file XLSX / XLS / CSV">
@@ -2527,8 +2673,9 @@
                         </div>
                     </div>
                     <!-- QUICK ACCESS TO DATA WORKBENCH & SPREADSHEET SYNC -->
-                    <button onclick="openCodeInspectorModal('workbench')"
-                        class="w-full bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 hover:border-[#cafc03] p-3 rounded-2xl flex items-center justify-between group transition shadow-md mb-3">
+                    <button onclick="reopenPivotStudio()"
+                        class="w-full bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 hover:border-[#cafc03] p-3 rounded-2xl flex items-center justify-between group transition shadow-md mb-3"
+                        title="Buka Excel Pivot Studio & Data Workbench">
                         <div class="flex items-center gap-3">
                             <div
                                 class="w-8 h-8 rounded-xl bg-[#cafc03] flex items-center justify-center text-slate-900 font-bold shadow-[0_0_12px_rgba(202,252,3,0.35)] shrink-0">
@@ -2540,7 +2687,7 @@
                                     🛠️ Buka Data Workbench & Spreadsheet Sync
                                 </div>
                                 <div class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                                    <span>Live Grid, GSheets Sync & 1-Click Analytics Kit</span>
+                                    <span>Pivot Studio, Live Grid & GSheets Sync</span>
                                     <span
                                         class="bg-[#cafc03]/20 text-[#cafc03] text-[9px] px-1 py-0.2 rounded font-mono font-bold">PRO</span>
                                 </div>
@@ -3317,15 +3464,16 @@
                 </button>
             </div>
 
+
             <!-- CENTER: INFORMASI NAMA FILE (CLEAN, MINIMALIS, TIDAK MENCOLOK) -->
             <div id="navFileStatusContainer" class="hidden md:flex items-center">
                 <div id="navFileActiveTab" onclick="openProjectModal('files')"
                     class="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-slate-100/90 text-slate-600 hover:text-slate-900 border border-transparent hover:border-slate-200 transition cursor-pointer select-none group"
                     title="Klik untuk membuka Manajer File & Proyek">
-                    <i class="ph-bold ph-file-code text-sm text-slate-400 group-hover:text-indigo-600 transition"></i>
+                    <i class="ph-bold ph-file-text text-sm text-indigo-500 group-hover:text-indigo-600 transition"></i>
                     <span id="navActiveFileNameDisplay"
-                        class="text-xs font-semibold font-mono text-slate-700 group-hover:text-slate-900 transition tracking-tight truncate max-w-[200px] lg:max-w-[340px] xl:max-w-[460px]">
-                        pro_chart_vision_17_2_data_science_edition.html
+                        class="text-xs font-bold text-slate-800 group-hover:text-indigo-700 transition tracking-tight truncate max-w-[200px] lg:max-w-[340px] xl:max-w-[460px]">
+                        Proyek Utama
                     </span>
                     <span id="navFileSyncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500/70 shrink-0"
                         title="Tersimpan"></span>
@@ -3451,6 +3599,7 @@
                     <div id="canvasWrapper"
                         class="w-full h-full relative transition-all duration-300 box-border flex flex-col items-center justify-start overflow-hidden">
 
+
                         <!-- INTERACTIVE DRILL-DOWN BREADCRUMB NAVIGATOR (POINT 3) -->
                         <div id="canvasDrillBreadcrumbsBar"
                             class="hidden w-full flex items-center justify-between mb-2.5 px-3.5 py-2 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-slate-700/80 shadow-lg text-white z-[70] transition-all">
@@ -3556,6 +3705,15 @@
                                 <i class="ph-fill ph-cpu"></i> HUD TELEMETRY
                             </span>
 
+                            <div id="hudSeriesSelectorWrap" class="hidden items-center gap-1 bg-white/95 border border-slate-300 rounded-lg px-2 py-0.5 shadow-2xs shrink-0 transition">
+                                <span class="text-[9px] font-black text-slate-500 uppercase flex items-center gap-1">
+                                    <i class="ph-bold ph-faders text-indigo-600 text-xs"></i> Fokus:
+                                </span>
+                                <select id="hudSeriesSelect" onchange="changeHudActiveSeries(this.value)"
+                                    class="bg-transparent text-[10px] font-black text-slate-900 outline-none cursor-pointer pr-1">
+                                </select>
+                            </div>
+
                             <div
                                 class="telemetry-pill flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-lg">
                                 <span class="text-[9px] font-bold text-slate-400 uppercase">MEAN (&mu;)</span>
@@ -3614,10 +3772,12 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-1.5">
-                                    <p class="text-[8px] font-bold text-slate-400 uppercase" data-i18n="totalData">Total
+                                    <p class="text-[8px] font-bold text-slate-400 uppercase" id="hudTotalLabel" data-i18n="totalData">Total
                                         Keseluruhan</p>
                                     <span id="simActiveTag"
                                         class="hidden text-[8px] font-black px-1.5 py-0.2 rounded bg-[#cafc03] text-slate-900 uppercase">SIM</span>
+                                    <span id="hudSeriesBadge"
+                                        class="hidden text-[8px] font-black px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 uppercase font-mono">B</span>
                                 </div>
                                 <h4 class="text-sm sm:text-base font-black text-slate-800 font-mono-tech leading-tight"
                                     id="totalSumDisplay">0</h4>
@@ -3880,18 +4040,21 @@
         }
 
         let mainCharts = []; let activeIconInput = null; let mapCache = { world: null, indo: null }; const STORAGE_KEY = 'ProChart_Vision_V17_Master';
+        const sessionWorkbooksBySlide = new Map();
+        const sessionWorkbookLibrary = new Map(); // fileName -> { workbook, fileName, sheetNames, timestamp }
         const SAVED_PROJECTS_KEY = 'ProChart_Vision_Saved_Slots';
         let currentProjectName = 'Proyek Utama';
-        let currentOpenedFileName = 'pro_chart_vision_17_2_data_science_edition.html';
+        let currentOpenedFileName = '';
 
         function updateNavFileProjectInfo() {
             try {
                 const fileNameEl = document.getElementById('navActiveFileNameDisplay');
                 const syncDot = document.getElementById('navFileSyncDot');
+                const displayName = currentOpenedFileName || currentProjectName || 'Proyek Utama';
 
                 if (fileNameEl) {
-                    fileNameEl.textContent = currentOpenedFileName || 'pro_chart_vision_17_2_data_science_edition.html';
-                    fileNameEl.title = `File: ${currentOpenedFileName || 'pro_chart_vision_17_2_data_science_edition.html'}`;
+                    fileNameEl.textContent = displayName;
+                    fileNameEl.title = `Proyek / File Kerja: ${displayName} (Klik untuk Kelola / Simpan Proyek)`;
                 }
 
                 if (syncDot) {
@@ -3984,11 +4147,14 @@
             isAnalyticsRadarActive = !isAnalyticsRadarActive;
             const btn = document.getElementById('btnAnalyticsRadar');
             if (btn) {
+                const icon = btn.querySelector('i');
                 if (isAnalyticsRadarActive) {
-                    btn.className = "bg-indigo-600 text-white px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-indigo-500 ring-2 ring-indigo-400/30 transition";
+                    btn.className = "w-full aspect-square bg-indigo-600 text-white border border-indigo-500 rounded-xl flex flex-col items-center justify-center gap-1 shadow-md ring-2 ring-indigo-400/30 transition group";
+                    if (icon) icon.className = "ph-bold ph-chart-line-up text-lg text-white";
                     showToast("📡 Auto-Trendline & Anomaly Radar Diaktifkan!");
                 } else {
-                    btn.className = "bg-white hover:bg-indigo-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition";
+                    btn.className = "w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-indigo-50 hover:border-indigo-200 transition group";
+                    if (icon) icon.className = "ph-bold ph-chart-line-up text-lg text-slate-500 group-hover:text-indigo-600";
                     showToast("Trendline & Anomaly Radar Dimatikan.");
                 }
             }
@@ -4027,10 +4193,13 @@
             if (badge) badge.classList.toggle('hidden', !isSimActive);
             if (simTag) simTag.classList.toggle('hidden', !isSimActive);
             if (btn) {
+                const icon = btn.querySelector('i');
                 if (isSimActive) {
-                    btn.className = "bg-slate-900 text-[#cafc03] px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-[#cafc03]/50 transition relative";
+                    btn.className = "relative w-full aspect-square bg-slate-900 text-[#cafc03] border border-[#cafc03]/50 rounded-xl flex flex-col items-center justify-center gap-1 shadow-md transition group";
+                    if (icon) icon.className = "ph-bold ph-sliders-horizontal text-lg text-[#cafc03]";
                 } else {
-                    btn.className = "bg-white hover:bg-lime-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition relative";
+                    btn.className = "relative w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-emerald-50 hover:border-emerald-200 transition group";
+                    if (icon) icon.className = "ph-bold ph-sliders-horizontal text-lg text-slate-500 group-hover:text-emerald-600";
                 }
             }
         }
@@ -4117,11 +4286,14 @@
             isSpotlightMode = !isSpotlightMode;
             const btn = document.getElementById('btnSpotlightMode');
             if (btn) {
+                const icon = btn.querySelector('i');
                 if (isSpotlightMode) {
-                    btn.className = "bg-slate-900 text-[#cafc03] px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-md border border-[#cafc03]/50 ring-2 ring-[#cafc03]/30 transition";
+                    btn.className = "w-full aspect-square bg-slate-900 text-[#cafc03] border border-[#cafc03]/50 rounded-xl flex flex-col items-center justify-center gap-1 shadow-md ring-2 ring-[#cafc03]/30 transition group";
+                    if (icon) icon.className = "ph-bold ph-flashlight text-lg text-[#cafc03]";
                     showToast("🔦 Spotlight Mode Aktif! Arahkan kursor / klik batang grafik untuk menyorot.");
                 } else {
-                    btn.className = "bg-white hover:bg-amber-50 text-slate-700 px-2.5 sm:px-3.5 py-1.5 md:py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm border border-slate-200 transition";
+                    btn.className = "w-full aspect-square bg-white border border-slate-200 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-amber-50 hover:border-amber-200 transition group";
+                    if (icon) icon.className = "ph-bold ph-flashlight text-lg text-slate-500 group-hover:text-amber-500";
                     clearSpotlightFocus();
                     showToast("Spotlight Mode Dimatikan.");
                 }
@@ -4255,6 +4427,12 @@
         }
         const sanitizeSlide = (s) => {
             if (!s) return s;
+            if (s.lastImportWorkbook) {
+                if (s.id && typeof sessionWorkbooksBySlide !== 'undefined') {
+                    sessionWorkbooksBySlide.set(s.id, s.lastImportWorkbook);
+                }
+                delete s.lastImportWorkbook;
+            }
             if (s.datalabelSize === undefined) s.datalabelSize = 13;
             if (s.datalabelWeight === undefined) s.datalabelWeight = '900';
             if (s.datalabelItalic === undefined) s.datalabelItalic = false;
@@ -6244,7 +6422,7 @@
         // FUNGSI MODAL RESET CUSTOM UI
         function openResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10); }
         function closeResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.add('opacity-0'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300); }
-        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); currentProjectName = 'Proyek Baru'; currentOpenedFileName = 'pro_chart_vision_17_2_data_science_edition.html'; appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; drillHistoryStack = []; whatIfState.multiplierPct = 0; whatIfState.jitterMap = {}; updateWhatIfBadgeUI(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); saveState(); updateNavFileProjectInfo(); showToast("New Project berhasil dibuat!"); }
+        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); currentProjectName = 'Proyek Baru'; currentOpenedFileName = ''; appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; drillHistoryStack = []; whatIfState.multiplierPct = 0; whatIfState.jitterMap = {}; updateWhatIfBadgeUI(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); saveState(); updateNavFileProjectInfo(); showToast("New Project berhasil dibuat!"); }
 
         // FUNGSI INTERACTIVE DRILL-DOWN (BREAKDOWN DATA AREA)
         function updateDrillBackUI() {
@@ -6790,6 +6968,7 @@
             isRightPanelOpen = prePresentationRightPanelOpen;
             applySidebarState();
             applyRightPanelState();
+            renderSlideList();
             saveState();
             if (typeof updateWorkspacePaddingForSidebar === 'function') updateWorkspacePaddingForSidebar();
             setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); if (typeof clampHudPosition === 'function') clampHudPosition(); }, 350);
@@ -7001,7 +7180,9 @@
                 const targetSlide = row.drillTarget ? appSlides.find(s => s.id === row.drillTarget) : null;
                 drillSection.classList.remove('hidden');
                 if (targetSlide) {
-                    drillText.innerText = `🔍 Buka Breakdown: ${targetSlide.chartTitle || 'Detail'}`;
+                    const rawTitle = targetSlide.chartTitle || 'Detail';
+                    const displayTitle = rawTitle.toLowerCase().startsWith('breakdown:') ? rawTitle.replace(/^breakdown:\s*/i, '').trim() : rawTitle;
+                    drillText.innerText = `🔍 Buka Breakdown: ${displayTitle}`;
                     btnDrill.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold py-2 px-3 rounded-xl flex items-center justify-center gap-2 shadow-md transition";
                     btnDrill.onclick = () => drillDownTo(targetSlide.id);
                 } else {
@@ -7187,6 +7368,16 @@
         }
 
         function saveState() {
+            if (Array.isArray(appSlides)) {
+                appSlides.forEach(s => {
+                    if (s && s.lastImportWorkbook) {
+                        if (s.id && typeof sessionWorkbooksBySlide !== 'undefined') {
+                            sessionWorkbooksBySlide.set(s.id, s.lastImportWorkbook);
+                        }
+                        delete s.lastImportWorkbook;
+                    }
+                });
+            }
             const currentSnapshot = JSON.stringify(appSlides);
             if (!isPerformingUndoRedo && currentSnapshot !== lastSavedSnapshot) {
                 if (lastSavedSnapshot !== '') {
@@ -7200,6 +7391,7 @@
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify({
                     projectName: currentProjectName,
+                    openedFileName: currentOpenedFileName,
                     slides: appSlides,
                     lang: globalLang,
                     activeSlideIndex: activeSlideIndex,
@@ -7211,8 +7403,9 @@
             } catch (e) {
                 console.error("Save State Error:", e);
                 if (e.name === 'QuotaExceededError' || (e.message && e.message.toLowerCase().includes('quota'))) {
-                    showToast("Penyimpanan penuh! Menghapus gambar besar otomatis...", true);
+                    showToast("Penyimpanan penuh! Mengoptimalkan memori otomatis...", true);
                     appSlides.forEach(s => {
+                        delete s.lastImportWorkbook;
                         if (s.bgMediaUrl && s.bgMediaUrl.length > 500000) s.bgMediaUrl = null;
                         if (s.bentoMedia) {
                             for (let k in s.bentoMedia) {
@@ -7230,6 +7423,7 @@
                     try {
                         localStorage.setItem(STORAGE_KEY, JSON.stringify({
                             projectName: currentProjectName,
+                            openedFileName: currentOpenedFileName,
                             slides: appSlides,
                             lang: globalLang,
                             activeSlideIndex: activeSlideIndex,
@@ -7238,7 +7432,7 @@
                             isRightPanelOpen: isRightPanelOpen,
                             isLeftPanelMinimized: isLeftPanelMinimized
                         }));
-                        setTimeout(() => showToast("Memori berhasil dibersihkan. Silakan upload ulang media.", false), 2000);
+                        setTimeout(() => showToast("Memori berhasil dibersihkan.", false), 2000);
                         if (window.triggerVisUpdateWithDebounce) triggerVisUpdateWithDebounce();
                     } catch (err) {
                         showToast("Gagal mengosongkan memori. Hapus slide yang tidak diperlukan.", true);
@@ -7254,8 +7448,10 @@
                     const parsed = JSON.parse(saved);
                     if (parsed.lang) globalLang = parsed.lang;
                     if (parsed.projectName) currentProjectName = parsed.projectName;
+                    if (parsed.openedFileName) currentOpenedFileName = parsed.openedFileName;
                     if (parsed.slides && parsed.slides.length > 0) {
                         appSlides = parsed.slides;
+                        let hadLegacyWorkbook = false;
                         if (parsed.activeSlideIndex !== undefined && parsed.activeSlideIndex >= 0 && parsed.activeSlideIndex < appSlides.length) {
                             activeSlideIndex = parsed.activeSlideIndex;
                         } else {
@@ -7264,6 +7460,13 @@
                         if (parsed.activeEditGridIndex !== undefined) activeEditGridIndex = parsed.activeEditGridIndex;
 
                         appSlides.forEach((slide, idx) => {
+                            if (slide.lastImportWorkbook) {
+                                if (slide.id && typeof sessionWorkbooksBySlide !== 'undefined') {
+                                    sessionWorkbooksBySlide.set(slide.id, slide.lastImportWorkbook);
+                                }
+                                delete slide.lastImportWorkbook;
+                                hadLegacyWorkbook = true;
+                            }
                             if (!slide.id) slide.id = 'slide_' + Date.now() + '_' + idx;
                             if (!slide.bentoLayout) slide.bentoLayout = '1'; if (!slide.bentoCharts) slide.bentoCharts = ['bar-vertical', 'doughnut', 'table'];
                             if (!slide.dataSets) {
@@ -7281,10 +7484,14 @@
                             if (slide.valueUnit === undefined) slide.valueUnit = 'unit';
                             sanitizeSlide(slide);
                         });
+                        if (hadLegacyWorkbook) {
+                            saveState();
+                        }
                     }
                     if (parsed.isSidebarOpen !== undefined) isSidebarOpen = parsed.isSidebarOpen;
                     if (parsed.isRightPanelOpen !== undefined) isRightPanelOpen = parsed.isRightPanelOpen;
                     if (parsed.isLeftPanelMinimized !== undefined) isLeftPanelMinimized = parsed.isLeftPanelMinimized;
+                    updateNavFileProjectInfo();
                 }
             } catch (e) { console.error("Load safe failed", e); appSlides = [generateDefaultSlide(1)]; localStorage.removeItem(STORAGE_KEY); }
         }
@@ -7923,8 +8130,10 @@
             }
             updateDrillBackUI();
             syncUIToActiveSlide();
-            renderSlideList();
-            saveState();
+            if (!isPresenting) {
+                renderSlideList();
+                saveState();
+            }
         }
 
         // --- PHOTOSHOP-STYLE LAYER PALETTE & FX DISCLOSURE SYSTEM ---
@@ -9605,7 +9814,7 @@
                     let parsedType = s.type === 'auto' ? globalBaseType : s.type; if (parsedType === 'area') parsedType = 'line'; let isLine = parsedType === 'line', isFillArea = s.type === 'area' || (s.type === 'auto' && cType === 'area'); let dataArr = [], colorArr = [];
                     ds.rows.forEach((r, rIdx) => { let v = r.values[sIdx] || { val: 0, val2: 0, color: '#000' }; colorArr.push(v.color); let val1 = getEffectiveValue(v.val, r.id, sIdx); let val2 = v.val2 !== null && v.val2 !== "" && v.val2 !== undefined ? Number(v.val2) : null; if (isScatterBubble) dataArr.push(val1 !== null ? { x: labels[rIdx], y: val1, r: Math.max(3, (val2 || 0) / 5) } : null); else if (isFloatingBar) dataArr.push(val1 !== null && val2 !== null ? [Math.min(val1, val2), Math.max(val1, val2)] : null); else dataArr.push(val1); });
                     let bgColor = isLine && !isFillArea ? 'transparent' : colorArr; let borderColor = isLine ? colorArr[0] : oColor; if (isLine && ds.series.length === 1 && colorArr.length > 1) borderColor = colorArr[0]; if (isFillArea) bgColor = hexToRgba(colorArr[0], 20);
-                    datasets.push({ label: s.name, type: parsedType, hidden: s.hidden === true, indexAxis: isHorizontal ? 'y' : 'x', data: dataArr, backgroundColor: bgColor, borderColor: borderColor, borderWidth: isLine ? (slide.lineBorderWidth || 3) : oWidth, fill: isFillArea, tension: 0.4, borderRadius: slide.borderRadius, grouped: isGrouped, stack: isStacked ? 'Stack 0' : undefined, order: s.zIndex === 'front' ? 0 : 2, xAxisID: isHorizontal ? (s.axis === 'y2' ? 'xRight' : 'x') : 'x', yAxisID: isHorizontal ? 'y' : (s.axis === 'y2' ? 'yRight' : 'y'), customOffsets: ds.rows.map(r => r.values[sIdx]?.offset || 0) });
+                    datasets.push({ label: s.name, type: parsedType, hidden: s.hidden === true, indexAxis: isHorizontal ? 'y' : 'x', data: dataArr, backgroundColor: bgColor, borderColor: borderColor, borderWidth: isLine ? (slide.lineBorderWidth || 3) : oWidth, fill: isFillArea, tension: 0.4, borderRadius: slide.borderRadius, grouped: isGrouped, stack: isStacked ? 'Stack 0' : undefined, order: isLine ? (s.zIndex === 'back' ? 2 : 0) : sIdx, xAxisID: isHorizontal ? (s.axis === 'y2' ? 'xRight' : 'x') : 'x', yAxisID: isHorizontal ? 'y' : (s.axis === 'y2' ? 'yRight' : 'y'), customOffsets: ds.rows.map(r => r.values[sIdx]?.offset || 0) });
                 });
             }
             if (slide.showOutliers && !isMap && !isWordCloud && !isTreemap) {
@@ -9820,18 +10029,63 @@
             return { datasets, labels, chartOptions, globalBaseType };
         }
 
+        function changeHudActiveSeries(val) {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            slide.hudActiveSeriesIdx = parseInt(val) || 0;
+            renderPercentageWidgets();
+            saveState();
+        }
+
         function renderPercentageWidgets() {
             try {
                 const slide = getActiveSlide(); const ds = getActiveDataSet();
                 if (!slide || !ds || !els.percentageContainer || !els.totalSumDisplay) return;
                 els.percentageContainer.innerHTML = '';
 
+                let activeSIdx = slide.hudActiveSeriesIdx;
+                if (activeSIdx === undefined || activeSIdx < 0 || activeSIdx >= ds.series.length) {
+                    // Default to latest series (index 1 if 2 series in versus mode, otherwise 0)
+                    activeSIdx = ds.series.length >= 2 ? 1 : 0;
+                    slide.hudActiveSeriesIdx = activeSIdx;
+                }
+
+                // Sync HUD selector UI if multiple series exist
+                const selectorWrap = document.getElementById('hudSeriesSelectorWrap');
+                const seriesSelect = document.getElementById('hudSeriesSelect');
+                const seriesBadge = document.getElementById('hudSeriesBadge');
+                if (selectorWrap && seriesSelect) {
+                    if (ds.series.length > 1) {
+                        selectorWrap.classList.remove('hidden');
+                        selectorWrap.classList.add('flex');
+                        let optHtml = '';
+                        ds.series.forEach((s, idx) => {
+                            let tag = '';
+                            if (ds.series.length === 2) {
+                                tag = idx === 1 ? ' [Terupdate]' : ' [Sebelum]';
+                            }
+                            optHtml += `<option value="${idx}" ${idx === activeSIdx ? 'selected' : ''}>${escapeHtml(s.name)}${tag}</option>`;
+                        });
+                        seriesSelect.innerHTML = optHtml;
+                        if (seriesBadge) {
+                            seriesBadge.classList.remove('hidden');
+                            const curName = ds.series[activeSIdx]?.name || '';
+                            seriesBadge.textContent = curName.includes('Periode B') ? 'B' : (curName.includes('Periode A') ? 'A' : `S${activeSIdx + 1}`);
+                            seriesBadge.className = `text-[8px] font-black px-1.5 py-0.2 rounded uppercase font-mono ${activeSIdx === 1 && ds.series.length === 2 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-700'}`;
+                        }
+                    } else {
+                        selectorWrap.classList.remove('flex');
+                        selectorWrap.classList.add('hidden');
+                        if (seriesBadge) seriesBadge.classList.add('hidden');
+                    }
+                }
+
                 const itemsMeta = ds.rows.map((r, rIdx) => ({
                     rIdx,
                     id: r.id,
                     label: r.label,
                     icon: r.icon || '',
-                    val: getEffectiveValue(r.values[0]?.val, r.id, 0)
+                    val: getEffectiveValue(r.values[activeSIdx]?.val, r.id, activeSIdx)
                 }));
 
                 const stats = computeDataScienceStats(itemsMeta);
@@ -9865,10 +10119,10 @@
 
                 if (total > 0) {
                     ds.rows.forEach((r, rIdx) => {
-                        let val = getEffectiveValue(r.values[0]?.val, r.id, 0);
+                        let val = getEffectiveValue(r.values[activeSIdx]?.val, r.id, activeSIdx);
                         if (val === null || isNaN(val) || val <= 0) return;
                         let pctStr = formatChartNumber((val / total) * 100, Object.assign({}, slide, { decimalPlaces: slide.decimalPlaces === 'auto' ? 0 : slide.decimalPlaces }));
-                        let color = r.values[0]?.color || '#000';
+                        let color = r.values[activeSIdx]?.color || r.values[0]?.color || '#000';
                         const isMvp = stats.mvp && stats.mvp.rIdx === rIdx;
                         const hasDrill = r.drillTarget && appSlides.some(s => s.id === r.drillTarget);
                         const div = document.createElement('div');
@@ -11123,6 +11377,12 @@
         let pivotStudioState = {
             filterColIdx: -1,             // Column index for Timeline Slicer (-1 = None)
             filterSelectedValues: new Set(), // Set of active filter strings (empty = all)
+            filter2ColIdx: -1,            // Column index for Secondary Filter (e.g. Program, -1 = None)
+            filter2SelectedValues: new Set(), // Set of active filter 2 strings (empty = all)
+            periodColIdx: -1,             // Dedicated column index for period comparison (-1 = auto)
+            unselectedExportColumns: new Set(), // Columns deselected via header checkboxes from chart export
+            timeGranularity: 'raw',       // 'raw' | 'daily' | 'weekly' | 'monthly' | 'yearly'
+            periodComparison: null,       // { type: 'wow'|'mom'|'custom', labelA: '', labelB: '', valuesA: Set, valuesB: Set }
             row1ColIdx: 0,                // Rows Level 1 (Primary Category)
             row2ColIdx: -1,               // Rows Level 2 (Sub-category / Drill-down, -1 = None)
             colColIdx: -1,                // Columns (Matrix Series Breakdown, -1 = None)
@@ -11148,7 +11408,7 @@
             rawEndRow: 100
         };
 
-        function openRawImportModal(workbook, fileName = 'File Excel') {
+        function openRawImportModal(workbook, fileName = 'File Excel', preserveState = false) {
             if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
                 showToast("File tidak berisi sheet yang valid!", true);
                 return;
@@ -11161,6 +11421,24 @@
 
             currentImportWorkbook = workbook;
             currentImportFileName = fileName;
+            if (fileName && fileName !== 'File Excel') {
+                currentOpenedFileName = fileName;
+                if (!currentProjectName || currentProjectName === 'Proyek Utama' || currentProjectName === 'Proyek Baru') {
+                    currentProjectName = fileName.replace(/\.[^/.]+$/, '');
+                }
+                updateNavFileProjectInfo();
+                if (typeof sessionWorkbookLibrary !== 'undefined') {
+                    sessionWorkbookLibrary.set(fileName, {
+                        workbook: workbook,
+                        fileName: fileName,
+                        sheetNames: workbook.SheetNames || [],
+                        timestamp: Date.now()
+                    });
+                }
+            }
+            if (typeof renderPivotSourceFileDropdown === 'function') {
+                renderPivotSourceFileDropdown();
+            }
 
             const modal = document.getElementById('rawImportModal');
             if (!modal) return;
@@ -11174,7 +11452,7 @@
             renderSheetTabs(workbook.SheetNames);
 
             const targetSheet = workbook.SheetNames.includes(currentActiveSheetName) ? currentActiveSheetName : workbook.SheetNames[0];
-            selectSheetForImport(targetSheet);
+            selectSheetForImport(targetSheet, preserveState);
 
             if (workbook.SheetNames.length > 1) {
                 showToast(`Terdeteksi ${workbook.SheetNames.length} sheet. Klik tab sheet di atas untuk memilih/berpindah sheet.`, false);
@@ -11256,7 +11534,7 @@
             });
         }
 
-        function selectSheetForImport(sheetName) {
+        function selectSheetForImport(sheetName, preserveState = false) {
             if (!currentImportWorkbook || !currentImportWorkbook.Sheets[sheetName]) return;
             currentActiveSheetName = sheetName;
 
@@ -11307,7 +11585,19 @@
             pivotStudioState.rawStartRow = detectedHeaderRowIdx + 2;
             pivotStudioState.rawEndRow = currentRawSheetData.length;
 
-            initializePivotStudioFields(detectedHeaderRowIdx, maxColsAcrossSheet);
+            if (preserveState) {
+                // Keep user configured state, just update header metadata and refresh UI
+                const rawHeader = currentRawSheetData[detectedHeaderRowIdx] ? [...currentRawSheetData[detectedHeaderRowIdx]] : [];
+                while (rawHeader.length < maxColsAcrossSheet) {
+                    rawHeader.push(`Kolom ${getColLetter(rawHeader.length)}`);
+                }
+                currentPreparedHeaderRow = rawHeader.map(col => cleanHeaderName(col));
+                renderQuadrantControls(currentPreparedHeaderRow, currentPreparedNumScores || []);
+                populateTimelineSlicer(currentPreparedHeaderRow);
+                renderFieldBadgesList(currentPreparedHeaderRow, currentPreparedNumScores || []);
+            } else {
+                initializePivotStudioFields(detectedHeaderRowIdx, maxColsAcrossSheet);
+            }
             runStudioPivotComputation();
         }
 
@@ -11510,16 +11800,51 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             // 1. QUADRANT 1: FILTERS (SLICER)
             const fContainer = document.getElementById('quadFilterSlotsContainer');
             if (fContainer) {
-                if (pivotStudioState.filterColIdx < 0) {
+                if (pivotStudioState.filterColIdx < 0 && pivotStudioState.filter2ColIdx < 0) {
                     fContainer.innerHTML = `
                     <div class="flex items-center justify-between bg-slate-50 border border-dashed border-slate-200/90 rounded-xl px-2.5 py-1.5 transition">
                         <span class="text-xs text-slate-400 font-medium italic">[ Tanpa Filter ]</span>
                         <button type="button" onclick="addQuadrantFilter()"
-                            class="text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2 py-0.5 rounded-lg transition flex items-center gap-1">
+                            class="text-[10px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-2 py-0.5 rounded-lg transition flex items-center gap-1 cursor-pointer">
                             <i class="ph-bold ph-plus text-xs"></i> <span>Tambah</span>
                         </button>
                     </div>`;
                 } else {
+                    let f2Html = '';
+                    if (pivotStudioState.filter2ColIdx >= 0) {
+                        const selCount2 = pivotStudioState.filter2SelectedValues.size;
+                        const badgeText2 = selCount2 === 0 ? 'Semua' : (pivotStudioState.filter2SelectedValues.has('__NONE__') ? '0 dipilih' : `${selCount2} dipilih`);
+                        f2Html = `
+                        <div class="pt-2 mt-1 border-t border-indigo-200/60 flex flex-col gap-1.5 bg-indigo-50/50 p-2 rounded-xl border border-indigo-200/70">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-black text-indigo-900 uppercase tracking-wider flex items-center gap-1">
+                                    <i class="ph-bold ph-funnel text-indigo-600"></i> Filter 2 (Program / Dimensi)
+                                </span>
+                                <button type="button" onclick="removeQuadrantFilter2()" class="text-[10px] text-rose-600 hover:text-rose-800 font-bold transition flex items-center gap-0.5 cursor-pointer">
+                                    <span>Hapus</span>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <select id="quadFilter2Select" onchange="onQuadFilter2SelectChange(this.value)"
+                                    class="flex-1 min-w-0 bg-white border border-indigo-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-indigo-600 transition cursor-pointer">
+                                    ${buildOptions(pivotStudioState.filter2ColIdx, true, '[ Pilih Filter 2 ]')}
+                                </select>
+                                <button type="button" onclick="openBurgerFilterModal(2)"
+                                    class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black shrink-0 transition flex items-center gap-1 shadow-2xs cursor-pointer"
+                                    title="Pilih item Filter 2 (klik 'Hanya Ini' untuk 1 item)">
+                                    <span>Pilih</span>
+                                    <span class="px-1 py-0.2 rounded bg-white text-indigo-800 text-[9px] font-black">${badgeText2}</span>
+                                </button>
+                            </div>
+                        </div>`;
+                    } else {
+                        f2Html = `
+                        <button type="button" onclick="addQuadrantFilter2()"
+                            class="w-full py-1.5 border border-dashed border-indigo-300/80 hover:border-indigo-500 bg-indigo-50/40 hover:bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-xl transition flex items-center justify-center gap-1 cursor-pointer">
+                            <i class="ph-bold ph-plus text-xs"></i> <span>+ Tambah Filter 2 (Misal: Program)</span>
+                        </button>`;
+                    }
+
                     fContainer.innerHTML = `
                     <div class="flex flex-col gap-1.5">
                         <div class="flex items-center gap-1.5">
@@ -11528,12 +11853,12 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 ${buildOptions(pivotStudioState.filterColIdx, true, '[ Tanpa Filter ]')}
                             </select>
                             <button type="button" onclick="removeQuadrantFilter()" title="Hapus Filter Slicer"
-                                class="w-7 h-7 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 border border-slate-200/80 flex items-center justify-center transition shrink-0">
+                                class="w-7 h-7 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 border border-slate-200/80 flex items-center justify-center transition shrink-0 cursor-pointer">
                                 <i class="ph-bold ph-minus text-xs"></i>
                             </button>
                         </div>
                         <div class="grid grid-cols-2 gap-1.5">
-                            <button type="button" onclick="openBurgerFilterModal()"
+                            <button type="button" onclick="openBurgerFilterModal(1)"
                                 class="py-1.5 px-2 bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl text-[11px] font-black flex items-center justify-center shadow-2xs transition cursor-pointer">
                                 <span>Menu Pilihan</span>
                             </button>
@@ -11542,6 +11867,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 <span>Versus (A vs B)</span>
                             </button>
                         </div>
+                        ${f2Html}
                     </div>`;
                 }
             }
@@ -11769,11 +12095,12 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 const label = formatExcelDateDisplay(val);
                 html += `
                 <button type="button" onclick="toggleTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\\'")}')"
+                    ondblclick="soloTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\\'")}')"
                     class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition shrink-0 flex items-center gap-1 border ${
                         isSelected 
                             ? 'bg-[#cafc03] text-slate-900 border-[#cafc03] font-black shadow-xs' 
                             : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white hover:border-slate-500'
-                    }" title="${escapeHtml(label)}">
+                    }" title="${escapeHtml(label)} (Klik: Toggle | Klik 2x: Hanya Ini)">
                     <span>${escapeHtml(label)}</span>
                     <span class="text-[9px] opacity-70">(${count})</span>
                 </button>`;
@@ -11794,6 +12121,17 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     <span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-white text-rose-700 border border-rose-200 shadow-2xs flex items-center gap-1">
                         <span>Tidak ada tanggal dipilih (Tabel kosong)</span>
                     </span>`;
+                } else if (pivotStudioState.periodComparison && pivotStudioState.periodComparison.active) {
+                    sumContainer.innerHTML = `
+                    <div class="flex items-center gap-1.5 bg-white/95 px-2.5 py-1 rounded-xl border border-amber-300 shadow-2xs">
+                        <span class="text-[9px] font-black text-amber-700 uppercase tracking-wider">
+                            Versus:
+                        </span>
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-blue-100 text-blue-900 border border-blue-200">${escapeHtml(pivotStudioState.periodComparison.labelA)}</span>
+                        <span class="text-[11px] font-black text-amber-600">vs</span>
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-200">${escapeHtml(pivotStudioState.periodComparison.labelB)}</span>
+                        <button type="button" onclick="clearPeriodComparison()" class="ml-1 text-slate-400 hover:text-rose-600 font-bold" title="Hapus Perbandingan Periode">✕</button>
+                    </div>`;
                 } else if (pivotStudioState.filterSelectedValues.size === 2) {
                     const selArr = Array.from(pivotStudioState.filterSelectedValues);
                     sumContainer.innerHTML = `
@@ -11856,6 +12194,431 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             runStudioPivotComputation();
         }
 
+        function soloTimelineFilterValue(val) {
+            pivotStudioState.filterSelectedValues = new Set([val]);
+            renderTimelineSlicerChips();
+            runStudioPivotComputation();
+            if (typeof showToast === 'function') showToast(`Hanya menampilkan: ${val}`);
+        }
+
+        // =========================================================================
+        // TIME INTELLIGENCE & DATE PARSER (WOW, MOM, DAILY, WEEKLY, MONTHLY, YEARLY)
+        // =========================================================================
+        function parseExcelDate(val) {
+            if (val === undefined || val === null || val === '') return null;
+            let d = null;
+            const num = Number(val);
+            if (!isNaN(num) && num >= 30000 && num <= 65000) {
+                // Excel serial number (days since 1899-12-30)
+                d = new Date(Math.round((num - 25569) * 86400 * 1000));
+            } else if (typeof val === 'string') {
+                const str = val.trim();
+                const parsed = Date.parse(str);
+                if (!isNaN(parsed)) {
+                    d = new Date(parsed);
+                } else {
+                    const m = str.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/);
+                    if (m) {
+                        const day = parseInt(m[1]);
+                        const month = parseInt(m[2]) - 1;
+                        let year = parseInt(m[3]);
+                        if (year < 100) year += 2000;
+                        d = new Date(year, month, day);
+                    }
+                }
+            }
+            if (!d || isNaN(d.getTime())) return null;
+
+            const day = d.getDate();
+            const month = d.getMonth();
+            const year = d.getFullYear();
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+            // ISO 8601 Week Calculation
+            const target = new Date(d.valueOf());
+            const dayNr = (d.getDay() + 6) % 7;
+            target.setDate(target.getDate() - dayNr + 3);
+            const firstThursday = target.valueOf();
+            target.setMonth(0, 1);
+            if (target.getDay() !== 4) {
+                target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+            }
+            const isoWeek = 1 + Math.ceil((firstThursday - target) / 604800000);
+
+            // Week Range (Monday to Sunday)
+            const dayOfWeek = (d.getDay() + 6) % 7;
+            const mon = new Date(d); mon.setDate(d.getDate() - dayOfWeek);
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            const dMon = String(mon.getDate()).padStart(2, '0');
+            const mMon = months[mon.getMonth()];
+            const dSun = String(sun.getDate()).padStart(2, '0');
+            const mSun = months[sun.getMonth()];
+            const weekRange = (mon.getMonth() === sun.getMonth()) 
+                ? `${dMon}-${dSun} ${mMon}` 
+                : `${dMon} ${mMon} - ${dSun} ${mSun}`;
+
+            return {
+                dateObj: d,
+                time: d.getTime(),
+                day,
+                month,
+                year,
+                dayName: days[d.getDay()],
+                monthName: months[month],
+                dailyKey: `${String(day).padStart(2, '0')} ${months[month]} ${year}`,
+                weekNum: isoWeek,
+                weeklyKey: `W${String(isoWeek).padStart(2, '0')} (${weekRange})`,
+                monthlyKey: `${months[month]} ${year}`,
+                yearlyKey: `${year}`,
+                sortKey: `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+            };
+        }
+
+        function findDateColIdx(hIdx = 0) {
+            const headerRow = currentRawSheetData[hIdx] || [];
+
+            // 1. Check if filterColIdx is actually a date column
+            if (pivotStudioState.filterColIdx >= 0) {
+                const c = pivotStudioState.filterColIdx;
+                const s = String(headerRow[c] || '').toLowerCase().trim();
+                const sampleVal = currentRawSheetData[hIdx + 1]?.[c];
+                if (s.includes('date') || s.includes('tanggal') || s.includes('week') || s.includes('hari') || parseExcelDate(sampleVal)) {
+                    return c;
+                }
+            }
+            // 2. Check if colColIdx is a date column
+            if (pivotStudioState.colColIdx >= 0) {
+                const c = pivotStudioState.colColIdx;
+                const s = String(headerRow[c] || '').toLowerCase().trim();
+                const sampleVal = currentRawSheetData[hIdx + 1]?.[c];
+                if (s.includes('date') || s.includes('tanggal') || s.includes('week') || s.includes('hari') || parseExcelDate(sampleVal)) {
+                    return c;
+                }
+            }
+            // 3. Search all headers for date/tanggal/week/hari
+            let detected = -1;
+            headerRow.forEach((col, idx) => {
+                const s = String(col || '').toLowerCase().trim();
+                if (detected === -1 && (s.includes('date') || s.includes('tanggal') || s.includes('week') || s.includes('hari') || s.includes('bulan') || s.includes('tahun'))) {
+                    detected = idx;
+                }
+            });
+            if (detected >= 0) return detected;
+
+            // 4. Search by parsing sample data rows
+            for (let c = 0; c < headerRow.length; c++) {
+                let validCount = 0;
+                for (let r = hIdx + 1; r < Math.min(hIdx + 10, currentRawSheetData.length); r++) {
+                    if (parseExcelDate(currentRawSheetData[r]?.[c])) validCount++;
+                }
+                if (validCount >= 3) return c;
+            }
+
+            return 0;
+        }
+
+        // =========================================================================
+        // VERSUS PRESETS: WOW (WEEK-ON-WEEK) & MOM (MONTH-ON-MONTH)
+        // =========================================================================
+        function applyVersusWoW() {
+            if (!currentRawSheetData || currentRawSheetData.length < 2) return;
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const dateCol = findDateColIdx(hIdx);
+
+            const parsedRows = [];
+            for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
+                const row = currentRawSheetData[r];
+                if (!row) continue;
+                const v = row[dateCol];
+                if (v !== undefined && v !== null && String(v).trim() !== '') {
+                    const rawStr = String(v).trim();
+                    const p = parseExcelDate(v);
+                    if (p) parsedRows.push({ raw: rawStr, time: p.time, weekNum: p.weekNum, year: p.year, weekKey: p.weeklyKey });
+                }
+            }
+
+            if (parsedRows.length === 0) {
+                showToast("Kolom tanggal tidak dapat diidentifikasi untuk perbandingan WoW!", true);
+                return;
+            }
+
+            // Group unique dates by week
+            const weekMap = new Map();
+            parsedRows.forEach(item => {
+                const wId = `${item.year}_W${String(item.weekNum).padStart(2, '0')}`;
+                if (!weekMap.has(wId)) {
+                    weekMap.set(wId, { id: wId, label: item.weekKey, time: item.time, rawValues: new Set() });
+                }
+                weekMap.get(wId).rawValues.add(item.raw);
+                if (item.time > weekMap.get(wId).time) weekMap.get(wId).time = item.time;
+            });
+
+            const sortedWeeks = Array.from(weekMap.values()).sort((a, b) => a.time - b.time);
+            let weekA, weekB;
+
+            if (sortedWeeks.length >= 2) {
+                weekA = sortedWeeks[sortedWeeks.length - 2];
+                weekB = sortedWeeks[sortedWeeks.length - 1];
+            } else {
+                // If only 1 week of data, fallback to last 7 days vs previous 7 days
+                const uniqueDates = Array.from(new Set(parsedRows.map(p => p.raw))).sort();
+                if (uniqueDates.length >= 2) {
+                    const mid = Math.floor(uniqueDates.length / 2);
+                    weekA = { label: 'Periode Awal', rawValues: new Set(uniqueDates.slice(0, mid)) };
+                    weekB = { label: 'Periode Terupdate', rawValues: new Set(uniqueDates.slice(mid)) };
+                } else {
+                    showToast("Dibutuhkan data minimal 2 tanggal untuk perbandingan WoW!", true);
+                    return;
+                }
+            }
+
+            // Configure Pivot Studio state for WoW
+            if (pivotStudioState.filterColIdx < 0 || pivotStudioState.filterColIdx === dateCol) {
+                pivotStudioState.filterColIdx = dateCol;
+                pivotStudioState.filterSelectedValues = new Set([...weekA.rawValues, ...weekB.rawValues]);
+            }
+            pivotStudioState.periodColIdx = dateCol;
+            pivotStudioState.colColIdx = dateCol;
+            pivotStudioState.periodComparison = {
+                active: true,
+                type: 'wow',
+                labelA: `1 Mgg Lalu (${weekA.label})`,
+                labelB: `1 Mgg Kini (${weekB.label})`,
+                valuesA: weekA.rawValues,
+                valuesB: weekB.rawValues
+            };
+            pivotStudioState.showDelta = true;
+            pivotStudioState.showAverage = true;
+            pivotStudioState.timeGranularity = 'raw';
+
+            closeVersusDateModal();
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            showToast(`✅ Berhasil mengaktifkan Versus WoW: ${weekA.label} vs ${weekB.label}`);
+        }
+
+        function applyVersusMoM() {
+            if (!currentRawSheetData || currentRawSheetData.length < 2) return;
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const dateCol = findDateColIdx(hIdx);
+
+            const parsedRows = [];
+            for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
+                const row = currentRawSheetData[r];
+                if (!row) continue;
+                const v = row[dateCol];
+                if (v !== undefined && v !== null && String(v).trim() !== '') {
+                    const rawStr = String(v).trim();
+                    const p = parseExcelDate(v);
+                    if (p) parsedRows.push({ raw: rawStr, time: p.time, month: p.month, year: p.year, monthKey: p.monthlyKey });
+                }
+            }
+
+            if (parsedRows.length === 0) {
+                showToast("Kolom tanggal tidak dapat diidentifikasi untuk perbandingan MoM!", true);
+                return;
+            }
+
+            // Group unique dates by month
+            const monthMap = new Map();
+            parsedRows.forEach(item => {
+                const mId = `${item.year}_M${String(item.month).padStart(2, '0')}`;
+                if (!monthMap.has(mId)) {
+                    monthMap.set(mId, { id: mId, label: item.monthKey, time: item.time, rawValues: new Set() });
+                }
+                monthMap.get(mId).rawValues.add(item.raw);
+                if (item.time > monthMap.get(mId).time) monthMap.get(mId).time = item.time;
+            });
+
+            const sortedMonths = Array.from(monthMap.values()).sort((a, b) => a.time - b.time);
+            if (sortedMonths.length < 2) {
+                showToast("Dibutuhkan data minimal 2 bulan yang berbeda untuk perbandingan MoM!", true);
+                return;
+            }
+
+            const monthA = sortedMonths[sortedMonths.length - 2];
+            const monthB = sortedMonths[sortedMonths.length - 1];
+
+            // Configure Pivot Studio state for MoM
+            if (pivotStudioState.filterColIdx < 0 || pivotStudioState.filterColIdx === dateCol) {
+                pivotStudioState.filterColIdx = dateCol;
+                pivotStudioState.filterSelectedValues = new Set([...monthA.rawValues, ...monthB.rawValues]);
+            }
+            pivotStudioState.periodColIdx = dateCol;
+            pivotStudioState.colColIdx = dateCol;
+            pivotStudioState.periodComparison = {
+                active: true,
+                type: 'mom',
+                labelA: `Bln Lalu (${monthA.label})`,
+                labelB: `Bln Ini (${monthB.label})`,
+                valuesA: monthA.rawValues,
+                valuesB: monthB.rawValues
+            };
+            pivotStudioState.showDelta = true;
+            pivotStudioState.showAverage = true;
+            pivotStudioState.timeGranularity = 'raw';
+
+            closeVersusDateModal();
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            showToast(`✅ Berhasil mengaktifkan Versus MoM: ${monthA.label} vs ${monthB.label}`);
+        }
+
+        function setTimeGranularity(granularity = 'raw') {
+            pivotStudioState.timeGranularity = granularity;
+            pivotStudioState.periodComparison = null; // Clear preset period when changing granularity
+
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const dateCol = findDateColIdx(hIdx);
+
+            if (granularity !== 'raw') {
+                pivotStudioState.colColIdx = dateCol;
+                pivotStudioState.filterSelectedValues.clear(); // Show all in granularity view
+            }
+
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            showToast(`Granularitas Waktu: ${granularity.toUpperCase()}`);
+        }
+
+        // =========================================================================
+        // EXPORT CHECKBOXES & COLUMN EXPORT SELECTOR
+        // =========================================================================
+        function isExportColumnSelected(colKey) {
+            if (!pivotStudioState.unselectedExportColumns) {
+                pivotStudioState.unselectedExportColumns = new Set();
+            }
+            return !pivotStudioState.unselectedExportColumns.has(String(colKey).trim());
+        }
+
+        function toggleExportColumn(colKey, isChecked) {
+            if (!pivotStudioState.unselectedExportColumns) {
+                pivotStudioState.unselectedExportColumns = new Set();
+            }
+            const k = String(colKey).trim();
+            if (isChecked) {
+                pivotStudioState.unselectedExportColumns.delete(k);
+            } else {
+                pivotStudioState.unselectedExportColumns.add(k);
+            }
+            renderStudioKitView();
+            updatePivotExportStatusBadge();
+        }
+
+        function updatePivotExportStatusBadge() {
+            if (!currentPreparedImportData || currentPreparedImportData.length < 2) return;
+            const headers = currentPreparedImportData[0];
+            let activeCount = 0;
+            for (let i = 1; i < headers.length; i++) {
+                const h = headers[i];
+                let isColActive = true;
+                if (h.includes('Δ Selisih') || h.includes('Selisih')) {
+                    isColActive = isExportColumnSelected('delta') && isExportColumnSelected(h);
+                } else if (h.includes('Rata-rata') || h.includes('Average')) {
+                    isColActive = isExportColumnSelected('avg') && isExportColumnSelected(h);
+                } else {
+                    isColActive = isExportColumnSelected(h);
+                }
+                if (isColActive) activeCount++;
+            }
+
+            const status = document.getElementById('rawImportSummaryStatus');
+            if (status) {
+                status.innerHTML = `<i class="ph-bold ph-check-circle text-emerald-600"></i> Siap diterapkan: <strong>${currentPreparedImportData.length - 1} data baris</strong> × <strong>${activeCount} series ke grafik</strong>`;
+            }
+        }
+
+        // =========================================================================
+        // REOPEN PIVOT STUDIO WITH FULL STATE PERSISTENCE
+        // =========================================================================
+        function reopenPivotStudio() {
+            const slide = getActiveSlide();
+            const storedWb = (slide && slide.id && sessionWorkbooksBySlide.get(slide.id)) || (slide && slide.lastImportWorkbook);
+            if (storedWb) {
+                currentImportWorkbook = storedWb;
+                currentImportFileName = (slide && slide.lastImportFileName) || currentImportFileName;
+                currentActiveSheetName = (slide && slide.lastImportSheetName) || currentActiveSheetName;
+            } else if (slide && slide.lastImportFileName && typeof sessionWorkbookLibrary !== 'undefined') {
+                const libEntry = sessionWorkbookLibrary.get(slide.lastImportFileName);
+                if (libEntry && libEntry.workbook) {
+                    currentImportWorkbook = libEntry.workbook;
+                    currentImportFileName = libEntry.fileName;
+                    currentActiveSheetName = (slide && slide.lastImportSheetName) || currentActiveSheetName;
+                }
+            }
+            if (slide && slide.lastImportWorkbook) {
+                delete slide.lastImportWorkbook;
+            }
+
+            if (slide && slide.pivotStateSnapshot) {
+                // Restore snapshot without data loss
+                try {
+                    const snap = slide.pivotStateSnapshot;
+                    Object.keys(snap).forEach(k => {
+                        if (k === 'filterSelectedValues' || k === 'unselectedExportColumns') {
+                            pivotStudioState[k] = new Set(Array.isArray(snap[k]) ? snap[k] : []);
+                        } else if (k === 'periodComparison' && snap[k]) {
+                            pivotStudioState[k] = {
+                                ...snap[k],
+                                valuesA: new Set(Array.isArray(snap[k].valuesA) ? snap[k].valuesA : []),
+                                valuesB: new Set(Array.isArray(snap[k].valuesB) ? snap[k].valuesB : [])
+                            };
+                        } else {
+                            pivotStudioState[k] = snap[k];
+                        }
+                    });
+                } catch (e) {
+                    console.warn("Failed restoring pivot state snapshot:", e);
+                }
+            }
+
+            if (currentImportWorkbook) {
+                openRawImportModal(currentImportWorkbook, currentImportFileName, true);
+            } else {
+                openRawImportModalManual();
+            }
+        }
+
+        // =========================================================================
+        // INSTANT WORKBOOK SWITCHING ENGINE (FILE POOL / LIBRARY)
+        // =========================================================================
+        function switchPivotSourceFile(targetFileName) {
+            if (!targetFileName || typeof sessionWorkbookLibrary === 'undefined') return;
+            const entry = sessionWorkbookLibrary.get(targetFileName);
+            if (entry && entry.workbook) {
+                openRawImportModal(entry.workbook, entry.fileName, true);
+                showToast(`Beralih ke sumber file: ${entry.fileName}`, false);
+            }
+        }
+
+        function renderPivotSourceFileDropdown() {
+            const container = document.getElementById('pivotSourceFileSelectorContainer');
+            const select = document.getElementById('pivotSourceFileSelect');
+            if (!container || !select) return;
+
+            if (typeof sessionWorkbookLibrary === 'undefined' || sessionWorkbookLibrary.size <= 1) {
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            container.classList.add('flex');
+
+            let html = '';
+            sessionWorkbookLibrary.forEach((entry, fName) => {
+                const isSelected = (fName === currentImportFileName);
+                const sCount = (entry.sheetNames && entry.sheetNames.length) || 1;
+                html += `<option value="${escapeHtml(fName)}" ${isSelected ? 'selected' : ''}>📄 ${escapeHtml(fName)} (${sCount} Sheet${sCount > 1 ? 's' : ''})</option>`;
+            });
+
+            select.innerHTML = html;
+        }
+
         function formatExcelDateDisplay(val) {
             if (val === undefined || val === null || val === '') return '';
             const num = Number(val);
@@ -11871,21 +12634,181 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             return String(val);
         }
 
-        function openVersus2DatesDialog() {
-            let colIdx = pivotStudioState.filterColIdx;
-            if (colIdx < 0) colIdx = pivotStudioState.colColIdx;
-            if (colIdx < 0) {
-                const meta = getActiveHeaderAndScores();
-                meta.headerRow.forEach((col, idx) => {
-                    const s = String(col || '').toLowerCase();
-                    if (colIdx < 0 && (s.includes('date') || s.includes('tanggal') || s.includes('week'))) colIdx = idx;
-                });
-                if (colIdx < 0) colIdx = 0;
-                pivotStudioState.filterColIdx = colIdx;
+        var currentVersusMode = 'range'; // 'range' | 'single'
+        var cachedVersusDateItems = [];
+
+        function setVersusMode(mode) {
+            currentVersusMode = mode;
+            const btnSingle = document.getElementById('btnVersusModeSingle');
+            const btnRange = document.getElementById('btnVersusModeRange');
+            const secSingle = document.getElementById('versusSingleDateSection');
+            const secRange = document.getElementById('versusRangeDateSection');
+
+            if (btnSingle && btnRange && secSingle && secRange) {
+                if (mode === 'single') {
+                    btnSingle.className = "flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-xs cursor-pointer";
+                    btnRange.className = "flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 cursor-pointer";
+                    secSingle.classList.remove('hidden');
+                    secRange.classList.add('hidden');
+                } else {
+                    btnRange.className = "flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-white text-slate-900 shadow-xs cursor-pointer";
+                    btnSingle.className = "flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 cursor-pointer";
+                    secRange.classList.remove('hidden');
+                    secSingle.classList.add('hidden');
+                }
+            }
+            updateVersusRangeSummary();
+        }
+
+        function getDatesInRange(startVal, endVal) {
+            if (!cachedVersusDateItems || cachedVersusDateItems.length === 0) return [];
+            let idxStart = cachedVersusDateItems.findIndex(d => d.raw === startVal);
+            let idxEnd = cachedVersusDateItems.findIndex(d => d.raw === endVal);
+            if (idxStart === -1) idxStart = 0;
+            if (idxEnd === -1) idxEnd = cachedVersusDateItems.length - 1;
+            const minIdx = Math.min(idxStart, idxEnd);
+            const maxIdx = Math.max(idxStart, idxEnd);
+            return cachedVersusDateItems.slice(minIdx, maxIdx + 1);
+        }
+
+        function formatRangeLabel(prefix, dateList) {
+            if (!dateList || dateList.length === 0) return prefix;
+            if (dateList.length === 1) {
+                const item = dateList[0];
+                return `${prefix} (${item.pDate ? item.pDate.dailyKey : item.raw})`;
+            }
+            const first = dateList[0];
+            const last = dateList[dateList.length - 1];
+            if (first.pDate && last.pDate) {
+                if (first.pDate.month === last.pDate.month && first.pDate.year === last.pDate.year) {
+                    return `${prefix} (${String(first.pDate.day).padStart(2, '0')}-${String(last.pDate.day).padStart(2, '0')} ${first.pDate.monthName} ${first.pDate.year})`;
+                } else if (first.pDate.year === last.pDate.year) {
+                    return `${prefix} (${String(first.pDate.day).padStart(2, '0')} ${first.pDate.monthName} - ${String(last.pDate.day).padStart(2, '0')} ${last.pDate.monthName} ${first.pDate.year})`;
+                } else {
+                    return `${prefix} (${first.pDate.dailyKey} - ${last.pDate.dailyKey})`;
+                }
+            }
+            return `${prefix} (${first.raw} - ${last.raw})`;
+        }
+
+        function updateVersusRangeSummary() {
+            const infoContent = document.getElementById('versusInfoContent');
+            if (!infoContent) return;
+
+            if (currentVersusMode === 'single') {
+                const selA = document.getElementById('versusDateASelect');
+                const selB = document.getElementById('versusDateBSelect');
+                const valA = selA ? selA.value : '';
+                const valB = selB ? selB.value : '';
+                if (valA === valB) {
+                    infoContent.innerHTML = `<span class="text-rose-700 font-bold">⚠️ Tanggal A dan B sama. Pilih 2 tanggal berbeda untuk membandingkan.</span>`;
+                } else {
+                    infoContent.innerHTML = `Tabel akan menyaring <strong>hanya 2 tanggal ini</strong> dan mengaktifkan kolom <strong>Selisih Δ (±)</strong> serta <strong>Rata-rata (x̄)</strong>.`;
+                }
+                return;
             }
 
+            // Range mode
+            const selAStart = document.getElementById('versusRangeAStartSelect');
+            const selAEnd = document.getElementById('versusRangeAEndSelect');
+            const selBStart = document.getElementById('versusRangeBStartSelect');
+            const selBEnd = document.getElementById('versusRangeBEndSelect');
+
+            const datesA = getDatesInRange(selAStart?.value, selAEnd?.value);
+            const datesB = getDatesInRange(selBStart?.value, selBEnd?.value);
+
+            const sumA = document.getElementById('versusRangeASummary');
+            const sumB = document.getElementById('versusRangeBSummary');
+
+            const rowsA = datesA.reduce((acc, d) => acc + (d.count || 0), 0);
+            const rowsB = datesB.reduce((acc, d) => acc + (d.count || 0), 0);
+
+            if (sumA) sumA.textContent = `${datesA.length} tgl (${rowsA.toLocaleString('id-ID')} baris)`;
+            if (sumB) sumB.textContent = `${datesB.length} tgl (${rowsB.toLocaleString('id-ID')} baris)`;
+
+            // Check overlap
+            const setA = new Set(datesA.map(d => d.raw));
+            const overlapDates = datesB.filter(d => setA.has(d.raw));
+
+            if (datesA.length === 0 || datesB.length === 0) {
+                infoContent.innerHTML = `<span class="text-rose-700 font-bold">⚠️ Harap tentukan tanggal mulai dan selesai untuk kedua periode.</span>`;
+            } else if (overlapDates.length > 0) {
+                infoContent.innerHTML = `<span class="text-rose-700 font-bold">⚠️ Perhatian: Terdapat ${overlapDates.length} tanggal saling bertumpukan (overlap) antara Periode A dan B! Harap atur rentang tanggal agar terpisah.</span>`;
+            } else {
+                const labelA = formatRangeLabel('Periode A', datesA);
+                const labelB = formatRangeLabel('Periode B', datesB);
+                infoContent.innerHTML = `Tabel akan membandingkan: <strong class="text-blue-900">${escapeHtml(labelA)}</strong> [${datesA.length} hari] vs <strong class="text-emerald-900">${escapeHtml(labelB)}</strong> [${datesB.length} hari], serta menghitung otomatis <strong>Selisih Δ (±)</strong> dan <strong>Rata-rata (x̄)</strong>.`;
+            }
+        }
+
+        function setVersusQuickRange(type) {
+            if (!cachedVersusDateItems || cachedVersusDateItems.length === 0) return;
+            const N = cachedVersusDateItems.length;
+
+            const selAStart = document.getElementById('versusRangeAStartSelect');
+            const selAEnd = document.getElementById('versusRangeAEndSelect');
+            const selBStart = document.getElementById('versusRangeBStartSelect');
+            const selBEnd = document.getElementById('versusRangeBEndSelect');
+            if (!selAStart || !selAEnd || !selBStart || !selBEnd) return;
+
+            if (type === 'split') {
+                const mid = Math.max(1, Math.floor(N / 2));
+                selAStart.value = cachedVersusDateItems[0].raw;
+                selAEnd.value = cachedVersusDateItems[mid - 1].raw;
+                selBStart.value = cachedVersusDateItems[mid].raw;
+                selBEnd.value = cachedVersusDateItems[N - 1].raw;
+            } else if (typeof type === 'number') {
+                const days = type;
+                if (N >= days * 2) {
+                    selBStart.value = cachedVersusDateItems[N - days].raw;
+                    selBEnd.value = cachedVersusDateItems[N - 1].raw;
+                    selAStart.value = cachedVersusDateItems[N - days * 2].raw;
+                    selAEnd.value = cachedVersusDateItems[N - days - 1].raw;
+                } else if (N >= 4) {
+                    const half = Math.floor(N / 2);
+                    selAStart.value = cachedVersusDateItems[0].raw;
+                    selAEnd.value = cachedVersusDateItems[half - 1].raw;
+                    selBStart.value = cachedVersusDateItems[half].raw;
+                    selBEnd.value = cachedVersusDateItems[N - 1].raw;
+                }
+            }
+            updateVersusRangeSummary();
+        }
+
+        function syncVersusRangeBDuration() {
+            if (!cachedVersusDateItems || cachedVersusDateItems.length === 0) return;
+            const selAStart = document.getElementById('versusRangeAStartSelect');
+            const selAEnd = document.getElementById('versusRangeAEndSelect');
+            const selBStart = document.getElementById('versusRangeBStartSelect');
+            const selBEnd = document.getElementById('versusRangeBEndSelect');
+            if (!selAStart || !selAEnd || !selBStart || !selBEnd) return;
+
+            const datesA = getDatesInRange(selAStart.value, selAEnd.value);
+            const duration = datesA.length;
+            if (duration === 0) return;
+
+            const idxBStart = cachedVersusDateItems.findIndex(d => d.raw === selBStart.value);
+            if (idxBStart >= 0) {
+                const targetIdxBEnd = Math.min(cachedVersusDateItems.length - 1, idxBStart + duration - 1);
+                selBEnd.value = cachedVersusDateItems[targetIdxBEnd].raw;
+            }
+            updateVersusRangeSummary();
+        }
+
+        function clearPeriodComparison() {
+            pivotStudioState.periodComparison = null;
+            pivotStudioState.filterSelectedValues = new Set();
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            if (typeof renderTimelineSlicerChips === 'function') renderTimelineSlicerChips();
+            showToast("Perbandingan Versus dinonaktifkan (kembali ke semua data).");
+        }
+
+        function openVersus2DatesDialog() {
             const pHeaderInput = document.getElementById('pivotHeaderRowInput');
             const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const colIdx = findDateColIdx(hIdx);
+            pivotStudioState.periodColIdx = colIdx;
 
             const valCountMap = new Map();
             for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
@@ -11898,26 +12821,80 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 }
             }
 
-            const uniqueDates = Array.from(valCountMap.keys()).sort();
-            if (uniqueDates.length < 2) {
+            cachedVersusDateItems = Array.from(valCountMap.entries()).map(([raw, count]) => {
+                const pDate = parseExcelDate(raw);
+                return {
+                    raw,
+                    count,
+                    pDate,
+                    time: pDate ? pDate.time : 0,
+                    display: formatExcelDateDisplay(raw)
+                };
+            });
+
+            if (cachedVersusDateItems.length < 2) {
                 showToast("Dibutuhkan minimal 2 tanggal dalam data untuk dibandingkan!", true);
                 return;
             }
 
+            // Sort strictly chronologically ascending
+            cachedVersusDateItems.sort((a, b) => {
+                if (a.time && b.time) return a.time - b.time;
+                return a.raw.localeCompare(b.raw, undefined, { numeric: true });
+            });
+
+            // Populate Single Date dropdowns
             const selA = document.getElementById('versusDateASelect');
             const selB = document.getElementById('versusDateBSelect');
             if (selA && selB) {
                 let optHtml = '';
-                uniqueDates.forEach(d => {
-                    optHtml += `<option value="${escapeHtml(d)}">${escapeHtml(formatExcelDateDisplay(d))} - [${valCountMap.get(d)} baris]</option>`;
+                cachedVersusDateItems.forEach(item => {
+                    optHtml += `<option value="${escapeHtml(item.raw)}">${escapeHtml(item.display)} - [${item.count} baris]</option>`;
                 });
                 selA.innerHTML = optHtml;
                 selB.innerHTML = optHtml;
 
-                // Pre-select: A = second to last date, B = latest date
-                selA.value = uniqueDates[Math.max(0, uniqueDates.length - 2)];
-                selB.value = uniqueDates[uniqueDates.length - 1];
+                selA.value = cachedVersusDateItems[Math.max(0, cachedVersusDateItems.length - 2)].raw;
+                selB.value = cachedVersusDateItems[cachedVersusDateItems.length - 1].raw;
             }
+
+            // Populate Range dropdowns
+            const selAStart = document.getElementById('versusRangeAStartSelect');
+            const selAEnd = document.getElementById('versusRangeAEndSelect');
+            const selBStart = document.getElementById('versusRangeBStartSelect');
+            const selBEnd = document.getElementById('versusRangeBEndSelect');
+
+            if (selAStart && selAEnd && selBStart && selBEnd) {
+                let optHtml = '';
+                cachedVersusDateItems.forEach(item => {
+                    optHtml += `<option value="${escapeHtml(item.raw)}">${escapeHtml(item.display)}</option>`;
+                });
+                selAStart.innerHTML = optHtml;
+                selAEnd.innerHTML = optHtml;
+                selBStart.innerHTML = optHtml;
+                selBEnd.innerHTML = optHtml;
+
+                const N = cachedVersusDateItems.length;
+                if (N >= 14) {
+                    selBStart.value = cachedVersusDateItems[N - 7].raw;
+                    selBEnd.value = cachedVersusDateItems[N - 1].raw;
+                    selAStart.value = cachedVersusDateItems[N - 14].raw;
+                    selAEnd.value = cachedVersusDateItems[N - 8].raw;
+                } else if (N >= 4) {
+                    const mid = Math.floor(N / 2);
+                    selAStart.value = cachedVersusDateItems[0].raw;
+                    selAEnd.value = cachedVersusDateItems[mid - 1].raw;
+                    selBStart.value = cachedVersusDateItems[mid].raw;
+                    selBEnd.value = cachedVersusDateItems[N - 1].raw;
+                } else {
+                    selAStart.value = cachedVersusDateItems[0].raw;
+                    selAEnd.value = cachedVersusDateItems[0].raw;
+                    selBStart.value = cachedVersusDateItems[1].raw;
+                    selBEnd.value = cachedVersusDateItems[1].raw;
+                }
+            }
+
+            setVersusMode(currentVersusMode || 'range');
 
             const modal = document.getElementById('versusDateModal');
             if (modal) modal.classList.remove('hidden');
@@ -11929,30 +12906,94 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         }
 
         function applyVersus2Dates() {
-            const selA = document.getElementById('versusDateASelect');
-            const selB = document.getElementById('versusDateBSelect');
-            if (!selA || !selB) return;
-            const dateA = selA.value;
-            const dateB = selB.value;
-            if (dateA === dateB) {
-                showToast("Pilih 2 tanggal yang berbeda untuk dibandingkan!", true);
-                return;
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const colIdx = findDateColIdx(hIdx);
+            pivotStudioState.periodColIdx = colIdx;
+            pivotStudioState.colColIdx = colIdx;
+
+            if (currentVersusMode === 'single') {
+                const selA = document.getElementById('versusDateASelect');
+                const selB = document.getElementById('versusDateBSelect');
+                if (!selA || !selB) return;
+                const dateA = selA.value;
+                const dateB = selB.value;
+                if (dateA === dateB) {
+                    showToast("Pilih 2 tanggal yang berbeda untuk dibandingkan!", true);
+                    return;
+                }
+
+                if (pivotStudioState.filterColIdx < 0 || pivotStudioState.filterColIdx === colIdx) {
+                    pivotStudioState.filterColIdx = colIdx;
+                    pivotStudioState.filterSelectedValues = new Set([dateA, dateB]);
+                }
+                pivotStudioState.periodComparison = {
+                    active: true,
+                    type: 'single_date',
+                    labelA: formatExcelDateDisplay(dateA),
+                    labelB: formatExcelDateDisplay(dateB),
+                    valuesA: new Set([dateA]),
+                    valuesB: new Set([dateB])
+                };
+                pivotStudioState.showDelta = true;
+                pivotStudioState.showAverage = true;
+                pivotStudioState.timeGranularity = 'raw';
+
+                closeVersusDateModal();
+                renderQuadrantControls();
+                runStudioPivotComputation();
+                showToast(`Membandingkan Versus: ${formatExcelDateDisplay(dateA)} vs ${formatExcelDateDisplay(dateB)}`);
+            } else {
+                // Range mode
+                const selAStart = document.getElementById('versusRangeAStartSelect');
+                const selAEnd = document.getElementById('versusRangeAEndSelect');
+                const selBStart = document.getElementById('versusRangeBStartSelect');
+                const selBEnd = document.getElementById('versusRangeBEndSelect');
+
+                const datesA = getDatesInRange(selAStart?.value, selAEnd?.value);
+                const datesB = getDatesInRange(selBStart?.value, selBEnd?.value);
+
+                if (datesA.length === 0) {
+                    showToast("Periode A tidak memiliki tanggal terpilih!", true);
+                    return;
+                }
+                if (datesB.length === 0) {
+                    showToast("Periode B tidak memiliki tanggal terpilih!", true);
+                    return;
+                }
+
+                const setA = new Set(datesA.map(d => d.raw));
+                const setB = new Set(datesB.map(d => d.raw));
+                const overlap = datesB.filter(d => setA.has(d.raw));
+                if (overlap.length > 0) {
+                    showToast(`Rentang Periode A dan B tidak boleh bertumpukan (${overlap.length} tanggal overlap)!`, true);
+                    return;
+                }
+
+                const labelA = formatRangeLabel('Periode A', datesA);
+                const labelB = formatRangeLabel('Periode B', datesB);
+
+                if (pivotStudioState.filterColIdx < 0 || pivotStudioState.filterColIdx === colIdx) {
+                    pivotStudioState.filterColIdx = colIdx;
+                    pivotStudioState.filterSelectedValues = new Set([...setA, ...setB]);
+                }
+                pivotStudioState.periodComparison = {
+                    active: true,
+                    type: 'custom_range',
+                    labelA: labelA,
+                    labelB: labelB,
+                    valuesA: setA,
+                    valuesB: setB
+                };
+                pivotStudioState.showDelta = true;
+                pivotStudioState.showAverage = true;
+                pivotStudioState.timeGranularity = 'raw';
+
+                closeVersusDateModal();
+                renderQuadrantControls();
+                runStudioPivotComputation();
+                showToast(`✅ Berhasil mengaktifkan Versus Periode: ${labelA} vs ${labelB}`);
             }
-
-            // Set filter specifically to these 2 dates
-            pivotStudioState.filterSelectedValues = new Set([dateA, dateB]);
-            pivotStudioState.showDelta = true;
-            pivotStudioState.showAverage = true;
-
-            // Ensure Columns (Series) is active on the date column so they appear side-by-side
-            if (pivotStudioState.colColIdx < 0 && pivotStudioState.filterColIdx >= 0) {
-                pivotStudioState.colColIdx = pivotStudioState.filterColIdx;
-            }
-
-            closeVersusDateModal();
-            renderQuadrantControls();
-            runStudioPivotComputation();
-            showToast(`Membandingkan Versus: ${formatExcelDateDisplay(dateA)} vs ${formatExcelDateDisplay(dateB)}`);
         }
 
         function toggleSlideStripVisibility() {
@@ -11965,17 +13006,58 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             }
         }
 
-        function openBurgerFilterModal() {
-            let colIdx = pivotStudioState.filterColIdx;
-            if (colIdx < 0) colIdx = pivotStudioState.colColIdx;
+        let activeBurgerFilterSlot = 1;
+
+        function getActiveBurgerColIdx() {
+            return activeBurgerFilterSlot === 2 ? pivotStudioState.filter2ColIdx : pivotStudioState.filterColIdx;
+        }
+
+        function getActiveBurgerSelectedSet() {
+            return activeBurgerFilterSlot === 2 ? pivotStudioState.filter2SelectedValues : pivotStudioState.filterSelectedValues;
+        }
+
+        function setActiveBurgerSelectedSet(newSet) {
+            if (activeBurgerFilterSlot === 2) {
+                pivotStudioState.filter2SelectedValues = newSet;
+            } else {
+                pivotStudioState.filterSelectedValues = newSet;
+            }
+        }
+
+        function openBurgerFilterModal(slot = 1) {
+            activeBurgerFilterSlot = (slot === 2) ? 2 : 1;
+            let colIdx = getActiveBurgerColIdx();
             if (colIdx < 0) {
-                const meta = getActiveHeaderAndScores();
-                meta.headerRow.forEach((col, idx) => {
-                    const s = String(col || '').toLowerCase();
-                    if (colIdx < 0 && (s.includes('date') || s.includes('tanggal') || s.includes('week'))) colIdx = idx;
-                });
-                if (colIdx < 0) colIdx = 0;
-                pivotStudioState.filterColIdx = colIdx;
+                if (activeBurgerFilterSlot === 2) {
+                    const meta = getActiveHeaderAndScores();
+                    meta.headerRow.forEach((col, idx) => {
+                        const s = String(col || '').toLowerCase();
+                        if (colIdx < 0 && idx !== pivotStudioState.filterColIdx && (s.includes('prog') || s.includes('acara') || s.includes('title'))) {
+                            colIdx = idx;
+                        }
+                    });
+                    if (colIdx < 0) {
+                        for (let i = 0; i < meta.headerRow.length; i++) {
+                            if (i !== pivotStudioState.filterColIdx && i !== pivotStudioState.row1ColIdx && (!meta.numScores || meta.numScores[i] <= 0.6)) {
+                                colIdx = i;
+                                break;
+                            }
+                        }
+                    }
+                    if (colIdx < 0) colIdx = 0;
+                    pivotStudioState.filter2ColIdx = colIdx;
+                } else {
+                    if (pivotStudioState.colColIdx >= 0) colIdx = pivotStudioState.colColIdx;
+                    if (colIdx < 0) {
+                        const meta = getActiveHeaderAndScores();
+                        meta.headerRow.forEach((col, idx) => {
+                            const s = String(col || '').toLowerCase();
+                            if (colIdx < 0 && (s.includes('date') || s.includes('tanggal') || s.includes('week'))) colIdx = idx;
+                        });
+                        if (colIdx < 0) colIdx = 0;
+                    }
+                    pivotStudioState.filterColIdx = colIdx;
+                }
             }
 
             const pHeaderInput = document.getElementById('pivotHeaderRowInput');
@@ -11983,11 +13065,22 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const colHeader = currentRawSheetData[hIdx]?.[colIdx] || `Kolom ${getColLetter(colIdx)}`;
 
             const colBadge = document.getElementById('burgerFilterColBadge');
-            if (colBadge) colBadge.textContent = `[${getColLetter(colIdx)}] ${colHeader}`;
+            if (colBadge) {
+                const slotPrefix = activeBurgerFilterSlot === 2 ? '[Filter 2] ' : '[Filter 1] ';
+                colBadge.textContent = `${slotPrefix}[${getColLetter(colIdx)}] ${colHeader}`;
+            }
+
+            const mTitle = document.getElementById('burgerFilterModalTitle');
+            if (mTitle) mTitle.textContent = `Pilih ${colHeader} & Filter (Slot ${activeBurgerFilterSlot})`;
+            const mSub = document.getElementById('burgerFilterModalSubtitle');
+            if (mSub) mSub.textContent = `Lihat dan centang nilai ${colHeader.toLowerCase()} langsung dalam grid (klik "Hanya Ini" untuk memilih 1 saja)`;
 
             // Clear search
             const sInput = document.getElementById('burgerFilterSearchInput');
-            if (sInput) sInput.value = '';
+            if (sInput) {
+                sInput.value = '';
+                sInput.placeholder = `Cari ${colHeader.toLowerCase()} (contoh: Seleb On News, 04 Mar)...`;
+            }
 
             renderBurgerFilterGrid();
 
@@ -12006,7 +13099,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const container = document.getElementById('burgerFilterListContainer');
             if (!container) return;
 
-            const colIdx = pivotStudioState.filterColIdx;
+            const colIdx = getActiveBurgerColIdx();
             const pHeaderInput = document.getElementById('pivotHeaderRowInput');
             const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
 
@@ -12020,11 +13113,12 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             }
 
             const uniqueValues = Array.from(valCountMap.keys()).sort();
-            const allSelected = pivotStudioState.filterSelectedValues.size === 0;
+            const selectedSet = getActiveBurgerSelectedSet();
+            const allSelected = selectedSet.size === 0;
 
             let html = '';
             uniqueValues.forEach((val, idx) => {
-                const isSelected = allSelected || pivotStudioState.filterSelectedValues.has(val);
+                const isSelected = allSelected || selectedSet.has(val);
                 const count = valCountMap.get(val);
                 const label = formatExcelDateDisplay(val);
                 const safeVal = escapeHtml(val).replace(/'/g, "\\'");
@@ -12045,9 +13139,16 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                             <span class="text-[10px] text-slate-400 font-mono">${escapeHtml(val)}</span>
                         </div>
                     </div>
-                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 shrink-0">
-                        ${count} baris
-                    </span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="event.stopPropagation(); soloBurgerFilterItem('${safeVal}')"
+                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition shadow-2xs cursor-pointer"
+                            title="Pilih hanya ${escapeHtml(label)} saja">
+                            Hanya Ini
+                        </button>
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600">
+                            ${count} baris
+                        </span>
+                    </div>
                 </div>`;
             });
 
@@ -12055,13 +13156,25 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             updateBurgerFilterFooterState(uniqueValues.length);
         }
 
+        function soloBurgerFilterItem(val) {
+            setActiveBurgerSelectedSet(new Set([val]));
+            renderBurgerFilterGrid();
+            if (typeof showToast === 'function') showToast(`Hanya memilih: ${val}`);
+        }
+
         function updateBurgerFilterFooterState(totalCount) {
-            const allSelected = pivotStudioState.filterSelectedValues.size === 0;
-            const selCount = allSelected ? totalCount : (pivotStudioState.filterSelectedValues.has('__NONE__') ? 0 : pivotStudioState.filterSelectedValues.size);
+            const selectedSet = getActiveBurgerSelectedSet();
+            const allSelected = selectedSet.size === 0;
+            const selCount = allSelected ? totalCount : (selectedSet.has('__NONE__') ? 0 : selectedSet.size);
+
+            const colIdx = getActiveBurgerColIdx();
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const colHeader = (currentRawSheetData && currentRawSheetData[hIdx]?.[colIdx]) ? currentRawSheetData[hIdx][colIdx] : 'item';
 
             const counter = document.getElementById('burgerFilterSelectionCounter');
             if (counter) {
-                counter.textContent = `${selCount} dari ${totalCount} tanggal dipilih`;
+                counter.textContent = `${selCount} dari ${totalCount} ${escapeHtml(colHeader).toLowerCase()} dipilih`;
             }
 
             const versusBadge = document.getElementById('burgerFilterVersusBadge');
@@ -12091,7 +13204,8 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         function toggleBurgerFilterItem(val) {
             const pHeaderInput = document.getElementById('pivotHeaderRowInput');
             const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
-            const colIdx = pivotStudioState.filterColIdx;
+            const colIdx = getActiveBurgerColIdx();
+            const selectedSet = getActiveBurgerSelectedSet();
 
             const allVals = new Set();
             for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
@@ -12101,32 +13215,36 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 allVals.add((v !== undefined && v !== null && String(v).trim() !== '') ? String(v).trim() : '(Kosong)');
             }
 
-            if (pivotStudioState.filterSelectedValues.size === 0) {
+            let newSet;
+            if (selectedSet.size === 0) {
                 // Was all selected -> deselect this one
-                pivotStudioState.filterSelectedValues = new Set(allVals);
-                pivotStudioState.filterSelectedValues.delete(val);
-            } else if (pivotStudioState.filterSelectedValues.has('__NONE__')) {
-                pivotStudioState.filterSelectedValues = new Set([val]);
-            } else if (pivotStudioState.filterSelectedValues.has(val)) {
-                pivotStudioState.filterSelectedValues.delete(val);
-                if (pivotStudioState.filterSelectedValues.size === 0) {
-                    pivotStudioState.filterSelectedValues = new Set(['__NONE__']);
+                newSet = new Set(allVals);
+                newSet.delete(val);
+            } else if (selectedSet.has('__NONE__')) {
+                newSet = new Set([val]);
+            } else if (selectedSet.has(val)) {
+                newSet = new Set(selectedSet);
+                newSet.delete(val);
+                if (newSet.size === 0) {
+                    newSet = new Set(['__NONE__']);
                 }
             } else {
-                pivotStudioState.filterSelectedValues.add(val);
-                if (pivotStudioState.filterSelectedValues.size === allVals.size) {
-                    pivotStudioState.filterSelectedValues.clear(); // All
+                newSet = new Set(selectedSet);
+                newSet.add(val);
+                if (newSet.size === allVals.size) {
+                    newSet = new Set(); // All
                 }
             }
 
+            setActiveBurgerSelectedSet(newSet);
             renderBurgerFilterGrid();
         }
 
         function setBurgerFilterAll(selectAll) {
             if (selectAll) {
-                pivotStudioState.filterSelectedValues.clear();
+                getActiveBurgerSelectedSet().clear();
             } else {
-                pivotStudioState.filterSelectedValues = new Set(['__NONE__']);
+                setActiveBurgerSelectedSet(new Set(['__NONE__']));
             }
             renderBurgerFilterGrid();
         }
@@ -12134,7 +13252,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         function setBurgerFilterPreset2Latest() {
             const pHeaderInput = document.getElementById('pivotHeaderRowInput');
             const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
-            const colIdx = pivotStudioState.filterColIdx;
+            const colIdx = getActiveBurgerColIdx();
 
             const valSet = new Set();
             for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
@@ -12149,7 +13267,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             if (sorted.length >= 2) {
                 const d1 = sorted[sorted.length - 2];
                 const d2 = sorted[sorted.length - 1];
-                pivotStudioState.filterSelectedValues = new Set([d1, d2]);
+                setActiveBurgerSelectedSet(new Set([d1, d2]));
             }
             renderBurgerFilterGrid();
         }
@@ -12157,7 +13275,8 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         function setBurgerFilterInvert() {
             const pHeaderInput = document.getElementById('pivotHeaderRowInput');
             const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
-            const colIdx = pivotStudioState.filterColIdx;
+            const colIdx = getActiveBurgerColIdx();
+            const selectedSet = getActiveBurgerSelectedSet();
 
             const allVals = new Set();
             for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
@@ -12167,9 +13286,9 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 allVals.add((v !== undefined && v !== null && String(v).trim() !== '') ? String(v).trim() : '(Kosong)');
             }
 
-            const currentSel = pivotStudioState.filterSelectedValues.size === 0 
+            const currentSel = selectedSet.size === 0 
                 ? new Set(allVals) 
-                : (pivotStudioState.filterSelectedValues.has('__NONE__') ? new Set() : new Set(pivotStudioState.filterSelectedValues));
+                : (selectedSet.has('__NONE__') ? new Set() : new Set(selectedSet));
 
             const inverted = new Set();
             allVals.forEach(v => {
@@ -12177,11 +13296,11 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             });
 
             if (inverted.size === 0) {
-                pivotStudioState.filterSelectedValues = new Set(['__NONE__']);
+                setActiveBurgerSelectedSet(new Set(['__NONE__']));
             } else if (inverted.size === allVals.size) {
-                pivotStudioState.filterSelectedValues.clear();
+                getActiveBurgerSelectedSet().clear();
             } else {
-                pivotStudioState.filterSelectedValues = inverted;
+                setActiveBurgerSelectedSet(inverted);
             }
             renderBurgerFilterGrid();
         }
@@ -12191,21 +13310,28 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             renderQuadrantControls();
             renderStudioKitView();
             runStudioPivotComputation();
-            showToast("Filter tanggal berhasil diterapkan.");
+            showToast(`Filter (Slot ${activeBurgerFilterSlot}) berhasil diterapkan.`);
         }
 
         function applyBurgerFilterAsVersus() {
-            const sel = Array.from(pivotStudioState.filterSelectedValues).filter(v => v !== '__NONE__');
+            const colIdx = getActiveBurgerColIdx();
+            const sel = Array.from(getActiveBurgerSelectedSet()).filter(v => v !== '__NONE__');
             if (sel.length !== 2) {
-                showToast("Pilih tepat 2 tanggal untuk mode Versus!", true);
+                showToast("Pilih tepat 2 nilai untuk mode Versus!", true);
                 return;
             }
 
             pivotStudioState.showDelta = true;
             pivotStudioState.showAverage = true;
-            if (pivotStudioState.colColIdx < 0 && pivotStudioState.filterColIdx >= 0) {
-                pivotStudioState.colColIdx = pivotStudioState.filterColIdx;
-            }
+            pivotStudioState.colColIdx = colIdx;
+            pivotStudioState.periodComparison = {
+                active: true,
+                type: 'versus_2_items',
+                labelA: formatExcelDateDisplay(sel[0]),
+                labelB: formatExcelDateDisplay(sel[1]),
+                valuesA: new Set([sel[0]]),
+                valuesB: new Set([sel[1]])
+            };
 
             closeBurgerFilterModal();
             renderQuadrantControls();
@@ -12325,7 +13451,47 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             renderQuadrantControls();
             if (typeof populateTimelineSlicer === 'function') populateTimelineSlicer(currentPreparedHeaderRow);
             runStudioPivotComputation();
-            showToast("Filter dinonaktifkan.");
+            showToast("Filter 1 dinonaktifkan.");
+        }
+
+        function addQuadrantFilter2() {
+            const meta = getActiveHeaderAndScores();
+            let targetIdx = -1;
+            meta.headerRow.forEach((col, idx) => {
+                const s = String(col || '').toLowerCase();
+                if (targetIdx < 0 && idx !== pivotStudioState.filterColIdx && (s.includes('prog') || s.includes('acara') || s.includes('title'))) {
+                    targetIdx = idx;
+                }
+            });
+            if (targetIdx < 0) {
+                for (let i = 0; i < meta.headerRow.length; i++) {
+                    if (i !== pivotStudioState.filterColIdx && i !== pivotStudioState.row1ColIdx && (!meta.numScores || meta.numScores[i] <= 0.6)) {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+            }
+            if (targetIdx < 0) targetIdx = 0;
+            pivotStudioState.filter2ColIdx = targetIdx;
+            pivotStudioState.filter2SelectedValues = new Set();
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            showToast("Filter 2 (Program/Dimensi) diaktifkan.");
+        }
+
+        function removeQuadrantFilter2() {
+            pivotStudioState.filter2ColIdx = -1;
+            pivotStudioState.filter2SelectedValues.clear();
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            showToast("Filter 2 dinonaktifkan.");
+        }
+
+        function onQuadFilter2SelectChange(val) {
+            pivotStudioState.filter2ColIdx = parseInt(val);
+            pivotStudioState.filter2SelectedValues.clear();
+            renderQuadrantControls();
+            runStudioPivotComputation();
         }
 
         function addQuadrantColumn() {
@@ -12495,21 +13661,44 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             renderStudioKitView();
         }
 
-        // Returns raw rows that pass the Timeline Slicer filter
+        // Returns raw rows that pass the Timeline Slicer filter and Filter 2
         function getFilteredRawRows(hIdx) {
             const rows = [];
             const filterCol = pivotStudioState.filterColIdx;
-            const hasFilter = filterCol >= 0 && pivotStudioState.filterSelectedValues.size > 0;
+            const filter2Col = pivotStudioState.filter2ColIdx;
+            const hasPeriod = pivotStudioState.periodComparison && pivotStudioState.periodComparison.active;
+            const periodCol = (pivotStudioState.periodColIdx >= 0) ? pivotStudioState.periodColIdx : findDateColIdx(hIdx);
+            const hasFilter1 = filterCol >= 0 && pivotStudioState.filterSelectedValues && pivotStudioState.filterSelectedValues.size > 0;
+            const hasFilter2 = filter2Col >= 0 && pivotStudioState.filter2SelectedValues && pivotStudioState.filter2SelectedValues.size > 0;
 
             for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
                 const row = currentRawSheetData[r];
                 if (!row || row.length === 0) continue;
 
-                if (hasFilter) {
-                    const fVal = row[filterCol];
-                    const key = (fVal !== undefined && fVal !== null && String(fVal).trim() !== '') ? String(fVal).trim() : '(Kosong)';
-                    if (!pivotStudioState.filterSelectedValues.has(key)) continue;
+                // 1. Period Comparison check (if active)
+                if (hasPeriod) {
+                    const pVal = (row[periodCol] !== undefined && row[periodCol] !== null) ? String(row[periodCol]).trim() : '';
+                    const inA = pivotStudioState.periodComparison.valuesA.has(pVal);
+                    const inB = pivotStudioState.periodComparison.valuesB.has(pVal);
+                    if (!inA && !inB) continue;
                 }
+
+                // 2. Filter 1 check (if active and not redundant with periodCol)
+                if (hasFilter1) {
+                    if (!hasPeriod || filterCol !== periodCol) {
+                        const fVal = row[filterCol];
+                        const key = (fVal !== undefined && fVal !== null && String(fVal).trim() !== '') ? String(fVal).trim() : '(Kosong)';
+                        if (!pivotStudioState.filterSelectedValues.has(key)) continue;
+                    }
+                }
+
+                // 3. Filter 2 check (e.g. Program / Channel)
+                if (hasFilter2) {
+                    const f2Val = row[filter2Col];
+                    const key2 = (f2Val !== undefined && f2Val !== null && String(f2Val).trim() !== '') ? String(f2Val).trim() : '(Kosong)';
+                    if (!pivotStudioState.filter2SelectedValues.has(key2)) continue;
+                }
+
                 rows.push(row);
             }
             return rows;
@@ -12568,21 +13757,55 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const v2Name = (v2Idx >= 0 && headerRow[v2Idx]) ? cleanHeaderName(headerRow[v2Idx]) : '';
 
             // CASE A: MATRIX (COLUMNS is active)
-            if (colIdx >= 0) {
+            const hasPeriod = pivotStudioState.periodComparison && pivotStudioState.periodComparison.active;
+            const effectiveColIdx = (hasPeriod && pivotStudioState.periodColIdx >= 0) ? pivotStudioState.periodColIdx : colIdx;
+
+            if (effectiveColIdx >= 0) {
                 const matrixMap = new Map();
                 const colKeySet = new Set();
+                const colTimeMap = new Map();
                 let v1SumTotal = 0;
+
+                const hasPeriod = pivotStudioState.periodComparison && pivotStudioState.periodComparison.active;
+                const granularity = pivotStudioState.timeGranularity || 'raw';
 
                 filteredRows.forEach(row => {
                     const r1Val = row[r1Idx];
                     const r1Key = (r1Val !== undefined && r1Val !== null && String(r1Val).trim() !== '') ? String(r1Val).trim() : '(Tanpa Kategori)';
                     
-                    const cVal = row[colIdx];
-                    const cKey = (cVal !== undefined && cVal !== null && String(cVal).trim() !== '') ? String(cVal).trim() : '(Lainnya)';
-                    
+                    const rawCVal = row[effectiveColIdx];
+                    const rawCStr = (rawCVal !== undefined && rawCVal !== null) ? String(rawCVal).trim() : '';
+
+                    let cKey = rawCStr || '(Lainnya)';
+                    let cTime = 0;
+
+                    if (hasPeriod) {
+                        if (pivotStudioState.periodComparison.valuesA.has(rawCStr)) {
+                            cKey = pivotStudioState.periodComparison.labelA;
+                            cTime = 1;
+                        } else if (pivotStudioState.periodComparison.valuesB.has(rawCStr)) {
+                            cKey = pivotStudioState.periodComparison.labelB;
+                            cTime = 2;
+                        } else {
+                            return; // skip rows outside compared periods
+                        }
+                    } else if (granularity !== 'raw') {
+                        const pDate = parseExcelDate(rawCVal);
+                        if (pDate) {
+                            cTime = pDate.time;
+                            if (granularity === 'daily') cKey = pDate.dailyKey;
+                            else if (granularity === 'weekly') cKey = pDate.weeklyKey;
+                            else if (granularity === 'monthly') cKey = pDate.monthlyKey;
+                            else if (granularity === 'yearly') cKey = pDate.yearlyKey;
+                        }
+                    }
+
                     const num1 = parseCleanNum(row[v1Idx]);
                     v1SumTotal += num1;
                     colKeySet.add(cKey);
+                    if (!colTimeMap.has(cKey) || cTime > colTimeMap.get(cKey)) {
+                        colTimeMap.set(cKey, cTime);
+                    }
 
                     if (!matrixMap.has(r1Key)) matrixMap.set(r1Key, new Map());
                     const cMap = matrixMap.get(r1Key);
@@ -12598,7 +13821,14 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     }
                 });
 
-                const colKeys = Array.from(colKeySet).slice(0, 15); // Support up to 15 series in matrix
+                // Chronological sort if date-based, otherwise natural order
+                let colKeys = Array.from(colKeySet);
+                if (hasPeriod) {
+                    colKeys = [pivotStudioState.periodComparison.labelA, pivotStudioState.periodComparison.labelB].filter(k => colKeySet.has(k));
+                } else if (granularity !== 'raw' && colTimeMap.size > 0) {
+                    colKeys.sort((a, b) => (colTimeMap.get(a) || 0) - (colTimeMap.get(b) || 0));
+                }
+                colKeys = colKeys.slice(0, 20); // Support up to 20 series in matrix
                 let matrixRows = [];
 
                 matrixMap.forEach((cMap, r1Key) => {
@@ -12873,10 +14103,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             }
 
             // Update footer status
-            const status = document.getElementById('rawImportSummaryStatus');
-            if (status) {
-                status.innerHTML = `<i class="ph-bold ph-check-circle text-emerald-600"></i> Siap diterapkan: <strong>${currentPreparedImportData.length - 1} data baris</strong> (Rank 1 - ${currentPreparedImportData.length - 1})`;
-            }
+            updatePivotExportStatusBadge();
             const countBadge = document.getElementById('rawImportRowCountBadge');
             if (countBadge) countBadge.textContent = `${currentPreparedImportData.length - 1} baris`;
 
@@ -13126,7 +14353,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
             // Optional compact filter chips bar if filter column selected
             let filterBarHtml = '';
-            if (pivotStudioState.filterColIdx >= 0 && currentRawSheetData && currentRawSheetData.length > 0) {
+            if ((pivotStudioState.filterColIdx >= 0 || pivotStudioState.filter2ColIdx >= 0) && currentRawSheetData && currentRawSheetData.length > 0) {
                 const pHeaderInput = document.getElementById('pivotHeaderRowInput');
                 const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
                 const colIdx = pivotStudioState.filterColIdx;
@@ -13143,20 +14370,39 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                             Filter [${getColLetter(colIdx)}] ${escapeHtml(colHeader)}:
                         </span>
 
-                        <!-- BURGER BUTTON: BUKA DAFTAR TANGGAL (GRID & SEARCH) -->
-                        <button type="button" onclick="openBurgerFilterModal()"
+                        <!-- BURGER BUTTON: BUKA DAFTAR NILAI (GRID & SEARCH) -->
+                        <button type="button" onclick="openBurgerFilterModal(1)"
                             class="px-3 py-1.5 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-[#cafc03] flex items-center gap-1.5 shadow-sm transition hover:scale-[1.02] cursor-pointer border border-slate-700 shrink-0"
-                            title="Buka menu lengkap daftar tanggal dalam bentuk grid & pencarian (tanpa perlu slide ke samping)">
-                            <span>Pilih Tanggal</span>
+                            title="Buka menu lengkap daftar ${escapeHtml(colHeader)} dalam bentuk grid & pencarian (tanpa perlu slide ke samping)">
+                            <span>Pilih ${escapeHtml(colHeader)}</span>
                             <span class="px-1.5 py-0.5 rounded-md bg-[#cafc03] text-slate-900 text-[10px] font-black">${selBadgeText}</span>
                         </button>
+                        ${pivotStudioState.filter2ColIdx >= 0 ? `
+                        <button type="button" onclick="openBurgerFilterModal(2)"
+                            class="px-3 py-1.5 rounded-xl text-xs font-black bg-indigo-700 hover:bg-indigo-800 text-white flex items-center gap-1.5 shadow-sm transition hover:scale-[1.02] cursor-pointer border border-indigo-600 shrink-0"
+                            title="Filter 2: [${getColLetter(pivotStudioState.filter2ColIdx)}] ${escapeHtml(currentRawSheetData[hIdx]?.[pivotStudioState.filter2ColIdx] || 'Filter 2')}">
+                            <i class="ph-bold ph-funnel text-amber-300"></i>
+                            <span>Filter 2: ${escapeHtml(currentRawSheetData[hIdx]?.[pivotStudioState.filter2ColIdx] || 'Filter 2')}</span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-white text-indigo-900 text-[10px] font-black">${pivotStudioState.filter2SelectedValues.size === 0 ? 'Semua' : (pivotStudioState.filter2SelectedValues.has('__NONE__') ? '0 dipilih' : `${pivotStudioState.filter2SelectedValues.size} dipilih`)}</span>
+                        </button>` : ''}
 
                         <!-- QUICK SHORTCUT BUTTONS -->
-                        <div class="flex items-center gap-1 flex-wrap shrink-0">
+                        <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+                            <!-- 1-CLICK WOW & MOM BUTTONS -->
+                            <button type="button" onclick="applyVersusWoW()"
+                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-amber-600 hover:bg-amber-700 text-white flex items-center gap-1 shadow-2xs transition cursor-pointer"
+                                title="Bandingkan 1 minggu terupdate versus 1 minggu sebelumnya (Week on Week)">
+                                <span>⚡ WoW (1 Mgg)</span>
+                            </button>
+                            <button type="button" onclick="applyVersusMoM()"
+                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1 shadow-2xs transition cursor-pointer"
+                                title="Bandingkan bulan ini versus bulan sebelumnya (Month on Month)">
+                                <span>⚡ MoM (1 Bln)</span>
+                            </button>
                             <button type="button" onclick="openVersus2DatesDialog()"
-                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-1 shadow-2xs transition"
-                                title="Bandingkan 2 tanggal spesifik head-to-head">
-                                <span>Versus 2 Tanggal</span>
+                                class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-white text-amber-900 border border-amber-300 hover:bg-amber-50 transition cursor-pointer"
+                                title="Bandingkan 2 tanggal atau 2 rentang periode bebas (A vs B)">
+                                <span>Versus Periode (A vs B)</span>
                             </button>
                             <button type="button" onclick="setPivotFilterPreset('delta')"
                                 class="px-2 py-1 rounded-xl text-[10px] font-bold bg-white text-indigo-700 border border-indigo-200 hover:bg-indigo-50 transition" title="Pilih 2 Tanggal Terakhir Otomatis">2 Terbaru</button>
@@ -13164,6 +14410,23 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 class="px-2 py-1 rounded-xl text-[10px] font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition">Semua</button>
                             <button type="button" onclick="setPivotFilterPreset('none')"
                                 class="px-2 py-1 rounded-xl text-[10px] font-bold bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 transition" title="Hapus semua centang untuk memilih manual">Kosongkan</button>
+                        </div>
+
+                        <!-- TIME GRANULARITY (TREND GROUPING) SEGMENTED CONTROL -->
+                        <div class="flex items-center gap-1 bg-white/95 border border-amber-200/90 rounded-xl px-1.5 py-0.5 shadow-2xs shrink-0">
+                            <span class="text-[9px] font-black uppercase text-amber-900 tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-chart-line-up text-amber-700"></i> Tren:
+                            </span>
+                            <button type="button" onclick="setTimeGranularity('raw')" 
+                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${(pivotStudioState.timeGranularity || 'raw') === 'raw' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Tampilkan tanggal asli tanpa grouping">Asli</button>
+                            <button type="button" onclick="setTimeGranularity('daily')" 
+                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'daily' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Pecah tren harian per hari">Harian</button>
+                            <button type="button" onclick="setTimeGranularity('weekly')" 
+                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'weekly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren mingguan (W01, W02...)">Mingguan</button>
+                            <button type="button" onclick="setTimeGranularity('monthly')" 
+                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'monthly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren bulanan (Jan, Feb, Mar...)">Bulanan</button>
+                            <button type="button" onclick="setTimeGranularity('yearly')" 
+                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'yearly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren tahunan">Tahunan</button>
                         </div>
 
                         <!-- SELECTED SUMMARY PILLS (REPLACES THE AWKWARD HORIZONTAL SLIDE) -->
@@ -13175,7 +14438,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     <!-- RIGHT STATUS COUNTER & TOGGLE STRIP -->
                     <div class="flex items-center gap-2 shrink-0">
                         <span class="text-[11px] text-amber-900/80 font-bold">
-                            ${isAllSelected ? 'Semua tanggal aktif' : `${selCount} tanggal disaring`}
+                            ${isAllSelected ? `Semua ${escapeHtml(colHeader).toLowerCase()} aktif` : `${selCount} ${escapeHtml(colHeader).toLowerCase()} disaring`}
                         </span>
                         <button type="button" onclick="toggleSlideStripVisibility()" id="btnToggleSlideStrip"
                             class="px-2.5 py-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 bg-white/80 hover:bg-white border border-slate-200 transition"
@@ -13206,6 +14469,22 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             else if (activeSortCol === 'delta') sortLabel = 'Selisih Δ (±)';
             else if (activeSortCol === 'avg') sortLabel = 'Average (x̄)';
             else if (activeSortCol === 'count') sortLabel = 'Frekuensi';
+
+            const qSearch = (pivotStudioState.tableSearch || '').toLowerCase().trim();
+            let displayGroups = res.groups || [];
+            let displayRows = res.rows || [];
+
+            if (qSearch) {
+                if (res.type === 'hierarchy' && res.groups) {
+                    displayGroups = res.groups.filter(g => {
+                        const m1 = g.key && String(g.key).toLowerCase().includes(qSearch);
+                        const m2 = g.children && g.children.some(c => c.key && String(c.key).toLowerCase().includes(qSearch));
+                        return m1 || m2;
+                    });
+                } else if (res.type === 'matrix' && res.rows) {
+                    displayRows = res.rows.filter(r => r.key && String(r.key).toLowerCase().includes(qSearch));
+                }
+            }
 
             const rankBarHtml = `
             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 flex-wrap gap-2">
@@ -13252,6 +14531,15 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         </label>
                     </div>
                     ` : ''}
+
+                    <!-- INSTANT TABLE ROW SEARCH (FILTER PROGRAM / KATEGORI) -->
+                    <div class="relative flex items-center ml-1">
+                        <i class="ph-bold ph-magnifying-glass absolute left-2.5 text-slate-400 text-xs pointer-events-none"></i>
+                        <input type="text" id="pivotStudioTableSearchInput" value="${escapeHtml(pivotStudioState.tableSearch || '')}"
+                            oninput="onStudioTableSearch(this.value)" placeholder="Cari baris (misal: Seleb On News)..."
+                            class="pl-7 pr-6 py-1 bg-white border border-slate-200/90 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none focus:border-slate-800 transition w-36 sm:w-52 shadow-2xs">
+                        ${pivotStudioState.tableSearch ? `<button type="button" onclick="clearStudioTableSearch()" class="absolute right-2 text-slate-400 hover:text-rose-600 text-xs font-bold cursor-pointer" title="Hapus pencarian">✕</button>` : ''}
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -13263,7 +14551,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     </button>
                     <span class="text-xs text-slate-300 font-mono hidden md:inline">|</span>
                     <span class="text-xs text-slate-400 font-medium hidden md:inline">
-                        Menampilkan <strong class="text-slate-700">${res.groups ? res.groups.length : (res.rows ? res.rows.length : 0)}</strong> Kategori
+                        Menampilkan <strong class="text-slate-700">${res.type === 'hierarchy' ? displayGroups.length : displayRows.length}</strong> Kategori${qSearch ? ` (disaring: "${escapeHtml(qSearch)}")` : ''}
                     </span>
                 </div>
             </div>`;
@@ -13278,32 +14566,32 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 let totalRowFreq = 0;
 
                 if (res.agg1 === 'SUM' || res.agg1 === 'COUNT') {
-                    grandVal1 = res.groups.reduce((acc, g) => acc + (typeof g.val1 === 'number' ? g.val1 : 0), 0);
+                    grandVal1 = displayGroups.reduce((acc, g) => acc + (typeof g.val1 === 'number' ? g.val1 : 0), 0);
                 } else if (res.agg1 === 'AVERAGE') {
-                    const totalWeighted = res.groups.reduce((acc, g) => acc + (typeof g.val1 === 'number' ? g.val1 * g.count : 0), 0);
-                    const totalCount = res.groups.reduce((acc, g) => acc + g.count, 0);
+                    const totalWeighted = displayGroups.reduce((acc, g) => acc + (typeof g.val1 === 'number' ? g.val1 * g.count : 0), 0);
+                    const totalCount = displayGroups.reduce((acc, g) => acc + g.count, 0);
                     grandVal1 = totalCount > 0 ? (totalWeighted / totalCount) : 0;
                 } else if (res.agg1 === 'MAX') {
-                    grandVal1 = Math.max(...res.groups.map(g => typeof g.val1 === 'number' ? g.val1 : 0));
+                    grandVal1 = displayGroups.length > 0 ? Math.max(...displayGroups.map(g => typeof g.val1 === 'number' ? g.val1 : 0)) : 0;
                 } else if (res.agg1 === 'MIN') {
-                    grandVal1 = Math.min(...res.groups.map(g => typeof g.val1 === 'number' ? g.val1 : 0));
+                    grandVal1 = displayGroups.length > 0 ? Math.min(...displayGroups.map(g => typeof g.val1 === 'number' ? g.val1 : 0)) : 0;
                 }
 
                 if (hasV2) {
                     if (res.agg2 === 'SUM' || res.agg2 === 'COUNT') {
-                        grandVal2 = res.groups.reduce((acc, g) => acc + (typeof g.val2 === 'number' ? g.val2 : 0), 0);
+                        grandVal2 = displayGroups.reduce((acc, g) => acc + (typeof g.val2 === 'number' ? g.val2 : 0), 0);
                     } else if (res.agg2 === 'AVERAGE') {
-                        const totalWeighted = res.groups.reduce((acc, g) => acc + (typeof g.val2 === 'number' ? (g.val2 || 0) * g.count : 0), 0);
-                        const totalCount = res.groups.reduce((acc, g) => acc + g.count, 0);
+                        const totalWeighted = displayGroups.reduce((acc, g) => acc + (typeof g.val2 === 'number' ? (g.val2 || 0) * g.count : 0), 0);
+                        const totalCount = displayGroups.reduce((acc, g) => acc + g.count, 0);
                         grandVal2 = totalCount > 0 ? (totalWeighted / totalCount) : 0;
                     } else if (res.agg2 === 'MAX') {
-                        grandVal2 = Math.max(...res.groups.map(g => typeof g.val2 === 'number' ? g.val2 : 0));
+                        grandVal2 = displayGroups.length > 0 ? Math.max(...displayGroups.map(g => typeof g.val2 === 'number' ? g.val2 : 0)) : 0;
                     } else if (res.agg2 === 'MIN') {
-                        grandVal2 = Math.min(...res.groups.map(g => typeof g.val2 === 'number' ? g.val2 : 0));
+                        grandVal2 = displayGroups.length > 0 ? Math.min(...displayGroups.map(g => typeof g.val2 === 'number' ? g.val2 : 0)) : 0;
                     }
                 }
 
-                totalRowFreq = res.groups.reduce((acc, g) => acc + g.count, 0);
+                totalRowFreq = displayGroups.reduce((acc, g) => acc + g.count, 0);
 
                 const fmtGrand1 = (typeof grandVal1 === 'number') ? grandVal1.toLocaleString('id-ID', { maximumFractionDigits: (grandVal1 % 1 !== 0 ? 2 : 0) }) : grandVal1;
                 const fmtGrand2 = (typeof grandVal2 === 'number') ? grandVal2.toLocaleString('id-ID', { maximumFractionDigits: (grandVal2 % 1 !== 0 ? 2 : 0) }) : grandVal2;
@@ -13331,36 +14619,56 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                         ${getSortIconHtml('key')}
                                     </span>
                                 </th>
-                                <th onclick="onStudioHeaderSort('val1')" title="Klik untuk mengurutkan Nilai 1 (Tinggi / Rendah)"
-                                    class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-slate-900 select-none">
-                                    <span class="inline-flex items-center justify-end gap-1">
-                                        <span>${escapeHtml(res.s1Title)}</span>
+                                <!-- COLUMN VALUE 1 (WITH CHART EXPORT CHECKBOX) -->
+                                <th onclick="onStudioHeaderSort('val1')" title="Klik untuk mengurutkan Nilai 1"
+                                    class="group cursor-pointer hover:bg-slate-100 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-slate-900 select-none ${isExportColumnSelected(res.s1Title) ? '' : 'bg-slate-100/60 opacity-60'}">
+                                    <div class="inline-flex items-center justify-end gap-1.5 w-full">
+                                        <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan kolom ini ke Grafik Slide">
+                                            <input type="checkbox" ${isExportColumnSelected(res.s1Title) ? 'checked' : ''} onchange="toggleExportColumn('${escapeHtml(res.s1Title).replace(/'/g, "\\'")}', this.checked)" class="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer">
+                                        </label>
+                                        <span class="${isExportColumnSelected(res.s1Title) ? '' : 'text-slate-400 line-through'}">${escapeHtml(res.s1Title)}</span>
+                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isExportColumnSelected(res.s1Title) ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-500'}">${isExportColumnSelected(res.s1Title) ? 'Chart' : 'Tabel'}</span>
                                         ${getSortIconHtml('val1')}
-                                    </span>
+                                    </div>
                                 </th>
                                 ${hasV2 ? `
-                                <th onclick="onStudioHeaderSort('val2')" title="Klik untuk mengurutkan Nilai 2 (Tinggi / Rendah)"
-                                    class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-indigo-700 select-none">
-                                    <span class="inline-flex items-center justify-end gap-1">
-                                        <span>${escapeHtml(res.s2Title)}</span>
+                                <!-- COLUMN VALUE 2 (WITH CHART EXPORT CHECKBOX) -->
+                                <th onclick="onStudioHeaderSort('val2')" title="Klik untuk mengurutkan Nilai 2"
+                                    class="group cursor-pointer hover:bg-slate-100 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-indigo-700 select-none ${isExportColumnSelected(res.s2Title) ? '' : 'bg-slate-100/60 opacity-60'}">
+                                    <div class="inline-flex items-center justify-end gap-1.5 w-full">
+                                        <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan kolom ini ke Grafik Slide">
+                                            <input type="checkbox" ${isExportColumnSelected(res.s2Title) ? 'checked' : ''} onchange="toggleExportColumn('${escapeHtml(res.s2Title).replace(/'/g, "\\'")}', this.checked)" class="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer">
+                                        </label>
+                                        <span class="${isExportColumnSelected(res.s2Title) ? '' : 'text-slate-400 line-through'}">${escapeHtml(res.s2Title)}</span>
+                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isExportColumnSelected(res.s2Title) ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-500'}">${isExportColumnSelected(res.s2Title) ? 'Chart' : 'Tabel'}</span>
                                         ${getSortIconHtml('val2')}
-                                    </span>
+                                    </div>
                                 </th>` : ''}
                                 ${(hasV2 && pivotStudioState.showDelta) ? `
+                                <!-- COLUMN DELTA (WITH CHART EXPORT CHECKBOX) -->
                                 <th onclick="onStudioHeaderSort('delta')" title="Klik untuk mengurutkan Selisih Nilai 2 - Nilai 1"
-                                    class="group cursor-pointer hover:bg-amber-100/70 transition py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-amber-900 bg-amber-50/70 select-none border-x border-amber-200/80">
-                                    <span class="inline-flex items-center justify-end gap-1">
-                                        <span>Δ Selisih (±)</span>
+                                    class="group cursor-pointer hover:bg-amber-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-amber-900 bg-amber-50/70 select-none border-x border-amber-200/80 ${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? '' : 'opacity-60 bg-slate-100/60'}">
+                                    <div class="inline-flex items-center justify-end gap-1.5 w-full">
+                                        <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan selisih ke Grafik Slide">
+                                            <input type="checkbox" ${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? 'checked' : ''} onchange="toggleExportColumn('delta', this.checked); toggleExportColumn('Δ Selisih', this.checked);" class="w-3.5 h-3.5 rounded text-amber-600 accent-amber-600 cursor-pointer">
+                                        </label>
+                                        <span class="${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? '' : 'text-slate-400 line-through'}">Δ Selisih (±)</span>
+                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-slate-200 text-slate-500'}">${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? 'Chart' : 'Tabel'}</span>
                                         ${getSortIconHtml('delta')}
-                                    </span>
+                                    </div>
                                 </th>` : ''}
                                 ${(hasV2 && pivotStudioState.showAverage) ? `
+                                <!-- COLUMN AVERAGE (WITH CHART EXPORT CHECKBOX) -->
                                 <th onclick="onStudioHeaderSort('avg')" title="Klik untuk mengurutkan Rata-rata"
-                                    class="group cursor-pointer hover:bg-cyan-100/70 transition py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-cyan-900 bg-cyan-50/70 select-none border-r border-cyan-200/80">
-                                    <span class="inline-flex items-center justify-end gap-1">
-                                        <span>Average (x̄)</span>
+                                    class="group cursor-pointer hover:bg-cyan-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-cyan-900 bg-cyan-50/70 select-none border-r border-cyan-200/80 ${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? '' : 'opacity-60 bg-slate-100/60'}">
+                                    <div class="inline-flex items-center justify-end gap-1.5 w-full">
+                                        <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan rata-rata ke Grafik Slide">
+                                            <input type="checkbox" ${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? 'checked' : ''} onchange="toggleExportColumn('avg', this.checked); toggleExportColumn('Rata-rata', this.checked);" class="w-3.5 h-3.5 rounded text-cyan-600 accent-cyan-600 cursor-pointer">
+                                        </label>
+                                        <span class="${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? '' : 'text-slate-400 line-through'}">Average (x̄)</span>
+                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? 'bg-cyan-200 text-cyan-900 border border-cyan-400' : 'bg-slate-200 text-slate-500'}">${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? 'Chart' : 'Tabel'}</span>
                                         ${getSortIconHtml('avg')}
-                                    </span>
+                                    </div>
                                 </th>` : ''}
                                 <th onclick="onStudioHeaderSort('count')" title="Klik untuk mengurutkan Frekuensi kemunculan"
                                     class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 font-bold text-[10px] tracking-wider text-center uppercase text-slate-400 w-24 select-none">
@@ -13374,7 +14682,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         <tbody class="divide-y divide-slate-100 bg-white font-mono">
                 `;
 
-                res.groups.forEach((g, idx) => {
+                displayGroups.forEach((g, idx) => {
                     const isOdd = idx % 2 === 1;
                     const isCollapsed = !!pivotStudioState.collapsedRows[g.key];
                     const hasChildren = g.children && g.children.length > 0;
@@ -13420,8 +14728,8 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                             <span class="font-bold text-slate-900">${escapeHtml(g.key)}</span>
                             ${hasChildren ? `<span class="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-1.5 py-0.2 rounded-full font-mono border border-indigo-200/70">${g.children.length} sub</span>` : ''}
                         </td>
-                        <td class="py-2 px-3 text-right font-black text-slate-900">${fmt1}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>
-                        ${hasV2 ? `<td class="py-2 px-3 text-right font-bold text-indigo-900">${fmt2}</td>` : ''}
+                        <td class="py-2 px-3 text-right font-black ${isExportColumnSelected(res.s1Title) ? 'text-slate-900' : 'opacity-40 text-slate-400 bg-slate-50/20'}" title="${isExportColumnSelected(res.s1Title) ? 'Masuk ke grafik' : 'Hanya tabel (tidak masuk grafik)'}">${fmt1}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>
+                        ${hasV2 ? `<td class="py-2 px-3 text-right font-bold ${isExportColumnSelected(res.s2Title) ? 'text-indigo-900' : 'opacity-40 text-slate-400 bg-slate-50/20'}" title="${isExportColumnSelected(res.s2Title) ? 'Masuk ke grafik' : 'Hanya tabel (tidak masuk grafik)'}">${fmt2}</td>` : ''}
                         ${deltaCellHtml}
                         ${avgCellHtml}
                         <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-mono">${g.count}x</td>
@@ -13536,50 +14844,67 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 `;
                 const has2MatrixCols = (res.colKeys && res.colKeys.length === 2);
                 res.colKeys.forEach((ck, colKeyIdx) => {
+                    const isCkActive = isExportColumnSelected(ck);
                     tableHtml += `
                     <th onclick="onStudioHeaderSort('col_${colKeyIdx}')" title="Klik untuk mengurutkan kolom ${escapeHtml(ck)}"
-                        class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-slate-900 select-none">
-                        <span class="inline-flex items-center justify-end gap-1">
-                            <span>${escapeHtml(typeof formatExcelDateDisplay === 'function' ? formatExcelDateDisplay(ck) : ck)}</span>
+                        class="group cursor-pointer hover:bg-slate-100 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-slate-900 select-none ${isCkActive ? '' : 'bg-slate-100/60 opacity-60'}">
+                        <div class="inline-flex items-center justify-end gap-1.5 w-full">
+                            <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan series ${escapeHtml(ck)} ke Grafik Slide">
+                                <input type="checkbox" ${isCkActive ? 'checked' : ''} onchange="toggleExportColumn('${escapeHtml(ck).replace(/'/g, "\\'")}', this.checked)" class="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer">
+                            </label>
+                            <span class="${isCkActive ? '' : 'text-slate-400 line-through'}">${escapeHtml(typeof formatExcelDateDisplay === 'function' ? formatExcelDateDisplay(ck) : ck)}</span>
+                            <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isCkActive ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-500'}">${isCkActive ? 'Chart' : 'Tabel'}</span>
                             ${getSortIconHtml('col_' + colKeyIdx)}
-                        </span>
+                        </div>
                     </th>`;
                 });
 
                 if (has2MatrixCols && pivotStudioState.showDelta) {
+                    const isDeltaActive = isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih');
                     tableHtml += `
                     <th onclick="onStudioHeaderSort('delta')" title="Klik untuk mengurutkan Selisih ${escapeHtml(res.colKeys[1])} - ${escapeHtml(res.colKeys[0])}"
-                        class="group cursor-pointer hover:bg-amber-100/70 transition py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-amber-900 bg-amber-50/70 select-none border-x border-amber-200/80">
-                        <span class="inline-flex items-center justify-end gap-1">
-                            <span>Δ Selisih (±)</span>
+                        class="group cursor-pointer hover:bg-amber-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-amber-900 bg-amber-50/70 select-none border-x border-amber-200/80 ${isDeltaActive ? '' : 'opacity-60 bg-slate-100/60'}">
+                        <div class="inline-flex items-center justify-end gap-1.5 w-full">
+                            <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan selisih ke Grafik Slide">
+                                <input type="checkbox" ${isDeltaActive ? 'checked' : ''} onchange="toggleExportColumn('delta', this.checked); toggleExportColumn('Δ Selisih', this.checked);" class="w-3.5 h-3.5 rounded text-amber-600 accent-amber-600 cursor-pointer">
+                            </label>
+                            <span class="${isDeltaActive ? '' : 'text-slate-400 line-through'}">Δ Selisih (±)</span>
+                            <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isDeltaActive ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-slate-200 text-slate-500'}">${isDeltaActive ? 'Chart' : 'Tabel'}</span>
                             ${getSortIconHtml('delta')}
-                        </span>
+                        </div>
                     </th>`;
                 }
 
                 if (has2MatrixCols && pivotStudioState.showAverage) {
+                    const isAvgActive = isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata');
                     tableHtml += `
                     <th onclick="onStudioHeaderSort('avg')" title="Klik untuk mengurutkan Rata-rata"
-                        class="group cursor-pointer hover:bg-cyan-100/70 transition py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-cyan-900 bg-cyan-50/70 select-none border-r border-cyan-200/80">
-                        <span class="inline-flex items-center justify-end gap-1">
-                            <span>Average (x̄)</span>
+                        class="group cursor-pointer hover:bg-cyan-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-cyan-900 bg-cyan-50/70 select-none border-r border-cyan-200/80 ${isAvgActive ? '' : 'opacity-60 bg-slate-100/60'}">
+                        <div class="inline-flex items-center justify-end gap-1.5 w-full">
+                            <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan rata-rata ke Grafik Slide">
+                                <input type="checkbox" ${isAvgActive ? 'checked' : ''} onchange="toggleExportColumn('avg', this.checked); toggleExportColumn('Rata-rata', this.checked);" class="w-3.5 h-3.5 rounded text-cyan-600 accent-cyan-600 cursor-pointer">
+                            </label>
+                            <span class="${isAvgActive ? '' : 'text-slate-400 line-through'}">Average (x̄)</span>
+                            <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isAvgActive ? 'bg-cyan-200 text-cyan-900 border border-cyan-400' : 'bg-slate-200 text-slate-500'}">${isAvgActive ? 'Chart' : 'Tabel'}</span>
                             ${getSortIconHtml('avg')}
-                        </span>
+                        </div>
                     </th>`;
                 }
 
                 tableHtml += `</tr></thead><tbody class="divide-y divide-slate-100 bg-white font-mono">`;
 
-                res.rows.forEach((r, idx) => {
+                displayRows.forEach((r, idx) => {
                     const isOdd = idx % 2 === 1;
                     tableHtml += `
                     <tr class="hover:bg-slate-50/80 transition-colors ${isOdd ? 'bg-slate-50/30' : 'bg-white'}">
                         <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-bold font-mono">${idx + 1}</td>
                         <td class="py-2 px-3 font-bold font-sans text-slate-800">${escapeHtml(r.key)}</td>
                     `;
-                    r.vals.forEach(v => {
+                    r.vals.forEach((v, vColIdx) => {
+                        const colK = res.colKeys[vColIdx];
+                        const isColActive = isExportColumnSelected(colK);
                         const fmt = (typeof v === 'number') ? v.toLocaleString('id-ID', { maximumFractionDigits: (v % 1 !== 0 ? 2 : 0) }) : v;
-                        tableHtml += `<td class="py-2 px-3 text-right font-bold text-slate-700">${fmt}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
+                        tableHtml += `<td class="py-2 px-3 text-right font-bold ${isColActive ? 'text-slate-700' : 'opacity-40 text-slate-400 bg-slate-50/20'}" title="${isColActive ? 'Masuk ke grafik' : 'Hanya tabel (tidak masuk grafik)'}">${fmt}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
                     });
 
                     if (has2MatrixCols && pivotStudioState.showDelta) {
@@ -13616,6 +14941,22 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
         function toggleRowCollapse(key) {
             pivotStudioState.collapsedRows[key] = !pivotStudioState.collapsedRows[key];
+            renderStudioKitView();
+        }
+
+        function onStudioTableSearch(query) {
+            pivotStudioState.tableSearch = query || '';
+            renderStudioKitView();
+            const inp = document.getElementById('pivotStudioTableSearchInput');
+            if (inp) {
+                inp.focus();
+                const len = inp.value.length;
+                inp.setSelectionRange(len, len);
+            }
+        }
+
+        function clearStudioTableSearch() {
+            pivotStudioState.tableSearch = '';
             renderStudioKitView();
         }
 
@@ -14319,27 +15660,57 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             if (!ds) return;
 
             const headers = currentPreparedImportData[0];
-            const dataRows = currentPreparedImportData.slice(1);
+            const qSearch = (pivotStudioState.tableSearch || '').toLowerCase().trim();
+            const dataRows = qSearch 
+                ? currentPreparedImportData.slice(1).filter(r => r[0] && String(r[0]).toLowerCase().includes(qSearch))
+                : currentPreparedImportData.slice(1);
 
-            // 1. Configure Series
-            ds.series = [];
+            if (dataRows.length === 0) {
+                showToast("Tidak ada baris data yang cocok dengan pencarian tabel!", true);
+                return;
+            }
+
+            // Determine which columns are checked for chart export
+            const activeColIndices = [];
             for (let i = 1; i < headers.length; i++) {
-                const sName = headers[i] ? String(headers[i]).trim() : `Series ${i}`;
-                const isSecondSeries = (i === 2);
+                const h = headers[i];
+                let isColActive = true;
+                if (h.includes('Δ Selisih') || h.includes('Selisih')) {
+                    isColActive = isExportColumnSelected('delta') && isExportColumnSelected(h);
+                } else if (h.includes('Rata-rata') || h.includes('Average')) {
+                    isColActive = isExportColumnSelected('avg') && isExportColumnSelected(h);
+                } else {
+                    isColActive = isExportColumnSelected(h);
+                }
+                if (isColActive) {
+                    activeColIndices.push(i);
+                }
+            }
+
+            if (activeColIndices.length === 0) {
+                showToast("Minimal pilih 1 kolom dengan tanda centang di header untuk masuk ke grafik slide!", true);
+                return;
+            }
+
+            // 1. Configure Series ONLY for checked columns
+            ds.series = [];
+            activeColIndices.forEach((cIdx, sIdx) => {
+                const sName = headers[cIdx] ? String(headers[cIdx]).trim() : `Series ${sIdx + 1}`;
+                const isSecondSeries = (sIdx === 1);
                 ds.series.push({
-                    id: 's_' + Date.now() + '_' + i,
+                    id: 's_' + Date.now() + '_' + sIdx,
                     name: sName,
                     type: isSecondSeries && pivotStudioState.dualAxis ? 'line' : 'auto',
                     axis: isSecondSeries && pivotStudioState.dualAxis ? 'y2' : 'y',
-                    zIndex: isSecondSeries ? 'front' : 'back'
+                    zIndex: isSecondSeries && pivotStudioState.dualAxis ? 'front' : 'back'
                 });
-            }
+            });
 
             if (ds.series.length === 0) {
                 ds.series.push({ id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' });
             }
 
-            // 2. Configure Rows
+            // 2. Configure Rows ONLY for checked columns
             ds.rows = [];
             dataRows.forEach((rData, rIdx) => {
                 const label = (rData[0] !== undefined && rData[0] !== null) ? String(rData[0]).trim() : `Baris ${rIdx + 1}`;
@@ -14351,8 +15722,8 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     drillTarget: null
                 };
 
-                ds.series.forEach((s, sIdx) => {
-                    const rawVal = rData[sIdx + 1];
+                activeColIndices.forEach((cIdx) => {
+                    const rawVal = rData[cIdx];
                     const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '') 
                         ? Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')) 
                         : null;
@@ -14419,14 +15790,38 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 }
             }
 
-            // 4. Metadata & Persistence
+            // 4. Metadata & Full Persistence for Reopening Pivot Studio
+            try {
+                const snap = JSON.parse(JSON.stringify(pivotStudioState, (k, v) => (v instanceof Set ? Array.from(v) : v)));
+                slide.pivotStateSnapshot = snap;
+            } catch (err) {
+                console.warn("Could not serialize pivot state snapshot:", err);
+            }
+            if (slide && currentImportWorkbook) {
+                if (slide.id && typeof sessionWorkbooksBySlide !== 'undefined') {
+                    sessionWorkbooksBySlide.set(slide.id, currentImportWorkbook);
+                }
+                if (currentImportFileName && typeof sessionWorkbookLibrary !== 'undefined') {
+                    sessionWorkbookLibrary.set(currentImportFileName, {
+                        workbook: currentImportWorkbook,
+                        fileName: currentImportFileName,
+                        sheetNames: currentImportWorkbook.SheetNames || [],
+                        timestamp: Date.now()
+                    });
+                }
+            }
+            delete slide.lastImportWorkbook; // Keep slide lightweight for localStorage (<5MB quota)
+            slide.lastImportFileName = currentImportFileName;
+            slide.lastImportSheetName = currentActiveSheetName;
             slide.lastImportMeta = {
                 fileName: currentImportFileName,
                 sheetName: currentActiveSheetName,
                 rowCount: ds.rows.length,
+                seriesCount: ds.series.length,
                 timestamp: Date.now()
             };
 
+            slide.hudActiveSeriesIdx = ds.series.length >= 2 ? 1 : 0;
             forceRecolor(slide.colorTheme, slide);
             syncUIPartialToGrid();
             triggerVisUpdateWithDebounce();
