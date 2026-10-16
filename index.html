@@ -932,44 +932,51 @@
                         </div>
                         <button onclick="quickSaveProject()"
                             class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition shrink-0"
-                            title="Simpan Nama &amp; Status Proyek">
+                            title="Simpan Nama &amp; Status Proyek (Ctrl+S)">
                             <i class="ph-bold ph-floppy-disk"></i> <span data-i18n="saveBtn">Save</span>
+                            <span class="text-[9px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono border border-slate-700/80 font-normal">Ctrl+S</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- AKSI UTAMA: NEW, SAVE AS FILE, OPEN FILE -->
                 <div class="grid grid-cols-3 gap-2.5">
-                    <button onclick="createNewProjectPrompt()"
+                    <button onclick="createNewProjectPrompt()" title="New Project (Ctrl+N)"
                         class="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-indigo-400 hover:bg-indigo-50/30 hover:shadow-md transition-all group text-center shadow-sm">
                         <div
                             class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition shadow-sm">
                             <i class="ph-bold ph-file-plus text-xl"></i>
                         </div>
-                        <span class="text-[11px] font-black text-slate-800 tracking-tight" data-i18n="newProj">New
-                            Project</span>
+                        <div class="flex items-center gap-1">
+                            <span class="text-[11px] font-black text-slate-800 tracking-tight" data-i18n="newProj">New Project</span>
+                            <span class="text-[9px] font-mono font-bold text-indigo-600 bg-indigo-50 border border-indigo-200/70 px-1 py-0.5 rounded">Ctrl+N</span>
+                        </div>
                         <span class="text-[9px] text-slate-400 leading-tight">Mulai kanvas baru yang bersih</span>
                     </button>
 
-                    <button onclick="exportProjectFile()"
+                    <button onclick="exportProjectFile()" title="Save As File (Ctrl+Shift+S)"
                         class="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow-md transition-all group text-center shadow-sm">
                         <div
                             class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center transition shadow-sm">
                             <i class="ph-bold ph-download-simple text-xl"></i>
                         </div>
-                        <span class="text-[11px] font-black text-slate-800 tracking-tight" data-i18n="saveAsFile">Save
-                            As (File)</span>
+                        <div class="flex items-center gap-1">
+                            <span class="text-[11px] font-black text-slate-800 tracking-tight" data-i18n="saveAsFile">Save As (File)</span>
+                            <span class="text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/70 px-1 py-0.5 rounded">Ctrl+Shift+S</span>
+                        </div>
                         <span class="text-[9px] text-slate-400 leading-tight">Unduh file backup (.json) ke PC/HP</span>
                     </button>
 
-                    <button onclick="document.getElementById('importProjectFileInput').click()"
+                    <button onclick="document.getElementById('importProjectFileInput').click()" title="Open File (Ctrl+O)"
                         class="flex flex-col items-center justify-center gap-2 p-3.5 rounded-2xl border border-slate-200/90 bg-white hover:border-amber-400 hover:bg-amber-50/30 hover:shadow-md transition-all group text-center shadow-sm">
                         <div
                             class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white flex items-center justify-center transition shadow-sm">
                             <i class="ph-bold ph-upload-simple text-xl"></i>
                         </div>
-                        <span class="text-[11px] font-black text-slate-800 tracking-tight" data-i18n="openFile">Open
-                            File</span>
+                        <div class="flex items-center gap-1">
+                            <span class="text-[11px] font-black text-slate-800 tracking-tight" data-i18n="openFile">Open File</span>
+                            <span class="text-[9px] font-mono font-bold text-amber-600 bg-amber-50 border border-amber-200/70 px-1 py-0.5 rounded">Ctrl+O</span>
+                        </div>
                         <span class="text-[9px] text-slate-400 leading-tight">Buka file proyek dari perangkat</span>
                     </button>
                     <input type="file" id="importProjectFileInput" accept=".json,.pcv" class="hidden"
@@ -1887,6 +1894,18 @@
 
                     <!-- THE 4 EXCEL QUADRANTS (2x2 GRID) - CLEAN CARDS LIKE ATTACHMENT 2 -->
                     <div class="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-2.5 custom-scrollbar">
+                        <!-- QUICK PRESET HELPER / CUSTOM USER ACTION BAR -->
+                        <div class="flex items-center justify-between gap-1.5 px-0.5 pb-0.5">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                                <i class="ph-bold ph-sliders text-indigo-500"></i> Kuadran Pivot (Bebas Kustom)
+                            </span>
+                            <button type="button" onclick="applyPresetSourceAirtimeROI()"
+                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white flex items-center gap-1.5 shadow-2xs transition hover:scale-[1.02] cursor-pointer"
+                                title="Otomatis susun kuadran: Baris = Source, Nilai 1 = Share, Nilai 2 = Durasi/Menit">
+                                <i class="ph-bold ph-lightning text-amber-200"></i> <span>Setup: Source &amp; Durasi</span>
+                            </button>
+                        </div>
+
                         <!-- THE 4 EXCEL QUADRANTS (2x2 GRID) - DYNAMIC +/- SLOTS -->
                         <div class="grid grid-cols-2 gap-2" id="pivotQuadrantsContainer">
                             
@@ -3469,7 +3488,7 @@
             <div id="navFileStatusContainer" class="hidden md:flex items-center">
                 <div id="navFileActiveTab" onclick="openProjectModal('files')"
                     class="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-slate-100/90 text-slate-600 hover:text-slate-900 border border-transparent hover:border-slate-200 transition cursor-pointer select-none group"
-                    title="Klik untuk membuka Manajer File & Proyek">
+                    title="Manajer File &amp; Proyek (Ctrl+N: Baru, Ctrl+S: Simpan, Ctrl+Shift+S: Save As, Ctrl+O: Buka)">
                     <i class="ph-bold ph-file-text text-sm text-indigo-500 group-hover:text-indigo-600 transition"></i>
                     <span id="navActiveFileNameDisplay"
                         class="text-xs font-bold text-slate-800 group-hover:text-indigo-700 transition tracking-tight truncate max-w-[200px] lg:max-w-[340px] xl:max-w-[460px]">
@@ -3500,7 +3519,7 @@
 
                 <button id="btnFullscreen"
                     class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 hover:border-slate-300 shadow-xs flex items-center justify-center transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer relative group"
-                    title="Mode Presentasi (Layar Penuh)" aria-label="Mode Presentasi">
+                    title="Mode Presentasi / Fullscreen (F)" aria-label="Mode Presentasi">
                     <i class="ph-bold ph-play text-base text-slate-800 transition-colors"></i>
                 </button>
 
@@ -6983,7 +7002,30 @@
                 }
             }
         }
-        if (els.btnFullscreen) els.btnFullscreen.addEventListener('click', () => { const elem = document.documentElement; if (!document.fullscreenElement) { if (elem.requestFullscreen) elem.requestFullscreen(); enterPresentationUI(); } });
+        function toggleFullscreenPresentation() {
+            const isCurrentlyFs = !!(document.fullscreenElement || document.webkitFullscreenElement || isPresenting);
+            if (!isCurrentlyFs) {
+                const elem = document.documentElement;
+                try {
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen().catch(() => {});
+                    } else if (elem.webkitRequestFullscreen) {
+                        elem.webkitRequestFullscreen();
+                    }
+                } catch (e) {}
+                enterPresentationUI();
+            } else {
+                try {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(() => {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                } catch (e) {}
+                exitPresentationUI();
+            }
+        }
+        if (els.btnFullscreen) els.btnFullscreen.addEventListener('click', toggleFullscreenPresentation);
         function nextSlide() { if (activeSlideIndex < appSlides.length - 1) switchSlide(activeSlideIndex + 1); }
         function prevSlide() { if (activeSlideIndex > 0) switchSlide(activeSlideIndex - 1); }
         window.addEventListener('keydown', (e) => {
@@ -9778,7 +9820,7 @@
                 slide.dataSets[blockIndex] = ds;
             }
             let isTreemap = cType === 'treemap'; let isConcentric = cType === 'concentric'; let isWindrose = cType === 'windrose'; let isTape = cType === 'tape'; let isMapWorld = cType === 'choropleth-world', isMapIndo = cType === 'choropleth-indo', isMap = isMapWorld || isMapIndo; let isWordCloud = cType === 'wordCloud'; let isHorizontal = cType === 'bar-horizontal' || cType === 'gantt' || isTape; let isRadial = ['pie', 'doughnut', 'polarArea', 'radar', 'concentric', 'windrose'].includes(cType); let isFloatingBar = ['gantt', 'waterfall'].includes(cType); let isScatterBubble = ['scatter', 'bubble'].includes(cType);
-            let labels = ds.rows.map(r => r.icon + ' ' + (r.label || '')); let datasets = [];
+            let labels = ds.rows.map(r => (r.icon ? (r.icon + ' ') : '') + (r.label || '')); let datasets = [];
             let stackLogic = slide.stackMode || 'accumulate'; let isGrouped = stackLogic === 'grouped'; let isInclude = stackLogic === 'include'; let isStacked = (stackLogic === 'accumulate') && !isFloatingBar && cType !== 'scatter' && cType !== 'bubble'; if (isTape) isStacked = true;
             let oWidth = slide.outlineWidth !== undefined ? slide.outlineWidth : 1; let oColor = slide.outlineColor || '#ffffff';
             let dlPos = { anchor: 'center', align: 'center' }; if (slide.datalabelPosition === 'end') dlPos = { anchor: 'end', align: 'start' }; else if (slide.datalabelPosition === 'start') dlPos = { anchor: 'start', align: 'end' }; else if (slide.datalabelPosition === 'outside') dlPos = { anchor: 'end', align: 'end' };
@@ -9808,7 +9850,7 @@
             } else if (isTape) {
                 labels = ds.series.map(s => s.name);
                 let seriesTotals = ds.series.map((s, sIdx) => { return ds.rows.reduce((sum, r) => sum + (getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx) || 0), 0); });
-                ds.rows.forEach((r, rIdx) => { let dataArr = []; let rawArr = []; ds.series.forEach((s, sIdx) => { let num = getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx); if (num === null) { dataArr.push(null); rawArr.push(null); } else { rawArr.push(num); dataArr.push(seriesTotals[sIdx] > 0 ? (num / seriesTotals[sIdx]) * 100 : 0); } }); datasets.push({ label: r.icon + ' ' + r.label, type: 'bar', indexAxis: 'y', data: dataArr, rawValues: rawArr, backgroundColor: r.values[0]?.color || '#000', borderColor: oColor, borderWidth: oWidth, borderRadius: Math.max(slide.borderRadius, 0), stack: 'Stack 0', customOffsets: ds.series.map((s, sIdx) => r.values[sIdx]?.offset || 0) }); });
+                ds.rows.forEach((r, rIdx) => { let dataArr = []; let rawArr = []; ds.series.forEach((s, sIdx) => { let num = getEffectiveValue(r.values[sIdx]?.val, r.id, sIdx); if (num === null) { dataArr.push(null); rawArr.push(null); } else { rawArr.push(num); dataArr.push(seriesTotals[sIdx] > 0 ? (num / seriesTotals[sIdx]) * 100 : 0); } }); datasets.push({ label: (r.icon ? (r.icon + ' ') : '') + (r.label || ''), type: 'bar', indexAxis: 'y', data: dataArr, rawValues: rawArr, backgroundColor: r.values[0]?.color || '#000', borderColor: oColor, borderWidth: oWidth, borderRadius: Math.max(slide.borderRadius, 0), stack: 'Stack 0', customOffsets: ds.series.map((s, sIdx) => r.values[sIdx]?.offset || 0) }); });
             } else {
                 ds.series.forEach((s, sIdx) => {
                     let parsedType = s.type === 'auto' ? globalBaseType : s.type; if (parsedType === 'area') parsedType = 'line'; let isLine = parsedType === 'line', isFillArea = s.type === 'area' || (s.type === 'auto' && cType === 'area'); let dataArr = [], colorArr = [];
@@ -11019,8 +11061,66 @@
 
         // Global Keybindings
         document.addEventListener('keydown', (e) => {
+            const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+
+            // --- SHORTCUTS FILE & PROYEK (Ctrl+N, Ctrl+S, Ctrl+Shift+S, Ctrl+O) ---
+            if (isCtrlOrCmd) {
+                const key = (e.key || '').toLowerCase();
+
+                // 1. Save As: Ctrl + Shift + S
+                if (key === 's' && e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                        document.activeElement.blur();
+                    }
+                    exportProjectFile();
+                    return;
+                }
+
+                // 2. Save: Ctrl + S
+                if (key === 's' && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                        document.activeElement.blur();
+                    }
+                    quickSaveProject();
+                    return;
+                }
+
+                // 3. New Project: Ctrl + N
+                if (key === 'n' && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    createNewProjectPrompt();
+                    return;
+                }
+
+                // 4. Open File: Ctrl + O
+                if (key === 'o' && !e.shiftKey && !e.altKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const openInput = document.getElementById('importProjectFileInput');
+                    if (openInput) openInput.click();
+                    return;
+                }
+            }
+
             const isTyping = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable || (e.target.closest && e.target.closest('#commandPaletteModal:not(.hidden)'));
             if (isTyping) return;
+
+            // Shortcut Fullscreen / Mode Presentasi (F atau F11)
+            if ((e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey && !e.altKey) || e.key === 'F11') {
+                const isModalActive = document.querySelector('#projectModal:not(.hidden), #commandPaletteModal:not(.hidden), #codeInspectorModal:not(.hidden), #iconModal:not(.hidden), #resetConfirmModal:not(.hidden), #rawImportModal:not(.hidden), #versusDateModal:not(.hidden)');
+                if (isModalActive && !isPresenting) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                toggleFullscreenPresentation();
+                return;
+            }
 
             // Panah atas, bawah, kiri, kanan aktif khusus saat mode presentasi. Di mode edit hanya PageDown / PageUp jika dibutuhkan.
             if (!isPresenting) {
@@ -11061,6 +11161,11 @@
 
         // --- COMMAND PALETTE ---
         let cmdList = [
+            { name: '📺 Mode Fullscreen / Presentasi (F)', action: () => toggleFullscreenPresentation() },
+            { name: '📄 Project: New Project (Ctrl+N)', action: () => createNewProjectPrompt() },
+            { name: '💾 Project: Save Project (Ctrl+S)', action: () => quickSaveProject() },
+            { name: '📥 Project: Save As / Export File (Ctrl+Shift+S)', action: () => exportProjectFile() },
+            { name: '📂 Project: Open File (Ctrl+O)', action: () => document.getElementById('importProjectFileInput')?.click() },
             { name: '📊 Change Chart: Bar Vertical', action: () => { getActiveSlide().bentoCharts[activeEditGridIndex] = 'bar-vertical'; triggerVisUpdateWithDebounce(); syncUIToActiveSlide(); } },
             { name: '📊 Change Chart: Bar Horizontal', action: () => { getActiveSlide().bentoCharts[activeEditGridIndex] = 'bar-horizontal'; triggerVisUpdateWithDebounce(); syncUIToActiveSlide(); } },
             { name: '📊 Change Chart: Line', action: () => { getActiveSlide().bentoCharts[activeEditGridIndex] = 'line'; triggerVisUpdateWithDebounce(); syncUIToActiveSlide(); } },
@@ -14412,39 +14517,45 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 class="px-2 py-1 rounded-xl text-[10px] font-bold bg-white text-rose-700 border border-rose-200 hover:bg-rose-50 transition" title="Hapus semua centang untuk memilih manual">Kosongkan</button>
                         </div>
 
-                        <!-- TIME GRANULARITY (TREND GROUPING) SEGMENTED CONTROL -->
-                        <div class="flex items-center gap-1 bg-white/95 border border-amber-200/90 rounded-xl px-1.5 py-0.5 shadow-2xs shrink-0">
-                            <span class="text-[9px] font-black uppercase text-amber-900 tracking-wider flex items-center gap-1">
-                                <i class="ph-bold ph-chart-line-up text-amber-700"></i> Tren:
-                            </span>
-                            <button type="button" onclick="setTimeGranularity('raw')" 
-                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${(pivotStudioState.timeGranularity || 'raw') === 'raw' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Tampilkan tanggal asli tanpa grouping">Asli</button>
-                            <button type="button" onclick="setTimeGranularity('daily')" 
-                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'daily' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Pecah tren harian per hari">Harian</button>
-                            <button type="button" onclick="setTimeGranularity('weekly')" 
-                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'weekly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren mingguan (W01, W02...)">Mingguan</button>
-                            <button type="button" onclick="setTimeGranularity('monthly')" 
-                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'monthly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren bulanan (Jan, Feb, Mar...)">Bulanan</button>
-                            <button type="button" onclick="setTimeGranularity('yearly')" 
-                                class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'yearly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren tahunan">Tahunan</button>
-                        </div>
-
-                        <!-- SELECTED SUMMARY PILLS (REPLACES THE AWKWARD HORIZONTAL SLIDE) -->
-                        <div id="filterSelectedSummaryContainer" class="flex items-center gap-1.5 flex-wrap">
-                            <!-- Injected by renderTimelineSlicerChips -->
-                        </div>
                     </div>
 
-                    <!-- RIGHT STATUS COUNTER & TOGGLE STRIP -->
-                    <div class="flex items-center gap-2 shrink-0">
-                        <span class="text-[11px] text-amber-900/80 font-bold">
-                            ${isAllSelected ? `Semua ${escapeHtml(colHeader).toLowerCase()} aktif` : `${selCount} ${escapeHtml(colHeader).toLowerCase()} disaring`}
-                        </span>
-                        <button type="button" onclick="toggleSlideStripVisibility()" id="btnToggleSlideStrip"
-                            class="px-2.5 py-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 bg-white/80 hover:bg-white border border-slate-200 transition"
-                            title="Tampilkan / sembunyikan baris chip geser">
-                            Strip Geser
-                        </button>
+                    <!-- ROW 2: TREN AGREGASI + SUMMARY PILLS + STATUS & STRIP GESER (SEJAJAR, RAPI TANPA DEAD SPACE KANAN) -->
+                    <div class="flex items-center justify-between gap-3 flex-wrap pt-1 border-t border-amber-200/50">
+                        <div class="flex items-center gap-2 flex-wrap min-w-0">
+                            <!-- TIME GRANULARITY (TREND GROUPING) SEGMENTED CONTROL -->
+                            <div class="flex items-center gap-1 bg-white/95 border border-amber-200/90 rounded-xl px-1.5 py-0.5 shadow-2xs shrink-0">
+                                <span class="text-[9px] font-black uppercase text-amber-900 tracking-wider flex items-center gap-1">
+                                    <i class="ph-bold ph-chart-line-up text-amber-700"></i> Tren:
+                                </span>
+                                <button type="button" onclick="setTimeGranularity('raw')" 
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${(pivotStudioState.timeGranularity || 'raw') === 'raw' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Tampilkan tanggal asli tanpa grouping">Asli</button>
+                                <button type="button" onclick="setTimeGranularity('daily')" 
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'daily' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Pecah tren harian per hari">Harian</button>
+                                <button type="button" onclick="setTimeGranularity('weekly')" 
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'weekly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren mingguan (W01, W02...)">Mingguan</button>
+                                <button type="button" onclick="setTimeGranularity('monthly')" 
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'monthly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren bulanan (Jan, Feb, Mar...)">Bulanan</button>
+                                <button type="button" onclick="setTimeGranularity('yearly')" 
+                                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${pivotStudioState.timeGranularity === 'yearly' ? 'bg-slate-900 text-[#cafc03] shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}" title="Agregasi tren tahunan">Tahunan</button>
+                            </div>
+
+                            <!-- SELECTED SUMMARY PILLS -->
+                            <div id="filterSelectedSummaryContainer" class="flex items-center gap-1.5 flex-wrap">
+                                <!-- Injected by renderTimelineSlicerChips -->
+                            </div>
+                        </div>
+
+                        <!-- RIGHT STATUS COUNTER & TOGGLE STRIP (SEJAJAR DI KANAN BARIS TREN) -->
+                        <div class="flex items-center gap-2 shrink-0 ml-auto">
+                            <span class="text-[11px] text-amber-900/80 font-bold whitespace-nowrap">
+                                ${isAllSelected ? `Semua ${escapeHtml(colHeader).toLowerCase()} aktif` : `${selCount} ${escapeHtml(colHeader).toLowerCase()} disaring`}
+                            </span>
+                            <button type="button" onclick="toggleSlideStripVisibility()" id="btnToggleSlideStrip"
+                                class="px-2.5 py-1 rounded-xl text-[10px] font-bold text-slate-500 hover:text-slate-800 bg-white/90 hover:bg-white border border-slate-200/90 shadow-2xs transition whitespace-nowrap"
+                                title="Tampilkan / sembunyikan baris chip geser">
+                                Strip Geser
+                            </button>
+                        </div>
                     </div>
 
                     <!-- OPTIONAL COLLAPSIBLE SLIDE STRIP (HIDDEN BY DEFAULT TO AVOID CLUTTER) -->
@@ -15364,64 +15475,308 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         }
 
         // -------------------------------------------------------------------------
-        // KIT 4: SHARE VS DURATION EFFICIENCY INDEX
+        // PRESET HELPER: SOURCE VS AIRTIME & SHARE ROI
         // -------------------------------------------------------------------------
+        function applyPresetSourceAirtimeROI() {
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const headerRow = currentRawSheetData[hIdx] || [];
+
+            let srcIdx = -1, shIdx = -1, durIdx = -1, dateIdx = -1;
+            headerRow.forEach((col, idx) => {
+                const s = String(col || '').toLowerCase().trim();
+                if (srcIdx === -1 && (s.includes('source') || s.includes('sumber') || s.includes('asal') || s.includes('ph'))) srcIdx = idx;
+                if (shIdx === -1 && (s.includes('share') || s.includes('tvr') || s.includes('performa') || s.includes('rating'))) shIdx = idx;
+                if (durIdx === -1 && (s.includes('durasi') || s.includes('duration') || s.includes('minute') || s.includes('hour') || s.includes('jam') || s.includes('menit'))) durIdx = idx;
+                if (dateIdx === -1 && (s.includes('date') || s.includes('tanggal') || s.includes('week') || s.includes('minggu'))) dateIdx = idx;
+            });
+
+            // Fallback heuristics
+            if (srcIdx === -1) {
+                headerRow.forEach((col, idx) => {
+                    const s = String(col || '').toLowerCase().trim();
+                    if (srcIdx === -1 && (s.includes('program') || s.includes('acara') || s.includes('channel') || s.includes('station'))) srcIdx = idx;
+                });
+                if (srcIdx === -1) srcIdx = 2;
+            }
+            if (shIdx === -1) shIdx = 3;
+            if (durIdx === -1) {
+                headerRow.forEach((col, idx) => {
+                    if (durIdx === -1 && idx !== shIdx && idx !== srcIdx && idx !== dateIdx && (currentPreparedNumScores[idx] || 0) > 0.5) {
+                        durIdx = idx;
+                    }
+                });
+                if (durIdx === -1) durIdx = 4;
+            }
+
+            pivotStudioState.row1ColIdx = srcIdx;
+            pivotStudioState.row2ColIdx = -1;
+            pivotStudioState.colColIdx = -1;
+            pivotStudioState.val1ColIdx = shIdx;
+            pivotStudioState.val1Agg = 'AVERAGE';
+            pivotStudioState.val2ColIdx = durIdx;
+            pivotStudioState.val2Agg = 'SUM';
+
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            showToast("✅ Template Source vs Share & Durasi diterapkan! Anda tetap bebas mengkustomisasi kuadran.");
+        }
+
+        // -------------------------------------------------------------------------
+        // KIT 4: CONTENT SOURCE & AIRTIME EFFICIENCY (ROI) ANALYZER
+        // -------------------------------------------------------------------------
+        window.__hideZeroSources = true;
+
+        function toggleHideZeroSources() {
+            window.__hideZeroSources = !window.__hideZeroSources;
+            const container = document.getElementById('studioKitContentArea');
+            if (container) renderKitEfficiencyIndex(container);
+        }
+
         function renderKitEfficiencyIndex(container) {
             const res = currentComputedPivotResult;
-            if (!res || res.type !== 'hierarchy') {
-                container.innerHTML = `<div class="p-8 text-center text-slate-400">Pilih metrik Share pada Nilai 1 dan Durasi/Menit pada Nilai 2 untuk menghitung efisiensi.</div>`;
+            if (!res || !res.groups || res.groups.length === 0) {
+                container.innerHTML = `
+                <div class="p-8 text-center flex flex-col items-center justify-center gap-3 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl shadow-xs">
+                        <i class="ph-bold ph-gauge"></i>
+                    </div>
+                    <div class="max-w-md">
+                        <h4 class="text-sm font-black text-slate-800">Metrik Durasi & Share Belum Terkonfigurasi</h4>
+                        <p class="text-xs text-slate-500 mt-1">Pilih metrik <strong>Share</strong> pada Nilai 1 dan <strong>Durasi/Menit</strong> pada Nilai 2 di Pivot Builder untuk menghitung efisiensi alokasi jam siar.</p>
+                    </div>
+                    <button type="button" onclick="applyPresetSourceAirtimeROI(); switchStudioKit('efficiency_index');" 
+                        class="px-4 py-2 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-[#cafc03] flex items-center gap-2 shadow-sm transition hover:scale-[1.02]">
+                        <i class="ph-bold ph-lightning"></i> <span>Auto-Setup Source &amp; Durasi Sekarang</span>
+                    </button>
+                </div>`;
                 return;
             }
 
+            // Extract metrics and compute airtime percentages & yield
+            const groups = res.groups || [];
+            let totalDur = 0;
+            let totalShare = 0;
+
+            groups.forEach(g => {
+                const s = (g.val1 !== null && g.val1 !== undefined && !isNaN(Number(g.val1))) ? Number(g.val1) : 0;
+                const d = (g.val2 !== null && g.val2 !== undefined && !isNaN(Number(g.val2))) ? Number(g.val2) : 0;
+                totalDur += d;
+                totalShare += s;
+            });
+
+            const items = groups.map(g => {
+                const share = (g.val1 !== null && g.val1 !== undefined && !isNaN(Number(g.val1))) ? Number(g.val1) : 0;
+                const dur = (g.val2 !== null && g.val2 !== undefined && !isNaN(Number(g.val2))) ? Number(g.val2) : 0;
+                const durPct = totalDur > 0 ? ((dur / totalDur) * 100) : 0;
+                const yieldRatio = durPct > 0 ? (share / durPct) : (share > 0 ? 99 : 0);
+                const isZero = (share <= 0.001 && dur <= 0.001);
+                return {
+                    key: g.key,
+                    share,
+                    dur,
+                    durPct,
+                    yieldRatio,
+                    isZero
+                };
+            });
+
+            // Sort items by Share descending
+            items.sort((a, b) => b.share - a.share);
+
+            const hideZero = (window.__hideZeroSources !== false);
+            const displayedItems = hideZero ? items.filter(it => !it.isZero) : items;
+            const zeroCount = items.filter(it => it.isZero).length;
+
+            // Find highlights for narrative
+            const nonZeroItems = items.filter(it => !it.isZero);
+            const topYield = nonZeroItems.length > 0 ? [...nonZeroItems].sort((a, b) => b.yieldRatio - a.yieldRatio)[0] : null;
+            const topVol = nonZeroItems.length > 0 ? [...nonZeroItems].sort((a, b) => b.durPct - a.durPct)[0] : null;
+
             let html = `
             <div class="flex flex-col gap-4">
-                <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                <!-- HEADER & ACTION TOOLBAR -->
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200/90 gap-3 flex-wrap">
                     <div>
                         <h4 class="text-sm font-black text-slate-900 flex items-center gap-2">
-                            <i class="ph-bold ph-gauge text-emerald-600"></i> Index Efisiensi: Share vs Durasi Tayang
+                            <i class="ph-bold ph-gauge text-emerald-600"></i> Index Efisiensi &amp; Yield Alokasi Jam Siar
                         </h4>
-                        <span class="text-xs text-slate-500">Mengevaluasi program dengan efisiensi share tertinggi per alokasi menit siar</span>
+                        <span class="text-xs text-slate-500">Mengevaluasi rasio perolehan share rating per 1% alokasi durasi/jam siar (Broadcasting Content Yield)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="toggleHideZeroSources()" 
+                            class="px-3 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 ${hideZero ? 'bg-amber-50 text-amber-900 border-amber-300' : 'bg-slate-100 text-slate-700 border-slate-200'}">
+                            <i class="ph-bold ${hideZero ? 'ph-eye-slash' : 'ph-eye'}"></i>
+                            <span>${hideZero ? `Sembunyikan 0% (${zeroCount})` : 'Tampilkan Semua Kategori'}</span>
+                        </button>
+                        <button type="button" onclick="applyEfficiencyKitToActiveSlide()" 
+                            class="px-4 py-1.5 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-[#cafc03] flex items-center gap-2 shadow-sm transition hover:scale-[1.02]">
+                            <i class="ph-bold ph-check text-sm text-[#cafc03]"></i>
+                            <span>Terapkan ke Grafik Slide</span>
+                        </button>
                     </div>
                 </div>
 
+                <!-- 1. KPI STATS SUMMARY CARDS -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Durasi Siar</span>
+                        <div class="text-base font-black text-slate-900 mt-0.5">${totalDur.toLocaleString('id-ID')} mnt</div>
+                        <span class="text-[9px] text-slate-400">Modal jam siar channel</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-2xs">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Share Agregat</span>
+                        <div class="text-base font-black text-indigo-700 mt-0.5">${(totalShare / Math.max(1, nonZeroItems.length)).toFixed(2)}%</div>
+                        <span class="text-[9px] text-slate-400">Rata-rata sumber aktif</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl border border-emerald-200/90 bg-emerald-50/30 shadow-2xs">
+                        <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Highest Yield (ROI)</span>
+                        <div class="text-base font-black text-emerald-800 mt-0.5 truncate">${topYield ? topYield.key : '-'}</div>
+                        <span class="text-[9px] text-emerald-600 font-bold">Yield Ratio: ${topYield ? topYield.yieldRatio.toFixed(2) + 'x' : '-'}</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl border border-amber-200/90 bg-amber-50/30 shadow-2xs">
+                        <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Volume Anchor</span>
+                        <div class="text-base font-black text-amber-800 mt-0.5 truncate">${topVol ? topVol.key : '-'}</div>
+                        <span class="text-[9px] text-amber-600 font-bold">Porsi Durasi: ${topVol ? topVol.durPct.toFixed(1) + '%' : '-'}</span>
+                    </div>
+                </div>
+
+                <!-- 2. AUTO-GENERATED EXECUTIVE STRATEGY NOTE -->
+                ${topYield ? `
+                <div class="p-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl border border-slate-800 shadow-sm flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-[#cafc03]/20 text-[#cafc03] flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                        <i class="ph-bold ph-lightbulb text-lg"></i>
+                    </div>
+                    <div class="text-xs leading-relaxed">
+                        <span class="font-black text-[#cafc03] uppercase tracking-wider text-[11px] block mb-1">Broadcasting Yield Intelligence</span>
+                        Kategori <strong class="text-white">${topYield.key}</strong> mencatatkan efisiensi tertinggi dengan <strong>Yield ${topYield.yieldRatio.toFixed(2)}x</strong> (menghasilkan Share ${topYield.share.toFixed(2)}% dari modal durasi hanya ${topYield.durPct.toFixed(1)}%). Sementara <strong class="text-white">${topVol ? topVol.key : ''}</strong> bertindak sebagai penopang volume utama (${topVol ? topVol.durPct.toFixed(1) : ''}% total jam siar).
+                        <span class="text-slate-300 block mt-1">💡 <strong>Rekomendasi Taktis:</strong> Uji penambahan slot airtime bertahap pada konten bertipe <strong>${topYield.key}</strong> di jam fringe/prime time guna memaksimalkan yield audiens agregat tanpa membebani biaya produksi internal.</span>
+                    </div>
+                </div>` : ''}
+
+                <!-- 3. DETAILED EFFICIENCY TABLE -->
                 <div class="overflow-x-auto border border-slate-200/90 rounded-2xl shadow-xs bg-white">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-slate-50/95 text-slate-700 sticky top-0 z-10 select-none border-b border-slate-200/90 backdrop-blur-xs">
                             <tr>
                                 <th class="py-2.5 px-3 text-[10px] font-mono font-bold text-slate-400 w-12 text-center uppercase">Rank</th>
-                                <th class="py-2.5 px-3 font-bold text-[11px] tracking-wider uppercase text-slate-800">Nama Program / Kategori</th>
-                                <th class="py-2.5 px-3 font-bold text-[11px] tracking-wider text-right uppercase text-slate-700">Avg Share</th>
-                                <th class="py-2.5 px-3 font-bold text-[11px] tracking-wider text-right uppercase text-indigo-700">Total Durasi</th>
-                                <th class="py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-emerald-700">Index Efisiensi</th>
-                                <th class="py-2.5 px-3 font-bold text-[10px] tracking-wider text-center uppercase text-slate-400">Klasifikasi</th>
+                                <th class="py-2.5 px-3 font-bold text-[11px] tracking-wider uppercase text-slate-800">Program Source / Kategori</th>
+                                <th class="py-2.5 px-3 font-bold text-[11px] tracking-wider text-right uppercase text-slate-700">Performa Share</th>
+                                <th class="py-2.5 px-3 font-bold text-[11px] tracking-wider text-right uppercase text-indigo-700">Alokasi Durasi</th>
+                                <th class="py-2.5 px-3 font-bold text-[11px] tracking-wider text-right uppercase text-cyan-700">Porsi Jam Siar (%)</th>
+                                <th class="py-2.5 px-3 font-black text-[11px] tracking-wider text-right uppercase text-emerald-700">Yield Index</th>
+                                <th class="py-2.5 px-3 font-bold text-[10px] tracking-wider text-center uppercase text-slate-400">Klasifikasi Konten</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white font-mono">
             `;
 
-            res.groups.forEach((g, idx) => {
+            displayedItems.forEach((it, idx) => {
                 const isOdd = idx % 2 === 1;
-                const share = Number(g.val1) || 0;
-                const dur = Number(g.val2) || g.count;
-                const effIndex = dur > 0 ? ((share / dur) * 100) : 0;
 
-                let badge = '<span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-full">🚀 HIGH ROI</span>';
-                if (share > 12 && dur > 60) badge = '<span class="bg-indigo-100 text-indigo-800 text-[9px] font-black px-2 py-0.5 rounded-full">💎 PILAR UTAMA</span>';
-                else if (share < 7 && dur > 40) badge = '<span class="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full">⏳ FATIGUE</span>';
+                let badge = '<span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-full">🚀 HIGH YIELD / STAR</span>';
+                if (it.isZero) {
+                    badge = '<span class="bg-slate-100 text-slate-400 text-[9px] font-bold px-2 py-0.5 rounded-full">⭕ 0% (NON-AKTIF)</span>';
+                } else if (it.yieldRatio >= 1.25) {
+                    badge = '<span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-full">🚀 STAR (HIGH YIELD)</span>';
+                } else if (it.yieldRatio >= 0.75) {
+                    badge = '<span class="bg-indigo-100 text-indigo-800 text-[9px] font-black px-2 py-0.5 rounded-full">💎 CORE PILLAR</span>';
+                } else {
+                    badge = '<span class="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full">📦 VOLUME DRIVER</span>';
+                }
 
                 html += `
-                <tr class="hover:bg-slate-50 transition ${isOdd ? 'bg-slate-50/50' : 'bg-white'}">
+                <tr class="hover:bg-slate-50 transition ${isOdd ? 'bg-slate-50/50' : 'bg-white'} ${it.isZero ? 'opacity-40' : ''}">
                     <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-bold">${idx + 1}</td>
-                    <td class="py-2 px-3 font-black font-sans text-slate-900">${escapeHtml(g.key)}</td>
-                    <td class="py-2 px-3 text-right font-bold text-slate-800">${share.toFixed(2)}%</td>
-                    <td class="py-2 px-3 text-right font-medium text-cyan-900">${dur.toLocaleString('id-ID')} mnt</td>
-                    <td class="py-2 px-3 text-right font-black text-emerald-700">${effIndex.toFixed(2)}</td>
+                    <td class="py-2 px-3 font-black font-sans text-slate-900">${escapeHtml(it.key)}</td>
+                    <td class="py-2 px-3 text-right font-bold text-slate-800">${it.share.toFixed(2)}%</td>
+                    <td class="py-2 px-3 text-right font-medium text-indigo-900">${it.dur.toLocaleString('id-ID')} mnt</td>
+                    <td class="py-2 px-3 text-right font-bold text-cyan-800">${it.durPct.toFixed(1)}%</td>
+                    <td class="py-2 px-3 text-right font-black ${it.yieldRatio >= 1 ? 'text-emerald-700' : 'text-slate-600'}">${it.yieldRatio > 0 ? it.yieldRatio.toFixed(2) + 'x' : '-'}</td>
                     <td class="py-2 px-3 text-center">${badge}</td>
                 </tr>`;
             });
 
             html += `</tbody></table></div></div>`;
             container.innerHTML = html;
+        }
+
+        // Apply clean Source & Airtime ROI data to slide canvas
+        function applyEfficiencyKitToActiveSlide() {
+            const res = currentComputedPivotResult;
+            if (!res || !res.groups || res.groups.length === 0) {
+                showToast("Data belum dihitung!", true);
+                return;
+            }
+
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const ds = getActiveDataSet();
+            if (!ds) return;
+
+            let totalDur = 0;
+            res.groups.forEach(g => {
+                const d = (g.val2 !== null && g.val2 !== undefined && !isNaN(Number(g.val2))) ? Number(g.val2) : 0;
+                totalDur += d;
+            });
+
+            const hideZero = (window.__hideZeroSources !== false);
+            let activeGroups = res.groups;
+            if (hideZero) {
+                activeGroups = activeGroups.filter(g => {
+                    const s = (g.val1 !== null && g.val1 !== undefined && !isNaN(Number(g.val1))) ? Number(g.val1) : 0;
+                    const d = (g.val2 !== null && g.val2 !== undefined && !isNaN(Number(g.val2))) ? Number(g.val2) : 0;
+                    return (s > 0.001 || d > 0.001);
+                });
+            }
+
+            if (activeGroups.length === 0) {
+                showToast("Tidak ada data aktif untuk diterapkan!", true);
+                return;
+            }
+
+            // Configure Series 1 (Share) and Series 2 (Durasi %)
+            ds.series = [
+                {
+                    id: 's_share_' + Date.now(),
+                    name: 'Share (Performa)',
+                    type: 'auto',
+                    axis: 'y'
+                },
+                {
+                    id: 's_dur_' + Date.now(),
+                    name: 'Persentase Durasi (%)',
+                    type: 'auto',
+                    axis: 'y'
+                }
+            ];
+
+            // Build rows
+            ds.rows = activeGroups.map((g, idx) => {
+                const s = (g.val1 !== null && g.val1 !== undefined && !isNaN(Number(g.val1))) ? Number(g.val1) : 0;
+                const d = (g.val2 !== null && g.val2 !== undefined && !isNaN(Number(g.val2))) ? Number(g.val2) : 0;
+                const durPct = totalDur > 0 ? Math.round((d / totalDur) * 1000) / 10 : 0;
+
+                return {
+                    id: 'r_eff_' + idx + '_' + Date.now(),
+                    label: g.key,
+                    icon: '',
+                    values: [
+                        { val: Math.round(s * 100) / 100, val2: 0, color: '#3b82f6', offset: 0, callout: false, calloutSub: '' },
+                        { val: durPct, val2: 0, color: '#f59e0b', offset: 0, callout: false, calloutSub: '' }
+                    ]
+                };
+            });
+
+            slide.chartTitle = 'Analisis Performa Share vs Persentase Durasi';
+            slide.chartSubtitle = 'Evaluasi Efisiensi Alokasi Jam Siar Berdasarkan Sumber Konten';
+
+            forceRecolor(slide.colorTheme || 'emerald', slide);
+            syncUIPartialToGrid();
+            triggerVisUpdateWithDebounce();
+            renderWorkbenchFromActiveDataSet();
+            closeRawImportModal();
+            showToast("✅ Visualisasi Source ROI & Durasi berhasil diterapkan ke slide!");
         }
 
         // -------------------------------------------------------------------------
