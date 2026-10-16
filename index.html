@@ -1231,7 +1231,7 @@
 
     <!-- POPUP MODAL: BURGER MENU PILIH TANGGAL / KATEGORI (GRID & SEARCH) -->
     <div id="burgerFilterModal" class="hidden fixed inset-0 z-[280] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5" onclick="if(event.target === this) closeBurgerFilterModal()">
-        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-2xl p-5 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-4xl p-5 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
             <!-- HEADER -->
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center gap-3">
@@ -1267,8 +1267,8 @@
                 </div>
             </div>
 
-            <!-- LIST CONTAINER (GRID MULTI-COLUMN) -->
-            <div id="burgerFilterListContainer" class="flex-1 min-h-[160px] max-h-[360px] overflow-y-auto custom-scrollbar p-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 bg-slate-50/60 rounded-2xl border border-slate-100">
+            <!-- LIST CONTAINER (GRID MULTI-COLUMN - 2 SPACIOUS COLUMNS) -->
+            <div id="burgerFilterListContainer" class="flex-1 min-h-[200px] max-h-[460px] overflow-y-auto custom-scrollbar p-1.5 grid grid-cols-1 md:grid-cols-2 gap-2.5 bg-slate-50/60 rounded-2xl border border-slate-100">
                 <!-- Checkbox items injected dynamically -->
             </div>
 
@@ -2112,19 +2112,24 @@
 
     <!-- POPUP ZOOM / EXPLODE & DRILL-DOWN INTERAKTIF -->
     <div id="elementPopup"
-        class="fixed z-[100] bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-2xl p-4 w-[280px] transition-all duration-200 transform origin-top-left flex flex-col gap-3 hidden-popup">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-            <div class="flex items-center gap-2">
-                <span id="popupIcon" class="text-base">📍</span>
-                <div class="flex flex-col">
-                    <h4 id="popupTitle" class="text-xs font-black text-slate-800 uppercase tracking-wider">LABEL</h4>
+        class="fixed z-[100] bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-2xl p-4 w-[295px] max-h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar flex flex-col gap-3 hidden-popup select-none">
+        <div id="elementPopupHeader"
+            class="flex items-center justify-between border-b border-slate-100 pb-2 cursor-move select-none group"
+            title="Klik dan seret untuk memindahkan posisi menu">
+            <div class="flex items-center gap-1.5 min-w-0">
+                <div class="w-3.5 h-5 flex items-center justify-center text-slate-300 group-hover:text-slate-600 transition shrink-0">
+                    <i class="ph-bold ph-dots-six-vertical text-base"></i>
+                </div>
+                <span id="popupIcon" class="text-base shrink-0">📍</span>
+                <div class="flex flex-col min-w-0">
+                    <h4 id="popupTitle" class="text-xs font-black text-slate-800 uppercase tracking-wider truncate">LABEL</h4>
                     <span id="popupSubtitle"
-                        class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">SERIES</span>
+                        class="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">SERIES</span>
                 </div>
             </div>
-            <button onclick="closeElementPopup()"
-                class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"><i
-                    class="ph ph-x"></i></button>
+            <button type="button" onclick="closeElementPopup()"
+                class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition shrink-0 cursor-pointer"
+                title="Tutup (Esc)"><i class="ph ph-x font-bold"></i></button>
         </div>
         <div>
             <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2" data-i18n="popupColor">Warna Elemen
@@ -7234,9 +7239,119 @@
                 }
             }
 
-            let popX = clientX + 15; let popY = clientY + 15; if (popX + 280 > window.innerWidth) popX = clientX - 295; if (popY + 260 > window.innerHeight) popY = clientY - 275; popup.style.left = Math.max(10, popX) + 'px'; popup.style.top = Math.max(10, popY) + 'px'; popup.classList.remove('hidden-popup'); if (typeof bringFloatingPanelToFront === 'function') bringFloatingPanelToFront(popup); activePopup = true;
+            // Tampilkan popup terlebih dahulu agar dimensi layout aktual (width, height) dapat diukur presisi
+            popup.classList.remove('hidden-popup');
+            const popWidth = popup.offsetWidth || 295;
+            const popHeight = popup.offsetHeight || 440;
+
+            // X Placement & Viewport Clamping
+            let popX = clientX + 15;
+            if (popX + popWidth > window.innerWidth - 12) {
+                popX = clientX - popWidth - 15;
+            }
+            popX = Math.max(12, Math.min(popX, window.innerWidth - popWidth - 12));
+
+            // Y Placement & Viewport Clamping (mencegah popup terpotong di bagian bawah!)
+            let popY = clientY + 12;
+            if (popY + popHeight > window.innerHeight - 15) {
+                popY = clientY - popHeight - 12; // Coba letakkan di atas kursor klik jika ruang bawah terbatas
+            }
+            // Batasi agar tidak menembus batas atas navbar (~55px) maupun batas bawah layar
+            popY = Math.max(55, Math.min(popY, window.innerHeight - popHeight - 15));
+
+            popup.style.left = popX + 'px';
+            popup.style.top = popY + 'px';
+            if (typeof bringFloatingPanelToFront === 'function') bringFloatingPanelToFront(popup);
+            activePopup = true;
         }
         function closeElementPopup() { const popup = document.getElementById('elementPopup'); if (popup) { popup.classList.add('hidden-popup'); activeElementData = null; activePopup = false; } }
+
+        // =========================================================================
+        // DRAGGABLE ELEMENT POPUP EDITOR (DAPAT DI-GESER BEBAS DI LAYAR)
+        // =========================================================================
+        function initElementPopupDraggable() {
+            const popup = document.getElementById('elementPopup');
+            const header = document.getElementById('elementPopupHeader') || popup;
+            if (!popup || !header) return;
+
+            let isDragging = false;
+            let startPointerX = 0, startPointerY = 0;
+            let initialLeft = 0, initialTop = 0;
+
+            const onStart = (e) => {
+                // Abaikan interaksi jika klik tombol close atau form controls
+                if (e.target.closest('button, input, select, textarea, label')) return;
+
+                if (typeof bringFloatingPanelToFront === 'function') bringFloatingPanelToFront(popup);
+                isDragging = true;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                startPointerX = clientX;
+                startPointerY = clientY;
+
+                const rect = popup.getBoundingClientRect();
+                initialLeft = rect.left;
+                initialTop = rect.top;
+
+                popup.classList.add('ring-2', 'ring-indigo-500/40', 'shadow-2xl');
+                document.body.style.userSelect = 'none';
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('mouseup', onEnd);
+                document.addEventListener('touchend', onEnd);
+                document.addEventListener('touchcancel', onEnd);
+
+                if (e.cancelable && e.type.includes('touch')) e.preventDefault();
+            };
+
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                const dx = clientX - startPointerX;
+                const dy = clientY - startPointerY;
+
+                const popW = popup.offsetWidth || 295;
+                const popH = popup.offsetHeight || 440;
+
+                let nextLeft = initialLeft + dx;
+                let nextTop = initialTop + dy;
+
+                // Viewport boundary clamping
+                const minX = 8;
+                const maxX = Math.max(8, window.innerWidth - popW - 8);
+                const minY = 50;
+                const maxY = Math.max(50, window.innerHeight - popH - 8);
+
+                nextLeft = Math.max(minX, Math.min(nextLeft, maxX));
+                nextTop = Math.max(minY, Math.min(nextTop, maxY));
+
+                popup.style.left = nextLeft + 'px';
+                popup.style.top = nextTop + 'px';
+
+                if (e.cancelable) e.preventDefault();
+            };
+
+            const onEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                popup.classList.remove('ring-2', 'ring-indigo-500/40');
+                document.body.style.userSelect = '';
+
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('mouseup', onEnd);
+                document.removeEventListener('touchend', onEnd);
+                document.removeEventListener('touchcancel', onEnd);
+            };
+
+            header.addEventListener('mousedown', onStart);
+            header.addEventListener('touchstart', onStart, { passive: false });
+        }
+        initElementPopupDraggable();
         document.getElementById('popupColorInput')?.addEventListener('input', (e) => { if (!activeElementData) return; const slide = getActiveSlide(); const ds = slide.dataSets[activeElementData.gridIndex] || slide.dataSets[0]; const row = ds.rows.find(r => r.id === activeElementData.rowId); if (row && row.values[activeElementData.sIdx]) { row.values[activeElementData.sIdx].color = e.target.value; document.getElementById('popupColorText').innerText = e.target.value; if (debounceTimer) clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { updateVisualizations(); }, 50); if (activeElementData.gridIndex === activeEditGridIndex) renderDataInputs(); } });
         const updateExplodeVal = (rawVal) => {
             if (!activeElementData) return;
@@ -9601,6 +9716,7 @@
                 // RENDER VERSUS DELTA (PLUS/MINUS) HTML
                 if (slide.showVersusDelta !== false && ds.series.length >= 2 && !['pie', 'doughnut', 'polarArea', 'radar', 'concentric', 'windrose'].includes(cType) && cType !== 'treemap' && cType !== 'wordCloud' && cType !== 'tape' && cType !== 'scatter' && cType !== 'bubble') {
                     const isHoriz = cType === 'bar-horizontal' || cType === 'gantt';
+                    const currentOrientation = isHoriz ? 'horiz' : 'vert';
                     const prog = window.__raceProgress !== undefined ? window.__raceProgress : 1;
                     let totalA = 0; let totalB = 0;
                     const meta0 = chart.getDatasetMeta(0);
@@ -9645,15 +9761,24 @@
                                 by = Math.min(el0.y, el1.y) - 6 + offsetY;
                             }
 
-                            if (r.vdPos === undefined) {
+                            const currentOrientation = isHoriz ? 'horiz' : 'vert';
+                            const autoX = ((bx) / wWidth) * 100;
+                            const autoY = ((by) / wHeight) * 100;
+
+                            // KUNCI: Jika user belum drag manual, ATAU jika tipe chart/orientasi berubah (misal dari bar horizontal ke vertikal),
+                            // posisi delta badge WAJIB dihitung ulang secara dinamis mengikuti bar masing-masing!
+                            if (!r.vdPos || !r.vdPos._userMoved || r.vdPos._orientation !== currentOrientation || r.vdPos._cType !== cType) {
                                 r.vdPos = {
-                                    x: ((bx) / wWidth) * 100,
-                                    y: ((by) / wHeight) * 100
+                                    x: autoX,
+                                    y: autoY,
+                                    _userMoved: false,
+                                    _orientation: currentOrientation,
+                                    _cType: cType
                                 };
                             }
 
                             const boxEl = document.createElement('div');
-                            boxEl.className = 'callout-box vd-box absolute px-2 py-1 rounded-[10px] shadow-sm font-[\'Inter\'] font-extrabold text-[10px] flex items-center justify-center cursor-move whitespace-nowrap pointer-events-auto';
+                            boxEl.className = 'callout-box vd-box absolute px-2.5 py-1 rounded-[10px] shadow-sm font-[\'Inter\'] font-extrabold text-[10px] flex items-center justify-center cursor-move whitespace-nowrap pointer-events-auto select-none transition-shadow hover:shadow-md';
                             boxEl.style.backgroundColor = bgColor;
                             boxEl.style.border = `1px solid ${borderColor}`;
                             boxEl.style.color = textColor;
@@ -9670,6 +9795,14 @@
                             boxEl.dataset.rowId = r.id;
                             boxEl.dataset.isTotal = 'false';
                             boxEl.innerText = badgeText;
+                            boxEl.title = `Delta (${badgeText}) - Drag untuk memindahkan, Dobel klik untuk reset ke posisi bar`;
+
+                            boxEl.ondblclick = (e) => {
+                                e.stopPropagation();
+                                delete r.vdPos;
+                                renderCalloutsOverlay();
+                                if (typeof showToast === 'function') showToast(`Posisi Delta "${r.label}" di-reset mengikuti bar`);
+                            };
 
                             container.appendChild(boxEl);
                         });
@@ -9694,25 +9827,38 @@
                         const bx = area.right - 4 + offsetX;
                         const by = area.top - 10 + offsetY;
 
-                        if (ds.vdTotalPos === undefined) {
+                        const tAutoX = ((bx) / wWidth) * 100;
+                        const tAutoY = ((by) / wHeight) * 100;
+
+                        if (!ds.vdTotalPos || !ds.vdTotalPos._userMoved || ds.vdTotalPos._orientation !== currentOrientation || ds.vdTotalPos._cType !== cType) {
                             ds.vdTotalPos = {
-                                x: ((bx) / wWidth) * 100,
-                                y: ((by) / wHeight) * 100
+                                x: tAutoX,
+                                y: tAutoY,
+                                _userMoved: false,
+                                _orientation: currentOrientation,
+                                _cType: cType
                             };
                         }
 
                         const boxEl = document.createElement('div');
-                        boxEl.className = 'callout-box vd-box absolute px-3 py-1 rounded-[12px] shadow-md font-[\'Inter\'] font-extrabold text-[11px] flex items-center justify-center cursor-move whitespace-nowrap pointer-events-auto';
+                        boxEl.className = 'callout-box vd-box absolute px-3 py-1 rounded-[12px] shadow-md font-[\'Inter\'] font-extrabold text-[11px] flex items-center justify-center cursor-move whitespace-nowrap pointer-events-auto select-none transition-shadow hover:shadow-lg';
                         boxEl.style.backgroundColor = bgColor;
                         boxEl.style.border = `1px solid ${borderColor}`;
                         boxEl.style.color = textColor;
                         boxEl.style.left = ds.vdTotalPos.x + '%';
                         boxEl.style.top = ds.vdTotalPos.y + '%';
-                        boxEl.style.transform = 'translate(-100%, -100%)';
-
+                        boxEl.style.transform = 'translate(-100%, 0)';
                         boxEl.dataset.bIdx = bIdx;
                         boxEl.dataset.isTotal = 'true';
                         boxEl.innerText = totalText;
+                        boxEl.title = `Total Delta - Drag untuk memindahkan, Dobel klik untuk reset posisi`;
+
+                        boxEl.ondblclick = (e) => {
+                            e.stopPropagation();
+                            delete ds.vdTotalPos;
+                            renderCalloutsOverlay();
+                            if (typeof showToast === 'function') showToast("Posisi Total Delta di-reset ke default");
+                        };
 
                         container.appendChild(boxEl);
                     }
@@ -9781,6 +9927,7 @@
             if (draggedCalloutInfo.boxEl.classList.contains('vd-box')) {
                 draggedCalloutInfo.valObj.x = newX;
                 draggedCalloutInfo.valObj.y = newY;
+                draggedCalloutInfo.valObj._userMoved = true;
             } else {
                 draggedCalloutInfo.valObj.calloutX = newX;
                 draggedCalloutInfo.valObj.calloutY = newY;
@@ -13227,31 +13374,38 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 const count = valCountMap.get(val);
                 const label = formatExcelDateDisplay(val);
                 const safeVal = escapeHtml(val).replace(/'/g, "\\'");
+                
+                // Only render secondary text if label is different from val (e.g. date serial numbers)
+                const isDateSerial = label !== String(val);
+                const subTextHtml = isDateSerial 
+                    ? `<span class="text-[10px] text-slate-400 font-mono truncate" title="${escapeHtml(val)}">${escapeHtml(val)}</span>` 
+                    : '';
 
                 html += `
                 <div onclick="toggleBurgerFilterItem('${safeVal}')" id="burger_item_${idx}" data-val="${escapeHtml(val)}"
-                    class="burger-filter-card flex items-center justify-between p-2.5 rounded-2xl border transition cursor-pointer select-none ${
+                    class="burger-filter-card flex items-center justify-between p-3 rounded-2xl border transition cursor-pointer select-none ${
                         isSelected 
-                            ? 'bg-amber-50/80 border-amber-400 shadow-2xs' 
-                            : 'bg-white border-slate-200/90 hover:border-slate-300 hover:bg-slate-50'
+                            ? 'bg-gradient-to-r from-amber-50/90 to-amber-50/40 border-amber-400 shadow-2xs ring-1 ring-amber-400/30' 
+                            : 'bg-white border-slate-200/90 hover:border-slate-300 hover:bg-slate-50 shadow-2xs'
                     }">
-                    <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="flex items-center gap-3 min-w-0 flex-1 mr-2">
                         <input type="checkbox" id="burger_chk_${idx}" ${isSelected ? 'checked' : ''}
                             onclick="event.stopPropagation(); toggleBurgerFilterItem('${safeVal}')"
                             class="w-4 h-4 rounded text-amber-600 accent-amber-500 cursor-pointer shrink-0">
-                        <div class="flex flex-col min-w-0">
-                            <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(label)}</span>
-                            <span class="text-[10px] text-slate-400 font-mono">${escapeHtml(val)}</span>
+                        <div class="flex flex-col min-w-0 flex-1">
+                            <span class="text-xs font-black text-slate-800 truncate" title="${escapeHtml(label)}">${escapeHtml(label)}</span>
+                            ${subTextHtml}
                         </div>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
                         <button type="button" onclick="event.stopPropagation(); soloBurgerFilterItem('${safeVal}')"
-                            class="px-2 py-0.5 rounded-lg text-[10px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition shadow-2xs cursor-pointer"
+                            class="px-2.5 py-1 rounded-xl text-[10px] font-black text-indigo-700 bg-indigo-50/90 hover:bg-indigo-600 hover:text-white border border-indigo-200/90 hover:border-indigo-600 transition shadow-2xs flex items-center gap-1 cursor-pointer"
                             title="Pilih hanya ${escapeHtml(label)} saja">
-                            Hanya Ini
+                            <i class="ph-bold ph-check text-[10px]"></i>
+                            <span>Hanya Ini</span>
                         </button>
-                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600">
-                            ${count} baris
+                        <span class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-100/90 text-slate-600 font-mono whitespace-nowrap border border-slate-200/60">
+                            ${Number(count).toLocaleString('id-ID')} baris
                         </span>
                     </div>
                 </div>`;
