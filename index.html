@@ -38,6 +38,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 
+    <!-- ZERO-GLITCH PIVOT STUDIO RESTORATION PRE-INIT (Runs before DOM is painted) -->
+    <script>
+        (function() {
+            try {
+                var raw = localStorage.getItem('ProChart_Pivot_Session_Status');
+                if (raw) {
+                    var p = JSON.parse(raw);
+                    if (p && p.isOpen) {
+                        document.documentElement.classList.add('pivot-studio-reopening');
+                    }
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <style>
+        /* ZERO-GLITCH: Show modal backdrop and frame instantly on Frame 0 */
+        html.pivot-studio-reopening #rawImportModal {
+            display: flex !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transition: none !important;
+        }
+        html.pivot-studio-reopening #rawImportModalContent {
+            transform: none !important;
+            transition: none !important;
+        }
+    </style>
+
     <style>
         @keyframes drillZoomTransition {
             0% {
@@ -1493,14 +1521,14 @@
     <div id="drillDeepDiveModal"
         class="fixed inset-0 z-[235] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 transition-all duration-300"
         onclick="if(event.target === this) closeDrillDeepDiveModal()">
-        <div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl w-full max-w-2xl max-h-[90vh] h-[84vh] flex flex-col overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800 window-modal-box"
+        <div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl w-full max-w-4xl max-h-[90vh] h-[85vh] flex flex-col overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800 window-modal-box"
             id="drillDeepDiveInner">
 
             <!-- HEADER / DRAG HANDLE -->
             <div id="drillDeepDiveDragHandle"
-                class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-white/70 shrink-0 window-drag-handle group select-none"
+                class="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-100 bg-white/70 shrink-0 window-drag-handle group select-none gap-2 flex-wrap sm:flex-nowrap"
                 title="Tahan & geser untuk memindahkan jendela (Klik 2x untuk Maximize/Restore)">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2.5">
                     <div
                         class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shrink-0 shadow-sm">
                         <i class="ph-bold ph-tree-structure text-lg"></i>
@@ -1508,16 +1536,29 @@
                     <div>
                         <h3
                             class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
-                            <span>Interactive Sub-Category Deep Dive</span>
+                            <span>Deep-Dive Matrix &amp; Kit Analisa</span>
                             <span
-                                class="text-[9px] font-mono bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full border border-indigo-200">HIERARCHY
-                                &amp; BREAKDOWN</span>
+                                class="text-[9px] font-mono bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full border border-indigo-200">HIERARCHY &amp; SCIENCE</span>
                         </h3>
-                        <p class="text-[9px] sm:text-[10px] font-medium text-slate-400">Analisis matriks sub-kategori,
-                            rasio kontribusi induk &amp; relasi data</p>
+                        <p class="text-[9px] sm:text-[10px] font-medium text-slate-400">Analisis matriks sub-kategori, komparasi periode, Pareto &amp; diagnostik performa</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-1.5 no-drag">
+                <div class="flex items-center gap-2 no-drag ml-auto">
+                    <!-- TABS SWITCHER -->
+                    <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-xs font-bold">
+                        <button type="button" onclick="switchDrillDeepDiveTab('matrix')" id="btnDrillTab_matrix"
+                            class="drill-tab-btn px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-indigo-700 shadow-xs">
+                            <i class="ph-bold ph-chart-bar text-xs"></i> <span>Matriks Rincian</span>
+                        </button>
+                        <button type="button" onclick="switchDrillDeepDiveTab('analysis')" id="btnDrillTab_analysis"
+                            class="drill-tab-btn px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+                            <i class="ph-bold ph-flask text-xs"></i> <span>Kit Analisa 🔬</span>
+                        </button>
+                        <button type="button" onclick="switchDrillDeepDiveTab('summary')" id="btnDrillTab_summary"
+                            class="drill-tab-btn px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900">
+                            <i class="ph-bold ph-sparkle text-xs"></i> <span>Executive Insight</span>
+                        </button>
+                    </div>
                     <button type="button" id="btnMaximizeDrillDeepDive"
                         class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition"
                         title="Maximize / Restore Jendela">
@@ -1546,6 +1587,11 @@
                         1 Breakdown</span>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" onclick="openPivotAnalysisFromDeepDive()"
+                        class="px-3 py-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs"
+                        title="Buka Tools Analisa Makro / Pivot Studio">
+                        <i class="ph-bold ph-arrow-up-right text-xs"></i> <span>Tools Analisa Pivot</span>
+                    </button>
                     <button type="button" onclick="closeDrillDeepDiveModal()"
                         class="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-bold transition shadow-2xs">
                         Tutup
@@ -4469,6 +4515,28 @@
             if (s.lineBorderWidth === undefined) s.lineBorderWidth = 3;
             if (s.showVersusDelta === undefined) s.showVersusDelta = true;
             if (s.versusDeltaMode === undefined) s.versusDeltaMode = 'both';
+            if (s.chartThickness === undefined || s.chartThickness === null || isNaN(s.chartThickness)) s.chartThickness = 100;
+            if (s.borderRadius === undefined || s.borderRadius === null || isNaN(s.borderRadius)) s.borderRadius = 8;
+
+            // Auto-heal Period Comparison, Grouped Versus, or Drill-down Child slides where secondary series was erroneously set to line on y2
+            if (s.dataSets && Array.isArray(s.dataSets)) {
+                s.dataSets.forEach(ds => {
+                    if (ds && Array.isArray(ds.series) && ds.series.length >= 2) {
+                        const isPeriodNamed = ds.series.some(ser => ser.name && /periode|period|\d{1,2}\s*[a-z]{3}\s*\d{2,4}/i.test(ser.name));
+                        const isVersusMode = s.stackMode === 'grouped' || !!(s.pivotStateSnapshot && s.pivotStateSnapshot.periodComparison && s.pivotStateSnapshot.periodComparison.active) || isPeriodNamed || !!s.drillParentId;
+                        if (isPeriodNamed || (isVersusMode && ds.series.some(ser => ser.type === 'line' && ser.axis === 'y2'))) {
+                            if (s.stackMode !== 'grouped') s.stackMode = 'grouped';
+                            ds.series.forEach((ser, idx) => {
+                                if (idx > 0 && ser.type === 'line' && ser.axis === 'y2') {
+                                    ser.type = 'auto';
+                                    ser.axis = 'y';
+                                    ser.zIndex = 'back';
+                                }
+                            });
+                        }
+                    }
+                });
+            }
             return s;
         };
         const getActiveSlide = () => sanitizeSlide(appSlides[activeSlideIndex]); const getActiveDataSet = () => { const s = getActiveSlide(); return s ? (s.dataSets[activeEditGridIndex] || s.dataSets[0]) : null; };
@@ -6446,12 +6514,10 @@
         // FUNGSI MODAL RESET CUSTOM UI
         function openResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.remove('hidden'); modal.classList.add('flex'); setTimeout(() => { modal.classList.remove('opacity-0'); modal.querySelector('div').classList.remove('scale-95'); }, 10); }
         function closeResetModal() { const modal = document.getElementById('resetConfirmModal'); modal.classList.add('opacity-0'); modal.querySelector('div').classList.add('scale-95'); setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300); }
-        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); currentProjectName = 'Proyek Baru'; currentOpenedFileName = ''; appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; drillHistoryStack = []; whatIfState.multiplierPct = 0; whatIfState.jitterMap = {}; updateWhatIfBadgeUI(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); saveState(); updateNavFileProjectInfo(); showToast("New Project berhasil dibuat!"); }
+        function executeReset() { closeResetModal(); localStorage.removeItem(STORAGE_KEY); if (typeof PivotStudioStorage !== 'undefined') { PivotStudioStorage.clearAll(); } currentProjectName = 'Proyek Baru'; currentOpenedFileName = ''; appSlides = [generateDefaultSlide(1)]; activeSlideIndex = 0; activeEditGridIndex = 0; drillHistoryStack = []; whatIfState.multiplierPct = 0; whatIfState.jitterMap = {}; updateWhatIfBadgeUI(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); saveState(); updateNavFileProjectInfo(); showToast("New Project berhasil dibuat!"); }
 
         // FUNGSI INTERACTIVE DRILL-DOWN (BREAKDOWN DATA AREA)
         function updateDrillBackUI() {
-            const btn = document.getElementById('btnDrillBack');
-            if (btn) btn.classList.add('hidden');
             updateCanvasDrillBreadcrumbs();
         }
 
@@ -6581,14 +6647,17 @@
         function updateCanvasDrillBreadcrumbs() {
             const bar = document.getElementById('canvasDrillBreadcrumbsBar');
             const list = document.getElementById('canvasDrillBreadcrumbsList');
-            if (!bar || !list) return;
+            const btn = document.getElementById('btnDrillBack');
 
             if (drillHistoryStack.length === 0) {
-                bar.classList.add('hidden');
+                if (bar) bar.classList.add('hidden');
+                if (btn) btn.classList.add('hidden');
                 return;
             }
 
-            bar.classList.remove('hidden');
+            // Interactive breadcrumbs bar is active with its own Kembali button, so hide floating duplicate btnDrillBack
+            if (btn) btn.classList.add('hidden');
+            if (bar) bar.classList.remove('hidden');
 
             let html = '';
             drillHistoryStack.forEach((slideIdx, stackPos) => {
@@ -6633,6 +6702,30 @@
             modal.classList.remove('flex');
         }
 
+        let drillDeepDiveActiveTab = 'matrix';
+
+        function switchDrillDeepDiveTab(tabName) {
+            drillDeepDiveActiveTab = tabName;
+            document.querySelectorAll('.drill-tab-btn').forEach(btn => {
+                btn.className = 'drill-tab-btn px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 text-slate-600 hover:text-slate-900';
+            });
+            const activeBtn = document.getElementById(`btnDrillTab_${tabName}`);
+            if (activeBtn) {
+                activeBtn.className = 'drill-tab-btn px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-indigo-700 shadow-xs';
+            }
+            refreshDrillDeepDive();
+        }
+
+        function openPivotAnalysisFromDeepDive() {
+            closeDrillDeepDiveModal();
+            const parentIdx = drillHistoryStack.length > 0 ? drillHistoryStack[0] : activeSlideIndex;
+            const rootSlide = appSlides[parentIdx] || getActiveSlide();
+            if (rootSlide) {
+                openRawImportModal(null, rootSlide.lastImportFileName || 'Data Analisis');
+                switchStudioKit('analysis');
+            }
+        }
+
         function refreshDrillDeepDive() {
             const container = document.getElementById('drillDeepDiveBody');
             if (!container) return;
@@ -6644,15 +6737,38 @@
             const parentSlide = parentIdx !== null ? appSlides[parentIdx] : null;
 
             const ds = currentSlide.dataSets[0] || { rows: [], series: [{ name: 'Data' }] };
-            let subTotal = 0;
-            ds.rows.forEach(r => {
-                const val = r.values && r.values[0] ? parseFloat(r.values[0].val) || 0 : 0;
-                subTotal += val;
+            const isVersus = ds.series && ds.series.length >= 2;
+            const sNameA = ds.series[0]?.name || 'Periode A';
+            const sNameB = isVersus ? (ds.series[1]?.name || 'Periode B') : null;
+
+            let totalA = 0;
+            let totalB = 0;
+
+            const rowItems = ds.rows.map((r, rIdx) => {
+                const valA = r.values && r.values[0] ? parseFloat(r.values[0].val) || 0 : 0;
+                const valB = isVersus && r.values && r.values[1] ? parseFloat(r.values[1].val) || 0 : 0;
+                totalA += valA;
+                if (isVersus) totalB += valB;
+                const diff = isVersus ? (valB - valA) : 0;
+                const growth = (isVersus && valA !== 0) ? ((diff / Math.abs(valA)) * 100) : 0;
+                const colorA = r.values && r.values[0] ? r.values[0].color || '#cafc03' : '#cafc03';
+                const colorB = isVersus && r.values && r.values[1] ? r.values[1].color || '#0f172a' : '#0f172a';
+                return {
+                    rIdx,
+                    label: r.label,
+                    icon: r.icon || '📍',
+                    valA,
+                    valB,
+                    diff,
+                    growth,
+                    colorA,
+                    colorB
+                };
             });
 
             let parentTotal = 0;
             let parentLabel = 'Slide Induk';
-            if (parentSlide && parentSlide.dataSets[0]) {
+            if (parentSlide && parentSlide.dataSets && parentSlide.dataSets[0]) {
                 parentSlide.dataSets[0].rows.forEach(r => {
                     const val = r.values && r.values[0] ? parseFloat(r.values[0].val) || 0 : 0;
                     parentTotal += val;
@@ -6660,71 +6776,377 @@
                 parentLabel = parentSlide.chartTitle || `Slide ${parentIdx + 1}`;
             }
 
-            const pctOfParentTotal = parentTotal > 0 ? ((subTotal / parentTotal) * 100).toFixed(1) : '100.0';
+            const pctOfParentTotal = parentTotal > 0 ? ((totalA / parentTotal) * 100).toFixed(1) : '100.0';
+            const totalDiff = isVersus ? (totalB - totalA) : 0;
+            const totalGrowth = (isVersus && totalA !== 0) ? ((totalDiff / Math.abs(totalA)) * 100) : 0;
 
-            let rowsHTML = '';
-            ds.rows.forEach(r => {
-                const val = r.values && r.values[0] ? parseFloat(r.values[0].val) || 0 : 0;
-                const color = r.values && r.values[0] ? r.values[0].color || '#4f46e5' : '#4f46e5';
-                const pctSub = subTotal > 0 ? ((val / subTotal) * 100).toFixed(1) : '0';
-                const pctParent = parentTotal > 0 ? ((val / parentTotal) * 100).toFixed(1) : pctSub;
+            // Statistical Metrics
+            const baseVals = isVersus ? rowItems.map(x => x.valB) : rowItems.map(x => x.valA);
+            const n = baseVals.length;
+            const sum = baseVals.reduce((a, b) => a + b, 0);
+            const mean = n > 0 ? sum / n : 0;
+            const sorted = [...baseVals].sort((a, b) => a - b);
+            const median = n > 0 ? (n % 2 !== 0 ? sorted[Math.floor(n / 2)] : (sorted[n / 2 - 1] + sorted[n / 2]) / 2) : 0;
+            const variance = n > 0 ? baseVals.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0) / n : 0;
+            const stdDev = Math.sqrt(variance);
+            const maxVal = n > 0 ? sorted[sorted.length - 1] : 0;
+            const minVal = n > 0 ? sorted[0] : 0;
+            const gapRatio = minVal > 0 ? (maxVal / minVal).toFixed(1) : 'N/A';
 
-                rowsHTML += `
-                    <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs flex flex-col gap-1.5">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm">${r.icon || '📍'}</span>
-                                <span class="text-xs font-bold text-slate-800">${escapeHtml(r.label)}</span>
+            // Growth Drivers
+            const sortedByDiff = [...rowItems].sort((a, b) => b.diff - a.diff);
+            const surgingHero = sortedByDiff.length > 0 ? sortedByDiff[0] : null;
+            const laggingDrag = sortedByDiff.length > 0 ? sortedByDiff[sortedByDiff.length - 1] : null;
+
+            // Pareto 80/20 Concentration
+            const sortedByValDesc = [...rowItems].sort((a, b) => (isVersus ? b.valB - a.valB : b.valA - a.valA));
+            let cumSum = 0;
+            let paretoCount = 0;
+            sortedByValDesc.forEach(item => {
+                const v = isVersus ? item.valB : item.valA;
+                if (cumSum < sum * 0.8 || paretoCount === 0) {
+                    cumSum += v;
+                    paretoCount++;
+                }
+            });
+            const paretoPctOfItems = n > 0 ? ((paretoCount / n) * 100).toFixed(0) : '0';
+            const paretoPctOfVal = sum > 0 ? ((cumSum / sum) * 100).toFixed(1) : '0';
+
+            // Update level badge in footer
+            const badge = document.getElementById('drillDeepDiveLevelBadge');
+            if (badge) {
+                badge.innerText = `Level ${drillHistoryStack.length || 1} Deep Dive • ${ds.rows.length} Sub-Kategori`;
+            }
+
+            // TAB 1: MATRIKS RINCIAN
+            if (drillDeepDiveActiveTab === 'matrix') {
+                let rowsHTML = '';
+                rowItems.forEach(r => {
+                    const pctSubA = totalA > 0 ? ((r.valA / totalA) * 100).toFixed(1) : '0';
+                    const pctSubB = (isVersus && totalB > 0) ? ((r.valB / totalB) * 100).toFixed(1) : '0';
+                    const pctParent = parentTotal > 0 ? ((r.valA / parentTotal) * 100).toFixed(1) : pctSubA;
+                    const diffStr = (r.diff > 0 ? '+' : '') + formatChartNumber(r.diff, currentSlide);
+                    const growthStr = (r.growth > 0 ? '+' : '') + r.growth.toFixed(1) + '%';
+                    const badgeBg = r.diff > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (r.diff < 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-600 border-slate-200');
+
+                    if (isVersus) {
+                        rowsHTML += `
+                            <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 shadow-2xs flex flex-col gap-2 transition hover:border-slate-300">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-base">${r.icon}</span>
+                                        <span class="text-xs font-black text-slate-800">${escapeHtml(r.label)}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 rounded-lg text-[10px] font-black border ${badgeBg}">
+                                            ${r.diff > 0 ? '▲ ' : (r.diff < 0 ? '▼ ' : '= ')}${diffStr} (${growthStr})
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- DUAL BARS COMPARISON -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
+                                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 flex flex-col gap-1">
+                                        <div class="flex items-center justify-between text-slate-500 font-bold">
+                                            <span class="text-[9px] uppercase tracking-wider">${escapeHtml(sNameA)}</span>
+                                            <span class="font-mono text-slate-800">${formatChartNumber(r.valA)} (${pctSubA}%)</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200/70 rounded-full h-1.5 overflow-hidden">
+                                            <div class="h-full rounded-full transition-all duration-300" style="width: ${pctSubA}%; background-color: ${r.colorA};"></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 flex flex-col gap-1">
+                                        <div class="flex items-center justify-between text-slate-500 font-bold">
+                                            <span class="text-[9px] uppercase tracking-wider">${escapeHtml(sNameB)}</span>
+                                            <span class="font-mono text-slate-900 font-black">${formatChartNumber(r.valB)} (${pctSubB}%)</span>
+                                        </div>
+                                        <div class="w-full bg-slate-200/70 rounded-full h-1.5 overflow-hidden">
+                                            <div class="h-full rounded-full transition-all duration-300" style="width: ${pctSubB}%; background-color: ${r.colorB};"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between text-[9px] text-slate-400 pt-0.5">
+                                    <span>Porsi Periode A: <b>${pctSubA}%</b> → Periode B: <b>${pctSubB}%</b></span>
+                                    <span>Kontribusi ke Portofolio Induk: <b>${pctParent}%</b></span>
+                                </div>
                             </div>
-                            <div class="text-right">
-                                <span class="text-xs font-mono font-bold text-slate-900">${formatChartNumber(val)}</span>
-                                <span class="text-[10px] font-mono text-slate-400 ml-1">(${pctSub}%)</span>
+                        `;
+                    } else {
+                        rowsHTML += `
+                            <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs flex flex-col gap-1.5">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm">${r.icon}</span>
+                                        <span class="text-xs font-bold text-slate-800">${escapeHtml(r.label)}</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="text-xs font-mono font-bold text-slate-900">${formatChartNumber(r.valA)}</span>
+                                        <span class="text-[10px] font-mono text-slate-400 ml-1">(${pctSubA}%)</span>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-300" style="width: ${pctSubA}%; background-color: ${r.colorA};"></div>
+                                </div>
+                                <div class="flex items-center justify-between text-[9px] text-slate-400 pt-0.5">
+                                    <span>Porsi di Sub-Level: <b>${pctSubA}%</b></span>
+                                    <span>Kontribusi ke Portofolio Utama: <b>${pctParent}%</b></span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                container.innerHTML = `
+                    <!-- SUMMARY BADGES -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">SLIDE SAAT INI</span>
+                            <span class="text-xs font-black text-indigo-700 truncate block mt-0.5">${escapeHtml(currentSlide.chartTitle || 'Sub-Breakdown')}</span>
+                            <span class="text-[10px] font-mono text-slate-500">${ds.rows.length} Sub-Kategori</span>
+                        </div>
+
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">TOTAL SUB-LEVEL</span>
+                            <span class="text-xs font-black text-slate-900 block mt-0.5">${isVersus ? `${formatChartNumber(totalA)} vs ${formatChartNumber(totalB)}` : `${formatChartNumber(totalA)} unit`}</span>
+                            <span class="text-[10px] ${totalDiff >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-bold">
+                                ${isVersus ? `Δ ${totalDiff >= 0 ? '+' : ''}${formatChartNumber(totalDiff)} (${totalGrowth >= 0 ? '+' : ''}${totalGrowth.toFixed(1)}%)` : `${pctOfParentTotal}% dari total induk`}
+                            </span>
+                        </div>
+
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs">
+                            <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">HIERARKI ANCESTOR</span>
+                            <span class="text-xs font-black text-slate-800 truncate block mt-0.5">${escapeHtml(parentLabel)}</span>
+                            <span class="text-[10px] font-mono text-indigo-600 font-bold">Level ${drillHistoryStack.length || 1} Deep Dive</span>
+                        </div>
+                    </div>
+
+                    <!-- SUB-CATEGORY MATRIX LIST -->
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between px-1">
+                            <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="ph-bold ph-list-numbers text-indigo-600"></i> Matriks Rincian Sub-Kategori
+                            </label>
+                            <span class="text-[9px] font-mono text-slate-400 font-bold">
+                                ${isVersus ? `Komparasi 2 Periode Berdampingan` : `Total: ${formatChartNumber(totalA)}`}
+                            </span>
+                        </div>
+                        ${rowsHTML}
+                    </div>
+                `;
+            }
+
+            // TAB 2: KIT ANALISA DATA SCIENCE
+            else if (drillDeepDiveActiveTab === 'analysis') {
+                container.innerHTML = `
+                    <div class="bg-gradient-to-r from-indigo-50/80 via-white to-purple-50/80 border border-indigo-100 rounded-2xl p-3.5 shadow-2xs flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-xl bg-indigo-600 text-[#cafc03] flex items-center justify-center font-black text-sm shrink-0">🔬</div>
+                            <div>
+                                <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Kit Analisa Data Science: Diagnostik Sub-Kategori</h4>
+                                <p class="text-[10px] text-slate-500">Evaluasi penggerak pertumbuhan, rasio konsentrasi Pareto 80/20, dispersi statistik & deteksi anomali.</p>
                             </div>
                         </div>
-                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                            <div class="h-full rounded-full transition-all duration-300" style="width: ${pctSub}%; background-color: ${color};"></div>
+                        <span class="text-[9px] font-mono bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold shrink-0">
+                            ${ds.rows.length} Data Points
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- CARD 1: GROWTH DRIVERS & DRAG -->
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="ph-bold ph-trend-up text-emerald-600"></i> Penggerak &amp; Hambatan (Drivers)
+                                    </span>
+                                    <span class="text-[9px] font-mono text-slate-400">Δ Performa</span>
+                                </div>
+                                ${isVersus ? `
+                                    <div class="space-y-2 mt-2">
+                                        <div class="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                                            <div class="flex items-center justify-between text-xs font-bold text-emerald-900">
+                                                <span>🚀 Surging Hero (Pendorong Terkuat)</span>
+                                                <span class="font-mono font-black">+${formatChartNumber(surgingHero.diff)} (+${surgingHero.growth.toFixed(1)}%)</span>
+                                            </div>
+                                            <p class="text-[10px] text-emerald-700 mt-0.5"><b>${escapeHtml(surgingHero.label)}</b> mencatatkan akselerasi tertinggi di antara seluruh sub-kategori.</p>
+                                        </div>
+                                        <div class="p-2.5 rounded-xl bg-rose-50/70 border border-rose-100">
+                                            <div class="flex items-center justify-between text-xs font-bold text-rose-900">
+                                                <span>🔻 Lagging Drag (Penghambat / Penurunan)</span>
+                                                <span class="font-mono font-black">${formatChartNumber(laggingDrag.diff)} (${laggingDrag.growth.toFixed(1)}%)</span>
+                                            </div>
+                                            <p class="text-[10px] text-rose-700 mt-0.5"><b>${escapeHtml(laggingDrag.label)}</b> mengalami tekanan performa paling tajam.</p>
+                                        </div>
+                                    </div>
+                                ` : `
+                                    <div class="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-100 mt-2">
+                                        <div class="flex items-center justify-between text-xs font-bold text-indigo-900">
+                                            <span>👑 Top Contributor (MVP)</span>
+                                            <span class="font-mono font-black">${formatChartNumber(sortedByValDesc[0]?.valA)}</span>
+                                        </div>
+                                        <p class="text-[10px] text-indigo-700 mt-0.5"><b>${escapeHtml(sortedByValDesc[0]?.label)}</b> memimpin kontribusi portofolio.</p>
+                                    </div>
+                                `}
+                            </div>
                         </div>
-                        <div class="flex items-center justify-between text-[9px] text-slate-400 pt-0.5">
-                            <span>Porsi di Sub-Level: <b>${pctSub}%</b></span>
-                            <span>Kontribusi ke Portofolio Utama: <b>${pctParent}%</b></span>
+
+                        <!-- CARD 2: PARETO 80/20 -->
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="ph-bold ph-chart-pie-slice text-indigo-600"></i> Konsentrasi Pareto 80/20
+                                    </span>
+                                    <span class="text-[9px] font-mono text-indigo-600 font-bold">${paretoPctOfVal}% Total</span>
+                                </div>
+                                <div class="mt-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div class="text-xs font-bold text-slate-800">
+                                        <span class="text-indigo-600 font-black">${paretoCount} dari ${n} Kategori (${paretoPctOfItems}%)</span> menguasai ${paretoPctOfVal}% volume
+                                    </div>
+                                    <div class="w-full bg-slate-200 rounded-full h-2 my-2 overflow-hidden">
+                                        <div class="h-full bg-indigo-600 rounded-full" style="width: ${paretoPctOfVal}%;"></div>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 leading-relaxed">
+                                        Kategori pilar: <b>${escapeHtml(sortedByValDesc.slice(0, paretoCount).map(x => x.label).join(', '))}</b>. Fokuskan energi perbaikan pada pilar-pilar ini.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CARD 3: STATISTIK DESKRIPTIF -->
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs">
+                            <span class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5 mb-2.5">
+                                <i class="ph-bold ph-calculator text-amber-600"></i> Metrik Dispersi &amp; Statistik
+                            </span>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase block">RATA-RATA (MEAN)</span>
+                                    <span class="font-mono font-black text-slate-800 text-sm mt-0.5 block">${formatChartNumber(mean, currentSlide)}</span>
+                                </div>
+                                <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase block">MEDIAN (TENGAH)</span>
+                                    <span class="font-mono font-black text-slate-800 text-sm mt-0.5 block">${formatChartNumber(median, currentSlide)}</span>
+                                </div>
+                                <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase block">STD DEV (VARIABILITAS)</span>
+                                    <span class="font-mono font-black text-slate-800 text-sm mt-0.5 block">±${formatChartNumber(stdDev, currentSlide)}</span>
+                                </div>
+                                <div class="p-2 rounded-xl bg-slate-50 border border-slate-100">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase block">GAP MAX / MIN</span>
+                                    <span class="font-mono font-black text-slate-800 text-sm mt-0.5 block">${gapRatio}x <span class="text-[9px] font-normal text-slate-400">(${formatChartNumber(maxVal)} vs ${formatChartNumber(minVal)})</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CARD 4: DETEKSI ANOMALI & TAKTIS -->
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                                    <i class="ph-bold ph-shield-check text-indigo-600"></i> Diagnostik &amp; Anomali
+                                </span>
+                                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                                    ${stdDev > 0 && Math.abs(maxVal - mean) / stdDev >= 1.5 ? `
+                                        <div class="text-rose-700 font-bold flex items-center gap-1">
+                                            <i class="ph-bold ph-warning-circle"></i> Terdeteksi Outlier Unggul
+                                        </div>
+                                        <p class="text-[10px] text-slate-600 mt-1">Kategori <b>${escapeHtml(sortedByValDesc[0]?.label)}</b> menunjukkan performa di atas 1.5σ standar deviasi.</p>
+                                    ` : `
+                                        <div class="text-emerald-700 font-bold flex items-center gap-1">
+                                            <i class="ph-bold ph-check-circle"></i> Distribusi Normal &amp; Seimbang
+                                        </div>
+                                        <p class="text-[10px] text-slate-600 mt-1">Tidak ada lonjakan deviasi ekstrem pada sub-level ini. Variasi antar item relatif wajar.</p>
+                                    `}
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <button type="button" onclick="openPivotAnalysisFromDeepDive()"
+                                    class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                                    <i class="ph-bold ph-chart-polar"></i> <span>Buka Full Tools Analisa Pivot Studio</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
-            });
+            }
 
-            container.innerHTML = `
-                <!-- SUMMARY BADGES -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                    <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">SLIDE SAAT INI</span>
-                        <span class="text-xs font-black text-indigo-700 truncate block mt-0.5">${escapeHtml(currentSlide.chartTitle || 'Sub-Breakdown')}</span>
-                        <span class="text-[10px] font-mono text-slate-500">${ds.rows.length} Sub-Kategori</span>
-                    </div>
+            // TAB 3: EXECUTIVE INSIGHT & SUMMARY
+            else if (drillDeepDiveActiveTab === 'summary') {
+                const narrative = `📊 EXECUTIVE INSIGHT: ${currentSlide.chartTitle || 'Sub-Breakdown'}
+• Portofolio Sub-Level: Terdapat ${ds.rows.length} sub-kategori aktif dengan total akumulasi ${isVersus ? `${formatChartNumber(totalA)} → ${formatChartNumber(totalB)} unit` : `${formatChartNumber(totalA)} unit`}.
+${isVersus ? `• Dinamika Pertumbuhan: Pertumbuhan agregat sebesar ${totalDiff >= 0 ? '+' : ''}${formatChartNumber(totalDiff)} (${totalGrowth >= 0 ? '+' : ''}${totalGrowth.toFixed(1)}%). Sub-kategori dengan kenaikan tertinggi adalah ${surgingHero.label} (${surgingHero.diff >= 0 ? '+' : ''}${formatChartNumber(surgingHero.diff)} | +${surgingHero.growth.toFixed(1)}%), sedangkan tekanan penurunan terdalam dialami oleh ${laggingDrag.label} (${formatChartNumber(laggingDrag.diff)}).` : `• Pemimpin Portofolio: Kategori ${sortedByValDesc[0]?.label} menyumbang kontribusi terbesar.`}
+• Konsentrasi Pareto: ${paretoCount} dari ${n} kategori (${paretoPctOfItems}%) menguasai ${paretoPctOfVal}% dari total volume sub-level.
+• Variabilitas Data: Nilai rata-rata sebesar ${formatChartNumber(mean)}, dengan deviasi standar ±${formatChartNumber(stdDev)} dan rentang rasio max/min sebesar ${gapRatio}x.
+• Rekomendasi: Pertahankan momentum pada ${escapeHtml(surgingHero ? surgingHero.label : sortedByValDesc[0]?.label)} dan evaluasi strategi alokasi jam tayang pada kategori bervolume rendah.`;
 
-                    <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">TOTAL SUB-LEVEL</span>
-                        <span class="text-xs font-black text-slate-900 block mt-0.5">${formatChartNumber(subTotal)} unit</span>
-                        <span class="text-[10px] text-slate-500">${pctOfParentTotal}% dari total induk</span>
-                    </div>
+                window.__lastDrillDeepDiveNarrative = narrative;
 
-                    <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs">
-                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider block">HIERARKI ANCESTOR</span>
-                        <span class="text-xs font-black text-slate-800 truncate block mt-0.5">${escapeHtml(parentLabel)}</span>
-                        <span class="text-[10px] font-mono text-emerald-600">Level ${drillHistoryStack.length} Deep Dive</span>
-                    </div>
-                </div>
+                container.innerHTML = `
+                    <div class="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-black text-sm">💡</span>
+                                <div>
+                                    <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">Narasi Eksekutif &amp; Ringkasan Rapat</h4>
+                                    <p class="text-[10px] text-slate-400">Dihasilkan otomatis secara berbasis data untuk bahan presentasi atau laporan.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="copyDrillAnalysisNarrative()"
+                                    class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+                                    <i class="ph-bold ph-copy text-xs"></i> <span>Salin Narasi</span>
+                                </button>
+                                <button type="button" onclick="pinDrillAnalysisToNotes()"
+                                    class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                                    <i class="ph-bold ph-note-pencil text-xs"></i> <span>Sematkan ke Catatan Slide</span>
+                                </button>
+                            </div>
+                        </div>
 
-                <!-- SUB-CATEGORY MATRIX LIST -->
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between px-1">
-                        <label class="text-[10px] font-black text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="ph-bold ph-list-numbers text-indigo-600"></i> Matriks Rincian Sub-Kategori
-                        </label>
-                        <span class="text-[9px] font-mono text-slate-400">Total: ${formatChartNumber(subTotal)}</span>
+                        <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 font-mono text-[11px] text-slate-700 leading-relaxed whitespace-pre-line custom-scrollbar max-h-[380px] overflow-y-auto select-all">
+${escapeHtml(narrative)}
+                        </div>
                     </div>
-                    ${rowsHTML}
-                </div>
-            `;
+                `;
+            }
+        }
+
+        function copyDrillAnalysisNarrative() {
+            if (window.__lastDrillDeepDiveNarrative) {
+                navigator.clipboard.writeText(window.__lastDrillDeepDiveNarrative).then(() => {
+                    showToast("Narasi analisa berhasil disalin ke clipboard!");
+                }).catch(() => {
+                    showToast("Gagal menyalin narasi.", true);
+                });
+            }
+        }
+
+        function pinDrillAnalysisToNotes() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            if (!slide.notes) slide.notes = [];
+            if (!window.__lastDrillDeepDiveNarrative) return;
+
+            const newNote = {
+                id: 'note_' + Date.now(),
+                text: window.__lastDrillDeepDiveNarrative.replace(/\n/g, '<br>'),
+                x: 10,
+                y: 10,
+                color: '#1e293b',
+                fontSize: 12,
+                rotation: 0,
+                isCollapsed: false,
+                bgType: 'solid',
+                bgColor: '#ffffff',
+                bgOpacity: 95
+            };
+            slide.notes.push(newNote);
+            activeNoteId = newNote.id;
+            syncNoteController();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            closeDrillDeepDiveModal();
+            showToast("Insight berhasil disematkan sebagai Catatan di Slide!");
         }
 
         // --- POINT 2: MULTI-SLIDE PRESENTATION PDF EXPORTER ENGINE ---
@@ -8853,7 +9275,27 @@
         if (els.toggleSubtitle) els.toggleSubtitle.addEventListener('change', (e) => syncAndRender('showSubtitle', e.target.checked));
         if (els.toggleWatermark) els.toggleWatermark.addEventListener('change', (e) => syncAndRender('showWatermark', e.target.checked));
         if (els.bentoLayout) els.bentoLayout.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.bentoLayout = e.target.value; if (e.target.value === '1') activeEditGridIndex = 0; if ((e.target.value === '2-h' || e.target.value === '2-v') && activeEditGridIndex > 1) activeEditGridIndex = 0; syncUIToActiveSlide(); triggerVisUpdateWithDebounce(); saveState(); });[els.bentoChart1, els.bentoChart2, els.bentoChart3].forEach((el, index) => { if (el) el.addEventListener('change', (e) => { getActiveSlide().bentoCharts[index] = e.target.value; forceRecolor(getActiveSlide().colorTheme, getActiveSlide()); syncUIToActiveSlide(); triggerVisUpdateWithDebounce(); saveState(); }); });
-        if (els.colorTheme) els.colorTheme.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.colorTheme = e.target.value; forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide(); triggerVisUpdateWithDebounce(); saveState(); }); if (els.stackMode) els.stackMode.addEventListener('change', (e) => syncAndRender('stackMode', e.target.value));
+        if (els.colorTheme) els.colorTheme.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.colorTheme = e.target.value; forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide(); triggerVisUpdateWithDebounce(); saveState(); });
+        if (els.stackMode) els.stackMode.addEventListener('change', (e) => {
+            const slide = getActiveSlide();
+            slide.stackMode = e.target.value;
+            if (slide.stackMode === 'grouped') {
+                const ds = getActiveDataSet();
+                if (ds && ds.series) {
+                    ds.series.forEach((s, idx) => {
+                        if (idx > 0 && s.type === 'line' && s.axis === 'y2') {
+                            s.type = 'auto';
+                            s.axis = 'y';
+                            s.zIndex = 'back';
+                        }
+                    });
+                }
+            }
+            syncUIToActiveSlide();
+            renderMultiLayerEngine();
+            triggerVisUpdateWithDebounce();
+            saveState();
+        });
 
         const sliderBinds = [
             { el: els.chartScale, input: document.getElementById('chartScaleInput'), prop: 'chartScale', disp: els.chartScaleDisplay, unit: '%' },
@@ -10214,7 +10656,11 @@
                     }
                 };
             }
-            if (!isRadial && !isTreemap) { chartOptions.barPercentage = isTape ? 1 : slide.chartThickness / 100; chartOptions.categoryPercentage = isTape ? 1 : 0.8; }
+            if (!isRadial && !isTreemap) {
+                const thickness = (typeof slide.chartThickness === 'number' && !isNaN(slide.chartThickness) && slide.chartThickness > 0) ? slide.chartThickness : 100;
+                chartOptions.barPercentage = isTape ? 1 : (thickness / 100);
+                chartOptions.categoryPercentage = isTape ? 1 : 0.8;
+            }
             return { datasets, labels, chartOptions, globalBaseType };
         }
 
@@ -10317,7 +10763,7 @@
                         const div = document.createElement('div');
                         div.className = `flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-xl border ${isMvp ? 'border-amber-300 bg-amber-50/40' : (hasDrill ? 'border-indigo-300 cursor-pointer hover:bg-indigo-50' : 'border-slate-100')} shadow-sm whitespace-nowrap shrink-0 transition-transform hover:scale-105`;
                         if (hasDrill) div.onclick = () => drillDownTo(r.drillTarget);
-                        div.innerHTML = `${isMvp ? '<span class="text-[10px]" title="Top Metric (MVP)">👑</span>' : `<div class="w-2 h-2 rounded-full" style="background-color: ${color}"></div>`}<span class="text-[10px] font-bold text-slate-700">${r.icon} ${r.label}</span><span class="text-[10px] font-black font-mono-tech text-slate-900 ml-0.5">${pctStr}%</span>${hasDrill ? '<i class="ph-bold ph-arrow-up-right text-indigo-600 text-[10px]"></i>' : ''}`;
+                        div.innerHTML = `${isMvp ? '<span class="text-[10px]" title="Top Metric (MVP)">👑</span>' : `<div class="w-2 h-2 rounded-full" style="background-color: ${color}"></div>`}<span class="text-[10px] font-bold text-slate-700">${(r.icon ? (r.icon + ' ') : '')}${r.label}</span><span class="text-[10px] font-black font-mono-tech text-slate-900 ml-0.5">${pctStr}%</span>${hasDrill ? '<i class="ph-bold ph-arrow-up-right text-indigo-600 text-[10px]"></i>' : ''}`;
                         els.percentageContainer.appendChild(div);
                     });
                 }
@@ -11657,8 +12103,583 @@
             fieldSearch: '',
             collapsedRows: {},            // Collapsed parent rows in tree view
             rawStartRow: 2,
-            rawEndRow: 100
+            rawEndRow: 100,
+            selectedRowKeys: new Set(),   // Set of selected rowIds in table
+            lastSelectedRowId: null
         };
+
+        // Table Rows Registry for Selection & Right-Click Context Actions
+        let pivotStudioTableRowsRegistry = new Map();
+
+        
+        // =========================================================================
+        // PIVOT STUDIO PERSISTENCE ENGINE (INDEXEDDB + LOCALSTORAGE DUAL LAYER)
+        // Menjamin posisi, file upload, dan konfigurasi pivot tidak hilang saat refresh
+        // =========================================================================
+        const PivotStudioStorage = {
+            DB_NAME: 'ProChart_Vision_DB',
+            DB_VERSION: 1,
+            SESSION_KEY: 'active_pivot_studio_session',
+            SYNC_FLAG_KEY: 'ProChart_Pivot_Session_Status',
+            FAST_WB_KEY: 'ProChart_Pivot_Fast_Workbook',
+            _db: null,
+            _saveTimer: null,
+
+            async getDB() {
+                if (this._db) return this._db;
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains('sessions')) {
+                            db.createObjectStore('sessions', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('workbooks')) {
+                            db.createObjectStore('workbooks', { keyPath: 'fileName' });
+                        }
+                    };
+                    req.onsuccess = (e) => {
+                        this._db = e.target.result;
+                        resolve(this._db);
+                    };
+                    req.onerror = (e) => {
+                        console.error('[PivotStudioStorage] IndexedDB error:', e);
+                        reject(e);
+                    };
+                });
+            },
+
+            serializeState(state) {
+                if (!state) return {};
+                return {
+                    filterColIdx: state.filterColIdx,
+                    filterSelectedValues: Array.from(state.filterSelectedValues || []),
+                    filter2ColIdx: state.filter2ColIdx,
+                    filter2SelectedValues: Array.from(state.filter2SelectedValues || []),
+                    periodColIdx: state.periodColIdx,
+                    unselectedExportColumns: Array.from(state.unselectedExportColumns || []),
+                    timeGranularity: state.timeGranularity || 'raw',
+                    periodComparison: state.periodComparison ? {
+                        ...state.periodComparison,
+                        valuesA: Array.from(state.periodComparison.valuesA || []),
+                        valuesB: Array.from(state.periodComparison.valuesB || [])
+                    } : null,
+                    row1ColIdx: state.row1ColIdx,
+                    row2ColIdx: state.row2ColIdx,
+                    colColIdx: state.colColIdx,
+                    val1ColIdx: state.val1ColIdx,
+                    val1Agg: state.val1Agg,
+                    val2ColIdx: state.val2ColIdx,
+                    val2Agg: state.val2Agg,
+                    sortOrder: state.sortOrder,
+                    tableSortCol: state.tableSortCol,
+                    tableSortDir: state.tableSortDir,
+                    showDelta: !!state.showDelta,
+                    showAverage: !!state.showAverage,
+                    topN: state.topN || 'all',
+                    includeOthersRow: !!state.includeOthersRow,
+                    rawViewLimit: state.rawViewLimit || '100',
+                    rawSearchQuery: state.rawSearchQuery || '',
+                    autoDrill: state.autoDrill !== false,
+                    dualAxis: state.dualAxis !== false,
+                    activeKit: state.activeKit || 'pivot',
+                    fieldSearch: state.fieldSearch || '',
+                    tableSearch: state.tableSearch || '',
+                    rawStartRow: state.rawStartRow || 2,
+                    rawEndRow: state.rawEndRow || 100,
+                    selectedRowKeys: Array.from(state.selectedRowKeys || []),
+                    lastSelectedRowId: state.lastSelectedRowId || null
+                };
+            },
+
+            deserializeState(saved) {
+                if (!saved) return;
+                Object.keys(saved).forEach(k => {
+                    if (k === 'filterSelectedValues' || k === 'filter2SelectedValues' || k === 'unselectedExportColumns' || k === 'selectedRowKeys') {
+                        pivotStudioState[k] = new Set(Array.isArray(saved[k]) ? saved[k] : []);
+                    } else if (k === 'periodComparison' && saved[k]) {
+                        pivotStudioState[k] = {
+                            ...saved[k],
+                            valuesA: new Set(Array.isArray(saved[k].valuesA) ? saved[k].valuesA : []),
+                            valuesB: new Set(Array.isArray(saved[k].valuesB) ? saved[k].valuesB : [])
+                        };
+                    } else {
+                        pivotStudioState[k] = saved[k];
+                    }
+                });
+            },
+
+            workbookToBase64(wb) {
+                try {
+                    if (wb._rawBase64) return wb._rawBase64;
+                    if (wb._rawArrayBuffer) {
+                        const bytes = new Uint8Array(wb._rawArrayBuffer);
+                        let binary = '';
+                        for (let i = 0; i < bytes.byteLength; i++) {
+                            binary += String.fromCharCode(bytes[i]);
+                        }
+                        const b64 = btoa(binary);
+                        wb._rawBase64 = b64;
+                        return b64;
+                    }
+                    const b64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+                    wb._rawBase64 = b64;
+                    return b64;
+                } catch (e) {
+                    console.warn('[PivotStudioStorage] Could not encode workbook to base64:', e);
+                    return null;
+                }
+            },
+
+            base64ToWorkbook(b64) {
+                try {
+                    const wb = XLSX.read(b64, { type: 'base64' });
+                    wb._rawBase64 = b64;
+                    return wb;
+                } catch (e) {
+                    console.error('[PivotStudioStorage] Could not parse workbook from base64:', e);
+                    return null;
+                }
+            },
+
+            saveSessionDebounced(isOpen) {
+                if (this._saveTimer) clearTimeout(this._saveTimer);
+                this._saveTimer = setTimeout(() => {
+                    this.saveSession(isOpen);
+                }, 80);
+            },
+
+            restoreSessionSyncFast() {
+                try {
+                    const syncStatusRaw = localStorage.getItem(this.SYNC_FLAG_KEY);
+                    if (!syncStatusRaw) return false;
+                    let syncStatus;
+                    try { syncStatus = JSON.parse(syncStatusRaw); } catch(e) { return false; }
+                    if (!syncStatus || !syncStatus.isOpen) return false;
+
+                    console.log('⚡ [PivotStudioStorage] Restoring fast sync for:', syncStatus.fileName);
+
+                    let restoredWb = null;
+                    let restoredFileName = syncStatus.fileName || 'Data Workbench Saat Ini';
+                    let restoredSheetName = syncStatus.sheetName || 'Workbench_Active';
+
+                    // 1. Try fast workbook from localStorage
+                    const fastWbRaw = localStorage.getItem(this.FAST_WB_KEY);
+                    if (fastWbRaw) {
+                        try {
+                            const parsedFast = JSON.parse(fastWbRaw);
+                            if (parsedFast && parsedFast.wbBase64) {
+                                restoredWb = this.base64ToWorkbook(parsedFast.wbBase64);
+                                restoredFileName = parsedFast.fileName || restoredFileName;
+                                restoredSheetName = parsedFast.sheetName || restoredSheetName;
+                            }
+                        } catch(e) {}
+                    }
+
+                    // 2. Fallback: If "Data Workbench Saat Ini" or slide data, construct from active dataset
+                    if (!restoredWb) {
+                        const ds = (typeof getActiveDataSet === 'function') ? getActiveDataSet() : null;
+                        if (ds && ds.rows && ds.rows.length > 0) {
+                            const headers = ['Kategori', ...ds.series.map(s => cleanHeaderName(s.name))];
+                            const aoa = [headers];
+                            ds.rows.forEach(r => {
+                                const row = [(r.icon ? (r.icon + ' ') : '') + (r.label || '')];
+                                ds.series.forEach((s, sIdx) => {
+                                    row.push(r.values[sIdx]?.val ?? '');
+                                });
+                                aoa.push(row);
+                            });
+                            const ws = XLSX.utils.aoa_to_sheet(aoa);
+                            restoredWb = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(restoredWb, ws, restoredSheetName || "Workbench_Active");
+                        }
+                    }
+
+                    if (!restoredWb) return false;
+
+                    // 3. Restore state
+                    if (syncStatus.state) {
+                        this.deserializeState(syncStatus.state);
+                    }
+
+                    currentImportWorkbook = restoredWb;
+                    currentImportFileName = restoredFileName;
+                    currentActiveSheetName = (restoredSheetName && restoredWb.Sheets[restoredSheetName]) ? restoredSheetName : restoredWb.SheetNames[0];
+
+                    // 4. Open modal with preserveState = true
+                    openRawImportModal(restoredWb, restoredFileName, true);
+
+                    // Re-apply header row
+                    if (syncStatus.headerRow) {
+                        const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+                        if (pHeaderInput) pHeaderInput.value = syncStatus.headerRow;
+                    }
+
+                    // Switch to activeKit tab if not pivot
+                    if (syncStatus.activeKit && syncStatus.activeKit !== 'pivot') {
+                        switchStudioKit(syncStatus.activeKit);
+                    }
+
+                    // Synchronize UI dropdowns with restored state
+                    const sortSel = document.getElementById('pivotSortSelect');
+                    if (sortSel && pivotStudioState.sortOrder) sortSel.value = pivotStudioState.sortOrder;
+                    const topNSel = document.getElementById('pivotTopNSelect');
+                    if (topNSel && pivotStudioState.topN) topNSel.value = pivotStudioState.topN;
+                    const othersToggle = document.getElementById('pivotIncludeOthersToggle');
+                    if (othersToggle) othersToggle.checked = !!pivotStudioState.includeOthersRow;
+                    const autoDrillToggle = document.getElementById('pivotAutoDrillToggle');
+                    if (autoDrillToggle) autoDrillToggle.checked = !!pivotStudioState.autoDrill;
+                    const dualAxisToggle = document.getElementById('pivotDualAxisToggle');
+                    if (dualAxisToggle) dualAxisToggle.checked = !!pivotStudioState.dualAxis;
+
+                    // Ensure modal has visible classes immediately
+                    const modal = document.getElementById('rawImportModal');
+                    if (modal) {
+                        modal.classList.remove('hidden', 'opacity-0');
+                        modal.classList.add('flex');
+                        document.getElementById('rawImportModalContent')?.classList.remove('scale-95');
+                    }
+
+                    // Run computation & render
+                    runStudioPivotComputation();
+
+                    // Remove temporary pre-render class
+                    document.documentElement.classList.remove('pivot-studio-reopening');
+
+                    console.log('⚡ [PivotStudioStorage] Restored zero-glitch synchronously!');
+                    return true;
+                } catch(e) {
+                    console.warn('[PivotStudioStorage] restoreSessionSyncFast error:', e);
+                    return false;
+                }
+            },
+
+            async syncBackgroundLibrary() {
+                try {
+                    const db = await this.getDB();
+                    const allWbs = await new Promise((resolve) => {
+                        const tx = db.transaction('workbooks', 'readonly');
+                        const req = tx.objectStore('workbooks').getAll();
+                        req.onsuccess = () => resolve(req.result || []);
+                        req.onerror = () => resolve([]);
+                    });
+                    if (allWbs && allWbs.length > 0 && typeof sessionWorkbookLibrary !== 'undefined') {
+                        allWbs.forEach(rec => {
+                            if (rec && rec.fileName && rec.workbookBase64 && !sessionWorkbookLibrary.has(rec.fileName)) {
+                                const libWb = this.base64ToWorkbook(rec.workbookBase64);
+                                if (libWb) {
+                                    sessionWorkbookLibrary.set(rec.fileName, {
+                                        workbook: libWb,
+                                        fileName: rec.fileName,
+                                        sheetNames: rec.sheetNames || libWb.SheetNames || [],
+                                        timestamp: rec.timestamp || Date.now()
+                                    });
+                                }
+                            }
+                        });
+                        if (typeof renderPivotSourceFileDropdown === 'function') {
+                            renderPivotSourceFileDropdown();
+                        }
+                    }
+                } catch(e) {}
+            },
+
+            saveSessionSync(isOpen) {
+                try {
+                    const sessionStatus = {
+                        isOpen: !!isOpen,
+                        fileName: currentImportFileName || '',
+                        sheetName: currentActiveSheetName || '',
+                        activeKit: (pivotStudioState && pivotStudioState.activeKit) || 'pivot',
+                        headerRow: parseInt(document.getElementById('pivotHeaderRowInput')?.value) || 1,
+                        state: this.serializeState(pivotStudioState),
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem(this.SYNC_FLAG_KEY, JSON.stringify(sessionStatus));
+
+                    if (isOpen && currentImportWorkbook && currentImportFileName) {
+                        const wbBase64 = this.workbookToBase64(currentImportWorkbook);
+                        if (wbBase64 && wbBase64.length < 2500000) {
+                            try {
+                                localStorage.setItem(this.FAST_WB_KEY, JSON.stringify({
+                                    fileName: currentImportFileName,
+                                    sheetName: currentActiveSheetName,
+                                    wbBase64: wbBase64,
+                                    timestamp: Date.now()
+                                }));
+                            } catch(e) {}
+                        }
+                    } else if (!isOpen) {
+                        localStorage.removeItem(this.FAST_WB_KEY);
+                        document.documentElement.classList.remove('pivot-studio-reopening');
+                    }
+                } catch (e) {
+                    console.warn('[PivotStudioStorage] saveSessionSync warning:', e);
+                }
+            },
+
+            async saveSession(isOpen) {
+                try {
+                    this.saveSessionSync(isOpen);
+
+                    const db = await this.getDB();
+                    if (!isOpen) {
+                        const tx = db.transaction('sessions', 'readwrite');
+                        tx.objectStore('sessions').put({
+                            id: this.SESSION_KEY,
+                            isOpen: false,
+                            timestamp: Date.now()
+                        });
+                        return;
+                    }
+
+                    let wbBase64 = null;
+                    let sheetsAoA = null;
+                    if (currentImportWorkbook) {
+                        wbBase64 = this.workbookToBase64(currentImportWorkbook);
+                        if (currentActiveSheetName && currentImportWorkbook.Sheets[currentActiveSheetName]) {
+                            sheetsAoA = XLSX.utils.sheet_to_json(currentImportWorkbook.Sheets[currentActiveSheetName], { header: 1, defval: '' });
+                        }
+                    }
+
+                    const headerRowInput = document.getElementById('pivotHeaderRowInput');
+                    const sessionData = {
+                        id: this.SESSION_KEY,
+                        isOpen: true,
+                        fileName: currentImportFileName,
+                        sheetName: currentActiveSheetName,
+                        activeKit: (pivotStudioState && pivotStudioState.activeKit) || 'pivot',
+                        headerRow: headerRowInput ? (parseInt(headerRowInput.value) || 1) : 1,
+                        state: this.serializeState(pivotStudioState),
+                        timestamp: Date.now()
+                    };
+
+                    const tx = db.transaction(['sessions', 'workbooks'], 'readwrite');
+                    tx.objectStore('sessions').put(sessionData);
+
+                    if (currentImportWorkbook && currentImportFileName) {
+                        tx.objectStore('workbooks').put({
+                            fileName: currentImportFileName,
+                            sheetNames: currentImportWorkbook.SheetNames || [],
+                            workbookBase64: wbBase64,
+                            sheetsAoA: sheetsAoA,
+                            timestamp: Date.now()
+                        });
+                    }
+
+                    // Also save any other workbooks in sessionWorkbookLibrary
+                    if (typeof sessionWorkbookLibrary !== 'undefined' && sessionWorkbookLibrary.size > 0) {
+                        sessionWorkbookLibrary.forEach((entry, fName) => {
+                            if (fName !== currentImportFileName && entry && entry.workbook) {
+                                const b64 = this.workbookToBase64(entry.workbook);
+                                if (b64) {
+                                    tx.objectStore('workbooks').put({
+                                        fileName: fName,
+                                        sheetNames: entry.workbook.SheetNames || [],
+                                        workbookBase64: b64,
+                                        timestamp: entry.timestamp || Date.now()
+                                    });
+                                }
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('[PivotStudioStorage] saveSession error:', e);
+                }
+            },
+
+            async restoreSession() {
+                try {
+                    const syncStatusRaw = localStorage.getItem(this.SYNC_FLAG_KEY);
+                    if (!syncStatusRaw) return false;
+                    let syncStatus;
+                    try { syncStatus = JSON.parse(syncStatusRaw); } catch(e) { return false; }
+                    if (!syncStatus || !syncStatus.isOpen) return false;
+
+                    console.log('🔄 [PivotStudioStorage] Restoring active Pivot Studio session for:', syncStatus.fileName);
+
+                    let restoredWb = null;
+                    let restoredFileName = syncStatus.fileName;
+                    let restoredSheetName = syncStatus.sheetName;
+
+                    // Fast restore check from localStorage
+                    const fastWbRaw = localStorage.getItem(this.FAST_WB_KEY);
+                    if (fastWbRaw) {
+                        try {
+                            const parsedFast = JSON.parse(fastWbRaw);
+                            if (parsedFast && parsedFast.fileName === syncStatus.fileName && parsedFast.wbBase64) {
+                                restoredWb = this.base64ToWorkbook(parsedFast.wbBase64);
+                            }
+                        } catch(e) {}
+                    }
+
+                    // Open DB
+                    const db = await this.getDB();
+                    const sessionData = await new Promise((resolve) => {
+                        const tx = db.transaction('sessions', 'readonly');
+                        const req = tx.objectStore('sessions').get(this.SESSION_KEY);
+                        req.onsuccess = () => resolve(req.result);
+                        req.onerror = () => resolve(null);
+                    });
+
+                    // If IndexedDB explicitly says closed and is newer, don't reopen
+                    if (sessionData && sessionData.isOpen === false && sessionData.timestamp >= syncStatus.timestamp) {
+                        return false;
+                    }
+
+                    const effectiveState = (sessionData && sessionData.state) || syncStatus.state;
+                    const effectiveHeader = (sessionData && sessionData.headerRow) || syncStatus.headerRow || 1;
+                    const effectiveKit = (sessionData && sessionData.activeKit) || syncStatus.activeKit || 'pivot';
+                    restoredFileName = (sessionData && sessionData.fileName) || restoredFileName;
+                    restoredSheetName = (sessionData && sessionData.sheetName) || restoredSheetName;
+
+                    // If not restored from fast storage, get from IndexedDB
+                    if (!restoredWb && restoredFileName) {
+                        const wbRecord = await new Promise((resolve) => {
+                            const tx = db.transaction('workbooks', 'readonly');
+                            const req = tx.objectStore('workbooks').get(restoredFileName);
+                            req.onsuccess = () => resolve(req.result);
+                            req.onerror = () => resolve(null);
+                        });
+
+                        if (wbRecord && wbRecord.workbookBase64) {
+                            restoredWb = this.base64ToWorkbook(wbRecord.workbookBase64);
+                        } else if (wbRecord && wbRecord.sheetsAoA) {
+                            const ws = XLSX.utils.aoa_to_sheet(wbRecord.sheetsAoA);
+                            restoredWb = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(restoredWb, ws, restoredSheetName || "Sheet1");
+                        }
+                    }
+
+                    // Restore all workbooks into sessionWorkbookLibrary
+                    try {
+                        const allWbs = await new Promise((resolve) => {
+                            const tx = db.transaction('workbooks', 'readonly');
+                            const req = tx.objectStore('workbooks').getAll();
+                            req.onsuccess = () => resolve(req.result || []);
+                            req.onerror = () => resolve([]);
+                        });
+                        if (allWbs && allWbs.length > 0 && typeof sessionWorkbookLibrary !== 'undefined') {
+                            allWbs.forEach(rec => {
+                                if (rec && rec.fileName && rec.workbookBase64) {
+                                    const libWb = this.base64ToWorkbook(rec.workbookBase64);
+                                    if (libWb) {
+                                        sessionWorkbookLibrary.set(rec.fileName, {
+                                            workbook: libWb,
+                                            fileName: rec.fileName,
+                                            sheetNames: rec.sheetNames || libWb.SheetNames || [],
+                                            timestamp: rec.timestamp || Date.now()
+                                        });
+                                    }
+                                }
+                            });
+                            if (typeof renderPivotSourceFileDropdown === 'function') {
+                                renderPivotSourceFileDropdown();
+                            }
+                        }
+                    } catch(e) {}
+
+                    // Fallback reconstruction if workbench data
+                    if (!restoredWb) {
+                        const ds = getActiveDataSet();
+                        if (ds && ds.rows && ds.rows.length > 0) {
+                            const headers = ['Kategori', ...ds.series.map(s => cleanHeaderName(s.name))];
+                            const aoa = [headers];
+                            ds.rows.forEach(r => {
+                                const row = [(r.icon ? (r.icon + ' ') : '') + (r.label || '')];
+                                ds.series.forEach((s, sIdx) => {
+                                    row.push(r.values[sIdx]?.val ?? '');
+                                });
+                                aoa.push(row);
+                            });
+                            const ws = XLSX.utils.aoa_to_sheet(aoa);
+                            restoredWb = XLSX.utils.book_new();
+                            XLSX.utils.book_append_sheet(restoredWb, ws, restoredSheetName || "Workbench_Active");
+                            restoredFileName = restoredFileName || "Data Workbench Saat Ini";
+                        }
+                    }
+
+                    if (!restoredWb) {
+                        console.warn('[PivotStudioStorage] No workbook could be reconstructed for restore.');
+                        return false;
+                    }
+
+                    // Restore state
+                    if (effectiveState) {
+                        this.deserializeState(effectiveState);
+                    }
+
+                    currentImportWorkbook = restoredWb;
+                    currentImportFileName = restoredFileName;
+                    currentActiveSheetName = (restoredSheetName && restoredWb.Sheets[restoredSheetName]) ? restoredSheetName : restoredWb.SheetNames[0];
+
+                    // Open modal with preserveState = true
+                    openRawImportModal(restoredWb, restoredFileName, true);
+
+                    // Re-apply header row
+                    if (effectiveHeader) {
+                        const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+                        if (pHeaderInput) pHeaderInput.value = effectiveHeader;
+                    }
+
+                    // Switch to activeKit tab if not pivot
+                    if (effectiveKit && effectiveKit !== 'pivot') {
+                        switchStudioKit(effectiveKit);
+                    }
+
+                    // Synchronize UI dropdowns with restored state
+                    const sortSel = document.getElementById('pivotSortSelect');
+                    if (sortSel && pivotStudioState.sortOrder) sortSel.value = pivotStudioState.sortOrder;
+                    const topNSel = document.getElementById('pivotTopNSelect');
+                    if (topNSel && pivotStudioState.topN) topNSel.value = pivotStudioState.topN;
+                    const othersToggle = document.getElementById('pivotIncludeOthersToggle');
+                    if (othersToggle) othersToggle.checked = !!pivotStudioState.includeOthersRow;
+                    const autoDrillToggle = document.getElementById('pivotAutoDrillToggle');
+                    if (autoDrillToggle) autoDrillToggle.checked = !!pivotStudioState.autoDrill;
+                    const dualAxisToggle = document.getElementById('pivotDualAxisToggle');
+                    if (dualAxisToggle) dualAxisToggle.checked = !!pivotStudioState.dualAxis;
+
+                    // Instant UI visibility without animation delay
+                    const modal = document.getElementById('rawImportModal');
+                    if (modal) {
+                        modal.classList.remove('hidden', 'opacity-0');
+                        modal.classList.add('flex');
+                        document.getElementById('rawImportModalContent')?.classList.remove('scale-95');
+                    }
+
+                    // Run computation & render
+                    runStudioPivotComputation();
+
+                    document.documentElement.classList.remove('pivot-studio-reopening');
+                    console.log('✅ [PivotStudioStorage] Session successfully restored for:', restoredFileName);
+                    return true;
+                } catch (e) {
+                    console.error('[PivotStudioStorage] restoreSession error:', e);
+                    return false;
+                }
+            },
+
+            async clearAll() {
+                try {
+                    localStorage.removeItem(this.SYNC_FLAG_KEY);
+                    localStorage.removeItem(this.FAST_WB_KEY);
+                    const db = await this.getDB();
+                    const tx = db.transaction(['sessions', 'workbooks'], 'readwrite');
+                    tx.objectStore('sessions').clear();
+                    tx.objectStore('workbooks').clear();
+                } catch(e) {}
+            }
+        };
+
+        window.addEventListener('beforeunload', () => {
+            const modal = document.getElementById('rawImportModal');
+            const isOpen = modal && !modal.classList.contains('hidden') && modal.classList.contains('flex');
+            if (isOpen) {
+                PivotStudioStorage.saveSessionSync(true);
+            } else {
+                PivotStudioStorage.saveSessionSync(false);
+            }
+        });
 
         function openRawImportModal(workbook, fileName = 'File Excel', preserveState = false) {
             if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
@@ -11716,6 +12737,9 @@
                 modal.classList.remove('opacity-0');
                 document.getElementById('rawImportModalContent')?.classList.remove('scale-95');
             }, 10);
+            if (typeof PivotStudioStorage !== 'undefined') {
+                PivotStudioStorage.saveSessionDebounced(true);
+            }
         }
 
         function openRawImportModalManual() {
@@ -11752,6 +12776,9 @@
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }, 300);
+            if (typeof PivotStudioStorage !== 'undefined') {
+                PivotStudioStorage.saveSessionDebounced(false);
+            }
         }
 
         function renderSheetTabs(sheetNames) {
@@ -11827,7 +12854,7 @@
             }
 
             const pHeaderInput = document.getElementById('pivotHeaderRowInput');
-            if (pHeaderInput) pHeaderInput.value = detectedHeaderRowIdx + 1;
+            if (pHeaderInput && !preserveState) pHeaderInput.value = detectedHeaderRowIdx + 1;
 
             const headerIndicator = document.getElementById('pivotHeaderIndicator');
             if (headerIndicator) {
@@ -12268,6 +13295,16 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     </button>`;
                 }
                 vContainer.innerHTML = vHtml;
+            }
+            const dualAxisContainer = document.getElementById('pivotDualAxisToggle')?.closest('label');
+            if (dualAxisContainer) {
+                const hasPeriod = !!(pivotStudioState.periodComparison && pivotStudioState.periodComparison.active);
+                const isMatrix = pivotStudioState.colColIdx >= 0;
+                if (hasPeriod || isMatrix) {
+                    dualAxisContainer.classList.add('hidden');
+                } else {
+                    dualAxisContainer.classList.remove('hidden');
+                }
             }
         }
 
@@ -13897,7 +14934,13 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             pivotStudioState.topN = document.getElementById('pivotTopNSelect')?.value || 'all';
             pivotStudioState.includeOthersRow = !!document.getElementById('pivotIncludeOthersToggle')?.checked;
             pivotStudioState.autoDrill = !!document.getElementById('pivotAutoDrillToggle')?.checked;
-            pivotStudioState.dualAxis = !!document.getElementById('pivotDualAxisToggle')?.checked;
+            const hasPeriod = !!(pivotStudioState.periodComparison && pivotStudioState.periodComparison.active);
+            const isMatrix = pivotStudioState.colColIdx >= 0;
+            if (hasPeriod || isMatrix) {
+                pivotStudioState.dualAxis = false;
+            } else {
+                pivotStudioState.dualAxis = !!document.getElementById('pivotDualAxisToggle')?.checked;
+            }
             runStudioPivotComputation();
         }
 
@@ -14032,6 +15075,12 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     const r1Val = row[r1Idx];
                     const r1Key = (r1Val !== undefined && r1Val !== null && String(r1Val).trim() !== '') ? String(r1Val).trim() : '(Tanpa Kategori)';
                     
+                    let r2Key = null;
+                    if (r2Idx >= 0) {
+                        const r2Val = row[r2Idx];
+                        r2Key = (r2Val !== undefined && r2Val !== null && String(r2Val).trim() !== '') ? String(r2Val).trim() : '';
+                    }
+
                     const rawCVal = row[effectiveColIdx];
                     const rawCStr = (rawCVal !== undefined && rawCVal !== null) ? String(rawCVal).trim() : '';
 
@@ -14066,9 +15115,32 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         colTimeMap.set(cKey, cTime);
                     }
 
-                    if (!matrixMap.has(r1Key)) matrixMap.set(r1Key, new Map());
-                    const cMap = matrixMap.get(r1Key);
+                    if (!matrixMap.has(r1Key)) {
+                        matrixMap.set(r1Key, {
+                            cols: new Map(),
+                            r2Set: new Set(),
+                            children: new Map()
+                        });
+                    }
+                    const r1Entry = matrixMap.get(r1Key);
+                    if (r2Key) {
+                        r1Entry.r2Set.add(r2Key);
+                        if (!r1Entry.children.has(r2Key)) {
+                            r1Entry.children.set(r2Key, new Map());
+                        }
+                        const subCols = r1Entry.children.get(r2Key);
+                        if (!subCols.has(cKey)) {
+                            subCols.set(cKey, { sum1: num1, count: 1, min1: num1, max1: num1 });
+                        } else {
+                            const subCell = subCols.get(cKey);
+                            subCell.sum1 += num1;
+                            subCell.count += 1;
+                            subCell.min1 = Math.min(subCell.min1, num1);
+                            subCell.max1 = Math.max(subCell.max1, num1);
+                        }
+                    }
 
+                    const cMap = r1Entry.cols;
                     if (!cMap.has(cKey)) {
                         cMap.set(cKey, { sum1: num1, count: 1, min1: num1, max1: num1 });
                     } else {
@@ -14090,43 +15162,89 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 colKeys = colKeys.slice(0, 20); // Support up to 20 series in matrix
                 let matrixRows = [];
 
-                matrixMap.forEach((cMap, r1Key) => {
+                matrixMap.forEach((entry, r1Key) => {
                     let cells = [];
                     let rowSum = 0;
+                    let totalCount = 0;
                     colKeys.forEach(cKey => {
-                        const cell = cMap.get(cKey);
+                        const cell = entry.cols.get(cKey);
                         const val = cell ? computeAgg(cell.sum1, cell.count, cell.min1, cell.max1, agg1) : 0;
                         cells.push(val);
                         rowSum += val;
+                        if (cell) totalCount += cell.count;
                     });
-                    matrixRows.push({ key: r1Key, vals: cells, total: rowSum });
+
+                    // Build children list for hierarchy / accordion
+                    let childrenArr = [];
+                    if (entry.children && entry.children.size > 0) {
+                        entry.children.forEach((subCols, subKey) => {
+                            let subCells = [];
+                            let subRowSum = 0;
+                            let subCount = 0;
+                            colKeys.forEach(cKey => {
+                                const cCell = subCols.get(cKey);
+                                const val = cCell ? computeAgg(cCell.sum1, cCell.count, cCell.min1, cCell.max1, agg1) : 0;
+                                subCells.push(val);
+                                subRowSum += val;
+                                if (cCell) subCount += cCell.count;
+                            });
+                            childrenArr.push({
+                                key: subKey,
+                                vals: subCells,
+                                total: subRowSum,
+                                count: subCount
+                            });
+                        });
+                        childrenArr.sort((a, b) => b.total - a.total);
+                    }
+
+                    const r2Label = (entry.r2Set && entry.r2Set.size > 0) ? Array.from(entry.r2Set).join(', ') : '';
+
+                    matrixRows.push({
+                        key: r1Key,
+                        subKey: r2Label,
+                        vals: cells,
+                        total: rowSum,
+                        count: totalCount,
+                        children: childrenArr
+                    });
                 });
 
-                // Multi-column sorting for Matrix
+                // Multi-column sorting for Matrix (Synchronized for Main Rows AND Sub / Children Rows)
                 const matrixSortCol = pivotStudioState.tableSortCol || 'val1';
                 const matrixSortDir = pivotStudioState.tableSortDir || sortMode || 'desc';
 
-                if (matrixSortCol === 'key') {
-                    matrixRows.sort((a, b) => matrixSortDir === 'asc' ? String(a.key).localeCompare(String(b.key)) : String(b.key).localeCompare(String(a.key)));
-                } else if (matrixSortCol === 'delta' && colKeys.length === 2) {
-                    matrixRows.sort((a, b) => {
-                        const dA = (a.vals[1] || 0) - (a.vals[0] || 0);
-                        const dB = (b.vals[1] || 0) - (b.vals[0] || 0);
-                        return matrixSortDir === 'asc' ? dA - dB : dB - dA;
-                    });
-                } else if (matrixSortCol === 'avg' && colKeys.length === 2) {
-                    matrixRows.sort((a, b) => {
-                        const aA = ((a.vals[0] || 0) + (a.vals[1] || 0)) / 2;
-                        const aB = ((b.vals[0] || 0) + (b.vals[1] || 0)) / 2;
-                        return matrixSortDir === 'asc' ? aA - aB : aB - aA;
-                    });
-                } else if (matrixSortCol.startsWith('col_')) {
-                    const cIdx = parseInt(matrixSortCol.replace('col_', '')) || 0;
-                    matrixRows.sort((a, b) => matrixSortDir === 'asc' ? (a.vals[cIdx] || 0) - (b.vals[cIdx] || 0) : (b.vals[cIdx] || 0) - (a.vals[cIdx] || 0));
-                } else {
-                    if (matrixSortDir === 'desc') matrixRows.sort((a, b) => b.total - a.total);
-                    else matrixRows.sort((a, b) => a.total - b.total);
+                function sortMatrixRowList(rowsList) {
+                    if (!rowsList || rowsList.length <= 1) return;
+                    if (matrixSortCol === 'key') {
+                        rowsList.sort((a, b) => matrixSortDir === 'asc' ? String(a.key).localeCompare(String(b.key)) : String(b.key).localeCompare(String(a.key)));
+                    } else if (matrixSortCol === 'delta' && colKeys.length === 2) {
+                        rowsList.sort((a, b) => {
+                            const dA = (a.vals[1] || 0) - (a.vals[0] || 0);
+                            const dB = (b.vals[1] || 0) - (b.vals[0] || 0);
+                            return matrixSortDir === 'asc' ? dA - dB : dB - dA;
+                        });
+                    } else if (matrixSortCol === 'avg' && colKeys.length === 2) {
+                        rowsList.sort((a, b) => {
+                            const aA = ((a.vals[0] || 0) + (a.vals[1] || 0)) / 2;
+                            const aB = ((b.vals[0] || 0) + (b.vals[1] || 0)) / 2;
+                            return matrixSortDir === 'asc' ? aA - aB : aB - aA;
+                        });
+                    } else if (matrixSortCol.startsWith('col_')) {
+                        const cIdx = parseInt(matrixSortCol.replace('col_', '')) || 0;
+                        rowsList.sort((a, b) => matrixSortDir === 'asc' ? (a.vals[cIdx] || 0) - (b.vals[cIdx] || 0) : (b.vals[cIdx] || 0) - (a.vals[cIdx] || 0));
+                    } else {
+                        if (matrixSortDir === 'desc') rowsList.sort((a, b) => b.total - a.total);
+                        else rowsList.sort((a, b) => a.total - b.total);
+                    }
                 }
+
+                sortMatrixRowList(matrixRows);
+                matrixRows.forEach(mr => {
+                    if (mr.children && mr.children.length > 1) {
+                        sortMatrixRowList(mr.children);
+                    }
+                });
 
                 if (topN !== 'all') {
                     matrixRows = matrixRows.slice(0, parseInt(topN) || 10);
@@ -14158,7 +15276,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
                 currentComputedPivotResult = {
                     type: 'matrix',
-                    r1Name, colName, colKeys, v1Name, agg1,
+                    r1Name, r2Name, colName, colKeys, v1Name, agg1,
                     rows: matrixRows,
                     totalRowsProcessed: filteredRows.length
                 };
@@ -14253,31 +15371,40 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     });
                 });
 
-                // Multi-column sorting supporting Header Click (Rank, Category, Share, Nilai 2, Delta, Avg, Count)
+                // Multi-column sorting supporting Header Click (Synchronized for Main Groups AND Sub-rows)
                 const activeSortCol = pivotStudioState.tableSortCol || 'val1';
                 const activeSortDir = pivotStudioState.tableSortDir || sortMode || 'desc';
 
-                groups.sort((a, b) => {
-                    let diff = 0;
-                    if (activeSortCol === 'key') {
-                        diff = String(a.key).localeCompare(String(b.key));
-                    } else if (activeSortCol === 'val2') {
-                        diff = (a.val2 || 0) - (b.val2 || 0);
-                    } else if (activeSortCol === 'delta') {
-                        const dA = (a.val2 || 0) - a.val1;
-                        const dB = (b.val2 || 0) - b.val1;
-                        diff = dA - dB;
-                    } else if (activeSortCol === 'avg') {
-                        const aA = (a.val1 + (a.val2 || 0)) / 2;
-                        const aB = (b.val1 + (b.val2 || 0)) / 2;
-                        diff = aA - aB;
-                    } else if (activeSortCol === 'count') {
-                        diff = a.count - b.count;
-                    } else {
-                        // Default 'val1' or 'rank'
-                        diff = a.val1 - b.val1;
+                function sortHierarchyList(list) {
+                    if (!list || list.length <= 1) return;
+                    list.sort((a, b) => {
+                        let diff = 0;
+                        if (activeSortCol === 'key') {
+                            diff = String(a.key).localeCompare(String(b.key));
+                        } else if (activeSortCol === 'val2') {
+                            diff = (a.val2 || 0) - (b.val2 || 0);
+                        } else if (activeSortCol === 'delta') {
+                            const dA = (a.val2 || 0) - a.val1;
+                            const dB = (b.val2 || 0) - b.val1;
+                            diff = dA - dB;
+                        } else if (activeSortCol === 'avg') {
+                            const aA = (a.val1 + (a.val2 || 0)) / 2;
+                            const aB = (b.val1 + (b.val2 || 0)) / 2;
+                            diff = aA - aB;
+                        } else if (activeSortCol === 'count') {
+                            diff = a.count - b.count;
+                        } else {
+                            diff = a.val1 - b.val1;
+                        }
+                        return activeSortDir === 'asc' ? diff : -diff;
+                    });
+                }
+
+                sortHierarchyList(groups);
+                groups.forEach(g => {
+                    if (g.children && g.children.length > 1) {
+                        sortHierarchyList(g.children);
                     }
-                    return activeSortDir === 'asc' ? diff : -diff;
                 });
 
                 const totalUniqueGroupsCount = groups.length;
@@ -14367,6 +15494,12 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             if (countBadge) countBadge.textContent = `${currentPreparedImportData.length - 1} baris`;
 
             renderStudioKitView();
+            if (typeof PivotStudioStorage !== 'undefined') {
+                const modal = document.getElementById('rawImportModal');
+                if (modal && !modal.classList.contains('hidden') && modal.classList.contains('flex')) {
+                    PivotStudioStorage.saveSessionDebounced(true);
+                }
+            }
         }
 
         // =========================================================================
@@ -14397,6 +15530,9 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 activeBtn.className = 'kit-tab-btn py-1.5 px-3.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 bg-slate-900 text-[#cafc03] shadow-xs';
             }
             renderStudioKitView();
+            if (typeof PivotStudioStorage !== 'undefined') {
+                PivotStudioStorage.saveSessionDebounced(true);
+            }
         }
 
         function togglePivotSortDirection() {
@@ -14600,6 +15736,157 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             container.innerHTML = html;
         }
 
+        // =========================================================================
+        // PIVOT TABLE SELECTION ENGINE & CONTEXT MENU DISPATCHER
+        // =========================================================================
+        function updatePivotSelectionUI() {
+            const count = (pivotStudioState.selectedRowKeys ? pivotStudioState.selectedRowKeys.size : 0);
+            const floatBar = document.getElementById('pivotSelectionFloatingBar');
+            const countBadge = document.getElementById('pivotSelectedCountBadge');
+            const ctxCountText = document.getElementById('ctxSelectedCountText');
+            if (countBadge) countBadge.textContent = count;
+            if (ctxCountText) ctxCountText.textContent = `${count} baris`;
+            if (floatBar) {
+                if (count > 0) {
+                    floatBar.classList.remove('hidden');
+                    floatBar.classList.add('flex');
+                } else {
+                    floatBar.classList.add('hidden');
+                    floatBar.classList.remove('flex');
+                }
+            }
+
+            // Sync visual highlights and checkboxes across rows
+            document.querySelectorAll('tr[data-pivot-row-id]').forEach(tr => {
+                const rId = tr.getAttribute('data-pivot-row-id');
+                const isSel = pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rId);
+                const cb = tr.querySelector('.pivot-row-select-cb');
+                if (cb) cb.checked = !!isSel;
+                if (isSel) {
+                    tr.classList.add('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
+                } else {
+                    tr.classList.remove('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
+                }
+            });
+
+            // Master select checkbox state
+            const masterCb = document.getElementById('pivotSelectAllMasterCb');
+            if (masterCb && pivotStudioTableRowsRegistry) {
+                const total = pivotStudioTableRowsRegistry.size;
+                masterCb.checked = (total > 0 && count === total);
+                masterCb.indeterminate = (count > 0 && count < total);
+            }
+        }
+
+        function togglePivotRowSelection(rowId, isChecked) {
+            if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
+            if (isChecked) {
+                pivotStudioState.selectedRowKeys.add(rowId);
+                pivotStudioState.lastSelectedRowId = rowId;
+            } else {
+                pivotStudioState.selectedRowKeys.delete(rowId);
+            }
+            updatePivotSelectionUI();
+        }
+
+        function onPivotRowClick(event, rowId) {
+            // Do not intercept clicks on buttons, inputs, links
+            if (event.target.closest('button') || event.target.closest('input') || event.target.closest('a')) return;
+            if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
+
+            if (event.shiftKey && pivotStudioState.lastSelectedRowId && pivotStudioTableRowsRegistry) {
+                const allKeys = Array.from(pivotStudioTableRowsRegistry.keys());
+                const idx1 = allKeys.indexOf(pivotStudioState.lastSelectedRowId);
+                const idx2 = allKeys.indexOf(rowId);
+                if (idx1 !== -1 && idx2 !== -1) {
+                    const start = Math.min(idx1, idx2);
+                    const end = Math.max(idx1, idx2);
+                    for (let i = start; i <= end; i++) {
+                        pivotStudioState.selectedRowKeys.add(allKeys[i]);
+                    }
+                }
+            } else if (event.ctrlKey || event.metaKey) {
+                if (pivotStudioState.selectedRowKeys.has(rowId)) {
+                    pivotStudioState.selectedRowKeys.delete(rowId);
+                } else {
+                    pivotStudioState.selectedRowKeys.add(rowId);
+                }
+                pivotStudioState.lastSelectedRowId = rowId;
+            } else {
+                if (pivotStudioState.selectedRowKeys.has(rowId) && pivotStudioState.selectedRowKeys.size === 1) {
+                    pivotStudioState.selectedRowKeys.clear();
+                } else {
+                    pivotStudioState.selectedRowKeys.clear();
+                    pivotStudioState.selectedRowKeys.add(rowId);
+                    pivotStudioState.lastSelectedRowId = rowId;
+                }
+            }
+            updatePivotSelectionUI();
+        }
+
+        function toggleSelectAllPivotRows(isChecked) {
+            if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
+            if (isChecked && pivotStudioTableRowsRegistry) {
+                pivotStudioTableRowsRegistry.forEach((_, rId) => {
+                    pivotStudioState.selectedRowKeys.add(rId);
+                });
+            } else {
+                pivotStudioState.selectedRowKeys.clear();
+            }
+            updatePivotSelectionUI();
+        }
+
+        function clearPivotRowSelection() {
+            if (pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys.clear();
+            updatePivotSelectionUI();
+        }
+
+        function onPivotRowContextMenu(event, rowId) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
+
+            if (!pivotStudioState.selectedRowKeys.has(rowId)) {
+                pivotStudioState.selectedRowKeys.clear();
+                pivotStudioState.selectedRowKeys.add(rowId);
+                pivotStudioState.lastSelectedRowId = rowId;
+                updatePivotSelectionUI();
+            }
+
+            const ctxMenu = document.getElementById('pivotContextMenu');
+            if (!ctxMenu) return;
+
+            const ctxCountText = document.getElementById('ctxSelectedCountText');
+            if (ctxCountText) ctxCountText.textContent = `${pivotStudioState.selectedRowKeys.size} baris`;
+
+            ctxMenu.style.display = 'block';
+            
+            const menuW = 250;
+            const menuH = 190;
+            let posX = event.clientX;
+            let posY = event.clientY;
+
+            if (posX + menuW > window.innerWidth) posX = window.innerWidth - menuW - 12;
+            if (posY + menuH > window.innerHeight) posY = window.innerHeight - menuH - 12;
+            if (posX < 10) posX = 10;
+            if (posY < 10) posY = 10;
+
+            ctxMenu.style.left = posX + 'px';
+            ctxMenu.style.top = posY + 'px';
+        }
+
+        function hidePivotContextMenu() {
+            const ctxMenu = document.getElementById('pivotContextMenu');
+            if (ctxMenu) ctxMenu.style.display = 'none';
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#pivotContextMenu')) hidePivotContextMenu();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hidePivotContextMenu();
+        });
+
         // -------------------------------------------------------------------------
         // KIT 1: PIVOT GRID (EXCEL TREE TABLE WITH RANK PRESETS)
         // -------------------------------------------------------------------------
@@ -14609,6 +15896,9 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 container.innerHTML = '<div class="p-8 text-center text-slate-400">Sedang memproses pivot...</div>';
                 return;
             }
+
+            if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
+            pivotStudioTableRowsRegistry.clear();
 
             // Optional compact filter chips bar if filter column selected
             let filterBarHtml = '';
@@ -14747,7 +16037,12 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         return m1 || m2;
                     });
                 } else if (res.type === 'matrix' && res.rows) {
-                    displayRows = res.rows.filter(r => r.key && String(r.key).toLowerCase().includes(qSearch));
+                    displayRows = res.rows.filter(r => {
+                        const m1 = r.key && String(r.key).toLowerCase().includes(qSearch);
+                        const m2 = r.subKey && String(r.subKey).toLowerCase().includes(qSearch);
+                        const m3 = r.children && r.children.some(c => c.key && String(c.key).toLowerCase().includes(qSearch));
+                        return m1 || m2 || m3;
+                    });
                 }
             }
 
@@ -14870,6 +16165,9 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-slate-50/95 text-slate-700 sticky top-0 z-10 select-none border-b border-slate-200/90 backdrop-blur-xs">
                             <tr>
+                                <th class="w-9 py-2.5 px-2 text-center select-none" title="Pilih Semua / Kosongkan Pilihan">
+                                    <input type="checkbox" id="pivotSelectAllMasterCb" onchange="toggleSelectAllPivotRows(this.checked)" class="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer">
+                                </th>
                                 <th onclick="onStudioHeaderSort('rank')" title="Klik untuk mengurutkan berdasarkan Peringkat Nilai"
                                     class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 text-[10px] font-mono font-bold text-slate-500 w-12 text-center uppercase tracking-wider select-none">
                                     <span class="inline-flex items-center gap-1">
@@ -14960,6 +16258,21 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     const rowDelta = v2Num - v1Num;
                     const rowAvg = (v1Num + v2Num) / 2;
 
+                    const pRowId = 'hr_p_' + idx;
+                    const isPSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(pRowId));
+                    const pVals = [g.key, v1Num];
+                    if (hasV2) pVals.push(v2Num);
+                    if (hasV2 && pivotStudioState.showDelta) pVals.push(rowDelta);
+                    if (hasV2 && pivotStudioState.showAverage) pVals.push(rowAvg);
+                    pivotStudioTableRowsRegistry.set(pRowId, {
+                        id: pRowId,
+                        label: g.key,
+                        rowValues: pVals,
+                        isChild: false,
+                        children: g.children || [],
+                        type: 'hierarchy'
+                    });
+
                     let deltaCellHtml = '';
                     if (hasV2 && pivotStudioState.showDelta) {
                         const isPos = rowDelta > 0.001;
@@ -14981,11 +16294,15 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     }
 
                     tableHtml += `
-                    <tr class="hover:bg-slate-50/80 transition-colors ${isOdd ? 'bg-slate-50/30' : 'bg-white'} group">
+                    <tr data-pivot-row-id="${pRowId}" onclick="onPivotRowClick(event, '${pRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${pRowId}')"
+                        class="hover:bg-slate-50/80 transition-colors ${isOdd ? 'bg-slate-50/30' : 'bg-white'} group cursor-pointer select-none ${isPSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
+                        <td class="py-2 px-2 text-center" onclick="event.stopPropagation()">
+                            <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isPSel ? 'checked' : ''} onchange="togglePivotRowSelection('${pRowId}', this.checked)">
+                        </td>
                         <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-bold font-mono">${idx + 1}</td>
                         <td class="py-2 px-3 font-bold font-sans text-slate-800 flex items-center gap-1.5">
                             ${hasChildren ? `
-                                <button type="button" onclick="toggleRowCollapse('${escapeHtml(g.key).replace(/'/g, "\'")}')"
+                                <button type="button" onclick="event.stopPropagation(); toggleRowCollapse('${escapeHtml(g.key).replace(/'/g, "\'")}')"
                                     class="w-5 h-5 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-400 transition">
                                     <i class="ph-bold ${isCollapsed ? 'ph-caret-right' : 'ph-caret-down'} text-xs"></i>
                                 </button>
@@ -15032,8 +16349,28 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 cAvgCell = `<td class="py-1 px-3 text-right font-semibold text-cyan-800 font-mono bg-cyan-50/20 text-[10px] border-r border-cyan-100/40">${fmtAvg}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
                             }
 
+                            const cRowId = 'hr_c_' + idx + '_' + cIdx;
+                            const isCSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(cRowId));
+                            const cVals = [c.key, cV1];
+                            if (hasV2) cVals.push(cV2);
+                            if (hasV2 && pivotStudioState.showDelta) cVals.push(cDelta);
+                            if (hasV2 && pivotStudioState.showAverage) cVals.push(cAvg);
+                            pivotStudioTableRowsRegistry.set(cRowId, {
+                                id: cRowId,
+                                label: `${g.key} • ${c.key}`,
+                                shortLabel: c.key,
+                                rowValues: cVals,
+                                isChild: true,
+                                parentKey: g.key,
+                                type: 'hierarchy'
+                            });
+
                             tableHtml += `
-                            <tr class="bg-slate-50/40 hover:bg-slate-50 transition-colors text-[11px]">
+                            <tr data-pivot-row-id="${cRowId}" onclick="onPivotRowClick(event, '${cRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${cRowId}')"
+                                class="bg-slate-50/40 hover:bg-slate-50 transition-colors text-[11px] cursor-pointer select-none ${isCSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
+                                <td class="py-1 px-2 text-center" onclick="event.stopPropagation()">
+                                    <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isCSel ? 'checked' : ''} onchange="togglePivotRowSelection('${cRowId}', this.checked)">
+                                </td>
                                 <td class="py-1 px-3 text-center text-slate-300 text-[9px] font-mono">${idx + 1}.${cIdx + 1}</td>
                                 <td class="py-1 px-3 pl-8 text-slate-600 font-medium font-sans flex items-center gap-1.5">
                                     <span class="text-slate-300 font-mono">└──</span>
@@ -15092,6 +16429,9 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     <table class="w-full text-left text-xs border-collapse">
                         <thead class="bg-slate-50/95 text-slate-700 sticky top-0 z-10 select-none border-b border-slate-200/90 backdrop-blur-xs">
                             <tr>
+                                <th class="w-9 py-2.5 px-2 text-center select-none" title="Pilih Semua / Kosongkan Pilihan">
+                                    <input type="checkbox" id="pivotSelectAllMasterCb" onchange="toggleSelectAllPivotRows(this.checked)" class="w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer">
+                                </th>
                                 <th onclick="onStudioHeaderSort('rank')" title="Klik untuk mengurutkan Rank"
                                     class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 text-[10px] font-mono font-bold text-slate-400 w-12 text-center uppercase tracking-wider select-none">
                                     <span class="inline-flex items-center gap-1">
@@ -15102,7 +16442,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 <th onclick="onStudioHeaderSort('key')" title="Klik untuk mengurutkan Abjad (A-Z / Z-A)"
                                     class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 font-bold text-[11px] tracking-wider uppercase text-slate-700 select-none">
                                     <span class="inline-flex items-center gap-1.5">
-                                        <span>${escapeHtml(res.r1Name)}</span>
+                                        <span>${escapeHtml(res.r1Name)}${res.r2Name ? (' / ' + escapeHtml(res.r2Name)) : ''}</span>
                                         ${getSortIconHtml('key')}
                                     </span>
                                 </th>
@@ -15160,10 +16500,42 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
                 displayRows.forEach((r, idx) => {
                     const isOdd = idx % 2 === 1;
+                    const isCollapsed = !!pivotStudioState.collapsedRows[r.key];
+                    const hasChildren = r.children && r.children.length > 0;
+                    const isSingleSub = (r.children && r.children.length === 1 && r.subKey);
+
+                    const pRowId = 'mr_p_' + idx;
+                    const isPSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(pRowId));
+                    const pVals = [r.key, ...r.vals];
+                    if (has2MatrixCols && pivotStudioState.showDelta) pVals.push((r.vals[1] || 0) - (r.vals[0] || 0));
+                    if (has2MatrixCols && pivotStudioState.showAverage) pVals.push(((r.vals[0] || 0) + (r.vals[1] || 0)) / 2);
+                    pivotStudioTableRowsRegistry.set(pRowId, {
+                        id: pRowId,
+                        label: r.key,
+                        rowValues: pVals,
+                        isChild: false,
+                        children: r.children || [],
+                        type: 'matrix'
+                    });
+
                     tableHtml += `
-                    <tr class="hover:bg-slate-50/80 transition-colors ${isOdd ? 'bg-slate-50/30' : 'bg-white'}">
+                    <tr data-pivot-row-id="${pRowId}" onclick="onPivotRowClick(event, '${pRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${pRowId}')"
+                        class="hover:bg-slate-50/80 transition-colors ${isOdd ? 'bg-slate-50/30' : 'bg-white'} cursor-pointer select-none ${isPSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
+                        <td class="py-2 px-2 text-center" onclick="event.stopPropagation()">
+                            <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isPSel ? 'checked' : ''} onchange="togglePivotRowSelection('${pRowId}', this.checked)">
+                        </td>
                         <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-bold font-mono">${idx + 1}</td>
-                        <td class="py-2 px-3 font-bold font-sans text-slate-800">${escapeHtml(r.key)}</td>
+                        <td class="py-2 px-3 font-bold font-sans text-slate-800 flex items-center gap-1.5 flex-wrap">
+                            ${hasChildren && r.children.length > 1 ? `
+                                <button type="button" onclick="event.stopPropagation(); toggleRowCollapse('${escapeHtml(r.key).replace(/'/g, "\\'")}')"
+                                    class="w-5 h-5 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-400 transition cursor-pointer">
+                                    <i class="ph-bold ${isCollapsed ? 'ph-caret-right' : 'ph-caret-down'} text-xs"></i>
+                                </button>
+                            ` : (idx === 0 ? '<span class="text-xs">🏆</span>' : '<span class="w-1.5 h-1.5 rounded-full bg-slate-300 ml-2"></span>')}
+                            <span class="font-bold text-slate-900">${escapeHtml(r.key)}</span>
+                            ${(r.subKey && (!hasChildren || r.children.length <= 1)) ? `<span class="bg-indigo-50 text-indigo-700 text-[10px] font-semibold px-2 py-0.5 rounded-lg border border-indigo-200/70 shadow-2xs">${escapeHtml(r.subKey)}</span>` : ''}
+                            ${hasChildren && r.children.length > 1 ? `<span class="bg-slate-100 text-slate-600 text-[9px] font-bold px-1.5 py-0.2 rounded-full font-mono">${r.children.length} sub</span>` : ''}
+                        </td>
                     `;
                     r.vals.forEach((v, vColIdx) => {
                         const colK = res.colKeys[vColIdx];
@@ -15193,14 +16565,122 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     }
 
                     tableHtml += `</tr>`;
+
+                    if (hasChildren && r.children.length > 1 && !isCollapsed) {
+                        r.children.forEach((c, cIdx) => {
+                            let cDeltaCell = '';
+                            if (has2MatrixCols && pivotStudioState.showDelta) {
+                                const cd = (c.vals[1] || 0) - (c.vals[0] || 0);
+                                const cisPos = cd > 0.001;
+                                const cisNeg = cd < -0.001;
+                                const cfmtD = Math.abs(cd).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+                                if (cisPos) cDeltaCell = `<td class="py-1 px-3 text-right font-bold font-mono text-emerald-600 bg-emerald-50/20 text-[10px] border-x border-emerald-100/40">+${cfmtD}%</td>`;
+                                else if (cisNeg) cDeltaCell = `<td class="py-1 px-3 text-right font-bold font-mono text-rose-600 bg-rose-50/20 text-[10px] border-x border-rose-100/40">-${cfmtD}%</td>`;
+                                else cDeltaCell = `<td class="py-1 px-3 text-right text-slate-300 font-mono text-[9px] border-x border-slate-100">0.00%</td>`;
+                            }
+                            let cAvgCell = '';
+                            if (has2MatrixCols && pivotStudioState.showAverage) {
+                                const ca = ((c.vals[0] || 0) + (c.vals[1] || 0)) / 2;
+                                const cfmtA = ca.toLocaleString('id-ID', { maximumFractionDigits: (ca % 1 !== 0 ? 2 : 0) });
+                                cAvgCell = `<td class="py-1 px-3 text-right font-semibold text-cyan-800 font-mono bg-cyan-50/20 text-[10px] border-r border-cyan-100/40">${cfmtA}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
+                            }
+
+                            const cRowId = 'mr_c_' + idx + '_' + cIdx;
+                            const isCSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(cRowId));
+                            const cVals = [c.key, ...c.vals];
+                            if (has2MatrixCols && pivotStudioState.showDelta) cVals.push((c.vals[1] || 0) - (c.vals[0] || 0));
+                            if (has2MatrixCols && pivotStudioState.showAverage) cVals.push(((c.vals[0] || 0) + (c.vals[1] || 0)) / 2);
+                            pivotStudioTableRowsRegistry.set(cRowId, {
+                                id: cRowId,
+                                label: `${r.key} • ${c.key}`,
+                                shortLabel: c.key,
+                                rowValues: cVals,
+                                isChild: true,
+                                parentKey: r.key,
+                                type: 'matrix'
+                            });
+
+                            tableHtml += `
+                            <tr data-pivot-row-id="${cRowId}" onclick="onPivotRowClick(event, '${cRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${cRowId}')"
+                                class="bg-slate-50/40 hover:bg-slate-50 transition-colors text-[11px] cursor-pointer select-none ${isCSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
+                                <td class="py-1 px-2 text-center" onclick="event.stopPropagation()">
+                                    <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isCSel ? 'checked' : ''} onchange="togglePivotRowSelection('${cRowId}', this.checked)">
+                                </td>
+                                <td class="py-1 px-3 text-center text-slate-300 text-[9px] font-mono">${idx + 1}.${cIdx + 1}</td>
+                                <td class="py-1 px-3 pl-8 text-slate-600 font-medium font-sans flex items-center gap-1.5">
+                                    <span class="text-slate-300 font-mono">└──</span>
+                                    <span>${escapeHtml(c.key)}</span>
+                                </td>
+                            `;
+                            c.vals.forEach((cv, cvColIdx) => {
+                                const cColK = res.colKeys[cvColIdx];
+                                const isCColActive = isExportColumnSelected(cColK);
+                                const cfmt = (typeof cv === 'number') ? cv.toLocaleString('id-ID', { maximumFractionDigits: (cv % 1 !== 0 ? 2 : 0) }) : cv;
+                                tableHtml += `<td class="py-1 px-3 text-right font-medium ${isCColActive ? 'text-slate-600' : 'opacity-40 text-slate-400'} text-[11px]">${cfmt}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
+                            });
+                            tableHtml += `${cDeltaCell}${cAvgCell}</tr>`;
+                        });
+                    }
                 });
 
                 tableHtml += `</tbody></table></div>`;
             }
 
-            container.innerHTML = filterBarHtml + rankBarHtml + tableHtml;
+            const floatingBarHtml = `
+            <div id="pivotSelectionFloatingBar" class="${(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.size > 0) ? 'flex' : 'hidden'} sticky bottom-3 z-30 mx-auto max-w-2xl bg-slate-900/95 text-white px-5 py-2.5 rounded-2xl shadow-2xl border border-slate-700/80 items-center justify-between gap-3 backdrop-blur-md animate-fade-in mt-3 select-none">
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#cafc03] animate-pulse shrink-0"></span>
+                    <span class="text-xs font-bold text-white whitespace-nowrap"><span id="pivotSelectedCountBadge">${pivotStudioState.selectedRowKeys ? pivotStudioState.selectedRowKeys.size : 0}</span> baris terpilih</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="applyPivotSelectionToChart(false)" class="px-3 py-1.5 rounded-xl text-xs font-black bg-[#cafc03] hover:bg-lime-400 text-slate-900 flex items-center gap-1.5 shadow-sm transition cursor-pointer" title="Terapkan baris terpilih ke grafik slide saat ini">
+                        <i class="ph-bold ph-chart-bar"></i> <span>Terapkan ke Slide</span>
+                    </button>
+                    <button type="button" onclick="applyPivotSelectionToChart(true)" class="px-3 py-1.5 rounded-xl text-xs font-black bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-1.5 shadow-sm transition cursor-pointer" title="Buat slide grafik baru dari baris terpilih">
+                        <i class="ph-bold ph-plus"></i> <span>Slide Baru</span>
+                    </button>
+                    <button type="button" onclick="copyPivotSelectedRowsAsTSV()" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer" title="Salin data terpilih (TSV / Excel)">
+                        <i class="ph-bold ph-copy"></i>
+                    </button>
+                    <button type="button" onclick="clearPivotRowSelection()" class="px-2 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-rose-400 transition cursor-pointer" title="Batalkan Pilihan">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+            </div>`;
+
+            const contextMenuHtml = `
+            <div id="pivotContextMenu" style="display: none;" class="fixed z-[9999] bg-slate-900/95 text-slate-100 rounded-2xl shadow-2xl border border-slate-700/90 py-1.5 px-1 min-w-[240px] backdrop-blur-md text-xs font-sans select-none">
+                <div class="px-3 py-1.5 text-[10px] font-black uppercase text-slate-400 tracking-wider border-b border-slate-800 flex items-center justify-between">
+                    <span>Aksi Baris Terpilih</span>
+                    <span class="text-[#cafc03] font-bold" id="ctxSelectedCountText">1 baris</span>
+                </div>
+                <div class="p-1 flex flex-col gap-0.5">
+                    <button type="button" onclick="applyPivotSelectionToChart(false); hidePivotContextMenu();" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 hover:text-[#cafc03] transition flex items-center gap-2.5 font-bold cursor-pointer text-slate-100">
+                        <i class="ph-bold ph-chart-bar text-sm text-[#cafc03]"></i>
+                        <span>Jadikan Grafik Slide Aktif</span>
+                    </button>
+                    <button type="button" onclick="applyPivotSelectionToChart(true); hidePivotContextMenu();" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 hover:text-white transition flex items-center gap-2.5 font-bold cursor-pointer text-slate-100">
+                        <i class="ph-bold ph-plus-circle text-sm text-indigo-400"></i>
+                        <span>Buat Slide Grafik Baru</span>
+                    </button>
+                    <div class="h-px bg-slate-800 my-1"></div>
+                    <button type="button" onclick="copyPivotSelectedRowsAsTSV(); hidePivotContextMenu();" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 hover:text-white transition flex items-center gap-2.5 font-semibold text-slate-300 cursor-pointer">
+                        <i class="ph-bold ph-copy text-sm text-emerald-400"></i>
+                        <span>Salin Data Terpilih (TSV / Excel)</span>
+                    </button>
+                    <button type="button" onclick="clearPivotRowSelection(); hidePivotContextMenu();" class="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 hover:text-rose-400 transition flex items-center gap-2.5 font-semibold text-slate-400 cursor-pointer">
+                        <i class="ph-bold ph-x-circle text-sm text-rose-400"></i>
+                        <span>Batalkan Pilihan Baris</span>
+                    </button>
+                </div>
+            </div>`;
+
+            container.innerHTML = filterBarHtml + rankBarHtml + tableHtml + floatingBarHtml + contextMenuHtml;
             if (filterBarHtml && typeof renderTimelineSlicerChips === 'function') {
                 renderTimelineSlicerChips();
+            }
+            if (pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.size > 0) {
+                updatePivotSelectionUI();
             }
         }
 
@@ -16203,20 +17683,31 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
 
             // 1. Configure Series ONLY for checked columns
             ds.series = [];
+            const hasPeriod = !!(pivotStudioState.periodComparison && pivotStudioState.periodComparison.active);
+            const isMatrix = pivotStudioState.colColIdx >= 0;
+            // Dual-axis (bar + line on secondary Y2) ONLY applies when plotting TWO DIFFERENT metrics (val1 vs val2).
+            // In Period Comparison or Matrix Breakdown, all columns represent the SAME metric (same unit & scale).
+            const shouldDualAxis = !hasPeriod && !isMatrix && (pivotStudioState.val2ColIdx >= 0) && !!pivotStudioState.dualAxis;
+
             activeColIndices.forEach((cIdx, sIdx) => {
                 const sName = headers[cIdx] ? String(headers[cIdx]).trim() : `Series ${sIdx + 1}`;
                 const isSecondSeries = (sIdx === 1);
                 ds.series.push({
                     id: 's_' + Date.now() + '_' + sIdx,
                     name: sName,
-                    type: isSecondSeries && pivotStudioState.dualAxis ? 'line' : 'auto',
-                    axis: isSecondSeries && pivotStudioState.dualAxis ? 'y2' : 'y',
-                    zIndex: isSecondSeries && pivotStudioState.dualAxis ? 'front' : 'back'
+                    type: isSecondSeries && shouldDualAxis ? 'line' : 'auto',
+                    axis: isSecondSeries && shouldDualAxis ? 'y2' : 'y',
+                    zIndex: isSecondSeries && shouldDualAxis ? 'front' : 'back'
                 });
             });
 
             if (ds.series.length === 0) {
                 ds.series.push({ id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' });
+            }
+
+            // For period comparison or matrix breakdown, automatically set to side-by-side versus grouping
+            if (hasPeriod || isMatrix) {
+                slide.stackMode = 'grouped';
             }
 
             // 2. Configure Rows ONLY for checked columns
@@ -16249,11 +17740,28 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 ds.rows.push(newRow);
             });
 
-            // 3. Auto-Generate Child Slides for Level 2 Drill-down (if enabled & Level 2 active)
+            // 3. Auto-Generate Child Slides for Level 2 Drill-down (Supports BOTH Matrix & Hierarchy Modes)
             const res = currentComputedPivotResult;
-            if (pivotStudioState.autoDrill && res && res.type === 'hierarchy' && res.r2Name) {
+            if (pivotStudioState.autoDrill && res && res.r2Name) {
                 let drillSlidesCreated = 0;
-                res.groups.forEach(parentGroup => {
+                
+                // Unified parent items list
+                let parentList = [];
+                if (res.type === 'hierarchy' && res.groups) {
+                    parentList = res.groups.map(g => ({
+                        key: g.key,
+                        children: g.children || [],
+                        type: 'hierarchy'
+                    }));
+                } else if (res.type === 'matrix' && res.rows) {
+                    parentList = res.rows.map(r => ({
+                        key: r.key,
+                        children: r.children || [],
+                        type: 'matrix'
+                    }));
+                }
+
+                parentList.forEach(parentGroup => {
                     if (parentGroup.children && parentGroup.children.length > 0) {
                         const matchingRow = ds.rows.find(r => r.label === parentGroup.key);
                         if (matchingRow) {
@@ -16261,30 +17769,72 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                             const childSlide = generateDefaultSlide(newSlideIdx);
                             childSlide.chartTitle = `${parentGroup.key} • Breakdown ${res.r2Name}`;
                             childSlide.chartSubtitle = `Detail kontribusi ${res.r2Name} pada ${parentGroup.key}`;
-                            
-                            const childDs = childSlide.dataSets[0];
-                            childDs.series = [{
-                                id: 's_child_' + Date.now(),
-                                name: `${res.v1Name} (${res.agg1})`,
-                                type: 'auto',
-                                axis: 'y',
-                                zIndex: 'back'
-                            }];
+                            childSlide.colorTheme = slide.colorTheme;
+                            childSlide.stackMode = slide.stackMode || 'grouped';
+                            childSlide.bentoCharts = Array.isArray(slide.bentoCharts) ? [...slide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
+                            childSlide.drillParentId = slide.id;
 
-                            childDs.rows = parentGroup.children.map((c, cIdx) => ({
-                                id: 'r_c_' + Date.now() + '_' + cIdx,
-                                label: c.key,
-                                icon: '',
-                                values: [{
-                                    val: c.val1,
-                                    val2: 0,
-                                    color: '#000',
-                                    offset: 0,
-                                    callout: false,
-                                    calloutSub: ''
-                                }],
-                                drillTarget: null
+                            const childDs = childSlide.dataSets[0];
+                            
+                            // Replicate EXACT active series configuration from parent slide
+                            childDs.series = ds.series.map((s, sIdx) => ({
+                                id: 's_child_' + Date.now() + '_' + sIdx,
+                                name: s.name,
+                                type: s.type,
+                                axis: s.axis,
+                                zIndex: s.zIndex
                             }));
+
+                            // Populate rows for each child with active columns
+                            childDs.rows = parentGroup.children.map((c, cIdx) => {
+                                const newChildRow = {
+                                    id: 'r_c_' + Date.now() + '_' + cIdx,
+                                    label: c.key || `Sub ${cIdx + 1}`,
+                                    icon: '',
+                                    values: [],
+                                    drillTarget: null
+                                };
+
+                                activeColIndices.forEach((cIdxVal) => {
+                                    let rawVal = 0;
+                                    const h = headers[cIdxVal] || '';
+
+                                    if (parentGroup.type === 'matrix') {
+                                        const colCount = (res.colKeys ? res.colKeys.length : 0);
+                                        if (cIdxVal >= 1 && cIdxVal <= colCount) {
+                                            rawVal = (c.vals && c.vals[cIdxVal - 1] !== undefined) ? c.vals[cIdxVal - 1] : 0;
+                                        } else if (h.includes('Δ Selisih') || h.includes('Selisih')) {
+                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                            rawVal = v1 - v0;
+                                        } else if (h.includes('Rata-rata') || h.includes('Average')) {
+                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                            rawVal = (v0 + v1) / 2;
+                                        }
+                                    } else {
+                                        if (cIdxVal === 1) rawVal = c.val1;
+                                        else if (cIdxVal === 2) rawVal = c.val2;
+                                        else if (h.includes('Δ Selisih') || h.includes('Selisih')) rawVal = (c.val2 || 0) - (c.val1 || 0);
+                                        else if (h.includes('Rata-rata') || h.includes('Average')) rawVal = ((c.val1 || 0) + (c.val2 || 0)) / 2;
+                                    }
+
+                                    const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '')
+                                        ? Number(Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')).toFixed(2))
+                                        : null;
+
+                                    newChildRow.values.push({
+                                        val: numVal,
+                                        val2: 0,
+                                        color: '#000',
+                                        offset: 0,
+                                        callout: false,
+                                        calloutSub: ''
+                                    });
+                                });
+
+                                return newChildRow;
+                            });
 
                             forceRecolor(childSlide.colorTheme, childSlide);
                             appSlides.push(childSlide);
@@ -16344,6 +17894,261 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             showToast(`✅ Berhasil menerapkan ${ds.rows.length} data baris ke Chart & Workbench!`);
         }
 
+        // =========================================================================
+        // MANUAL TABLE SELECTION & RIGHT-CLICK CONTEXT MENU ACTIONS (TO CHART)
+        // =========================================================================
+        function applyPivotSelectionToChart(isNewSlide = false) {
+            if (!currentPreparedImportData || currentPreparedImportData.length < 2) {
+                showToast("Hasil pivot kosong atau belum dihitung!", true);
+                return;
+            }
+
+            const selectedKeys = pivotStudioState.selectedRowKeys;
+            if (!selectedKeys || selectedKeys.size === 0) {
+                showToast("Pilih minimal 1 baris tabel terlebih dahulu!", true);
+                return;
+            }
+
+            // Collect selected row items in order of registration
+            const selectedItems = [];
+            pivotStudioTableRowsRegistry.forEach((item, rowId) => {
+                if (selectedKeys.has(rowId)) {
+                    selectedItems.push(item);
+                }
+            });
+
+            if (selectedItems.length === 0) {
+                showToast("Tidak ada data baris yang cocok dengan seleksi!", true);
+                return;
+            }
+
+            const headers = currentPreparedImportData[0];
+            const activeColIndices = [];
+            for (let i = 1; i < headers.length; i++) {
+                const h = headers[i];
+                let isColActive = true;
+                if (h.includes('Δ Selisih') || h.includes('Selisih')) {
+                    isColActive = isExportColumnSelected('delta') && isExportColumnSelected(h);
+                } else if (h.includes('Rata-rata') || h.includes('Average')) {
+                    isColActive = isExportColumnSelected('avg') && isExportColumnSelected(h);
+                } else {
+                    isColActive = isExportColumnSelected(h);
+                }
+                if (isColActive) {
+                    activeColIndices.push(i);
+                }
+            }
+
+            if (activeColIndices.length === 0) {
+                showToast("Minimal pilih 1 kolom dengan tanda centang di header untuk masuk ke grafik!", true);
+                return;
+            }
+
+            let targetSlide;
+            if (isNewSlide) {
+                const newSlideIdx = appSlides.length + 1;
+                targetSlide = generateDefaultSlide(newSlideIdx);
+                const firstLabel = selectedItems[0]?.label || 'Data';
+                targetSlide.chartTitle = selectedItems.length === 1 
+                    ? `Analisa Khusus • ${firstLabel}` 
+                    : `Data Pilihan • ${selectedItems.length} Kategori`;
+                targetSlide.chartSubtitle = `Visualisasi dari baris terpilih pada ${currentImportFileName || 'Pivot Studio'}`;
+                const currActive = getActiveSlide();
+                if (currActive) {
+                    targetSlide.colorTheme = currActive.colorTheme;
+                    targetSlide.bentoCharts = Array.isArray(currActive.bentoCharts) ? [...currActive.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
+                }
+                appSlides.push(targetSlide);
+                activeSlideIndex = appSlides.length - 1;
+            } else {
+                targetSlide = getActiveSlide();
+            }
+
+            if (!targetSlide) return;
+            const ds = targetSlide.dataSets[0];
+            if (!ds) return;
+
+            // Configure Series
+            ds.series = [];
+            activeColIndices.forEach((cIdx, sIdx) => {
+                const sName = headers[cIdx] ? String(headers[cIdx]).trim() : `Series ${sIdx + 1}`;
+                const isSecondSeries = (sIdx === 1);
+                ds.series.push({
+                    id: 's_sel_' + Date.now() + '_' + sIdx,
+                    name: sName,
+                    type: isSecondSeries && pivotStudioState.dualAxis ? 'line' : 'auto',
+                    axis: isSecondSeries && pivotStudioState.dualAxis ? 'y2' : 'y',
+                    zIndex: isSecondSeries && pivotStudioState.dualAxis ? 'front' : 'back'
+                });
+            });
+
+            if (ds.series.length === 0) {
+                ds.series.push({ id: 's_main', name: 'Data Utama', type: 'auto', axis: 'y', zIndex: 'back' });
+            }
+
+            // Configure Rows from selected items
+            ds.rows = [];
+            selectedItems.forEach((item, rIdx) => {
+                const label = item.label || `Baris ${rIdx + 1}`;
+                const newRow = {
+                    id: 'r_sel_' + Date.now() + '_' + rIdx,
+                    label: label,
+                    icon: '',
+                    values: [],
+                    drillTarget: null
+                };
+
+                activeColIndices.forEach((cIdx) => {
+                    const rawVal = item.rowValues ? item.rowValues[cIdx] : null;
+                    const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '')
+                        ? Number(Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')).toFixed(2))
+                        : null;
+                    newRow.values.push({
+                        val: numVal,
+                        val2: 0,
+                        color: '#000',
+                        offset: 0,
+                        callout: false,
+                        calloutSub: ''
+                    });
+                });
+
+                ds.rows.push(newRow);
+            });
+
+            // If Level 2 auto-drill is enabled, generate sub-slides for selected parent items that have children
+            const res = currentComputedPivotResult;
+            if (pivotStudioState.autoDrill && res && res.r2Name) {
+                let drillSlidesCreated = 0;
+                selectedItems.forEach(item => {
+                    if (!item.isChild && item.children && item.children.length > 0) {
+                        const matchingRow = ds.rows.find(r => r.label === item.label);
+                        if (matchingRow) {
+                            const newSlideIdx = appSlides.length + 1;
+                            const childSlide = generateDefaultSlide(newSlideIdx);
+                            childSlide.chartTitle = `${item.label} • Breakdown ${res.r2Name}`;
+                            childSlide.chartSubtitle = `Detail kontribusi ${res.r2Name} pada ${item.label}`;
+                            childSlide.colorTheme = targetSlide.colorTheme;
+                            childSlide.bentoCharts = Array.isArray(targetSlide.bentoCharts) ? [...targetSlide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
+                            childSlide.drillParentId = targetSlide.id;
+
+                            const childDs = childSlide.dataSets[0];
+                            childDs.series = ds.series.map((s, sIdx) => ({
+                                id: 's_child_' + Date.now() + '_' + sIdx,
+                                name: s.name,
+                                type: s.type,
+                                axis: s.axis,
+                                zIndex: s.zIndex
+                            }));
+
+                            childDs.rows = item.children.map((c, cIdx) => {
+                                const newChildRow = {
+                                    id: 'r_c_' + Date.now() + '_' + cIdx,
+                                    label: c.key || `Sub ${cIdx + 1}`,
+                                    icon: '',
+                                    values: [],
+                                    drillTarget: null
+                                };
+
+                                activeColIndices.forEach((cIdxVal) => {
+                                    let rawVal = 0;
+                                    const h = headers[cIdxVal] || '';
+
+                                    if (item.type === 'matrix') {
+                                        const colCount = (res.colKeys ? res.colKeys.length : 0);
+                                        if (cIdxVal >= 1 && cIdxVal <= colCount) {
+                                            rawVal = (c.vals && c.vals[cIdxVal - 1] !== undefined) ? c.vals[cIdxVal - 1] : 0;
+                                        } else if (h.includes('Δ Selisih') || h.includes('Selisih')) {
+                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                            rawVal = v1 - v0;
+                                        } else if (h.includes('Rata-rata') || h.includes('Average')) {
+                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                            rawVal = (v0 + v1) / 2;
+                                        }
+                                    } else {
+                                        if (cIdxVal === 1) rawVal = c.val1;
+                                        else if (cIdxVal === 2) rawVal = c.val2;
+                                        else if (h.includes('Δ Selisih') || h.includes('Selisih')) rawVal = (c.val2 || 0) - (c.val1 || 0);
+                                        else if (h.includes('Rata-rata') || h.includes('Average')) rawVal = ((c.val1 || 0) + (c.val2 || 0)) / 2;
+                                    }
+
+                                    const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '')
+                                        ? Number(Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')).toFixed(2))
+                                        : null;
+
+                                    newChildRow.values.push({
+                                        val: numVal,
+                                        val2: 0,
+                                        color: '#000',
+                                        offset: 0,
+                                        callout: false,
+                                        calloutSub: ''
+                                    });
+                                });
+
+                                return newChildRow;
+                            });
+
+                            forceRecolor(childSlide.colorTheme, childSlide);
+                            appSlides.push(childSlide);
+                            matchingRow.drillTarget = childSlide.id;
+                            drillSlidesCreated++;
+                        }
+                    }
+                });
+            }
+
+            forceRecolor(targetSlide.colorTheme, targetSlide);
+            if (isNewSlide) {
+                syncUIToActiveSlide();
+            } else {
+                syncUIPartialToGrid();
+            }
+            triggerVisUpdateWithDebounce();
+            renderWorkbenchFromActiveDataSet();
+            renderDataInputs();
+            renderPercentageWidgets();
+            renderSlideList();
+            saveState();
+            closeRawImportModal();
+
+            showToast(isNewSlide 
+                ? `✨ Slide baru dengan ${selectedItems.length} data terpilih berhasil dibuat!` 
+                : `✅ Berhasil menerapkan ${selectedItems.length} data terpilih ke Chart Slide!`);
+        }
+
+        function copyPivotSelectedRowsAsTSV() {
+            if (!currentPreparedImportData || currentPreparedImportData.length < 2) return;
+            const selectedKeys = pivotStudioState.selectedRowKeys;
+            if (!selectedKeys || selectedKeys.size === 0) {
+                showToast("Pilih minimal 1 baris tabel untuk disalin!", true);
+                return;
+            }
+
+            const selectedItems = [];
+            pivotStudioTableRowsRegistry.forEach((item, rowId) => {
+                if (selectedKeys.has(rowId)) selectedItems.push(item);
+            });
+
+            const headers = currentPreparedImportData[0] || [];
+            let tsv = headers.join('\t') + '\n';
+            selectedItems.forEach(item => {
+                if (item.rowValues) {
+                    tsv += item.rowValues.join('\t') + '\n';
+                }
+            });
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(tsv).then(() => {
+                    showToast(`📋 ${selectedItems.length} baris data berhasil disalin ke clipboard! Siap dipaste ke Excel.`);
+                }).catch(() => {
+                    showToast("Gagal menyalin ke clipboard", true);
+                });
+            }
+        }
+
         // Alias for legacy button triggers
         function applyRawImportToWorkbench() {
             applyPivotStudioToActiveSlide();
@@ -16357,6 +18162,7 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
+                    workbook._rawArrayBuffer = e.target.result;
                     openRawImportModal(workbook, file.name);
                 } catch (err) {
                     console.error("File Import Error:", err);
@@ -18082,7 +19888,35 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => { loadState(); applySidebarState(); applyRightPanelState(); initLeftPanelDraggable(); updateDrillBackUI(); syncUIToActiveSlide(); renderSlideList(); translatePage(); populateIcons(); triggerVisUpdateWithDebounce(); initCanvasToSidebarLinking(); initFloatingPanelsFocusManager(); });
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+
+            // ZERO-GLITCH: If Pivot Studio was open, restore it fast synchronously BEFORE painting the slide canvas!
+            let restoredFast = false;
+            if (typeof PivotStudioStorage !== 'undefined') {
+                restoredFast = PivotStudioStorage.restoreSessionSyncFast();
+            }
+
+            applySidebarState();
+            applyRightPanelState();
+            initLeftPanelDraggable();
+            updateDrillBackUI();
+            syncUIToActiveSlide();
+            renderSlideList();
+            translatePage();
+            populateIcons();
+            triggerVisUpdateWithDebounce();
+            initCanvasToSidebarLinking();
+            initFloatingPanelsFocusManager();
+
+            if (typeof PivotStudioStorage !== 'undefined') {
+                if (!restoredFast) {
+                    PivotStudioStorage.restoreSession();
+                } else {
+                    PivotStudioStorage.syncBackgroundLibrary();
+                }
+            }
+        });
     </script>
     <!-- COMMAND PALETTE MODAL -->
     <div id="commandPaletteModal"
