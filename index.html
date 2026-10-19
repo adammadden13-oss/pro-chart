@@ -6540,32 +6540,83 @@
             newSlide.chartTitle = `Breakdown: ${row.label}`;
             newSlide.chartSubtitle = `Distribusi Sub-Kategori ${row.label} (Total Induk: ${formatChartNumber(rowVal)})`;
 
-            // Generate 4 intelligent contextual sub-proportions that sum cleanly to rowVal
-            const ratios = [0.42, 0.28, 0.18, 0.12];
-            const subLabels = [
-                `Sub-Zona A (${row.label})`,
-                `Sub-Zona B (${row.label})`,
-                `Sub-Zona C (${row.label})`,
-                `Sub-Zona D (${row.label})`
-            ];
-            const subIcons = ['🏙️', '🏢', '🏬', '📍'];
-            const palette = themes[currentSlide.theme] || themes['lime'];
+            // Check if real pivot multi-level hierarchy data exists for this row
+            let realChildren = null;
+            let realSubLevelName = 'Sub-Kategori';
+            if (typeof currentComputedPivotResult !== 'undefined' && currentComputedPivotResult) {
+                const res = currentComputedPivotResult;
+                const searchList = res.rows || res.groups || [];
+                function findNodeByLabel(list) {
+                    if (!list) return null;
+                    for (const n of list) {
+                        if (n.key === row.label) return n;
+                        if (n.children && n.children.length > 0) {
+                            const sub = findNodeByLabel(n.children);
+                            if (sub) return sub;
+                        }
+                    }
+                    return null;
+                }
+                const foundNode = findNodeByLabel(searchList);
+                if (foundNode && foundNode.children && foundNode.children.length > 0) {
+                    realChildren = foundNode.children;
+                    const dIdx = foundNode.level ? foundNode.level : 1;
+                    if (res.rowNames && res.rowNames[dIdx]) {
+                        realSubLevelName = res.rowNames[dIdx];
+                    } else if (dIdx === 1 && res.r2Name) {
+                        realSubLevelName = res.r2Name;
+                    }
+                }
+            }
 
-            const subRows = ratios.map((ratio, idx) => {
-                const val = Math.round(rowVal * ratio);
-                return {
-                    id: 'r_sub_' + Date.now() + '_' + idx,
-                    label: subLabels[idx],
-                    icon: subIcons[idx % subIcons.length],
-                    drillTarget: null,
-                    values: [{
-                        val: val,
-                        color: palette[idx % palette.length],
-                        offset: 0,
-                        callout: false
-                    }]
-                };
-            });
+            const palette = themes[currentSlide.theme] || themes['lime'];
+            let subRows = [];
+
+            if (realChildren && realChildren.length > 0) {
+                newSlide.chartTitle = `${row.label} • Breakdown ${realSubLevelName}`;
+                newSlide.chartSubtitle = `Detail kontribusi ${realSubLevelName} pada ${row.label} (Total: ${formatChartNumber(rowVal)})`;
+                subRows = realChildren.map((c, idx) => {
+                    const cVal = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : (typeof c.val1 === 'number' ? c.val1 : (c.total || 0));
+                    return {
+                        id: 'r_sub_' + Date.now() + '_' + idx,
+                        label: c.key || `Sub ${idx + 1}`,
+                        icon: '',
+                        drillTarget: null,
+                        values: [{
+                            val: cVal,
+                            color: palette[idx % palette.length],
+                            offset: 0,
+                            callout: false
+                        }]
+                    };
+                });
+            } else {
+                // Generate 4 intelligent contextual sub-proportions that sum cleanly to rowVal
+                const ratios = [0.42, 0.28, 0.18, 0.12];
+                const subLabels = [
+                    `Sub-Zona A (${row.label})`,
+                    `Sub-Zona B (${row.label})`,
+                    `Sub-Zona C (${row.label})`,
+                    `Sub-Zona D (${row.label})`
+                ];
+                const subIcons = ['🏙️', '🏢', '🏬', '📍'];
+
+                subRows = ratios.map((ratio, idx) => {
+                    const val = Math.round(rowVal * ratio);
+                    return {
+                        id: 'r_sub_' + Date.now() + '_' + idx,
+                        label: subLabels[idx],
+                        icon: subIcons[idx % subIcons.length],
+                        drillTarget: null,
+                        values: [{
+                            val: val,
+                            color: palette[idx % palette.length],
+                            offset: 0,
+                            callout: false
+                        }]
+                    };
+                });
+            }
 
             newSlide.dataSets[0].rows = subRows;
             newSlide.drillParentInfo = {
@@ -12081,6 +12132,7 @@ ${escapeHtml(narrative)}
             unselectedExportColumns: new Set(), // Columns deselected via header checkboxes from chart export
             timeGranularity: 'raw',       // 'raw' | 'daily' | 'weekly' | 'monthly' | 'yearly'
             periodComparison: null,       // { type: 'wow'|'mom'|'custom', labelA: '', labelB: '', valuesA: Set, valuesB: Set }
+            rowColIndices: [0],           // Multi-level Row Hierarchy: Array of column indices [lvl1, lvl2, lvl3, ...]
             row1ColIdx: 0,                // Rows Level 1 (Primary Category)
             row2ColIdx: -1,               // Rows Level 2 (Sub-category / Drill-down, -1 = None)
             colColIdx: -1,                // Columns (Matrix Series Breakdown, -1 = None)
@@ -12164,6 +12216,7 @@ ${escapeHtml(narrative)}
                         valuesA: Array.from(state.periodComparison.valuesA || []),
                         valuesB: Array.from(state.periodComparison.valuesB || [])
                     } : null,
+                    rowColIndices: Array.isArray(state.rowColIndices) ? Array.from(state.rowColIndices) : [state.row1ColIdx, ...(state.row2ColIdx >= 0 ? [state.row2ColIdx] : [])],
                     row1ColIdx: state.row1ColIdx,
                     row2ColIdx: state.row2ColIdx,
                     colColIdx: state.colColIdx,
@@ -13002,7 +13055,8 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     if (numScores[i] <= 0.6) { pivotStudioState.row1ColIdx = i; break; }
                 }
             }
-            // By user rule: clean 1 level by default! User clicks [+] to add Level 2
+            // By user rule: clean 1 level by default! User clicks [+] to add Level 2, Level 3, etc.
+            pivotStudioState.rowColIndices = [pivotStudioState.row1ColIdx];
             pivotStudioState.row2ColIdx = -1;
 
             // Columns (Series) default: 1 Series Tunggal
@@ -13178,50 +13232,78 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 }
             }
 
-            // 3. QUADRANT 3: ROWS (BARIS)
+            // 3. QUADRANT 3: ROWS (BARIS) - MULTI-LEVEL DYNAMIC HIERARCHY
             const rContainer = document.getElementById('quadRowSlotsContainer');
             const swapBtn = document.getElementById('btnQuadSwapRows');
+            const rowIndices = getActiveRowColIndices();
+
             if (swapBtn) {
-                if (pivotStudioState.row2ColIdx >= 0) swapBtn.classList.remove('hidden');
+                if (rowIndices.length >= 2) swapBtn.classList.remove('hidden');
                 else swapBtn.classList.add('hidden');
             }
+
             if (rContainer) {
-                let rHtml = `
-                <!-- Level 1 (Utama) -->
-                <div class="flex flex-col gap-0.5">
-                    <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Level 1 (Utama):</span>
-                    <select id="quadRow1Select" onchange="onQuadRow1SelectChange(this.value)"
-                        class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
-                        ${buildOptions(pivotStudioState.row1ColIdx, false)}
-                    </select>
+                let rHtml = '';
+                rowIndices.forEach((colIdx, lvlIdx) => {
+                    const isMain = (lvlIdx === 0);
+                    const lvlNum = lvlIdx + 1;
+
+                    if (isMain) {
+                        rHtml += `
+                        <!-- Level 1 (Utama) -->
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Level 1 (Utama):</span>
+                                <span class="text-[9px] font-mono text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100">Utama</span>
+                            </div>
+                            <select id="quadRow1Select" onchange="onQuadRowLvlSelectChange(0, this.value)"
+                                class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
+                                ${buildOptions(colIdx, false)}
+                            </select>
+                        </div>`;
+                    } else {
+                        rHtml += `
+                        <!-- Level ${lvlNum} (Sub / Drill) -->
+                        <div class="flex flex-col gap-0.5 pt-1 border-t border-slate-100">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] font-medium text-slate-500 uppercase tracking-wider">Level ${lvlNum} (Sub / Drill):</span>
+                                <div class="flex items-center gap-1">
+                                    ${lvlIdx > 1 ? `
+                                    <button type="button" onclick="moveQuadrantRowLevel(${lvlIdx}, 'up')" title="Pindah Level ke Atas"
+                                        class="w-4 h-4 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center text-[10px] transition cursor-pointer">
+                                        <i class="ph-bold ph-caret-up"></i>
+                                    </button>` : ''}
+                                    ${lvlIdx < rowIndices.length - 1 ? `
+                                    <button type="button" onclick="moveQuadrantRowLevel(${lvlIdx}, 'down')" title="Pindah Level ke Bawah"
+                                        class="w-4 h-4 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center text-[10px] transition cursor-pointer">
+                                        <i class="ph-bold ph-caret-down"></i>
+                                    </button>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <select onchange="onQuadRowLvlSelectChange(${lvlIdx}, this.value)"
+                                    class="flex-1 min-w-0 bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-700 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
+                                    ${buildOptions(colIdx, true, '[ Hapus Level Ini ]')}
+                                </select>
+                                <button type="button" onclick="removeQuadrantRowLevel(${lvlIdx})" title="Hapus Level ${lvlNum}"
+                                    class="w-7 h-7 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 border border-slate-200/80 flex items-center justify-center transition shrink-0 cursor-pointer">
+                                    <i class="ph-bold ph-minus text-xs"></i>
+                                </button>
+                            </div>
+                        </div>`;
+                    }
+                });
+
+                // ALWAYS show the "+ Tambah Level X (Sub / Drill)" button at the bottom!
+                rHtml += `
+                <div class="pt-1 border-t border-dashed border-slate-200">
+                    <button type="button" onclick="addQuadrantRowLevel()"
+                        class="w-full py-1.5 px-2.5 border border-dashed border-slate-200 hover:border-indigo-300 bg-slate-50/70 hover:bg-indigo-50/50 rounded-xl text-[11px] font-semibold text-slate-500 hover:text-indigo-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="ph-bold ph-plus text-xs"></i>
+                        <span>Tambah Level ${rowIndices.length + 1} (Sub / Drill)</span>
+                    </button>
                 </div>`;
 
-                if (pivotStudioState.row2ColIdx >= 0) {
-                    rHtml += `
-                    <!-- Level 2 (Sub / Drill) -->
-                    <div class="flex flex-col gap-0.5 pt-1 border-t border-slate-100">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[9px] font-medium text-slate-500 uppercase tracking-wider">Level 2 (Sub / Drill):</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <select id="quadRow2Select" onchange="onQuadRow2SelectChange(this.value)"
-                                class="flex-1 min-w-0 bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-700 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
-                                ${buildOptions(pivotStudioState.row2ColIdx, true, '[ Tidak Ada / Tunggal ]')}
-                            </select>
-                            <button type="button" onclick="removeQuadrantRowLevel(2)" title="Hapus Level 2"
-                                class="w-7 h-7 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 border border-slate-200/80 flex items-center justify-center transition shrink-0">
-                                <i class="ph-bold ph-minus text-xs"></i>
-                            </button>
-                        </div>
-                    </div>`;
-                } else {
-                    rHtml += `
-                    <button type="button" onclick="addQuadrantRowLevel()"
-                        class="w-full py-1.5 px-2.5 border border-dashed border-slate-200 hover:border-indigo-300 bg-slate-50/70 hover:bg-indigo-50/50 rounded-xl text-[11px] font-semibold text-slate-500 hover:text-indigo-700 transition flex items-center justify-center gap-1.5">
-                        <i class="ph-bold ph-plus text-xs"></i>
-                        <span>Tambah Level 2 (Sub / Drill)</span>
-                    </button>`;
-                }
                 rContainer.innerHTML = rHtml;
             }
 
@@ -14705,8 +14787,8 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     
                     <!-- Quick action dropdown on hover/click -->
                     <div class="hidden group-hover:flex items-center gap-0.5 ml-1 pl-1 border-l border-slate-200">
+                        <button type="button" onclick="addQuadrantRowLevel(${idx})" class="hover:bg-indigo-100 text-indigo-700 px-1 py-0.5 rounded text-[9px] font-black" title="Tambah sebagai Level Baris Berikutnya">+R</button>
                         <button type="button" onclick="setFieldToQuadrant(${idx}, 'row1')" class="hover:bg-indigo-100 text-indigo-700 p-0.5 rounded text-[9px] font-bold" title="Jadikan Baris Level 1">R1</button>
-                        <button type="button" onclick="setFieldToQuadrant(${idx}, 'row2')" class="hover:bg-indigo-100 text-indigo-700 p-0.5 rounded text-[9px] font-bold" title="Jadikan Baris Level 2">R2</button>
                         <button type="button" onclick="setFieldToQuadrant(${idx}, 'col')" class="hover:bg-sky-100 text-sky-700 p-0.5 rounded text-[9px] font-bold" title="Jadikan Kolom Series">C</button>
                         <button type="button" onclick="setFieldToQuadrant(${idx}, 'val1')" class="hover:bg-emerald-100 text-emerald-700 p-0.5 rounded text-[9px] font-bold" title="Jadikan Nilai Utama">V</button>
                     </div>
@@ -14812,27 +14894,143 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             showToast("Kembali ke mode 1 Series Tunggal.");
         }
 
-        function addQuadrantRowLevel() {
-            const meta = getActiveHeaderAndScores();
-            let targetIdx = -1;
-            for (let i = 0; i < meta.headerRow.length; i++) {
-                if (i !== pivotStudioState.row1ColIdx && (!meta.numScores || meta.numScores[i] <= 0.6)) {
-                    targetIdx = i;
-                    break;
+        // --- MULTI-LEVEL ROW HIERARCHY ENGINE ---
+        function getActiveRowColIndices() {
+            if (!Array.isArray(pivotStudioState.rowColIndices) || pivotStudioState.rowColIndices.length === 0) {
+                pivotStudioState.rowColIndices = [pivotStudioState.row1ColIdx !== undefined ? pivotStudioState.row1ColIdx : 0];
+                if (pivotStudioState.row2ColIdx !== undefined && pivotStudioState.row2ColIdx >= 0) {
+                    pivotStudioState.rowColIndices.push(pivotStudioState.row2ColIdx);
                 }
             }
-            pivotStudioState.row2ColIdx = targetIdx !== -1 ? targetIdx : 0;
-            renderQuadrantControls();
-            runStudioPivotComputation();
-            showToast("Level 2 (Sub / Drill) ditambahkan.");
+            // Keep indices sanitized (valid positive integers, no duplicate column indices)
+            pivotStudioState.rowColIndices = pivotStudioState.rowColIndices.filter((idx, p, self) => typeof idx === 'number' && idx >= 0 && self.indexOf(idx) === p);
+            if (pivotStudioState.rowColIndices.length === 0) {
+                pivotStudioState.rowColIndices = [0];
+            }
+            pivotStudioState.row1ColIdx = pivotStudioState.rowColIndices[0];
+            pivotStudioState.row2ColIdx = pivotStudioState.rowColIndices.length > 1 ? pivotStudioState.rowColIndices[1] : -1;
+            return pivotStudioState.rowColIndices;
         }
 
-        function removeQuadrantRowLevel(lvl = 2) {
-            pivotStudioState.row2ColIdx = -1;
+        function addQuadrantRowLevel(specificColIdx) {
+            const meta = getActiveHeaderAndScores();
+            const indices = getActiveRowColIndices();
+
+            let targetIdx = -1;
+            if (specificColIdx !== undefined && specificColIdx !== null && specificColIdx >= 0) {
+                if (indices.includes(specificColIdx)) {
+                    const lvl = indices.indexOf(specificColIdx) + 1;
+                    showToast(`Field [${getColLetter(specificColIdx)}] sudah ada di Level ${lvl}`);
+                    return;
+                }
+                targetIdx = specificColIdx;
+            } else {
+                // Find next text/categorical column not already in row hierarchy
+                for (let i = 0; i < meta.headerRow.length; i++) {
+                    if (!indices.includes(i) && i !== pivotStudioState.filterColIdx && (!meta.numScores || meta.numScores[i] <= 0.6)) {
+                        targetIdx = i;
+                        break;
+                    }
+                }
+                // If all text columns used, check any unused column
+                if (targetIdx === -1) {
+                    for (let i = 0; i < meta.headerRow.length; i++) {
+                        if (!indices.includes(i)) {
+                            targetIdx = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (targetIdx === -1) {
+                showToast("Semua kolom sheet sudah digunakan dalam hierarki baris!", true);
+                return;
+            }
+
+            indices.push(targetIdx);
+            pivotStudioState.rowColIndices = indices;
+            pivotStudioState.row1ColIdx = indices[0];
+            pivotStudioState.row2ColIdx = indices.length > 1 ? indices[1] : -1;
+
+            const colName = cleanHeaderName(meta.headerRow[targetIdx]) || `Kolom ${getColLetter(targetIdx)}`;
             renderQuadrantControls();
             runStudioPivotComputation();
-            showToast("Level 2 (Sub) dihapus.");
+            showToast(`Level ${indices.length} (${colName}) berhasil ditambahkan untuk analisa in-depth.`);
         }
+
+        function removeQuadrantRowLevel(lvl = 1) {
+            const indices = getActiveRowColIndices();
+            if (indices.length <= 1) return;
+            let targetArrIdx = lvl;
+            if (targetArrIdx >= indices.length) {
+                targetArrIdx = lvl - 1;
+            }
+            if (targetArrIdx >= 1 && targetArrIdx < indices.length) {
+                indices.splice(targetArrIdx, 1);
+                pivotStudioState.rowColIndices = indices;
+                pivotStudioState.row1ColIdx = indices[0];
+                pivotStudioState.row2ColIdx = indices.length > 1 ? indices[1] : -1;
+                renderQuadrantControls();
+                runStudioPivotComputation();
+                showToast('Level ' + (targetArrIdx + 1) + ' dihapus.');
+            }
+        }
+
+        function onQuadRowLvlSelectChange(lvlIndex, val) {
+            const newIdx = parseInt(val);
+            const indices = getActiveRowColIndices();
+            if (newIdx === -1) {
+                removeQuadrantRowLevel(lvlIndex);
+                return;
+            }
+            if (lvlIndex >= 0 && lvlIndex < indices.length) {
+                indices[lvlIndex] = newIdx;
+                pivotStudioState.rowColIndices = indices;
+                pivotStudioState.row1ColIdx = indices[0];
+                pivotStudioState.row2ColIdx = indices.length > 1 ? indices[1] : -1;
+
+                renderQuadrantControls();
+                runStudioPivotComputation();
+            }
+        }
+
+        function moveQuadrantRowLevel(lvlIndex, direction) {
+            const indices = getActiveRowColIndices();
+            const target = direction === 'up' ? lvlIndex - 1 : lvlIndex + 1;
+            if (target >= 0 && target < indices.length) {
+                const temp = indices[lvlIndex];
+                indices[lvlIndex] = indices[target];
+                indices[target] = temp;
+                pivotStudioState.rowColIndices = indices;
+                pivotStudioState.row1ColIdx = indices[0];
+                pivotStudioState.row2ColIdx = indices.length > 1 ? indices[1] : -1;
+
+                renderQuadrantControls();
+                runStudioPivotComputation();
+                showToast(`Level ${lvlIndex + 1} dipindah ke Level ${target + 1}.`);
+            }
+        }
+
+        function swapRowHierarchy() {
+            const indices = getActiveRowColIndices();
+            if (indices.length >= 2) {
+                const temp = indices[0];
+                indices[0] = indices[1];
+                indices[1] = temp;
+                pivotStudioState.rowColIndices = indices;
+                pivotStudioState.row1ColIdx = indices[0];
+                pivotStudioState.row2ColIdx = indices[1];
+
+                renderQuadrantControls();
+                runStudioPivotComputation();
+                showToast("Hierarki Baris Level 1 & Level 2 ditukar.");
+            }
+        }
+
+        function onQuadRow1SelectChange(val) { onQuadRowLvlSelectChange(0, val); }
+        function onQuadRow2SelectChange(val) { onQuadRowLvlSelectChange(1, val); }
+        function onQuadColSelectChange(val) { pivotStudioState.colColIdx = parseInt(val); renderQuadrantControls(); runStudioPivotComputation(); }
 
         function addQuadrantValue() {
             const meta = getActiveHeaderAndScores();
@@ -14898,9 +15096,19 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
         function setFieldToQuadrant(colIdx, quad) {
             if (quad === 'row1') {
+                const indices = getActiveRowColIndices();
+                indices[0] = colIdx;
+                pivotStudioState.rowColIndices = indices;
                 pivotStudioState.row1ColIdx = colIdx;
             } else if (quad === 'row2') {
+                const indices = getActiveRowColIndices();
+                if (indices.length > 1) indices[1] = colIdx;
+                else indices.push(colIdx);
+                pivotStudioState.rowColIndices = indices;
                 pivotStudioState.row2ColIdx = colIdx;
+            } else if (quad === 'addRow') {
+                addQuadrantRowLevel(colIdx);
+                return;
             } else if (quad === 'col') {
                 pivotStudioState.colColIdx = colIdx;
             } else if (quad === 'val1') {
@@ -14911,19 +15119,6 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             showToast(`Field [${getColLetter(colIdx)}] diterapkan ke ${quad.toUpperCase()}`);
         }
 
-        function swapRowHierarchy() {
-            const temp = pivotStudioState.row1ColIdx;
-            pivotStudioState.row1ColIdx = pivotStudioState.row2ColIdx !== -1 ? pivotStudioState.row2ColIdx : 0;
-            pivotStudioState.row2ColIdx = temp;
-
-            renderQuadrantControls();
-            runStudioPivotComputation();
-            showToast("Hierarki Baris Level 1 & Level 2 ditukar.");
-        }
-
-        function onQuadColSelectChange(val) { pivotStudioState.colColIdx = parseInt(val); renderQuadrantControls(); runStudioPivotComputation(); }
-        function onQuadRow1SelectChange(val) { pivotStudioState.row1ColIdx = parseInt(val); renderQuadrantControls(); runStudioPivotComputation(); }
-        function onQuadRow2SelectChange(val) { pivotStudioState.row2ColIdx = parseInt(val); renderQuadrantControls(); runStudioPivotComputation(); }
         function onQuadVal1SelectChange(val) { pivotStudioState.val1ColIdx = parseInt(val); renderQuadrantControls(); runStudioPivotComputation(); }
         function onQuadVal2SelectChange(val) { pivotStudioState.val2ColIdx = parseInt(val); renderQuadrantControls(); runStudioPivotComputation(); }
         function onQuadAgg1SelectChange(val) { pivotStudioState.val1Agg = val; runStudioPivotComputation(); }
@@ -15052,18 +15247,20 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const sortMode = pivotStudioState.sortOrder;
             const topN = pivotStudioState.topN;
 
-            const r1Name = cleanHeaderName(headerRow[r1Idx]) || `Baris 1`;
-            const r2Name = (r2Idx >= 0 && headerRow[r2Idx]) ? cleanHeaderName(headerRow[r2Idx]) : '';
+            const rowIndices = getActiveRowColIndices();
+            const rowNames = rowIndices.map((idx, pos) => (headerRow[idx] ? cleanHeaderName(headerRow[idx]) : `Baris ${pos + 1}`));
+            const r1Name = rowNames[0] || (cleanHeaderName(headerRow[r1Idx]) || `Baris 1`);
+            const r2Name = rowNames[1] || ((r2Idx >= 0 && headerRow[r2Idx]) ? cleanHeaderName(headerRow[r2Idx]) : '');
             const colName = (colIdx >= 0 && headerRow[colIdx]) ? cleanHeaderName(headerRow[colIdx]) : '';
             const v1Name = cleanHeaderName(headerRow[v1Idx]) || `Nilai 1`;
             const v2Name = (v2Idx >= 0 && headerRow[v2Idx]) ? cleanHeaderName(headerRow[v2Idx]) : '';
 
-            // CASE A: MATRIX (COLUMNS is active)
+            // CASE A: MATRIX (COLUMNS is active, with Recursive Multi-level Row Hierarchy)
             const hasPeriod = pivotStudioState.periodComparison && pivotStudioState.periodComparison.active;
             const effectiveColIdx = (hasPeriod && pivotStudioState.periodColIdx >= 0) ? pivotStudioState.periodColIdx : colIdx;
 
             if (effectiveColIdx >= 0) {
-                const matrixMap = new Map();
+                const matrixRootMap = new Map();
                 const colKeySet = new Set();
                 const colTimeMap = new Map();
                 let v1SumTotal = 0;
@@ -15072,15 +15269,6 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 const granularity = pivotStudioState.timeGranularity || 'raw';
 
                 filteredRows.forEach(row => {
-                    const r1Val = row[r1Idx];
-                    const r1Key = (r1Val !== undefined && r1Val !== null && String(r1Val).trim() !== '') ? String(r1Val).trim() : '(Tanpa Kategori)';
-                    
-                    let r2Key = null;
-                    if (r2Idx >= 0) {
-                        const r2Val = row[r2Idx];
-                        r2Key = (r2Val !== undefined && r2Val !== null && String(r2Val).trim() !== '') ? String(r2Val).trim() : '';
-                    }
-
                     const rawCVal = row[effectiveColIdx];
                     const rawCStr = (rawCVal !== undefined && rawCVal !== null) ? String(rawCVal).trim() : '';
 
@@ -15115,41 +15303,38 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         colTimeMap.set(cKey, cTime);
                     }
 
-                    if (!matrixMap.has(r1Key)) {
-                        matrixMap.set(r1Key, {
-                            cols: new Map(),
-                            r2Set: new Set(),
-                            children: new Map()
-                        });
-                    }
-                    const r1Entry = matrixMap.get(r1Key);
-                    if (r2Key) {
-                        r1Entry.r2Set.add(r2Key);
-                        if (!r1Entry.children.has(r2Key)) {
-                            r1Entry.children.set(r2Key, new Map());
-                        }
-                        const subCols = r1Entry.children.get(r2Key);
-                        if (!subCols.has(cKey)) {
-                            subCols.set(cKey, { sum1: num1, count: 1, min1: num1, max1: num1 });
-                        } else {
-                            const subCell = subCols.get(cKey);
-                            subCell.sum1 += num1;
-                            subCell.count += 1;
-                            subCell.min1 = Math.min(subCell.min1, num1);
-                            subCell.max1 = Math.max(subCell.max1, num1);
-                        }
-                    }
+                    // Multi-level row tree traversal
+                    let curMap = matrixRootMap;
+                    const curPath = [];
 
-                    const cMap = r1Entry.cols;
-                    if (!cMap.has(cKey)) {
-                        cMap.set(cKey, { sum1: num1, count: 1, min1: num1, max1: num1 });
-                    } else {
-                        const cell = cMap.get(cKey);
-                        cell.sum1 += num1;
-                        cell.count += 1;
-                        cell.min1 = Math.min(cell.min1, num1);
-                        cell.max1 = Math.max(cell.max1, num1);
-                    }
+                    rowIndices.forEach((colIdxVal, depth) => {
+                        const rawVal = row[colIdxVal];
+                        const key = (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '')
+                            ? String(rawVal).trim()
+                            : (depth === 0 ? '(Tanpa Kategori)' : `(Tanpa ${rowNames[depth]})`);
+                        curPath.push(key);
+
+                        if (!curMap.has(key)) {
+                            curMap.set(key, {
+                                key: key,
+                                level: depth + 1,
+                                path: [...curPath],
+                                cols: new Map(),
+                                childrenMap: new Map()
+                            });
+                        }
+                        const node = curMap.get(key);
+                        if (!node.cols.has(cKey)) {
+                            node.cols.set(cKey, { sum1: num1, count: 1, min1: num1, max1: num1 });
+                        } else {
+                            const cell = node.cols.get(cKey);
+                            cell.sum1 += num1;
+                            cell.count += 1;
+                            cell.min1 = Math.min(cell.min1, num1);
+                            cell.max1 = Math.max(cell.max1, num1);
+                        }
+                        curMap = node.childrenMap;
+                    });
                 });
 
                 // Chronological sort if date-based, otherwise natural order
@@ -15160,57 +15345,41 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     colKeys.sort((a, b) => (colTimeMap.get(a) || 0) - (colTimeMap.get(b) || 0));
                 }
                 colKeys = colKeys.slice(0, 20); // Support up to 20 series in matrix
-                let matrixRows = [];
 
-                matrixMap.forEach((entry, r1Key) => {
-                    let cells = [];
-                    let rowSum = 0;
-                    let totalCount = 0;
-                    colKeys.forEach(cKey => {
-                        const cell = entry.cols.get(cKey);
-                        const val = cell ? computeAgg(cell.sum1, cell.count, cell.min1, cell.max1, agg1) : 0;
-                        cells.push(val);
-                        rowSum += val;
-                        if (cell) totalCount += cell.count;
-                    });
-
-                    // Build children list for hierarchy / accordion
-                    let childrenArr = [];
-                    if (entry.children && entry.children.size > 0) {
-                        entry.children.forEach((subCols, subKey) => {
-                            let subCells = [];
-                            let subRowSum = 0;
-                            let subCount = 0;
-                            colKeys.forEach(cKey => {
-                                const cCell = subCols.get(cKey);
-                                const val = cCell ? computeAgg(cCell.sum1, cCell.count, cCell.min1, cCell.max1, agg1) : 0;
-                                subCells.push(val);
-                                subRowSum += val;
-                                if (cCell) subCount += cCell.count;
-                            });
-                            childrenArr.push({
-                                key: subKey,
-                                vals: subCells,
-                                total: subRowSum,
-                                count: subCount
-                            });
+                // Recursively build matrix tree
+                function buildMatrixTreeFromMap(childrenMap) {
+                    const list = [];
+                    childrenMap.forEach(node => {
+                        let cells = [];
+                        let rowSum = 0;
+                        let totalCount = 0;
+                        colKeys.forEach(cKey => {
+                            const cell = node.cols.get(cKey);
+                            const val = cell ? computeAgg(cell.sum1, cell.count, cell.min1, cell.max1, agg1) : 0;
+                            cells.push(val);
+                            rowSum += val;
+                            if (cell) totalCount += cell.count;
                         });
-                        childrenArr.sort((a, b) => b.total - a.total);
-                    }
 
-                    const r2Label = (entry.r2Set && entry.r2Set.size > 0) ? Array.from(entry.r2Set).join(', ') : '';
+                        const subChildren = buildMatrixTreeFromMap(node.childrenMap);
 
-                    matrixRows.push({
-                        key: r1Key,
-                        subKey: r2Label,
-                        vals: cells,
-                        total: rowSum,
-                        count: totalCount,
-                        children: childrenArr
+                        list.push({
+                            key: node.key,
+                            level: node.level,
+                            path: node.path,
+                            vals: cells,
+                            total: rowSum,
+                            count: totalCount,
+                            children: subChildren,
+                            subKey: subChildren.length > 0 ? subChildren.map(c => c.key).slice(0, 3).join(', ') : ''
+                        });
                     });
-                });
+                    return list;
+                }
 
-                // Multi-column sorting for Matrix (Synchronized for Main Rows AND Sub / Children Rows)
+                let matrixRows = buildMatrixTreeFromMap(matrixRootMap);
+
+                // Multi-column sorting for Matrix (Synchronized across all levels)
                 const matrixSortCol = pivotStudioState.tableSortCol || 'val1';
                 const matrixSortDir = pivotStudioState.tableSortDir || sortMode || 'desc';
 
@@ -15239,18 +15408,23 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     }
                 }
 
-                sortMatrixRowList(matrixRows);
-                matrixRows.forEach(mr => {
-                    if (mr.children && mr.children.length > 1) {
-                        sortMatrixRowList(mr.children);
-                    }
-                });
+                function recursiveSortMatrixTree(list) {
+                    if (!list || list.length === 0) return;
+                    sortMatrixRowList(list);
+                    list.forEach(node => {
+                        if (node.children && node.children.length > 0) {
+                            recursiveSortMatrixTree(node.children);
+                        }
+                    });
+                }
+
+                recursiveSortMatrixTree(matrixRows);
 
                 if (topN !== 'all') {
                     matrixRows = matrixRows.slice(0, parseInt(topN) || 10);
                 }
 
-                const matrixHeaders = [r1Name, ...colKeys];
+                const matrixHeaders = [rowNames.join(' / '), ...colKeys];
                 if (colKeys.length === 2 && pivotStudioState.showDelta) {
                     matrixHeaders.push(`Δ Selisih (${colKeys[1]} - ${colKeys[0]})`);
                 }
@@ -15277,27 +15451,23 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 currentComputedPivotResult = {
                     type: 'matrix',
                     r1Name, r2Name, colName, colKeys, v1Name, agg1,
+                    rowIndices: [...rowIndices],
+                    rowNames: [...rowNames],
                     rows: matrixRows,
                     totalRowsProcessed: filteredRows.length
                 };
 
             } else {
-                // CASE B: 1-LEVEL or 2-LEVEL ROWS (with Metric 1 & optional Metric 2)
-                const groupMap = new Map();
+                // CASE B: MULTI-LEVEL RECURSIVE HIERARCHY (with Metric 1 & optional Metric 2)
+                const rowIndices = getActiveRowColIndices();
+                const rowNames = rowIndices.map((idx, pos) => (headerRow[idx] ? cleanHeaderName(headerRow[idx]) : `Baris ${pos + 1}`));
+
+                const rootMap = new Map();
                 let v1GrandSum = 0;
                 let v2GrandSum = 0;
                 let totalItemsCount = 0;
 
                 filteredRows.forEach(row => {
-                    const r1Val = row[r1Idx];
-                    const r1Key = (r1Val !== undefined && r1Val !== null && String(r1Val).trim() !== '') ? String(r1Val).trim() : '(Tanpa Kategori)';
-
-                    let r2Key = null;
-                    if (r2Idx >= 0) {
-                        const r2Val = row[r2Idx];
-                        r2Key = (r2Val !== undefined && r2Val !== null && String(r2Val).trim() !== '') ? String(r2Val).trim() : '(Tanpa Sub)';
-                    }
-
                     const num1 = parseCleanNum(row[v1Idx]);
                     const num2 = (v2Idx >= 0) ? parseCleanNum(row[v2Idx]) : 0;
 
@@ -15305,73 +15475,64 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     v2GrandSum += num2;
                     totalItemsCount++;
 
-                    if (!groupMap.has(r1Key)) {
-                        groupMap.set(r1Key, {
-                            key: r1Key,
-                            sum1: num1, min1: num1, max1: num1,
-                            sum2: num2, min2: num2, max2: num2,
-                            count: 1,
-                            children: new Map()
-                        });
-                    } else {
-                        const g = groupMap.get(r1Key);
-                        g.sum1 += num1;
-                        g.min1 = Math.min(g.min1, num1);
-                        g.max1 = Math.max(g.max1, num1);
-                        g.sum2 += num2;
-                        g.min2 = Math.min(g.min2, num2);
-                        g.max2 = Math.max(g.max2, num2);
-                        g.count += 1;
-                    }
+                    let curMap = rootMap;
+                    const curPath = [];
 
-                    if (r2Key !== null) {
-                        const g = groupMap.get(r1Key);
-                        if (!g.children.has(r2Key)) {
-                            g.children.set(r2Key, {
-                                key: r2Key,
+                    rowIndices.forEach((colIdx, depth) => {
+                        const rawVal = row[colIdx];
+                        const key = (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '') 
+                            ? String(rawVal).trim() 
+                            : (depth === 0 ? '(Tanpa Kategori)' : `(Tanpa ${rowNames[depth]})`);
+                        curPath.push(key);
+
+                        if (!curMap.has(key)) {
+                            curMap.set(key, {
+                                key: key,
+                                level: depth + 1,
+                                path: [...curPath],
                                 sum1: num1, min1: num1, max1: num1,
                                 sum2: num2, min2: num2, max2: num2,
-                                count: 1
+                                count: 1,
+                                childrenMap: new Map()
                             });
                         } else {
-                            const c = g.children.get(r2Key);
-                            c.sum1 += num1;
-                            c.min1 = Math.min(c.min1, num1);
-                            c.max1 = Math.max(c.max1, num1);
-                            c.sum2 += num2;
-                            c.min2 = Math.min(c.min2, num2);
-                            c.max2 = Math.max(c.max2, num2);
-                            c.count += 1;
+                            const node = curMap.get(key);
+                            node.sum1 += num1;
+                            node.min1 = Math.min(node.min1, num1);
+                            node.max1 = Math.max(node.max1, num1);
+                            node.sum2 += num2;
+                            node.min2 = Math.min(node.min2, num2);
+                            node.max2 = Math.max(node.max2, num2);
+                            node.count += 1;
                         }
-                    }
-                });
 
-                // Compute aggregated values (pure values, never re-scaled or distorted!)
-                let groups = [];
-                groupMap.forEach(g => {
-                    const finalVal1 = computeAgg(g.sum1, g.count, g.min1, g.max1, agg1);
-                    const finalVal2 = (v2Idx >= 0) ? computeAgg(g.sum2, g.count, g.min2, g.max2, agg2) : null;
-
-                    let childrenArr = [];
-                    g.children.forEach(c => {
-                        const cVal1 = computeAgg(c.sum1, c.count, c.min1, c.max1, agg1);
-                        const cVal2 = (v2Idx >= 0) ? computeAgg(c.sum2, c.count, c.min2, c.max2, agg2) : null;
-                        childrenArr.push({ key: c.key, val1: cVal1, val2: cVal2, count: c.count });
-                    });
-
-                    // Sort children descending by val1
-                    childrenArr.sort((a, b) => b.val1 - a.val1);
-
-                    groups.push({
-                        key: g.key,
-                        val1: finalVal1,
-                        val2: finalVal2,
-                        count: g.count,
-                        children: childrenArr
+                        curMap = curMap.get(key).childrenMap;
                     });
                 });
 
-                // Multi-column sorting supporting Header Click (Synchronized for Main Groups AND Sub-rows)
+                function buildTreeFromMap(childrenMap) {
+                    const list = [];
+                    childrenMap.forEach(node => {
+                        const finalVal1 = computeAgg(node.sum1, node.count, node.min1, node.max1, agg1);
+                        const finalVal2 = (v2Idx >= 0) ? computeAgg(node.sum2, node.count, node.min2, node.max2, agg2) : null;
+                        const subChildren = buildTreeFromMap(node.childrenMap);
+
+                        list.push({
+                            key: node.key,
+                            level: node.level,
+                            path: node.path,
+                            val1: finalVal1,
+                            val2: finalVal2,
+                            count: node.count,
+                            children: subChildren
+                        });
+                    });
+                    return list;
+                }
+
+                let groups = buildTreeFromMap(rootMap);
+
+                // Multi-column sorting supporting Header Click (Recursive across all levels!)
                 const activeSortCol = pivotStudioState.tableSortCol || 'val1';
                 const activeSortDir = pivotStudioState.tableSortDir || sortMode || 'desc';
 
@@ -15400,13 +15561,17 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     });
                 }
 
-                sortHierarchyList(groups);
-                groups.forEach(g => {
-                    if (g.children && g.children.length > 1) {
-                        sortHierarchyList(g.children);
-                    }
-                });
+                function recursiveSortTree(list) {
+                    if (!list || list.length === 0) return;
+                    sortHierarchyList(list);
+                    list.forEach(node => {
+                        if (node.children && node.children.length > 0) {
+                            recursiveSortTree(node.children);
+                        }
+                    });
+                }
 
+                recursiveSortTree(groups);
                 const totalUniqueGroupsCount = groups.length;
 
                 // Limit top N (pure ranking: if top 10 chosen, show EXACTLY 10 rows!)
@@ -15479,6 +15644,8 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
                 currentComputedPivotResult = {
                     type: 'hierarchy',
+                    rowNames: (typeof rowNames !== 'undefined' ? rowNames : [r1Name, ...(r2Name ? [r2Name] : [])]),
+                    rowIndices: (typeof rowIndices !== 'undefined' ? [...rowIndices] : [r1Idx, ...(r2Idx >= 0 ? [r2Idx] : [])]),
                     r1Name, r2Name, v1Name, agg1, v2Name, agg2,
                     s1Title, s2Title,
                     groups: finalGroups,
@@ -15891,6 +16058,8 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         // KIT 1: PIVOT GRID (EXCEL TREE TABLE WITH RANK PRESETS)
         // -------------------------------------------------------------------------
         function renderKitPivotGrid(container) {
+            if (!container) container = document.getElementById('studioKitContentArea');
+            if (!container) return;
             const res = currentComputedPivotResult;
             if (!res) {
                 container.innerHTML = '<div class="p-8 text-center text-slate-400">Sedang memproses pivot...</div>';
@@ -16178,7 +16347,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 <th onclick="onStudioHeaderSort('key')" title="Klik untuk mengurutkan Abjad (A-Z / Z-A)"
                                     class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 font-bold text-[11px] tracking-wider uppercase text-slate-700 select-none">
                                     <span class="inline-flex items-center gap-1.5">
-                                        <span>${escapeHtml(res.r1Name)} ${hasL2 ? ('/ ' + escapeHtml(res.r2Name)) : ''}</span>
+                                        <span>${(res.rowNames && res.rowNames.length > 0) ? res.rowNames.map(escapeHtml).join(' / ') : `${escapeHtml(res.r1Name)} ${hasL2 ? ('/ ' + escapeHtml(res.r2Name)) : ''}`}</span>
                                         ${getSortIconHtml('key')}
                                     </span>
                                 </th>
@@ -16245,146 +16414,108 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         <tbody class="divide-y divide-slate-100 bg-white font-mono">
                 `;
 
-                displayGroups.forEach((g, idx) => {
-                    const isOdd = idx % 2 === 1;
-                    const isCollapsed = !!pivotStudioState.collapsedRows[g.key];
-                    const hasChildren = g.children && g.children.length > 0;
+                function renderHierarchyTreeRows(nodeList, parentPathId = 'hr_p', rankPrefix = '') {
+                    let rowsHtml = '';
+                    nodeList.forEach((node, idx) => {
+                        const rankStr = rankPrefix ? `${rankPrefix}.${idx + 1}` : `${idx + 1}`;
+                        const nodePathKey = node.path ? node.path.join('___') : (parentPathId + '_' + node.key);
+                        const isCollapsed = !!pivotStudioState.collapsedRows[nodePathKey];
+                        const hasChildren = node.children && node.children.length > 0;
+                        const depth = (node.level ? node.level - 1 : 0);
 
-                    const v1Num = (typeof g.val1 === 'number') ? g.val1 : 0;
-                    const v2Num = (typeof g.val2 === 'number') ? g.val2 : 0;
-                    const fmt1 = (typeof g.val1 === 'number') ? g.val1.toLocaleString('id-ID', { maximumFractionDigits: (g.val1 % 1 !== 0 ? 2 : 0) }) : g.val1;
-                    const fmt2 = (typeof g.val2 === 'number') ? g.val2.toLocaleString('id-ID', { maximumFractionDigits: (g.val2 % 1 !== 0 ? 2 : 0) }) : g.val2;
+                        const v1Num = (typeof node.val1 === 'number') ? node.val1 : 0;
+                        const v2Num = (typeof node.val2 === 'number') ? node.val2 : 0;
+                        const fmt1 = (typeof node.val1 === 'number') ? node.val1.toLocaleString('id-ID', { maximumFractionDigits: (node.val1 % 1 !== 0 ? 2 : 0) }) : node.val1;
+                        const fmt2 = (typeof node.val2 === 'number') ? node.val2.toLocaleString('id-ID', { maximumFractionDigits: (node.val2 % 1 !== 0 ? 2 : 0) }) : node.val2;
 
-                    const rowDelta = v2Num - v1Num;
-                    const rowAvg = (v1Num + v2Num) / 2;
+                        const rowDelta = v2Num - v1Num;
+                        const rowAvg = (v1Num + v2Num) / 2;
 
-                    const pRowId = 'hr_p_' + idx;
-                    const isPSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(pRowId));
-                    const pVals = [g.key, v1Num];
-                    if (hasV2) pVals.push(v2Num);
-                    if (hasV2 && pivotStudioState.showDelta) pVals.push(rowDelta);
-                    if (hasV2 && pivotStudioState.showAverage) pVals.push(rowAvg);
-                    pivotStudioTableRowsRegistry.set(pRowId, {
-                        id: pRowId,
-                        label: g.key,
-                        rowValues: pVals,
-                        isChild: false,
-                        children: g.children || [],
-                        type: 'hierarchy'
-                    });
+                        const rowId = `${parentPathId}_${idx}`;
+                        const isSelected = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rowId));
 
-                    let deltaCellHtml = '';
-                    if (hasV2 && pivotStudioState.showDelta) {
-                        const isPos = rowDelta > 0.001;
-                        const isNeg = rowDelta < -0.001;
-                        const fmtDelta = Math.abs(rowDelta).toLocaleString('id-ID', { maximumFractionDigits: 2 });
-                        if (isPos) {
-                            deltaCellHtml = `<td class="py-2 px-3 text-right font-black font-mono bg-emerald-50/40 border-x border-emerald-100/60"><span class="inline-flex items-center gap-0.5 text-emerald-700 bg-emerald-100/70 border border-emerald-300/80 px-1.5 py-0.5 rounded text-[10px]">▲ +${fmtDelta}%</span></td>`;
-                        } else if (isNeg) {
-                            deltaCellHtml = `<td class="py-2 px-3 text-right font-black font-mono bg-rose-50/40 border-x border-rose-100/60"><span class="inline-flex items-center gap-0.5 text-rose-700 bg-rose-100/70 border border-rose-300/80 px-1.5 py-0.5 rounded text-[10px]">▼ -${fmtDelta}%</span></td>`;
-                        } else {
-                            deltaCellHtml = `<td class="py-2 px-3 text-right font-medium font-mono text-slate-400 bg-slate-50/30 border-x border-slate-100"><span class="text-[10px]">0.00%</span></td>`;
-                        }
-                    }
+                        const rowVals = [node.key, v1Num];
+                        if (hasV2) rowVals.push(v2Num);
+                        if (hasV2 && pivotStudioState.showDelta) rowVals.push(rowDelta);
+                        if (hasV2 && pivotStudioState.showAverage) rowVals.push(rowAvg);
 
-                    let avgCellHtml = '';
-                    if (hasV2 && pivotStudioState.showAverage) {
-                        const fmtAvg = rowAvg.toLocaleString('id-ID', { maximumFractionDigits: (rowAvg % 1 !== 0 ? 2 : 0) });
-                        avgCellHtml = `<td class="py-2 px-3 text-right font-black text-cyan-900 font-mono bg-cyan-50/30 border-r border-cyan-100/60">${fmtAvg}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
-                    }
-
-                    tableHtml += `
-                    <tr data-pivot-row-id="${pRowId}" onclick="onPivotRowClick(event, '${pRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${pRowId}')"
-                        class="hover:bg-slate-50/80 transition-colors ${isOdd ? 'bg-slate-50/30' : 'bg-white'} group cursor-pointer select-none ${isPSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
-                        <td class="py-2 px-2 text-center" onclick="event.stopPropagation()">
-                            <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isPSel ? 'checked' : ''} onchange="togglePivotRowSelection('${pRowId}', this.checked)">
-                        </td>
-                        <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-bold font-mono">${idx + 1}</td>
-                        <td class="py-2 px-3 font-bold font-sans text-slate-800 flex items-center gap-1.5">
-                            ${hasChildren ? `
-                                <button type="button" onclick="event.stopPropagation(); toggleRowCollapse('${escapeHtml(g.key).replace(/'/g, "\'")}')"
-                                    class="w-5 h-5 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-400 transition">
-                                    <i class="ph-bold ${isCollapsed ? 'ph-caret-right' : 'ph-caret-down'} text-xs"></i>
-                                </button>
-                            ` : (idx === 0 ? '<span class="text-xs">🏆</span>' : '<span class="w-1.5 h-1.5 rounded-full bg-slate-300 ml-2"></span>')}
-                            <span class="font-bold text-slate-900">${escapeHtml(g.key)}</span>
-                            ${hasChildren ? `<span class="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-1.5 py-0.2 rounded-full font-mono border border-indigo-200/70">${g.children.length} sub</span>` : ''}
-                        </td>
-                        <td class="py-2 px-3 text-right font-black ${isExportColumnSelected(res.s1Title) ? 'text-slate-900' : 'opacity-40 text-slate-400 bg-slate-50/20'}" title="${isExportColumnSelected(res.s1Title) ? 'Masuk ke grafik' : 'Hanya tabel (tidak masuk grafik)'}">${fmt1}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>
-                        ${hasV2 ? `<td class="py-2 px-3 text-right font-bold ${isExportColumnSelected(res.s2Title) ? 'text-indigo-900' : 'opacity-40 text-slate-400 bg-slate-50/20'}" title="${isExportColumnSelected(res.s2Title) ? 'Masuk ke grafik' : 'Hanya tabel (tidak masuk grafik)'}">${fmt2}</td>` : ''}
-                        ${deltaCellHtml}
-                        ${avgCellHtml}
-                        <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-mono">${g.count}x</td>
-                    </tr>
-                    `;
-
-                    // Render child rows if expanded
-                    if (hasChildren && !isCollapsed) {
-                        g.children.forEach((c, cIdx) => {
-                            const cV1 = (typeof c.val1 === 'number') ? c.val1 : 0;
-                            const cV2 = (typeof c.val2 === 'number') ? c.val2 : 0;
-                            const cFmt1 = (typeof c.val1 === 'number') ? c.val1.toLocaleString('id-ID', { maximumFractionDigits: (c.val1 % 1 !== 0 ? 2 : 0) }) : c.val1;
-                            const cFmt2 = (typeof c.val2 === 'number') ? c.val2.toLocaleString('id-ID', { maximumFractionDigits: (c.val2 % 1 !== 0 ? 2 : 0) }) : c.val2;
-
-                            const cDelta = cV2 - cV1;
-                            const cAvg = (cV1 + cV2) / 2;
-
-                            let cDeltaCell = '';
-                            if (hasV2 && pivotStudioState.showDelta) {
-                                const isPos = cDelta > 0.001;
-                                const isNeg = cDelta < -0.001;
-                                const fmtDelta = Math.abs(cDelta).toLocaleString('id-ID', { maximumFractionDigits: 2 });
-                                if (isPos) {
-                                    cDeltaCell = `<td class="py-1 px-3 text-right font-bold font-mono text-emerald-600 bg-emerald-50/20 text-[10px] border-x border-emerald-100/40">+${fmtDelta}%</td>`;
-                                } else if (isNeg) {
-                                    cDeltaCell = `<td class="py-1 px-3 text-right font-bold font-mono text-rose-600 bg-rose-50/20 text-[10px] border-x border-rose-100/40">-${fmtDelta}%</td>`;
-                                } else {
-                                    cDeltaCell = `<td class="py-1 px-3 text-right text-slate-300 font-mono text-[9px] border-x border-slate-100">0.00%</td>`;
-                                }
-                            }
-
-                            let cAvgCell = '';
-                            if (hasV2 && pivotStudioState.showAverage) {
-                                const fmtAvg = cAvg.toLocaleString('id-ID', { maximumFractionDigits: (cAvg % 1 !== 0 ? 2 : 0) });
-                                cAvgCell = `<td class="py-1 px-3 text-right font-semibold text-cyan-800 font-mono bg-cyan-50/20 text-[10px] border-r border-cyan-100/40">${fmtAvg}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
-                            }
-
-                            const cRowId = 'hr_c_' + idx + '_' + cIdx;
-                            const isCSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(cRowId));
-                            const cVals = [c.key, cV1];
-                            if (hasV2) cVals.push(cV2);
-                            if (hasV2 && pivotStudioState.showDelta) cVals.push(cDelta);
-                            if (hasV2 && pivotStudioState.showAverage) cVals.push(cAvg);
-                            pivotStudioTableRowsRegistry.set(cRowId, {
-                                id: cRowId,
-                                label: `${g.key} • ${c.key}`,
-                                shortLabel: c.key,
-                                rowValues: cVals,
-                                isChild: true,
-                                parentKey: g.key,
-                                type: 'hierarchy'
-                            });
-
-                            tableHtml += `
-                            <tr data-pivot-row-id="${cRowId}" onclick="onPivotRowClick(event, '${cRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${cRowId}')"
-                                class="bg-slate-50/40 hover:bg-slate-50 transition-colors text-[11px] cursor-pointer select-none ${isCSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
-                                <td class="py-1 px-2 text-center" onclick="event.stopPropagation()">
-                                    <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isCSel ? 'checked' : ''} onchange="togglePivotRowSelection('${cRowId}', this.checked)">
-                                </td>
-                                <td class="py-1 px-3 text-center text-slate-300 text-[9px] font-mono">${idx + 1}.${cIdx + 1}</td>
-                                <td class="py-1 px-3 pl-8 text-slate-600 font-medium font-sans flex items-center gap-1.5">
-                                    <span class="text-slate-300 font-mono">└──</span>
-                                    <span>${escapeHtml(c.key)}</span>
-                                </td>
-                                <td class="py-1 px-3 text-right font-semibold text-slate-700">${cFmt1}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>
-                                ${hasV2 ? `<td class="py-1 px-3 text-right font-medium text-indigo-700">${cFmt2}</td>` : ''}
-                                ${cDeltaCell}
-                                ${cAvgCell}
-                                <td class="py-1 px-3 text-center text-slate-400 text-[9px] font-mono">${c.count}x</td>
-                            </tr>`;
+                        pivotStudioTableRowsRegistry.set(rowId, {
+                            id: rowId,
+                            label: node.path ? node.path.join(' • ') : node.key,
+                            shortLabel: node.key,
+                            rowValues: rowVals,
+                            isChild: depth > 0,
+                            depth: depth,
+                            parentKey: node.path && node.path.length > 1 ? node.path[node.path.length - 2] : null,
+                            children: node.children || [],
+                            type: 'hierarchy'
                         });
-                    }
-                });
+
+                        // Delta cell
+                        let deltaCellHtml = '';
+                        if (hasV2 && pivotStudioState.showDelta) {
+                            const isPos = rowDelta > 0.001;
+                            const isNeg = rowDelta < -0.001;
+                            const fmtDelta = Math.abs(rowDelta).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+                            if (isPos) {
+                                deltaCellHtml = `<td class="py-1.5 px-3 text-right font-black font-mono bg-emerald-50/40 border-x border-emerald-100/60"><span class="inline-flex items-center gap-0.5 text-emerald-700 bg-emerald-100/70 border border-emerald-300/80 px-1.5 py-0.5 rounded text-[10px]">▲ +${fmtDelta}%</span></td>`;
+                            } else if (isNeg) {
+                                deltaCellHtml = `<td class="py-1.5 px-3 text-right font-black font-mono bg-rose-50/40 border-x border-rose-100/60"><span class="inline-flex items-center gap-0.5 text-rose-700 bg-rose-100/70 border border-rose-300/80 px-1.5 py-0.5 rounded text-[10px]">▼ -${fmtDelta}%</span></td>`;
+                            } else {
+                                deltaCellHtml = `<td class="py-1.5 px-3 text-right font-medium font-mono text-slate-400 bg-slate-50/30 border-x border-slate-100"><span class="text-[10px]">0.00%</span></td>`;
+                            }
+                        }
+
+                        // Avg cell
+                        let avgCellHtml = '';
+                        if (hasV2 && pivotStudioState.showAverage) {
+                            const fmtAvg = rowAvg.toLocaleString('id-ID', { maximumFractionDigits: (rowAvg % 1 !== 0 ? 2 : 0) });
+                            avgCellHtml = `<td class="py-1.5 px-3 text-right font-black text-cyan-900 font-mono bg-cyan-50/30 border-r border-cyan-100/60 text-xs">${fmtAvg}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
+                        }
+
+                        const padLeftPx = 12 + (depth * 22);
+                        const isRoot = (depth === 0);
+                        const bgClass = isRoot 
+                            ? (idx % 2 === 1 ? 'bg-slate-50/40' : 'bg-white') 
+                            : (depth % 2 === 1 ? 'bg-indigo-50/20' : 'bg-slate-50/35');
+
+                        rowsHtml += `
+                        <tr data-pivot-row-id="${rowId}" onclick="onPivotRowClick(event, '${rowId}')" oncontextmenu="onPivotRowContextMenu(event, '${rowId}')"
+                            class="hover:bg-slate-100/80 transition-colors ${bgClass} group cursor-pointer select-none ${isSelected ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
+                            <td class="py-1.5 px-2 text-center" onclick="event.stopPropagation()">
+                                <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isSelected ? 'checked' : ''} onchange="togglePivotRowSelection('${rowId}', this.checked)">
+                            </td>
+                            <td class="py-1.5 px-3 text-center text-slate-400 text-[10px] font-bold font-mono">${rankStr}</td>
+                            <td class="py-1.5 px-3 font-sans text-slate-800 flex items-center gap-1.5" style="padding-left: ${padLeftPx}px">
+                                ${depth > 0 ? `<span class="text-slate-300 font-mono select-none">└──</span>` : ''}
+                                ${hasChildren ? `
+                                    <button type="button" onclick="event.stopPropagation(); toggleRowCollapse('${escapeHtml(nodePathKey).replace(/'/g, "\'")}')"
+                                        class="w-5 h-5 rounded-md hover:bg-slate-200/70 flex items-center justify-center text-slate-500 transition">
+                                        <i class="ph-bold ${isCollapsed ? 'ph-caret-right' : 'ph-caret-down'} text-xs"></i>
+                                    </button>
+                                ` : (isRoot && idx === 0 ? '<span class="text-xs">🏆</span>' : (depth > 0 ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-slate-300 ml-2 mr-1"></span>'))}
+                                <span class="${isRoot ? 'font-bold text-slate-900 text-xs' : 'font-medium text-slate-700 text-[11px]'}">${escapeHtml(node.key)}</span>
+                                ${hasChildren ? `<span class="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-1.5 py-0.2 rounded-full font-mono border border-indigo-200/70">${node.children.length} sub</span>` : ''}
+                                ${depth > 0 ? `<span class="text-[8px] font-mono text-indigo-500 bg-indigo-50/80 border border-indigo-100 px-1 py-0.2 rounded font-bold">L${depth + 1}</span>` : ''}
+                            </td>
+                            <td class="py-1.5 px-3 text-right font-black ${isRoot ? 'text-slate-900' : 'text-slate-700 text-xs'} ${isExportColumnSelected(res.s1Title) ? '' : 'opacity-40 text-slate-400 bg-slate-50/20'}">${fmt1}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>
+                            ${hasV2 ? `<td class="py-1.5 px-3 text-right ${isRoot ? 'font-bold text-indigo-900' : 'font-medium text-indigo-700 text-xs'} ${isExportColumnSelected(res.s2Title) ? '' : 'opacity-40 text-slate-400 bg-slate-50/20'}">${fmt2}</td>` : ''}
+                            ${deltaCellHtml}
+                            ${avgCellHtml}
+                            <td class="py-1.5 px-3 text-center text-slate-400 text-[10px] font-mono">${node.count}x</td>
+                        </tr>
+                        `;
+
+                        if (hasChildren && !isCollapsed) {
+                            rowsHtml += renderHierarchyTreeRows(node.children, rowId, rankStr);
+                        }
+                    });
+                    return rowsHtml;
+                }
+
+                tableHtml += renderHierarchyTreeRows(displayGroups, 'hr_p');
+                tableHtml += `
+                `;
 
                 let grandDeltaHtml = '';
                 if (hasV2 && pivotStudioState.showDelta) {
@@ -16442,7 +16573,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 <th onclick="onStudioHeaderSort('key')" title="Klik untuk mengurutkan Abjad (A-Z / Z-A)"
                                     class="group cursor-pointer hover:bg-slate-100 transition py-2.5 px-3 font-bold text-[11px] tracking-wider uppercase text-slate-700 select-none">
                                     <span class="inline-flex items-center gap-1.5">
-                                        <span>${escapeHtml(res.r1Name)}${res.r2Name ? (' / ' + escapeHtml(res.r2Name)) : ''}</span>
+                                        <span>${escapeHtml((res.rowNames && res.rowNames.length > 0) ? res.rowNames.join(' / ') : (res.r1Name + (res.r2Name ? (' / ' + res.r2Name) : '')))}</span>
                                         ${getSortIconHtml('key')}
                                     </span>
                                 </th>
@@ -16497,131 +16628,98 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 }
 
                 tableHtml += `</tr></thead><tbody class="divide-y divide-slate-100 bg-white font-mono">`;
+                function renderMatrixTreeRows(nodeList, parentPathId = 'mr_p', rankPrefix = '') {
+                    let rowsHtml = '';
+                    nodeList.forEach((node, idx) => {
+                        const rankStr = rankPrefix ? `${rankPrefix}.${idx + 1}` : `${idx + 1}`;
+                        const nodePathKey = node.path ? node.path.join('___') : (parentPathId + '_' + node.key);
+                        const isCollapsed = !!pivotStudioState.collapsedRows[nodePathKey];
+                        const hasChildren = node.children && node.children.length > 0;
+                        const depth = (node.level ? node.level - 1 : 0);
+                        const isRoot = (depth === 0);
 
-                displayRows.forEach((r, idx) => {
-                    const isOdd = idx % 2 === 1;
-                    const isCollapsed = !!pivotStudioState.collapsedRows[r.key];
-                    const hasChildren = r.children && r.children.length > 0;
-                    const isSingleSub = (r.children && r.children.length === 1 && r.subKey);
+                        const rowId = `${parentPathId}_${idx}`;
+                        const isSelected = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rowId));
 
-                    const pRowId = 'mr_p_' + idx;
-                    const isPSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(pRowId));
-                    const pVals = [r.key, ...r.vals];
-                    if (has2MatrixCols && pivotStudioState.showDelta) pVals.push((r.vals[1] || 0) - (r.vals[0] || 0));
-                    if (has2MatrixCols && pivotStudioState.showAverage) pVals.push(((r.vals[0] || 0) + (r.vals[1] || 0)) / 2);
-                    pivotStudioTableRowsRegistry.set(pRowId, {
-                        id: pRowId,
-                        label: r.key,
-                        rowValues: pVals,
-                        isChild: false,
-                        children: r.children || [],
-                        type: 'matrix'
-                    });
+                        const pVals = [node.key, ...node.vals];
+                        if (has2MatrixCols && pivotStudioState.showDelta) pVals.push((node.vals[1] || 0) - (node.vals[0] || 0));
+                        if (has2MatrixCols && pivotStudioState.showAverage) pVals.push(((node.vals[0] || 0) + (node.vals[1] || 0)) / 2);
 
-                    tableHtml += `
-                    <tr data-pivot-row-id="${pRowId}" onclick="onPivotRowClick(event, '${pRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${pRowId}')"
-                        class="hover:bg-slate-50/80 transition-colors ${isOdd ? 'bg-slate-50/30' : 'bg-white'} cursor-pointer select-none ${isPSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
-                        <td class="py-2 px-2 text-center" onclick="event.stopPropagation()">
-                            <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isPSel ? 'checked' : ''} onchange="togglePivotRowSelection('${pRowId}', this.checked)">
-                        </td>
-                        <td class="py-2 px-3 text-center text-slate-400 text-[10px] font-bold font-mono">${idx + 1}</td>
-                        <td class="py-2 px-3 font-bold font-sans text-slate-800 flex items-center gap-1.5 flex-wrap">
-                            ${hasChildren && r.children.length > 1 ? `
-                                <button type="button" onclick="event.stopPropagation(); toggleRowCollapse('${escapeHtml(r.key).replace(/'/g, "\\'")}')"
-                                    class="w-5 h-5 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-400 transition cursor-pointer">
-                                    <i class="ph-bold ${isCollapsed ? 'ph-caret-right' : 'ph-caret-down'} text-xs"></i>
-                                </button>
-                            ` : (idx === 0 ? '<span class="text-xs">🏆</span>' : '<span class="w-1.5 h-1.5 rounded-full bg-slate-300 ml-2"></span>')}
-                            <span class="font-bold text-slate-900">${escapeHtml(r.key)}</span>
-                            ${(r.subKey && (!hasChildren || r.children.length <= 1)) ? `<span class="bg-indigo-50 text-indigo-700 text-[10px] font-semibold px-2 py-0.5 rounded-lg border border-indigo-200/70 shadow-2xs">${escapeHtml(r.subKey)}</span>` : ''}
-                            ${hasChildren && r.children.length > 1 ? `<span class="bg-slate-100 text-slate-600 text-[9px] font-bold px-1.5 py-0.2 rounded-full font-mono">${r.children.length} sub</span>` : ''}
-                        </td>
-                    `;
-                    r.vals.forEach((v, vColIdx) => {
-                        const colK = res.colKeys[vColIdx];
-                        const isColActive = isExportColumnSelected(colK);
-                        const fmt = (typeof v === 'number') ? v.toLocaleString('id-ID', { maximumFractionDigits: (v % 1 !== 0 ? 2 : 0) }) : v;
-                        tableHtml += `<td class="py-2 px-3 text-right font-bold ${isColActive ? 'text-slate-700' : 'opacity-40 text-slate-400 bg-slate-50/20'}" title="${isColActive ? 'Masuk ke grafik' : 'Hanya tabel (tidak masuk grafik)'}">${fmt}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
-                    });
-
-                    if (has2MatrixCols && pivotStudioState.showDelta) {
-                        const d = (r.vals[1] || 0) - (r.vals[0] || 0);
-                        const isPos = d > 0.001;
-                        const isNeg = d < -0.001;
-                        const fmtD = Math.abs(d).toLocaleString('id-ID', { maximumFractionDigits: 2 });
-                        if (isPos) {
-                            tableHtml += `<td class="py-2 px-3 text-right font-black font-mono bg-emerald-50/40 border-x border-emerald-100/60"><span class="inline-flex items-center gap-0.5 text-emerald-700 bg-emerald-100/70 border border-emerald-300/80 px-1.5 py-0.5 rounded text-[10px]">▲ +${fmtD}%</span></td>`;
-                        } else if (isNeg) {
-                            tableHtml += `<td class="py-2 px-3 text-right font-black font-mono bg-rose-50/40 border-x border-rose-100/60"><span class="inline-flex items-center gap-0.5 text-rose-700 bg-rose-100/70 border border-rose-300/80 px-1.5 py-0.5 rounded text-[10px]">▼ -${fmtD}%</span></td>`;
-                        } else {
-                            tableHtml += `<td class="py-2 px-3 text-right font-medium font-mono text-slate-400 bg-slate-50/30 border-x border-slate-100"><span class="text-[10px]">0.00%</span></td>`;
-                        }
-                    }
-
-                    if (has2MatrixCols && pivotStudioState.showAverage) {
-                        const a = ((r.vals[0] || 0) + (r.vals[1] || 0)) / 2;
-                        const fmtA = a.toLocaleString('id-ID', { maximumFractionDigits: (a % 1 !== 0 ? 2 : 0) });
-                        tableHtml += `<td class="py-2 px-3 text-right font-black text-cyan-900 font-mono bg-cyan-50/30 border-r border-cyan-100/60">${fmtA}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
-                    }
-
-                    tableHtml += `</tr>`;
-
-                    if (hasChildren && r.children.length > 1 && !isCollapsed) {
-                        r.children.forEach((c, cIdx) => {
-                            let cDeltaCell = '';
-                            if (has2MatrixCols && pivotStudioState.showDelta) {
-                                const cd = (c.vals[1] || 0) - (c.vals[0] || 0);
-                                const cisPos = cd > 0.001;
-                                const cisNeg = cd < -0.001;
-                                const cfmtD = Math.abs(cd).toLocaleString('id-ID', { maximumFractionDigits: 2 });
-                                if (cisPos) cDeltaCell = `<td class="py-1 px-3 text-right font-bold font-mono text-emerald-600 bg-emerald-50/20 text-[10px] border-x border-emerald-100/40">+${cfmtD}%</td>`;
-                                else if (cisNeg) cDeltaCell = `<td class="py-1 px-3 text-right font-bold font-mono text-rose-600 bg-rose-50/20 text-[10px] border-x border-rose-100/40">-${cfmtD}%</td>`;
-                                else cDeltaCell = `<td class="py-1 px-3 text-right text-slate-300 font-mono text-[9px] border-x border-slate-100">0.00%</td>`;
-                            }
-                            let cAvgCell = '';
-                            if (has2MatrixCols && pivotStudioState.showAverage) {
-                                const ca = ((c.vals[0] || 0) + (c.vals[1] || 0)) / 2;
-                                const cfmtA = ca.toLocaleString('id-ID', { maximumFractionDigits: (ca % 1 !== 0 ? 2 : 0) });
-                                cAvgCell = `<td class="py-1 px-3 text-right font-semibold text-cyan-800 font-mono bg-cyan-50/20 text-[10px] border-r border-cyan-100/40">${cfmtA}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
-                            }
-
-                            const cRowId = 'mr_c_' + idx + '_' + cIdx;
-                            const isCSel = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(cRowId));
-                            const cVals = [c.key, ...c.vals];
-                            if (has2MatrixCols && pivotStudioState.showDelta) cVals.push((c.vals[1] || 0) - (c.vals[0] || 0));
-                            if (has2MatrixCols && pivotStudioState.showAverage) cVals.push(((c.vals[0] || 0) + (c.vals[1] || 0)) / 2);
-                            pivotStudioTableRowsRegistry.set(cRowId, {
-                                id: cRowId,
-                                label: `${r.key} • ${c.key}`,
-                                shortLabel: c.key,
-                                rowValues: cVals,
-                                isChild: true,
-                                parentKey: r.key,
-                                type: 'matrix'
-                            });
-
-                            tableHtml += `
-                            <tr data-pivot-row-id="${cRowId}" onclick="onPivotRowClick(event, '${cRowId}')" oncontextmenu="onPivotRowContextMenu(event, '${cRowId}')"
-                                class="bg-slate-50/40 hover:bg-slate-50 transition-colors text-[11px] cursor-pointer select-none ${isCSel ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
-                                <td class="py-1 px-2 text-center" onclick="event.stopPropagation()">
-                                    <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isCSel ? 'checked' : ''} onchange="togglePivotRowSelection('${cRowId}', this.checked)">
-                                </td>
-                                <td class="py-1 px-3 text-center text-slate-300 text-[9px] font-mono">${idx + 1}.${cIdx + 1}</td>
-                                <td class="py-1 px-3 pl-8 text-slate-600 font-medium font-sans flex items-center gap-1.5">
-                                    <span class="text-slate-300 font-mono">└──</span>
-                                    <span>${escapeHtml(c.key)}</span>
-                                </td>
-                            `;
-                            c.vals.forEach((cv, cvColIdx) => {
-                                const cColK = res.colKeys[cvColIdx];
-                                const isCColActive = isExportColumnSelected(cColK);
-                                const cfmt = (typeof cv === 'number') ? cv.toLocaleString('id-ID', { maximumFractionDigits: (cv % 1 !== 0 ? 2 : 0) }) : cv;
-                                tableHtml += `<td class="py-1 px-3 text-right font-medium ${isCColActive ? 'text-slate-600' : 'opacity-40 text-slate-400'} text-[11px]">${cfmt}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
-                            });
-                            tableHtml += `${cDeltaCell}${cAvgCell}</tr>`;
+                        pivotStudioTableRowsRegistry.set(rowId, {
+                            id: rowId,
+                            label: node.path ? node.path.join(' • ') : node.key,
+                            shortLabel: node.key,
+                            rowValues: pVals,
+                            isChild: depth > 0,
+                            depth: depth,
+                            parentKey: node.path && node.path.length > 1 ? node.path[node.path.length - 2] : null,
+                            children: node.children || [],
+                            type: 'matrix'
                         });
-                    }
-                });
+
+                        let deltaCellHtml = '';
+                        if (has2MatrixCols && pivotStudioState.showDelta) {
+                            const d = (node.vals[1] || 0) - (node.vals[0] || 0);
+                            const isPos = d > 0.001;
+                            const isNeg = d < -0.001;
+                            const fmtD = Math.abs(d).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+                            if (isPos) {
+                                deltaCellHtml = `<td class="py-1.5 px-3 text-right font-black font-mono bg-emerald-50/40 border-x border-emerald-100/60"><span class="inline-flex items-center gap-0.5 text-emerald-700 bg-emerald-100/70 border border-emerald-300/80 px-1.5 py-0.5 rounded text-[10px]">▲ +${fmtD}%</span></td>`;
+                            } else if (isNeg) {
+                                deltaCellHtml = `<td class="py-1.5 px-3 text-right font-black font-mono bg-rose-50/40 border-x border-rose-100/60"><span class="inline-flex items-center gap-0.5 text-rose-700 bg-rose-100/70 border border-rose-300/80 px-1.5 py-0.5 rounded text-[10px]">▼ -${fmtD}%</span></td>`;
+                            } else {
+                                deltaCellHtml = `<td class="py-1.5 px-3 text-right font-medium font-mono text-slate-400 bg-slate-50/30 border-x border-slate-100"><span class="text-[10px]">0.00%</span></td>`;
+                            }
+                        }
+
+                        let avgCellHtml = '';
+                        if (has2MatrixCols && pivotStudioState.showAverage) {
+                            const a = ((node.vals[0] || 0) + (node.vals[1] || 0)) / 2;
+                            const fmtA = a.toLocaleString('id-ID', { maximumFractionDigits: (a % 1 !== 0 ? 2 : 0) });
+                            avgCellHtml = `<td class="py-1.5 px-3 text-right font-black text-cyan-900 font-mono bg-cyan-50/30 border-r border-cyan-100/60 text-xs">${fmtA}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
+                        }
+
+                        const padLeftPx = 12 + (depth * 22);
+                        const bgClass = isRoot
+                            ? (idx % 2 === 1 ? 'bg-slate-50/30' : 'bg-white')
+                            : (depth % 2 === 1 ? 'bg-indigo-50/20' : 'bg-slate-50/35');
+
+                        rowsHtml += `
+                        <tr data-pivot-row-id="${rowId}" onclick="onPivotRowClick(event, '${rowId}')" oncontextmenu="onPivotRowContextMenu(event, '${rowId}')"
+                            class="hover:bg-slate-100/80 transition-colors ${bgClass} cursor-pointer select-none ${isSelected ? 'bg-indigo-50/90 text-indigo-950 font-bold border-l-4 border-indigo-600 shadow-2xs' : ''}">
+                            <td class="py-1.5 px-2 text-center" onclick="event.stopPropagation()">
+                                <input type="checkbox" class="pivot-row-select-cb w-3.5 h-3.5 rounded text-indigo-600 accent-indigo-600 cursor-pointer" ${isSelected ? 'checked' : ''} onchange="togglePivotRowSelection('${rowId}', this.checked)">
+                            </td>
+                            <td class="py-1.5 px-3 text-center text-slate-400 text-[10px] font-bold font-mono">${rankStr}</td>
+                            <td class="py-1.5 px-3 font-sans text-slate-800 flex items-center gap-1.5 flex-wrap" style="padding-left: ${padLeftPx}px">
+                                ${depth > 0 ? `<span class="text-slate-300 font-mono select-none">└──</span>` : ''}
+                                ${hasChildren ? `
+                                    <button type="button" onclick="event.stopPropagation(); toggleRowCollapse('${escapeHtml(nodePathKey).replace(/'/g, "\\'")}')"
+                                        class="w-5 h-5 rounded-md hover:bg-slate-200/70 flex items-center justify-center text-slate-500 transition cursor-pointer">
+                                        <i class="ph-bold ${isCollapsed ? 'ph-caret-right' : 'ph-caret-down'} text-xs"></i>
+                                    </button>
+                                ` : (isRoot && idx === 0 ? '<span class="text-xs">🏆</span>' : (depth > 0 ? '' : '<span class="w-1.5 h-1.5 rounded-full bg-slate-300 ml-2 mr-1"></span>'))}
+                                <span class="${isRoot ? 'font-bold text-slate-900 text-xs' : 'font-medium text-slate-700 text-[11px]'}">${escapeHtml(node.key)}</span>
+                                ${hasChildren ? `<span class="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-1.5 py-0.2 rounded-full font-mono border border-indigo-200/70">${node.children.length} sub</span>` : ''}
+                                ${depth > 0 ? `<span class="text-[8px] font-mono text-indigo-500 bg-indigo-50/80 border border-indigo-100 px-1 py-0.2 rounded font-bold">L${depth + 1}</span>` : ''}
+                            </td>
+                        `;
+                        node.vals.forEach((v, vColIdx) => {
+                            const colK = res.colKeys[vColIdx];
+                            const isColActive = isExportColumnSelected(colK);
+                            const fmt = (typeof v === 'number') ? v.toLocaleString('id-ID', { maximumFractionDigits: (v % 1 !== 0 ? 2 : 0) }) : v;
+                            rowsHtml += `<td class="py-1.5 px-3 text-right font-bold ${isRoot ? 'text-slate-900' : 'text-slate-700 text-xs'} ${isColActive ? '' : 'opacity-40 text-slate-400 bg-slate-50/20'}" title="${isColActive ? 'Masuk ke grafik' : 'Hanya tabel'}">${fmt}${res.agg1 === 'AVERAGE' ? '%' : ''}</td>`;
+                        });
+                        rowsHtml += `${deltaCellHtml}${avgCellHtml}</tr>`;
+
+                        if (hasChildren && !isCollapsed) {
+                            rowsHtml += renderMatrixTreeRows(node.children, rowId, rankStr);
+                        }
+                    });
+                    return rowsHtml;
+                }
+
+                tableHtml += renderMatrixTreeRows(displayRows, 'mr_p');
 
                 tableHtml += `</tbody></table></div>`;
             }
@@ -17738,108 +17836,128 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 });
 
                 ds.rows.push(newRow);
-            });
-
-            // 3. Auto-Generate Child Slides for Level 2 Drill-down (Supports BOTH Matrix & Hierarchy Modes)
+            });            // 3. Auto-Generate Recursive Child Slides for Multi-Level Drill-down (Supports BOTH Matrix & Hierarchy Modes)
             const res = currentComputedPivotResult;
-            if (pivotStudioState.autoDrill && res && res.r2Name) {
+            const rowNames = (res && res.rowNames && res.rowNames.length > 0)
+                ? res.rowNames
+                : [res ? res.r1Name : 'Level 1', res ? res.r2Name : 'Level 2'].filter(Boolean);
+
+            if (pivotStudioState.autoDrill && res && rowNames.length >= 2) {
                 let drillSlidesCreated = 0;
-                
-                // Unified parent items list
-                let parentList = [];
-                if (res.type === 'hierarchy' && res.groups) {
-                    parentList = res.groups.map(g => ({
-                        key: g.key,
-                        children: g.children || [],
-                        type: 'hierarchy'
-                    }));
-                } else if (res.type === 'matrix' && res.rows) {
-                    parentList = res.rows.map(r => ({
-                        key: r.key,
-                        children: r.children || [],
-                        type: 'matrix'
-                    }));
+
+                // Function to build slide rows from node children
+                function buildSlideRows(childrenNodes, parentType) {
+                    return childrenNodes.map((c, cIdx) => {
+                        const newChildRow = {
+                            id: 'r_c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '_' + cIdx,
+                            label: c.key || `Sub ${cIdx + 1}`,
+                            icon: '',
+                            values: [],
+                            drillTarget: null
+                        };
+
+                        activeColIndices.forEach((cIdxVal) => {
+                            let rawVal = 0;
+                            const h = headers[cIdxVal] || '';
+
+                            if (parentType === 'matrix') {
+                                const colCount = (res.colKeys ? res.colKeys.length : 0);
+                                if (cIdxVal >= 1 && cIdxVal <= colCount) {
+                                    rawVal = (c.vals && c.vals[cIdxVal - 1] !== undefined) ? c.vals[cIdxVal - 1] : 0;
+                                } else if (h.includes('Δ Selisih') || h.includes('Selisih')) {
+                                    const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                    const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                    rawVal = v1 - v0;
+                                } else if (h.includes('Rata-rata') || h.includes('Average')) {
+                                    const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                    const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                    rawVal = (v0 + v1) / 2;
+                                }
+                            } else {
+                                if (cIdxVal === 1) rawVal = c.val1;
+                                else if (cIdxVal === 2) rawVal = c.val2;
+                                else if (h.includes('Δ Selisih') || h.includes('Selisih')) rawVal = (c.val2 || 0) - (c.val1 || 0);
+                                else if (h.includes('Rata-rata') || h.includes('Average')) rawVal = ((c.val1 || 0) + (c.val2 || 0)) / 2;
+                            }
+
+                            const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '')
+                                ? Number(Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')).toFixed(2))
+                                : null;
+
+                            newChildRow.values.push({
+                                val: numVal,
+                                val2: 0,
+                                color: '#000',
+                                offset: 0,
+                                callout: false,
+                                calloutSub: ''
+                            });
+                        });
+
+                        return newChildRow;
+                    });
                 }
 
-                parentList.forEach(parentGroup => {
-                    if (parentGroup.children && parentGroup.children.length > 0) {
-                        const matchingRow = ds.rows.find(r => r.label === parentGroup.key);
+                // Recursive function to generate drill slide for any node that has children
+                function generateDrillSlideForNode(node, parentSlideId, depthIndex, nodeType) {
+                    if (!node || !node.children || node.children.length === 0) return null;
+                    if (depthIndex >= rowNames.length) return null;
+
+                    const childLevelName = rowNames[depthIndex] || (`Level ${depthIndex + 1}`);
+                    const newSlideIdx = appSlides.length + 1;
+                    const childSlide = generateDefaultSlide(newSlideIdx);
+                    childSlide.chartTitle = `${node.key} • Breakdown ${childLevelName}`;
+                    childSlide.chartSubtitle = `Detail kontribusi ${childLevelName} pada ${node.key}`;
+                    childSlide.colorTheme = slide.colorTheme;
+                    childSlide.stackMode = slide.stackMode || 'grouped';
+                    childSlide.bentoCharts = Array.isArray(slide.bentoCharts) ? [...slide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
+                    childSlide.drillParentId = parentSlideId;
+
+                    const childDs = childSlide.dataSets[0];
+                    childDs.series = ds.series.map((s, sIdx) => ({
+                        id: 's_child_' + Date.now() + '_' + sIdx,
+                        name: s.name,
+                        type: s.type,
+                        axis: s.axis,
+                        zIndex: s.zIndex
+                    }));
+
+                    const childRows = buildSlideRows(node.children, nodeType);
+                    childDs.rows = childRows;
+
+                    forceRecolor(childSlide.colorTheme, childSlide);
+                    appSlides.push(childSlide);
+                    drillSlidesCreated++;
+
+                    // Recursively generate grandchild slides for any child node having deeper children
+                    node.children.forEach((cNode, cIdx) => {
+                        if (cNode.children && cNode.children.length > 0 && (depthIndex + 1) < rowNames.length) {
+                            const grandChildSlide = generateDrillSlideForNode(cNode, childSlide.id, depthIndex + 1, nodeType);
+                            if (grandChildSlide && childRows[cIdx]) {
+                                childRows[cIdx].drillTarget = grandChildSlide.id;
+                            }
+                        }
+                    });
+
+                    return childSlide;
+                }
+
+                // Unified parent items list
+                let rootList = [];
+                if (res.type === 'hierarchy' && res.groups) {
+                    rootList = res.groups.map(g => ({ node: g, type: 'hierarchy' }));
+                } else if (res.type === 'matrix' && res.rows) {
+                    rootList = res.rows.map(r => ({ node: r, type: 'matrix' }));
+                }
+
+                rootList.forEach(item => {
+                    if (item.node && item.node.children && item.node.children.length > 0) {
+                        const matchingRow = ds.rows.find(r => r.label === item.node.key);
                         if (matchingRow) {
-                            const newSlideIdx = appSlides.length + 1;
-                            const childSlide = generateDefaultSlide(newSlideIdx);
-                            childSlide.chartTitle = `${parentGroup.key} • Breakdown ${res.r2Name}`;
-                            childSlide.chartSubtitle = `Detail kontribusi ${res.r2Name} pada ${parentGroup.key}`;
-                            childSlide.colorTheme = slide.colorTheme;
-                            childSlide.stackMode = slide.stackMode || 'grouped';
-                            childSlide.bentoCharts = Array.isArray(slide.bentoCharts) ? [...slide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
-                            childSlide.drillParentId = slide.id;
-
-                            const childDs = childSlide.dataSets[0];
-                            
-                            // Replicate EXACT active series configuration from parent slide
-                            childDs.series = ds.series.map((s, sIdx) => ({
-                                id: 's_child_' + Date.now() + '_' + sIdx,
-                                name: s.name,
-                                type: s.type,
-                                axis: s.axis,
-                                zIndex: s.zIndex
-                            }));
-
-                            // Populate rows for each child with active columns
-                            childDs.rows = parentGroup.children.map((c, cIdx) => {
-                                const newChildRow = {
-                                    id: 'r_c_' + Date.now() + '_' + cIdx,
-                                    label: c.key || `Sub ${cIdx + 1}`,
-                                    icon: '',
-                                    values: [],
-                                    drillTarget: null
-                                };
-
-                                activeColIndices.forEach((cIdxVal) => {
-                                    let rawVal = 0;
-                                    const h = headers[cIdxVal] || '';
-
-                                    if (parentGroup.type === 'matrix') {
-                                        const colCount = (res.colKeys ? res.colKeys.length : 0);
-                                        if (cIdxVal >= 1 && cIdxVal <= colCount) {
-                                            rawVal = (c.vals && c.vals[cIdxVal - 1] !== undefined) ? c.vals[cIdxVal - 1] : 0;
-                                        } else if (h.includes('Δ Selisih') || h.includes('Selisih')) {
-                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
-                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
-                                            rawVal = v1 - v0;
-                                        } else if (h.includes('Rata-rata') || h.includes('Average')) {
-                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
-                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
-                                            rawVal = (v0 + v1) / 2;
-                                        }
-                                    } else {
-                                        if (cIdxVal === 1) rawVal = c.val1;
-                                        else if (cIdxVal === 2) rawVal = c.val2;
-                                        else if (h.includes('Δ Selisih') || h.includes('Selisih')) rawVal = (c.val2 || 0) - (c.val1 || 0);
-                                        else if (h.includes('Rata-rata') || h.includes('Average')) rawVal = ((c.val1 || 0) + (c.val2 || 0)) / 2;
-                                    }
-
-                                    const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '')
-                                        ? Number(Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')).toFixed(2))
-                                        : null;
-
-                                    newChildRow.values.push({
-                                        val: numVal,
-                                        val2: 0,
-                                        color: '#000',
-                                        offset: 0,
-                                        callout: false,
-                                        calloutSub: ''
-                                    });
-                                });
-
-                                return newChildRow;
-                            });
-
-                            forceRecolor(childSlide.colorTheme, childSlide);
-                            appSlides.push(childSlide);
-                            matchingRow.drillTarget = childSlide.id;
-                            drillSlidesCreated++;
+                            const childSlide = generateDrillSlideForNode(item.node, slide.id, 1, item.type);
+                            if (childSlide) {
+                                matchingRow.drillTarget = childSlide.id;
+                            }
                         }
                     }
                 });
@@ -18014,87 +18132,116 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 });
 
                 ds.rows.push(newRow);
-            });
-
-            // If Level 2 auto-drill is enabled, generate sub-slides for selected parent items that have children
+            });            // Multi-level recursive auto-drill for selected items
             const res = currentComputedPivotResult;
-            if (pivotStudioState.autoDrill && res && res.r2Name) {
+            const rowNames = (res && res.rowNames && res.rowNames.length > 0)
+                ? res.rowNames
+                : [res ? res.r1Name : 'Level 1', res ? res.r2Name : 'Level 2'].filter(Boolean);
+
+            if (pivotStudioState.autoDrill && res && rowNames.length >= 2) {
                 let drillSlidesCreated = 0;
+
+                function buildSlideRowsSel(childrenNodes, parentType) {
+                    return childrenNodes.map((c, cIdx) => {
+                        const newChildRow = {
+                            id: 'r_c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '_' + cIdx,
+                            label: c.key || `Sub ${cIdx + 1}`,
+                            icon: '',
+                            values: [],
+                            drillTarget: null
+                        };
+
+                        activeColIndices.forEach((cIdxVal) => {
+                            let rawVal = 0;
+                            const h = headers[cIdxVal] || '';
+
+                            if (parentType === 'matrix') {
+                                const colCount = (res.colKeys ? res.colKeys.length : 0);
+                                if (cIdxVal >= 1 && cIdxVal <= colCount) {
+                                    rawVal = (c.vals && c.vals[cIdxVal - 1] !== undefined) ? c.vals[cIdxVal - 1] : 0;
+                                } else if (h.includes('Δ Selisih') || h.includes('Selisih')) {
+                                    const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                    const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                    rawVal = v1 - v0;
+                                } else if (h.includes('Rata-rata') || h.includes('Average')) {
+                                    const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
+                                    const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
+                                    rawVal = (v0 + v1) / 2;
+                                }
+                            } else {
+                                if (cIdxVal === 1) rawVal = c.val1;
+                                else if (cIdxVal === 2) rawVal = c.val2;
+                                else if (h.includes('Δ Selisih') || h.includes('Selisih')) rawVal = (c.val2 || 0) - (c.val1 || 0);
+                                else if (h.includes('Rata-rata') || h.includes('Average')) rawVal = ((c.val1 || 0) + (c.val2 || 0)) / 2;
+                            }
+
+                            const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '')
+                                ? Number(Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')).toFixed(2))
+                                : null;
+
+                            newChildRow.values.push({
+                                val: numVal,
+                                val2: 0,
+                                color: '#000',
+                                offset: 0,
+                                callout: false,
+                                calloutSub: ''
+                            });
+                        });
+
+                        return newChildRow;
+                    });
+                }
+
+                function generateDrillSlideForNodeSel(node, parentSlideId, depthIndex, nodeType) {
+                    if (!node || !node.children || node.children.length === 0) return null;
+                    if (depthIndex >= rowNames.length) return null;
+
+                    const childLevelName = rowNames[depthIndex] || (`Level ${depthIndex + 1}`);
+                    const newSlideIdx = appSlides.length + 1;
+                    const childSlide = generateDefaultSlide(newSlideIdx);
+                    childSlide.chartTitle = `${node.key || node.label} • Breakdown ${childLevelName}`;
+                    childSlide.chartSubtitle = `Detail kontribusi ${childLevelName} pada ${node.key || node.label}`;
+                    childSlide.colorTheme = targetSlide.colorTheme;
+                    childSlide.bentoCharts = Array.isArray(targetSlide.bentoCharts) ? [...targetSlide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
+                    childSlide.drillParentId = parentSlideId;
+
+                    const childDs = childSlide.dataSets[0];
+                    childDs.series = ds.series.map((s, sIdx) => ({
+                        id: 's_child_' + Date.now() + '_' + sIdx,
+                        name: s.name,
+                        type: s.type,
+                        axis: s.axis,
+                        zIndex: s.zIndex
+                    }));
+
+                    const childRows = buildSlideRowsSel(node.children, nodeType);
+                    childDs.rows = childRows;
+
+                    forceRecolor(childSlide.colorTheme, childSlide);
+                    appSlides.push(childSlide);
+                    drillSlidesCreated++;
+
+                    node.children.forEach((cNode, cIdx) => {
+                        if (cNode.children && cNode.children.length > 0 && (depthIndex + 1) < rowNames.length) {
+                            const grandChildSlide = generateDrillSlideForNodeSel(cNode, childSlide.id, depthIndex + 1, nodeType);
+                            if (grandChildSlide && childRows[cIdx]) {
+                                childRows[cIdx].drillTarget = grandChildSlide.id;
+                            }
+                        }
+                    });
+
+                    return childSlide;
+                }
+
                 selectedItems.forEach(item => {
                     if (!item.isChild && item.children && item.children.length > 0) {
                         const matchingRow = ds.rows.find(r => r.label === item.label);
                         if (matchingRow) {
-                            const newSlideIdx = appSlides.length + 1;
-                            const childSlide = generateDefaultSlide(newSlideIdx);
-                            childSlide.chartTitle = `${item.label} • Breakdown ${res.r2Name}`;
-                            childSlide.chartSubtitle = `Detail kontribusi ${res.r2Name} pada ${item.label}`;
-                            childSlide.colorTheme = targetSlide.colorTheme;
-                            childSlide.bentoCharts = Array.isArray(targetSlide.bentoCharts) ? [...targetSlide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
-                            childSlide.drillParentId = targetSlide.id;
-
-                            const childDs = childSlide.dataSets[0];
-                            childDs.series = ds.series.map((s, sIdx) => ({
-                                id: 's_child_' + Date.now() + '_' + sIdx,
-                                name: s.name,
-                                type: s.type,
-                                axis: s.axis,
-                                zIndex: s.zIndex
-                            }));
-
-                            childDs.rows = item.children.map((c, cIdx) => {
-                                const newChildRow = {
-                                    id: 'r_c_' + Date.now() + '_' + cIdx,
-                                    label: c.key || `Sub ${cIdx + 1}`,
-                                    icon: '',
-                                    values: [],
-                                    drillTarget: null
-                                };
-
-                                activeColIndices.forEach((cIdxVal) => {
-                                    let rawVal = 0;
-                                    const h = headers[cIdxVal] || '';
-
-                                    if (item.type === 'matrix') {
-                                        const colCount = (res.colKeys ? res.colKeys.length : 0);
-                                        if (cIdxVal >= 1 && cIdxVal <= colCount) {
-                                            rawVal = (c.vals && c.vals[cIdxVal - 1] !== undefined) ? c.vals[cIdxVal - 1] : 0;
-                                        } else if (h.includes('Δ Selisih') || h.includes('Selisih')) {
-                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
-                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
-                                            rawVal = v1 - v0;
-                                        } else if (h.includes('Rata-rata') || h.includes('Average')) {
-                                            const v0 = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : 0;
-                                            const v1 = (c.vals && c.vals[1] !== undefined) ? c.vals[1] : 0;
-                                            rawVal = (v0 + v1) / 2;
-                                        }
-                                    } else {
-                                        if (cIdxVal === 1) rawVal = c.val1;
-                                        else if (cIdxVal === 2) rawVal = c.val2;
-                                        else if (h.includes('Δ Selisih') || h.includes('Selisih')) rawVal = (c.val2 || 0) - (c.val1 || 0);
-                                        else if (h.includes('Rata-rata') || h.includes('Average')) rawVal = ((c.val1 || 0) + (c.val2 || 0)) / 2;
-                                    }
-
-                                    const numVal = (rawVal !== undefined && rawVal !== null && rawVal !== '')
-                                        ? Number(Number(String(rawVal).replace(',', '.').replace(/[^0-9.-]/g, '')).toFixed(2))
-                                        : null;
-
-                                    newChildRow.values.push({
-                                        val: numVal,
-                                        val2: 0,
-                                        color: '#000',
-                                        offset: 0,
-                                        callout: false,
-                                        calloutSub: ''
-                                    });
-                                });
-
-                                return newChildRow;
-                            });
-
-                            forceRecolor(childSlide.colorTheme, childSlide);
-                            appSlides.push(childSlide);
-                            matchingRow.drillTarget = childSlide.id;
-                            drillSlidesCreated++;
+                            const childSlide = generateDrillSlideForNodeSel(item, targetSlide.id, 1, item.type);
+                            if (childSlide) {
+                                matchingRow.drillTarget = childSlide.id;
+                            }
                         }
                     }
                 });
