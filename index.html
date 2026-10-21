@@ -1072,6 +1072,99 @@
         </div>
     </div>
 
+    <!-- POPUP MODAL: TEMPLATE EKSEKUTIF SINDIKASI (SHARE & DURASI WOW) -->
+    <div id="syndicateExecutiveModal" class="hidden fixed inset-0 z-[285] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeSyndicateExecutiveModal()">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-2xl p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-amber-600 text-white flex items-center justify-center font-bold shadow-md">
+                        <i class="ph-bold ph-television text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-sm font-black text-slate-900 tracking-tight">Template Eksekutif Sindikasi: Share &amp; Durasi</h4>
+                            <span class="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">WoW Executive Deck</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 font-medium">Format komparasi 2 minggu (Tabel Ringkasan + Dual Clustered Bar)</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeSyndicateExecutiveModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+            </div>
+
+            <!-- CONTROLS & SELECTION -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                        <span>Pilih Channel:</span>
+                        <span class="text-[10px] text-indigo-600 font-mono" id="synChannelCount">0 channel</span>
+                    </label>
+                    <select id="synChannelSelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-600 transition cursor-pointer">
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-700">Kolom Program Source (Kategori):</label>
+                    <select id="synSourceColSelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-600 transition cursor-pointer">
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Periode / Week A (Basis Awal):
+                    </label>
+                    <select id="synPeriodASelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-600 transition cursor-pointer">
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-700"></span> Periode / Week B (Pembanding):
+                    </label>
+                    <select id="synPeriodBSelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-700 transition cursor-pointer">
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-700">Kolom Share (Performa):</label>
+                    <select id="synShareColSelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-600 transition cursor-pointer">
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-[11px] font-bold text-slate-700">Kolom Durasi (Jam/Menit):</label>
+                    <select id="synDurColSelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-600 transition cursor-pointer">
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
+                    <i class="ph-bold ph-table text-indigo-600"></i> Live Preview Tabel &amp; Data
+                </span>
+                <button type="button" onclick="loadSampleSyndicateData()" class="px-3 py-1 rounded-xl text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition flex items-center gap-1">
+                    <i class="ph-bold ph-magic-wand text-amber-600"></i> <span>Gunakan Contoh Kids TV (Week 2627 vs 2628)</span>
+                </button>
+            </div>
+
+            <!-- LIVE PREVIEW CONTAINER -->
+            <div id="synPreviewContainer" class="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
+                <div class="p-4 text-center text-slate-400 text-xs">Memuat pratinjau data sindikasi...</div>
+            </div>
+
+            <!-- ACTION FOOTER -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeSyndicateExecutiveModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+                    Batal
+                </button>
+                <button type="button" onclick="applySyndicateToSlide()" class="px-5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 hover:from-blue-800 hover:to-amber-700 text-white shadow-md transition flex items-center gap-2 cursor-pointer hover:scale-[1.02]">
+                    <i class="ph-bold ph-rocket-launch text-sm"></i> <span>Terapkan ke Slide Canvas</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- POPUP MODAL: VERSUS 2 TANGGAL / PERIODE (A VS B) -->
     <div id="versusDateModal" class="hidden fixed inset-0 z-[280] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeVersusDateModal()">
         <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
@@ -1945,6 +2038,11 @@
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                                 <i class="ph-bold ph-sliders text-indigo-500"></i> Kuadran Pivot (Bebas Kustom)
                             </span>
+                            <button type="button" onclick="openSyndicateExecutiveModal()"
+                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 hover:from-blue-800 hover:to-amber-700 text-white flex items-center gap-1.5 shadow-2xs transition hover:scale-[1.02] cursor-pointer"
+                                title="Template Eksekutif Sindikasi: Tabel + 2 Grafik WoW (Share & Durasi)">
+                                <i class="ph-bold ph-television text-amber-200"></i> <span>Template Sindikasi (WoW)</span>
+                            </button>
                             <button type="button" onclick="applyPresetSourceAirtimeROI()"
                                 class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white flex items-center gap-1.5 shadow-2xs transition hover:scale-[1.02] cursor-pointer"
                                 title="Otomatis susun kuadran: Baris = Source, Nilai 1 = Share, Nilai 2 = Durasi/Menit">
@@ -2654,6 +2752,7 @@
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black text-slate-900 focus:ring-2 focus:ring-[#cafc03] outline-none appearance-none shadow-sm border-l-4 border-l-[#cafc03] cursor-pointer transition">
                             <option value="1" data-i18n="g1">1 Grid (Standar Penuh)</option>
                             <option value="2-v" data-i18n="g2v">2 Grid (Kiri & Kanan)</option>
+                            <option value="syndicate-deck" class="font-bold text-indigo-900 bg-indigo-50">⭐ Executive Syndicate Deck (Tabel + 2 Grafik WoW)</option>
                             <option value="2-h" data-i18n="g2h">2 Grid (Atas & Bawah)</option>
                             <option value="3" data-i18n="g3">3 Grid (Bento: Kiri Besar, Kanan Kecil)</option>
                         </select>
@@ -7997,7 +8096,8 @@ ${escapeHtml(narrative)}
             showToast('⏩ Redo (Maju)');
         }
 
-        function saveState() {
+        let _mainSaveStateTimer = null;
+        function saveState(immediate = false) {
             if (Array.isArray(appSlides)) {
                 appSlides.forEach(s => {
                     if (s && s.lastImportWorkbook) {
@@ -8008,6 +8108,7 @@ ${escapeHtml(narrative)}
                     }
                 });
             }
+            // In-memory snapshot & undo/redo are synchronous and instantaneous
             const currentSnapshot = JSON.stringify(appSlides);
             if (!isPerformingUndoRedo && currentSnapshot !== lastSavedSnapshot) {
                 if (lastSavedSnapshot !== '') {
@@ -8018,56 +8119,68 @@ ${escapeHtml(narrative)}
                 lastSavedSnapshot = currentSnapshot;
                 updateUndoRedoButtonsUI();
             }
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                    projectName: currentProjectName,
-                    openedFileName: currentOpenedFileName,
-                    slides: appSlides,
-                    lang: globalLang,
-                    activeSlideIndex: activeSlideIndex,
-                    activeEditGridIndex: activeEditGridIndex,
-                    isSidebarOpen: isSidebarOpen,
-                    isRightPanelOpen: isRightPanelOpen,
-                    isLeftPanelMinimized: isLeftPanelMinimized
-                }));
-            } catch (e) {
-                console.error("Save State Error:", e);
-                if (e.name === 'QuotaExceededError' || (e.message && e.message.toLowerCase().includes('quota'))) {
-                    showToast("Penyimpanan penuh! Mengoptimalkan memori otomatis...", true);
-                    appSlides.forEach(s => {
-                        delete s.lastImportWorkbook;
-                        if (s.bgMediaUrl && s.bgMediaUrl.length > 500000) s.bgMediaUrl = null;
-                        if (s.bentoMedia) {
-                            for (let k in s.bentoMedia) {
-                                if (s.bentoMedia[k] && s.bentoMedia[k].url && s.bentoMedia[k].url.length > 500000) s.bentoMedia[k] = null;
-                            }
-                        }
-                        if (s.notes) {
-                            s.notes.forEach(n => {
-                                if (n.text) {
-                                    n.text = n.text.replace(/<img[^>]+src="data:image\/[^"]{500000,}"[^>]*>/g, '<div style="color:red;font-size:10px;text-align:center;">[Gambar dihapus karena memori browser penuh]</div>');
+
+            // High Performance: Debounce heavy localStorage disk writes (prevents UI freeze on every slider/color/input)
+            const executeStorageWrite = () => {
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                        projectName: currentProjectName,
+                        openedFileName: currentOpenedFileName,
+                        slides: appSlides,
+                        lang: globalLang,
+                        activeSlideIndex: activeSlideIndex,
+                        activeEditGridIndex: activeEditGridIndex,
+                        isSidebarOpen: isSidebarOpen,
+                        isRightPanelOpen: isRightPanelOpen,
+                        isLeftPanelMinimized: isLeftPanelMinimized
+                    }));
+                } catch (e) {
+                    console.error("Save State Error:", e);
+                    if (e.name === 'QuotaExceededError' || (e.message && e.message.toLowerCase().includes('quota'))) {
+                        showToast("Penyimpanan penuh! Mengoptimalkan memori otomatis...", true);
+                        appSlides.forEach(s => {
+                            delete s.lastImportWorkbook;
+                            if (s.bgMediaUrl && s.bgMediaUrl.length > 500000) s.bgMediaUrl = null;
+                            if (s.bentoMedia) {
+                                for (let k in s.bentoMedia) {
+                                    if (s.bentoMedia[k] && s.bentoMedia[k].url && s.bentoMedia[k].url.length > 500000) s.bentoMedia[k] = null;
                                 }
-                            });
+                            }
+                            if (s.notes) {
+                                s.notes.forEach(n => {
+                                    if (n.text) {
+                                        n.text = n.text.replace(/<img[^>]+src="data:image\/[^"]{500000,}"[^>]*>/g, '<div style="color:red;font-size:10px;text-align:center;">[Gambar dihapus karena memori browser penuh]</div>');
+                                    }
+                                });
+                            }
+                        });
+                        try {
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                                projectName: currentProjectName,
+                                openedFileName: currentOpenedFileName,
+                                slides: appSlides,
+                                lang: globalLang,
+                                activeSlideIndex: activeSlideIndex,
+                                activeEditGridIndex: activeEditGridIndex,
+                                isSidebarOpen: isSidebarOpen,
+                                isRightPanelOpen: isRightPanelOpen,
+                                isLeftPanelMinimized: isLeftPanelMinimized
+                            }));
+                            setTimeout(() => showToast("Memori berhasil dibersihkan.", false), 2000);
+                            if (window.triggerVisUpdateWithDebounce) triggerVisUpdateWithDebounce();
+                        } catch (err) {
+                            showToast("Gagal mengosongkan memori. Hapus slide yang tidak diperlukan.", true);
                         }
-                    });
-                    try {
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                            projectName: currentProjectName,
-                            openedFileName: currentOpenedFileName,
-                            slides: appSlides,
-                            lang: globalLang,
-                            activeSlideIndex: activeSlideIndex,
-                            activeEditGridIndex: activeEditGridIndex,
-                            isSidebarOpen: isSidebarOpen,
-                            isRightPanelOpen: isRightPanelOpen,
-                            isLeftPanelMinimized: isLeftPanelMinimized
-                        }));
-                        setTimeout(() => showToast("Memori berhasil dibersihkan.", false), 2000);
-                        if (window.triggerVisUpdateWithDebounce) triggerVisUpdateWithDebounce();
-                    } catch (err) {
-                        showToast("Gagal mengosongkan memori. Hapus slide yang tidak diperlukan.", true);
                     }
                 }
+            };
+
+            if (immediate) {
+                if (_mainSaveStateTimer) clearTimeout(_mainSaveStateTimer);
+                executeStorageWrite();
+            } else {
+                if (_mainSaveStateTimer) clearTimeout(_mainSaveStateTimer);
+                _mainSaveStateTimer = setTimeout(executeStorageWrite, 250);
             }
         }
         function loadState() {
@@ -9135,7 +9248,7 @@ ${escapeHtml(narrative)}
                 if (els.toggleWatermark) els.toggleWatermark.checked = slide.showWatermark !== false;
                 if (slide.notes && slide.notes.length > 0) { if (!slide.notes.find(n => n.id === activeNoteId)) activeNoteId = slide.notes[0].id; } else { activeNoteId = null; } syncNoteController();
                 if (els.bentoLayout) els.bentoLayout.value = slide.bentoLayout; if (els.bentoChart1) els.bentoChart1.value = slide.bentoCharts[0]; if (els.bentoChart2) els.bentoChart2.value = slide.bentoCharts[1]; if (els.bentoChart3) els.bentoChart3.value = slide.bentoCharts[2];
-                if (els.bentoGrid2Container) els.bentoGrid2Container.style.display = slide.bentoLayout === '1' ? 'none' : 'block'; if (els.bentoGrid3Container) els.bentoGrid3Container.style.display = slide.bentoLayout === '3' ? 'block' : 'none'; if (els.dataTargetSelectorPanel) els.dataTargetSelectorPanel.style.display = slide.bentoLayout === '1' ? 'none' : 'flex'; if (els.tabGrid1) els.tabGrid1.style.display = (slide.bentoLayout === '2-h' || slide.bentoLayout === '2-v' || slide.bentoLayout === '3') ? 'block' : 'none'; if (els.tabGrid2) els.tabGrid2.style.display = slide.bentoLayout === '3' ? 'block' : 'none';
+                if (els.bentoGrid2Container) els.bentoGrid2Container.style.display = slide.bentoLayout === '1' ? 'none' : 'block'; if (els.bentoGrid3Container) els.bentoGrid3Container.style.display = slide.bentoLayout === '3' ? 'block' : 'none'; if (els.dataTargetSelectorPanel) els.dataTargetSelectorPanel.style.display = slide.bentoLayout === '1' ? 'none' : 'flex'; if (els.tabGrid1) els.tabGrid1.style.display = (slide.bentoLayout === '2-h' || slide.bentoLayout === '2-v' || slide.bentoLayout === '3' || slide.bentoLayout === 'syndicate-deck') ? 'block' : 'none'; if (els.tabGrid2) els.tabGrid2.style.display = slide.bentoLayout === '3' ? 'block' : 'none';
                 setActiveEditGrid(activeEditGridIndex);
                 if (els.colorTheme) els.colorTheme.value = slide.colorTheme; if (els.stackMode) els.stackMode.value = slide.stackMode || 'accumulate';
                 const setSliderValWithInput = (sliderEl, inputId, dispEl, val, unit = '%') => {
@@ -10058,7 +10171,7 @@ ${escapeHtml(narrative)}
             container.innerHTML = '';
 
             const slide = getActiveSlide();
-            if (!slide) return;
+            if (!slide || slide.bentoLayout === 'syndicate-deck') return;
 
             const wWidth = els.canvasWrapper.offsetWidth;
             const wHeight = els.canvasWrapper.offsetHeight;
@@ -10676,7 +10789,58 @@ ${escapeHtml(narrative)}
                         if (isConcentric && ctx.datasetIndex > 0) {
                             baseSize = Math.max(9, Math.round(baseSize - (ctx.datasetIndex * 2)));
                         }
-                        return { family: 'Inter', size: baseSize, weight: String(slide.datalabelWeight || '900'), style: slide.datalabelItalic ? 'italic' : 'normal' };
+                        
+            if (slide.bentoLayout === 'syndicate-deck') {
+                if (blockIndex === 0) {
+                    // Share chart: Series 0 = #3b82f6, Series 1 = #0f3ba2
+                    if (datasets[0]) {
+                        datasets[0].backgroundColor = '#3b82f6';
+                        datasets[0].borderColor = '#2563eb';
+                        datasets[0].borderRadius = 4;
+                    }
+                    if (datasets[1]) {
+                        datasets[1].backgroundColor = '#0f3ba2';
+                        datasets[1].borderColor = '#002060';
+                        datasets[1].borderRadius = 4;
+                    }
+                } else if (blockIndex === 1) {
+                    // Durasi chart: Series 0 = #eab308, Series 1 = #854d0e
+                    if (datasets[0]) {
+                        datasets[0].backgroundColor = '#eab308';
+                        datasets[0].borderColor = '#ca8a04';
+                        datasets[0].borderRadius = 4;
+                    }
+                    if (datasets[1]) {
+                        datasets[1].backgroundColor = '#854d0e';
+                        datasets[1].borderColor = '#713f12';
+                        datasets[1].borderRadius = 4;
+                    }
+                }
+                chartOptions.plugins = chartOptions.plugins || {};
+                chartOptions.plugins.legend = { display: false };
+                chartOptions.plugins.datalabels = {
+                    display: true,
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 3,
+                    color: '#0f172a',
+                    font: { family: 'Inter', size: 11, weight: 'bold' },
+                    formatter: (v) => {
+                        if (v === null || v === undefined || v === '') return '';
+                        const n = Number(v);
+                        if (isNaN(n)) return v;
+                        return blockIndex === 1 ? (n.toFixed(1) + '%') : n.toFixed(2);
+                    }
+                };
+                chartOptions.layout = chartOptions.layout || {};
+                chartOptions.layout.padding = { top: 24, left: 10, right: 10, bottom: 8 };
+                if (chartOptions.scales && chartOptions.scales.y) {
+                    chartOptions.scales.y.grid = { color: 'rgba(226, 232, 240, 0.6)', borderDash: [3, 3] };
+                    chartOptions.scales.y.grace = '18%';
+                }
+            }
+
+            return { family: 'Inter', size: baseSize, weight: String(slide.datalabelWeight || '900'), style: slide.datalabelItalic ? 'italic' : 'normal' };
                     },
                     textStrokeColor: (ctx) => {
                         if (slide.datalabelColorMode === 'custom') return slide.datalabelStrokeColor || '#000000';
@@ -10711,6 +10875,55 @@ ${escapeHtml(narrative)}
                 const thickness = (typeof slide.chartThickness === 'number' && !isNaN(slide.chartThickness) && slide.chartThickness > 0) ? slide.chartThickness : 100;
                 chartOptions.barPercentage = isTape ? 1 : (thickness / 100);
                 chartOptions.categoryPercentage = isTape ? 1 : 0.8;
+            }
+            
+            if (slide.bentoLayout === 'syndicate-deck') {
+                if (blockIndex === 0) {
+                    // Share chart: Series 0 = #3b82f6 (Light Blue), Series 1 = #0f3ba2 (Dark Navy)
+                    if (datasets[0]) {
+                        datasets[0].backgroundColor = '#3b82f6';
+                        datasets[0].borderColor = '#2563eb';
+                        datasets[0].borderRadius = 4;
+                    }
+                    if (datasets[1]) {
+                        datasets[1].backgroundColor = '#0f3ba2';
+                        datasets[1].borderColor = '#002060';
+                        datasets[1].borderRadius = 4;
+                    }
+                } else if (blockIndex === 1) {
+                    // Durasi chart: Series 0 = #eab308 (Gold/Yellow), Series 1 = #854d0e (Dark Bronze)
+                    if (datasets[0]) {
+                        datasets[0].backgroundColor = '#eab308';
+                        datasets[0].borderColor = '#ca8a04';
+                        datasets[0].borderRadius = 4;
+                    }
+                    if (datasets[1]) {
+                        datasets[1].backgroundColor = '#854d0e';
+                        datasets[1].borderColor = '#713f12';
+                        datasets[1].borderRadius = 4;
+                    }
+                }
+                chartOptions.plugins = chartOptions.plugins || {};
+                chartOptions.plugins.legend = { display: false };
+                chartOptions.plugins.datalabels = {
+                    display: true,
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 3,
+                    color: '#0f172a',
+                    font: { family: 'Inter', size: 11, weight: 'bold' },
+                    formatter: (v) => {
+                        if (v === null || v === undefined || v === '') return '';
+                        const n = Number(v);
+                        if (isNaN(n)) return v;
+                        return blockIndex === 1 ? (n.toFixed(1) + '%') : n.toFixed(2);
+                    }
+                };
+                chartOptions.layout = chartOptions.layout || {};
+                chartOptions.layout.padding = { top: 24, left: 10, right: 10, bottom: 8 };
+                if (chartOptions.scales && chartOptions.scales.y) {
+                    chartOptions.scales.y.grid = { color: 'rgba(226, 232, 240, 0.6)', borderDash: [3, 3] };
+                }
             }
             return { datasets, labels, chartOptions, globalBaseType };
         }
@@ -10920,7 +11133,7 @@ ${escapeHtml(narrative)}
                     els.globalWatermark.style.display = 'none';
                 }
 
-                let numCharts = slide.bentoLayout === '1' ? 1 : (slide.bentoLayout.startsWith('2') ? 2 : 3); let preparedConfigs = [];
+                let numCharts = (slide.bentoLayout === 'syndicate-deck' || slide.bentoLayout.startsWith('2')) ? 2 : (slide.bentoLayout === '1' ? 1 : 3); let preparedConfigs = [];
                 for (let i = 0; i < numCharts; i++) {
                     try {
                         let cType = slide.bentoCharts[i] || 'bar-vertical';
@@ -10940,7 +11153,21 @@ ${escapeHtml(narrative)}
 
                 if (mainCharts && mainCharts.length > 0) mainCharts.forEach(c => { if (c && c.destroy) c.destroy(); }); mainCharts = []; els.bentoWrapper.innerHTML = '';
 
-                let layoutClass = 'flex items-center justify-center'; if (slide.bentoLayout === '2-v') layoutClass = 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full h-full'; else if (slide.bentoLayout === '2-h') layoutClass = 'grid grid-rows-2 gap-4 sm:gap-6 w-full h-full'; else if (slide.bentoLayout === '3') layoutClass = 'grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 sm:gap-6 w-full h-full';
+                let layoutClass = 'flex items-center justify-center';
+                let syndicateChartGrid = null;
+                if (slide.bentoLayout === 'syndicate-deck') {
+                    layoutClass = 'flex flex-col gap-3 w-full h-full';
+                    const synTableWrapper = document.createElement('div');
+                    synTableWrapper.className = 'w-full bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-3.5 flex flex-col gap-2 shrink-0 select-none';
+                    synTableWrapper.innerHTML = buildSyndicateTableHTML(slide);
+                    els.bentoWrapper.appendChild(synTableWrapper);
+
+                    syndicateChartGrid = document.createElement('div');
+                    syndicateChartGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-[220px] w-full';
+                    els.bentoWrapper.appendChild(syndicateChartGrid);
+                } else if (slide.bentoLayout === '2-v') layoutClass = 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full h-full';
+                else if (slide.bentoLayout === '2-h') layoutClass = 'grid grid-rows-2 gap-4 sm:gap-6 w-full h-full';
+                else if (slide.bentoLayout === '3') layoutClass = 'grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 sm:gap-6 w-full h-full';
                 els.bentoWrapper.className = `w-full flex-1 box-border relative transition-all duration-500 min-h-0 ${layoutClass}`;
 
                 for (let i = 0; i < numCharts; i++) {
@@ -11077,7 +11304,35 @@ ${escapeHtml(narrative)}
                             card.innerHTML = `<div class="flex items-center justify-center w-full h-full p-4 text-center text-red-500 font-bold bg-red-50 rounded-xl border border-dashed border-red-300 overflow-auto">Chart.js Error: ${err.message}</div>`;
                         }
                     }
-                    els.bentoWrapper.appendChild(card);
+                    if (slide.bentoLayout === 'syndicate-deck') {
+                        // Prepend custom card header for Share vs Durasi
+                        const wA_name = (slide.dataSets[0] && slide.dataSets[0].series[0] ? slide.dataSets[0].series[0].name : '') || slide.syndicateWeekA || 'Week 1';
+                        const wB_name = (slide.dataSets[0] && slide.dataSets[0].series[1] ? slide.dataSets[0].series[1].name : '') || slide.syndicateWeekB || 'Week 2';
+                        const cardHdr = document.createElement('div');
+                        cardHdr.className = 'text-center pt-2 pb-1 select-none shrink-0';
+                        if (i === 0) {
+                            cardHdr.innerHTML = `
+                                <h4 class="text-xs font-black text-slate-800 tracking-wider uppercase font-['Inter']">KONTRIBUSI (PERFORMA SHARE)</h4>
+                                <div class="flex items-center justify-center gap-4 text-[10px] font-bold text-slate-600 mt-0.5">
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#3b82f6]"></span> ${escapeHtml(wA_name)}</span>
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#1e40af]"></span> ${escapeHtml(wB_name)}</span>
+                                </div>
+                            `;
+                        } else {
+                            cardHdr.innerHTML = `
+                                <h4 class="text-xs font-black text-slate-800 tracking-wider uppercase font-['Inter']">PERSENTASE DURASI</h4>
+                                <div class="flex items-center justify-center gap-4 text-[10px] font-bold text-slate-600 mt-0.5">
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#eab308]"></span> ${escapeHtml(wA_name)}</span>
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#854d0e]"></span> ${escapeHtml(wB_name)}</span>
+                                </div>
+                            `;
+                        }
+                        card.prepend(cardHdr);
+                        if (syndicateChartGrid) syndicateChartGrid.appendChild(card);
+                        else els.bentoWrapper.appendChild(card);
+                    } else {
+                        els.bentoWrapper.appendChild(card);
+                    }
                 }
                 renderNotes();
                 applyChartPanTransform();
@@ -12268,8 +12523,9 @@ ${escapeHtml(narrative)}
                     if (wb._rawArrayBuffer) {
                         const bytes = new Uint8Array(wb._rawArrayBuffer);
                         let binary = '';
-                        for (let i = 0; i < bytes.byteLength; i++) {
-                            binary += String.fromCharCode(bytes[i]);
+                        const chunkSize = 0x8000; // 32KB chunking (50x-100x faster than 1-byte loop, prevents call stack overflow)
+                        for (let i = 0; i < bytes.byteLength; i += chunkSize) {
+                            binary += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + chunkSize, bytes.byteLength)));
                         }
                         const b64 = btoa(binary);
                         wb._rawBase64 = b64;
@@ -12297,9 +12553,14 @@ ${escapeHtml(narrative)}
 
             saveSessionDebounced(isOpen) {
                 if (this._saveTimer) clearTimeout(this._saveTimer);
+                // 500ms debounce ensures smooth 60fps modal animations without freezing main thread
                 this._saveTimer = setTimeout(() => {
-                    this.saveSession(isOpen);
-                }, 80);
+                    if (typeof requestIdleCallback === 'function') {
+                        requestIdleCallback(() => this.saveSession(isOpen), { timeout: 1000 });
+                    } else {
+                        this.saveSession(isOpen);
+                    }
+                }, 500);
             },
 
             restoreSessionSyncFast() {
@@ -12451,8 +12712,9 @@ ${escapeHtml(narrative)}
                     localStorage.setItem(this.SYNC_FLAG_KEY, JSON.stringify(sessionStatus));
 
                     if (isOpen && currentImportWorkbook && currentImportFileName) {
-                        const wbBase64 = this.workbookToBase64(currentImportWorkbook);
-                        if (wbBase64 && wbBase64.length < 2500000) {
+                        // Only save FAST_WB_KEY if base64 is already cached and size is safe (< 500KB) to prevent localStorage quota crash
+                        const wbBase64 = currentImportWorkbook._rawBase64 || null;
+                        if (wbBase64 && wbBase64.length < 500000) {
                             try {
                                 localStorage.setItem(this.FAST_WB_KEY, JSON.stringify({
                                     fileName: currentImportFileName,
@@ -12490,9 +12752,12 @@ ${escapeHtml(narrative)}
                     let sheetsAoA = null;
                     if (currentImportWorkbook) {
                         wbBase64 = this.workbookToBase64(currentImportWorkbook);
-                        if (currentActiveSheetName && currentImportWorkbook.Sheets[currentActiveSheetName]) {
-                            sheetsAoA = XLSX.utils.sheet_to_json(currentImportWorkbook.Sheets[currentActiveSheetName], { header: 1, defval: '' });
-                        }
+                        // Reuse cached sheet data directly without re-parsing all rows with sheet_to_json
+                        sheetsAoA = (currentImportWorkbook._parsedSheets && currentImportWorkbook._parsedSheets[currentActiveSheetName]) 
+                            || currentRawSheetData 
+                            || (currentActiveSheetName && currentImportWorkbook.Sheets[currentActiveSheetName] 
+                                ? XLSX.utils.sheet_to_json(currentImportWorkbook.Sheets[currentActiveSheetName], { header: 1, defval: '' }) 
+                                : null);
                     }
 
                     const headerRowInput = document.getElementById('pivotHeaderRowInput');
@@ -12725,6 +12990,7 @@ ${escapeHtml(narrative)}
         };
 
         window.addEventListener('beforeunload', () => {
+            if (typeof saveState === 'function') saveState(true);
             const modal = document.getElementById('rawImportModal');
             const isOpen = modal && !modal.classList.contains('hidden') && modal.classList.contains('flex');
             if (isOpen) {
@@ -12814,6 +13080,7 @@ ${escapeHtml(narrative)}
                 const ws = XLSX.utils.aoa_to_sheet(aoa);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Workbench_Active");
+                wb._parsedSheets = { "Workbench_Active": aoa };
                 openRawImportModal(wb, "Data Workbench Saat Ini");
             } else {
                 importWorkbenchExcelFile();
@@ -12878,14 +13145,21 @@ ${escapeHtml(narrative)}
                 activeBtn.className = 'sheet-tab-pill px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 bg-slate-900 text-[#cafc03] shadow-xs';
             }
 
-            const worksheet = currentImportWorkbook.Sheets[sheetName];
-            const raw = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-            
-            let lastNonEmpty = raw.length - 1;
-            while (lastNonEmpty >= 0 && (!raw[lastNonEmpty] || raw[lastNonEmpty].every(c => c === '' || c === null || c === undefined))) {
-                lastNonEmpty--;
+            if (!currentImportWorkbook._parsedSheets) currentImportWorkbook._parsedSheets = {};
+            let raw = currentImportWorkbook._parsedSheets[sheetName];
+            if (!raw) {
+                const worksheet = currentImportWorkbook.Sheets[sheetName];
+                if (!worksheet) return;
+                const rawAll = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                let lastNonEmpty = rawAll.length - 1;
+                while (lastNonEmpty >= 0 && (!rawAll[lastNonEmpty] || rawAll[lastNonEmpty].every(c => c === '' || c === null || c === undefined))) {
+                    lastNonEmpty--;
+                }
+                raw = rawAll.slice(0, lastNonEmpty + 1);
+                currentImportWorkbook._parsedSheets[sheetName] = raw;
             }
-            currentRawSheetData = raw.slice(0, lastNonEmpty + 1);
+            currentRawSheetData = raw;
+            currentRawSheetData._colUniqueCache = new Map();
 
             // Calculate true maximum column count across the entire worksheet (e.g. 19 for columns A to S)
             let maxColsAcrossSheet = 0;
@@ -13441,45 +13715,34 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
             const colIdx = pivotStudioState.filterColIdx;
 
-            // Gather unique values and counts
-            const valCountMap = new Map();
-            for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
-                const row = currentRawSheetData[r];
-                if (!row) continue;
-                const v = row[colIdx];
-                const key = (v !== undefined && v !== null && String(v).trim() !== '') ? String(v).trim() : '(Kosong)';
-                valCountMap.set(key, (valCountMap.get(key) || 0) + 1);
+            // Cache unique values map for the active dataset, hIdx, and colIdx
+            if (!currentRawSheetData._colUniqueCache) currentRawSheetData._colUniqueCache = new Map();
+            const cacheKey = `${hIdx}_${colIdx}`;
+            let cached = currentRawSheetData._colUniqueCache.get(cacheKey);
+
+            if (!cached) {
+                const valCountMap = new Map();
+                for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
+                    const row = currentRawSheetData[r];
+                    if (!row) continue;
+                    const v = row[colIdx];
+                    const key = (v !== undefined && v !== null && String(v).trim() !== '') ? String(v).trim() : '(Kosong)';
+                    valCountMap.set(key, (valCountMap.get(key) || 0) + 1);
+                }
+                const uniqueValues = Array.from(valCountMap.keys()).sort();
+                cached = { valCountMap, uniqueValues };
+                currentRawSheetData._colUniqueCache.set(cacheKey, cached);
             }
 
-            const uniqueValues = Array.from(valCountMap.keys()).sort();
+            const { valCountMap, uniqueValues } = cached;
             if (uniqueValues.length === 0) {
                 container.innerHTML = '<span class="text-[10px] text-indigo-300/70 italic px-2">Tidak ada data untuk kolom ini</span>';
                 return;
             }
 
-            let html = '';
             const allSelected = pivotStudioState.filterSelectedValues.size === 0;
 
-            uniqueValues.forEach(val => {
-                const isSelected = allSelected || pivotStudioState.filterSelectedValues.has(val);
-                const count = valCountMap.get(val);
-                const label = formatExcelDateDisplay(val);
-                html += `
-                <button type="button" onclick="toggleTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\\'")}')"
-                    ondblclick="soloTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\\'")}')"
-                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition shrink-0 flex items-center gap-1 border ${
-                        isSelected 
-                            ? 'bg-[#cafc03] text-slate-900 border-[#cafc03] font-black shadow-xs' 
-                            : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white hover:border-slate-500'
-                    }" title="${escapeHtml(label)} (Klik: Toggle | Klik 2x: Hanya Ini)">
-                    <span>${escapeHtml(label)}</span>
-                    <span class="text-[9px] opacity-70">(${count})</span>
-                </button>`;
-            });
-
-            container.innerHTML = html;
-
-            // Update smart summary container (no horizontal scrolling required!)
+            // Update smart summary container (always fast & visible)
             const sumContainer = document.getElementById('filterSelectedSummaryContainer');
             if (sumContainer) {
                 if (allSelected) {
@@ -13524,7 +13787,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         pills += `
                         <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-[#cafc03] text-slate-900 border border-[#cafc03] flex items-center gap-1 shadow-2xs">
                             <span>${escapeHtml(label)}</span>
-                            <button type="button" onclick="toggleTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\\'")}')" class="text-slate-600 hover:text-rose-700 font-black ml-0.5">✕</button>
+                            <button type="button" onclick="toggleTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\'")}')" class="text-slate-600 hover:text-rose-700 font-black ml-0.5">✕</button>
                         </span>`;
                     }
                     if (selArr.length > 3) {
@@ -13533,6 +13796,38 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     sumContainer.innerHTML = pills;
                 }
             }
+
+            // High Performance: Only build DOM chips if the slide strip is currently expanded!
+            const stripWrap = document.getElementById('pivotFilterChipsContainerWrapper');
+            if (stripWrap && stripWrap.classList.contains('hidden')) {
+                container.innerHTML = `<span class="text-[10px] text-indigo-300/80 px-2 italic font-mono">${uniqueValues.length} tanggal siap (klik "Strip Geser" untuk melihat tombol chip)</span>`;
+                return;
+            }
+
+            let html = '';
+            // Render up to 100 chips for smooth scrolling
+            const maxChips = 100;
+            const sliceVals = uniqueValues.slice(0, maxChips);
+            sliceVals.forEach(val => {
+                const isSelected = allSelected || pivotStudioState.filterSelectedValues.has(val);
+                const count = valCountMap.get(val);
+                const label = formatExcelDateDisplay(val);
+                html += `
+                <button type="button" onclick="toggleTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\'")}')"
+                    ondblclick="soloTimelineFilterValue('${escapeHtml(val).replace(/'/g, "\'")}')"
+                    class="px-2 py-0.5 rounded-lg text-[10px] font-bold transition shrink-0 flex items-center gap-1 border ${
+                        isSelected 
+                            ? 'bg-[#cafc03] text-slate-900 border-[#cafc03] font-black shadow-xs' 
+                            : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:text-white hover:border-slate-500'
+                    }" title="${escapeHtml(label)} (Klik: Toggle | Klik 2x: Hanya Ini)">
+                    <span>${escapeHtml(label)}</span>
+                    <span class="text-[9px] opacity-70">(${count})</span>
+                </button>`;
+            });
+            if (uniqueValues.length > maxChips) {
+                html += `<span class="px-2 py-0.5 text-[9px] text-slate-400 italic shrink-0">+${uniqueValues.length - maxChips} tanggal lainnya</span>`;
+            }
+            container.innerHTML = html;
         }
 
         function toggleTimelineFilterValue(val) {
@@ -14374,6 +14669,9 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const btn = document.getElementById('btnToggleSlideStrip');
             if (btn) {
                 btn.textContent = wrap.classList.contains('hidden') ? 'Strip Geser' : '✕ Tutup Strip';
+            }
+            if (!wrap.classList.contains('hidden')) {
+                renderTimelineSlicerChips();
             }
         }
 
@@ -15736,6 +16034,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const ws = XLSX.utils.aoa_to_sheet(aoa);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Slide_Saat_Ini");
+            wb._parsedSheets = { "Slide_Saat_Ini": aoa };
             openRawImportModal(wb, "Data Slide Saat Ini");
             showToast("✅ Berhasil memuat data slide saat ini ke Pivot Studio!");
         }
@@ -15874,6 +16173,31 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         </div>
                     </div>
 
+                    <!-- TILE SYN: EXECUTIVE SYNDICATE DECK -->
+                    <div class="bg-gradient-to-br from-white to-blue-50/40 border border-blue-200 rounded-2xl p-4 flex flex-col gap-2 shadow-2xs hover:border-indigo-400 transition group col-span-1 md:col-span-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-700 text-white flex items-center justify-center font-bold shadow-xs">
+                                    <i class="ph-bold ph-television text-xl text-amber-300"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h5 class="text-xs font-black text-slate-900">Laporan Eksekutif Sindikasi: Share &amp; Durasi (WoW)</h5>
+                                        <span class="bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-0.5 rounded-full">POPULAR TEMPLATE</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-medium">Format baku Pay TV Syndicate: Tabel Ringkasan Komparasi + 2 Grafik Clustered Bar</span>
+                                </div>
+                            </div>
+                            <button type="button" onclick="openSyndicateExecutiveModal()"
+                                class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                                <span>Buka Template</span> <i class="ph-bold ph-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Otomatis mengelompokkan Program Source per channel, menghitung porsi % alokasi jam siar dan rata-rata share, menyajikan kolom delta &plusmn; (merah untuk turun, biru untuk naik), dan menata 2 grafik berdampingan.
+                        </p>
+                    </div>
+
                     <!-- TILE D: SHARE VS DURASI ROI -->
                     <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-2 shadow-2xs hover:border-indigo-300 transition group">
                         <div class="flex items-center justify-between">
@@ -15906,7 +16230,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         // =========================================================================
         // PIVOT TABLE SELECTION ENGINE & CONTEXT MENU DISPATCHER
         // =========================================================================
-        function updatePivotSelectionUI() {
+        function updatePivotSelectionUI(specificRowId = null) {
             const count = (pivotStudioState.selectedRowKeys ? pivotStudioState.selectedRowKeys.size : 0);
             const floatBar = document.getElementById('pivotSelectionFloatingBar');
             const countBadge = document.getElementById('pivotSelectedCountBadge');
@@ -15923,18 +16247,33 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 }
             }
 
-            // Sync visual highlights and checkboxes across rows
-            document.querySelectorAll('tr[data-pivot-row-id]').forEach(tr => {
-                const rId = tr.getAttribute('data-pivot-row-id');
-                const isSel = pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rId);
-                const cb = tr.querySelector('.pivot-row-select-cb');
-                if (cb) cb.checked = !!isSel;
-                if (isSel) {
-                    tr.classList.add('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
-                } else {
-                    tr.classList.remove('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
+            if (specificRowId) {
+                // High Performance: update only single targeted row element in O(1) time
+                const tr = document.querySelector(`tr[data-pivot-row-id="${specificRowId}"]`);
+                if (tr) {
+                    const isSel = pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(specificRowId);
+                    const cb = tr.querySelector('.pivot-row-select-cb');
+                    if (cb) cb.checked = !!isSel;
+                    if (isSel) {
+                        tr.classList.add('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
+                    } else {
+                        tr.classList.remove('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
+                    }
                 }
-            });
+            } else {
+                // Full sync only on mass selection / clearing
+                document.querySelectorAll('tr[data-pivot-row-id]').forEach(tr => {
+                    const rId = tr.getAttribute('data-pivot-row-id');
+                    const isSel = pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rId);
+                    const cb = tr.querySelector('.pivot-row-select-cb');
+                    if (cb) cb.checked = !!isSel;
+                    if (isSel) {
+                        tr.classList.add('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
+                    } else {
+                        tr.classList.remove('bg-indigo-50/90', 'text-indigo-950', 'font-bold', 'border-l-4', 'border-indigo-600', 'shadow-2xs');
+                    }
+                });
+            }
 
             // Master select checkbox state
             const masterCb = document.getElementById('pivotSelectAllMasterCb');
@@ -15953,49 +16292,14 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             } else {
                 pivotStudioState.selectedRowKeys.delete(rowId);
             }
-            updatePivotSelectionUI();
-        }
-
-        function onPivotRowClick(event, rowId) {
-            // Do not intercept clicks on buttons, inputs, links
-            if (event.target.closest('button') || event.target.closest('input') || event.target.closest('a')) return;
-            if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
-
-            if (event.shiftKey && pivotStudioState.lastSelectedRowId && pivotStudioTableRowsRegistry) {
-                const allKeys = Array.from(pivotStudioTableRowsRegistry.keys());
-                const idx1 = allKeys.indexOf(pivotStudioState.lastSelectedRowId);
-                const idx2 = allKeys.indexOf(rowId);
-                if (idx1 !== -1 && idx2 !== -1) {
-                    const start = Math.min(idx1, idx2);
-                    const end = Math.max(idx1, idx2);
-                    for (let i = start; i <= end; i++) {
-                        pivotStudioState.selectedRowKeys.add(allKeys[i]);
-                    }
-                }
-            } else if (event.ctrlKey || event.metaKey) {
-                if (pivotStudioState.selectedRowKeys.has(rowId)) {
-                    pivotStudioState.selectedRowKeys.delete(rowId);
-                } else {
-                    pivotStudioState.selectedRowKeys.add(rowId);
-                }
-                pivotStudioState.lastSelectedRowId = rowId;
-            } else {
-                if (pivotStudioState.selectedRowKeys.has(rowId) && pivotStudioState.selectedRowKeys.size === 1) {
-                    pivotStudioState.selectedRowKeys.clear();
-                } else {
-                    pivotStudioState.selectedRowKeys.clear();
-                    pivotStudioState.selectedRowKeys.add(rowId);
-                    pivotStudioState.lastSelectedRowId = rowId;
-                }
-            }
-            updatePivotSelectionUI();
+            updatePivotSelectionUI(rowId);
         }
 
         function toggleSelectAllPivotRows(isChecked) {
             if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
-            if (isChecked && pivotStudioTableRowsRegistry) {
-                pivotStudioTableRowsRegistry.forEach((_, rId) => {
-                    pivotStudioState.selectedRowKeys.add(rId);
+            if (isChecked) {
+                pivotStudioTableRowsRegistry.forEach((val, id) => {
+                    pivotStudioState.selectedRowKeys.add(id);
                 });
             } else {
                 pivotStudioState.selectedRowKeys.clear();
@@ -16008,51 +16312,106 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             updatePivotSelectionUI();
         }
 
-        function onPivotRowContextMenu(event, rowId) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (!pivotStudioState.selectedRowKeys) pivotStudioState.selectedRowKeys = new Set();
+        function copyPivotSelectedRowsAsTSV() {
+            if (!pivotStudioState.selectedRowKeys || pivotStudioState.selectedRowKeys.size === 0) {
+                showToast("Pilih minimal satu baris pivot terlebih dahulu!", true);
+                return;
+            }
+            const res = currentComputedPivotResult;
+            if (!res) return;
 
-            if (!pivotStudioState.selectedRowKeys.has(rowId)) {
-                pivotStudioState.selectedRowKeys.clear();
-                pivotStudioState.selectedRowKeys.add(rowId);
-                pivotStudioState.lastSelectedRowId = rowId;
-                updatePivotSelectionUI();
+            let tsv = '';
+            // Header
+            if (res.type === 'hierarchy') {
+                tsv = `Kategori\t${res.val1Title}`;
+                if (res.s2Title) tsv += `\t${res.s2Title}`;
+                if (res.s2Title && pivotStudioState.showDelta) tsv += `\tSelisih Δ`;
+                if (res.s2Title && pivotStudioState.showAverage) tsv += `\tAverage`;
+                tsv += `\tFrekuensi\n`;
+            } else if (res.type === 'matrix') {
+                tsv = `Kategori\t${(res.colKeys || []).join('\t')}\tTotal\n`;
             }
 
-            const ctxMenu = document.getElementById('pivotContextMenu');
-            if (!ctxMenu) return;
+            let copiedCount = 0;
+            pivotStudioTableRowsRegistry.forEach((data, rowId) => {
+                if (pivotStudioState.selectedRowKeys.has(rowId)) {
+                    copiedCount++;
+                    tsv += data.join('\t') + '\n';
+                }
+            });
 
-            const ctxCountText = document.getElementById('ctxSelectedCountText');
-            if (ctxCountText) ctxCountText.textContent = `${pivotStudioState.selectedRowKeys.size} baris`;
-
-            ctxMenu.style.display = 'block';
-            
-            const menuW = 250;
-            const menuH = 190;
-            let posX = event.clientX;
-            let posY = event.clientY;
-
-            if (posX + menuW > window.innerWidth) posX = window.innerWidth - menuW - 12;
-            if (posY + menuH > window.innerHeight) posY = window.innerHeight - menuH - 12;
-            if (posX < 10) posX = 10;
-            if (posY < 10) posY = 10;
-
-            ctxMenu.style.left = posX + 'px';
-            ctxMenu.style.top = posY + 'px';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(tsv).then(() => {
+                    showToast(`✅ Berhasil menyalin ${copiedCount} baris data ke clipboard (TSV / Excel)!`);
+                }).catch(() => {
+                    showToast("Gagal mengakses clipboard.", true);
+                });
+            }
         }
 
-        function hidePivotContextMenu() {
-            const ctxMenu = document.getElementById('pivotContextMenu');
-            if (ctxMenu) ctxMenu.style.display = 'none';
-        }
+        function applyPivotSelectionToChart(replaceChart = false) {
+            if (!pivotStudioState.selectedRowKeys || pivotStudioState.selectedRowKeys.size === 0) {
+                showToast("Pilih minimal satu baris pivot terlebih dahulu!", true);
+                return;
+            }
+            const slide = getActiveSlide();
+            const ds = getActiveDataSet();
+            if (!slide || !ds) return;
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#pivotContextMenu')) hidePivotContextMenu();
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') hidePivotContextMenu();
-        });
+            const selectedRowsData = [];
+            pivotStudioTableRowsRegistry.forEach((data, rowId) => {
+                if (pivotStudioState.selectedRowKeys.has(rowId)) {
+                    selectedRowsData.push(data);
+                }
+            });
+
+            if (selectedRowsData.length === 0) return;
+
+            const res = currentComputedPivotResult;
+            if (!res) return;
+
+            if (replaceChart) {
+                ds.rows = [];
+            }
+
+            const existingLabels = new Set(ds.rows.map(r => r.label));
+
+            selectedRowsData.forEach(rowArr => {
+                const label = String(rowArr[0] || '').trim();
+                if (!label) return;
+
+                if (!replaceChart && existingLabels.has(label)) {
+                    const existingRow = ds.rows.find(r => r.label === label);
+                    if (existingRow) {
+                        for (let sIdx = 0; sIdx < ds.series.length; sIdx++) {
+                            const val = typeof rowArr[sIdx + 1] === 'number' ? rowArr[sIdx + 1] : 0;
+                            if (!existingRow.values[sIdx]) existingRow.values[sIdx] = { val: val };
+                            else existingRow.values[sIdx].val = val;
+                        }
+                    }
+                    return;
+                }
+
+                const newRow = {
+                    id: 'r_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    label: label,
+                    icon: '',
+                    values: []
+                };
+
+                for (let sIdx = 0; sIdx < ds.series.length; sIdx++) {
+                    const val = typeof rowArr[sIdx + 1] === 'number' ? rowArr[sIdx + 1] : 0;
+                    newRow.values.push({ val: val });
+                }
+                ds.rows.push(newRow);
+                existingLabels.add(label);
+            });
+
+            saveState();
+            if (window.triggerVisUpdateWithDebounce) triggerVisUpdateWithDebounce();
+            showToast(`✅ Berhasil menerapkan ${selectedRowsData.length} baris pilihan ke Grafik Slide!`);
+            closeRawImportModal();
+        }
 
         // -------------------------------------------------------------------------
         // KIT 1: PIVOT GRID (EXCEL TREE TABLE WITH RANK PRESETS)
@@ -20064,6 +20423,473 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 }
             }
         });
+    
+        // =========================================================================
+        // EXECUTIVE SYNDICATE DECK MODULE (SHARE & DURASI WOW)
+        // =========================================================================
+
+        function buildSyndicateTableHTML(slide) {
+            const dsShare = (slide.dataSets && slide.dataSets[0]) ? slide.dataSets[0] : generateDefaultDataSet(1);
+            const dsDur = (slide.dataSets && slide.dataSets[1]) ? slide.dataSets[1] : generateDefaultDataSet(2);
+
+            const wA = (dsShare.series && dsShare.series[0] ? dsShare.series[0].name : '') || slide.syndicateWeekA || 'Week 2627';
+            const wB = (dsShare.series && dsShare.series[1] ? dsShare.series[1].name : '') || slide.syndicateWeekB || 'Week 2628';
+            const channel = slide.syndicateChannel || 'KIDS TV';
+
+            let rowsHTML = '';
+            const rows = dsShare.rows || [];
+
+            rows.forEach((r, idx) => {
+                const label = r.label || `Source ${idx + 1}`;
+                const shA = (r.values && r.values[0] && r.values[0].val !== null && r.values[0].val !== undefined && r.values[0].val !== '') ? Number(r.values[0].val) : null;
+                const shB = (r.values && r.values[1] && r.values[1].val !== null && r.values[1].val !== undefined && r.values[1].val !== '') ? Number(r.values[1].val) : null;
+                const deltaSh = (shA !== null && shB !== null) ? Math.round((shB - shA) * 100) / 100 : null;
+
+                const rDur = dsDur.rows && dsDur.rows[idx] ? dsDur.rows[idx] : null;
+                const durA = (rDur && rDur.values && rDur.values[0] && rDur.values[0].val !== null && rDur.values[0].val !== undefined && rDur.values[0].val !== '') ? Number(rDur.values[0].val) : null;
+                const durB = (rDur && rDur.values && rDur.values[1] && rDur.values[1].val !== null && rDur.values[1].val !== undefined && rDur.values[1].val !== '') ? Number(rDur.values[1].val) : null;
+                const deltaDur = (durA !== null && durB !== null) ? Math.round((durB - durA) * 10) / 10 : null;
+
+                let deltaDurBadge = '<span class="text-slate-500 font-medium">0.0%</span>';
+                if (deltaDur !== null) {
+                    if (deltaDur > 0) deltaDurBadge = `<span class="text-blue-600 font-bold">+${deltaDur.toFixed(1)}%</span>`;
+                    else if (deltaDur < 0) deltaDurBadge = `<span class="text-rose-600 font-bold">${deltaDur.toFixed(1)}%</span>`;
+                }
+
+                let deltaShBadge = '<span class="text-slate-500 font-medium">0.00</span>';
+                if (deltaSh !== null) {
+                    if (deltaSh > 0) deltaShBadge = `<span class="text-blue-600 font-bold">+${deltaSh.toFixed(2)}</span>`;
+                    else if (deltaSh < 0) deltaShBadge = `<span class="text-rose-600 font-bold">${deltaSh.toFixed(2)}</span>`;
+                }
+
+                const isOdd = idx % 2 === 1;
+
+                rowsHTML += `
+                    <tr class="${isOdd ? 'bg-slate-50/70' : 'bg-white'} hover:bg-blue-50/40 transition border-b border-dotted border-slate-300">
+                        <td class="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-300">${escapeHtml(label)}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${durA !== null ? durA.toFixed(1) + '%' : '-'}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${durB !== null ? durB.toFixed(1) + '%' : '-'}</td>
+                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-300">${deltaDurBadge}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${shA !== null ? shA.toFixed(2) : '-'}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${shB !== null ? shB.toFixed(2) : '-'}</td>
+                        <td class="py-1.5 px-2 text-center font-mono">${deltaShBadge}</td>
+                    </tr>
+                `;
+            });
+
+            return `
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200 flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#002060]"></span>
+                        <span class="text-xs font-black text-slate-900 uppercase tracking-wider font-['Inter']">Share dan Persentase Durasi Menurut Program Source di ${escapeHtml(channel)}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center border border-slate-300 rounded overflow-hidden shadow-2xs text-xs font-bold">
+                            <span class="bg-[#002060] text-white px-3 py-1 font-black text-[11px] tracking-wider uppercase">CHANNEL</span>
+                            <span class="bg-[#e8edf7] text-[#002060] px-4 py-1 font-black text-xs cursor-pointer hover:bg-blue-100 transition" onclick="promptChangeSyndicateChannel()" title="Klik untuk ganti Channel">${escapeHtml(channel)}</span>
+                        </div>
+                        <span class="text-[10px] text-slate-400 italic">Pilih channel</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs">
+                    <table class="w-full text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-[#002060] text-white text-[11px] font-bold">
+                                <th class="py-2 px-3 border border-slate-400 text-left uppercase tracking-wider" rowspan="2">Program Source</th>
+                                <th class="py-2 px-3 border border-slate-400 text-center uppercase tracking-wider" colspan="3">Persentase Durasi</th>
+                                <th class="py-2 px-3 border border-slate-400 text-center uppercase tracking-wider" colspan="3">Share</th>
+                            </tr>
+                            <tr class="bg-[#002060] text-white text-[10px] font-bold">
+                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1.5 px-2 border border-slate-400 text-center">+/-</th>
+                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1.5 px-2 border border-slate-400 text-center">+/-</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            ${rowsHTML}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function promptChangeSyndicateChannel() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const current = slide.syndicateChannel || 'KIDS TV';
+            const newChan = prompt('Masukkan nama Channel untuk laporan sindikasi:', current);
+            if (newChan && newChan.trim()) {
+                slide.syndicateChannel = newChan.trim();
+                slide.chartTitle = 'Share dan Persentase Durasi Menurut Program Source di ' + slide.syndicateChannel;
+                syncUIToActiveSlide();
+                triggerVisUpdateWithDebounce();
+                showToast(`✅ Channel diubah ke ${slide.syndicateChannel}`);
+            }
+        }
+
+        function openSyndicateExecutiveModal() {
+            initSyndicateModalSelectors();
+            const modal = document.getElementById('syndicateExecutiveModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                updateSyndicatePreview();
+            }
+        }
+
+        function closeSyndicateExecutiveModal() {
+            const modal = document.getElementById('syndicateExecutiveModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // Mock Syndicate Sample Data Matching User's Screenshot Exactly
+        const DEFAULT_SYNDICATE_SAMPLE = [
+            { source: 'ACQ. FTA', durA: 59.1, durB: 57.9, shareA: 29.74, shareB: 11.25 },
+            { source: 'ACQ. KIDS TV', durA: 22.7, durB: 24.4, shareA: 19.68, shareB: 7.11 },
+            { source: 'OUTHOUSE', durA: 11.3, durB: 11.3, shareA: 15.50, shareB: 4.31 },
+            { source: 'INV. INHOUSE', durA: 1.5, durB: 1.2, shareA: 11.97, shareB: 6.68 },
+            { source: 'INHOUSE', durA: 5.5, durB: 5.2, shareA: 10.77, shareB: 3.06 }
+        ];
+
+        window.__cachedSyndicateComputedData = null;
+
+        function initSyndicateModalSelectors() {
+            const chanSel = document.getElementById('synChannelSelect');
+            const pASel = document.getElementById('synPeriodASelect');
+            const pBSel = document.getElementById('synPeriodBSelect');
+            const srcSel = document.getElementById('synSourceColSelect');
+            const shSel = document.getElementById('synShareColSelect');
+            const durSel = document.getElementById('synDurColSelect');
+            const chanCount = document.getElementById('synChannelCount');
+
+            if (!chanSel || !pASel || !pBSel || !srcSel || !shSel || !durSel) return;
+
+            chanSel.innerHTML = '';
+            pASel.innerHTML = '';
+            pBSel.innerHTML = '';
+            srcSel.innerHTML = '';
+            shSel.innerHTML = '';
+            durSel.innerHTML = '';
+
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+            const headerRow = (currentRawSheetData && currentRawSheetData[hIdx]) ? currentRawSheetData[hIdx] : [];
+
+            if (!currentRawSheetData || currentRawSheetData.length < 2 || headerRow.length === 0) {
+                // No raw data loaded -> Provide clean defaults
+                chanSel.innerHTML = '<option value="KIDS TV" selected>KIDS TV (Sample)</option><option value="MNCTV">MNCTV</option><option value="RCTI">RCTI</option><option value="GTV">GTV</option>';
+                pASel.innerHTML = '<option value="Week 2627" selected>Week 2627</option>';
+                pBSel.innerHTML = '<option value="Week 2628" selected>Week 2628</option>';
+                srcSel.innerHTML = '<option value="-1">Program Source (Sample)</option>';
+                shSel.innerHTML = '<option value="-1">Share (Sample)</option>';
+                durSel.innerHTML = '<option value="-1">Durasi (Sample)</option>';
+                if (chanCount) chanCount.textContent = 'Mode Demo (Kids TV)';
+                return;
+            }
+
+            // Find best column guesses
+            let cChan = -1, cSrc = -1, cDate = -1, cShare = -1, cDur = -1;
+            headerRow.forEach((col, idx) => {
+                const s = String(col || '').toLowerCase().trim();
+                const opt = `<option value="${idx}">${escapeHtml(col || 'Kolom ' + idx)}</option>`;
+                srcSel.innerHTML += opt;
+                shSel.innerHTML += opt;
+                durSel.innerHTML += opt;
+
+                if (cChan === -1 && (s.includes('channel') || s.includes('stasiun') || s.includes('station') || s.includes('saluran'))) cChan = idx;
+                if (cSrc === -1 && (s.includes('source') || s.includes('sumber') || s.includes('asal') || s.includes('ph') || s.includes('program source'))) cSrc = idx;
+                if (cDate === -1 && (s.includes('week') || s.includes('minggu') || s.includes('date') || s.includes('tanggal') || s.includes('periode'))) cDate = idx;
+                if (cShare === -1 && (s.includes('share') || s.includes('tvr') || s.includes('rating') || s.includes('performa'))) cShare = idx;
+                if (cDur === -1 && (s.includes('durasi') || s.includes('duration') || s.includes('menit') || s.includes('minute') || s.includes('jam') || s.includes('hour'))) cDur = idx;
+            });
+
+            if (cSrc !== -1) srcSel.value = String(cSrc);
+            if (cShare !== -1) shSel.value = String(cShare);
+            if (cDur !== -1) durSel.value = String(cDur);
+
+            // Extract unique channels
+            const channels = new Set();
+            const periods = new Set();
+
+            const cCol = cChan >= 0 ? cChan : (pivotStudioState.filterColIdx >= 0 ? pivotStudioState.filterColIdx : -1);
+            const pCol = cDate >= 0 ? cDate : (pivotStudioState.colColIdx >= 0 ? pivotStudioState.colColIdx : 0);
+
+            for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
+                const row = currentRawSheetData[r];
+                if (!row) continue;
+                if (cCol >= 0 && row[cCol] !== undefined && row[cCol] !== null && String(row[cCol]).trim() !== '') {
+                    channels.add(String(row[cCol]).trim());
+                }
+                if (pCol >= 0 && row[pCol] !== undefined && row[pCol] !== null && String(row[pCol]).trim() !== '') {
+                    periods.add(String(row[pCol]).trim());
+                }
+            }
+
+            if (channels.size > 0) {
+                channels.forEach(ch => {
+                    chanSel.innerHTML += `<option value="${escapeHtml(ch)}">${escapeHtml(ch)}</option>`;
+                });
+                if (chanCount) chanCount.textContent = `${channels.size} channel ditemukan`;
+            } else {
+                chanSel.innerHTML = '<option value="KIDS TV">KIDS TV</option>';
+            }
+
+            const pArr = Array.from(periods);
+            if (pArr.length >= 2) {
+                pArr.forEach((p, idx) => {
+                    pASel.innerHTML += `<option value="${escapeHtml(p)}" ${idx === 0 ? 'selected' : ''}>${escapeHtml(p)}</option>`;
+                    pBSel.innerHTML += `<option value="${escapeHtml(p)}" ${idx === 1 ? 'selected' : ''}>${escapeHtml(p)}</option>`;
+                });
+            } else {
+                pASel.innerHTML = '<option value="Week 2627" selected>Week 2627</option>';
+                pBSel.innerHTML = '<option value="Week 2628" selected>Week 2628</option>';
+            }
+        }
+
+        function updateSyndicatePreview() {
+            const previewContainer = document.getElementById('synPreviewContainer');
+            if (!previewContainer) return;
+
+            const chan = document.getElementById('synChannelSelect')?.value || 'KIDS TV';
+            const wA = document.getElementById('synPeriodASelect')?.value || 'Week 2627';
+            const wB = document.getElementById('synPeriodBSelect')?.value || 'Week 2628';
+            const srcIdx = parseInt(document.getElementById('synSourceColSelect')?.value) || -1;
+            const shIdx = parseInt(document.getElementById('synShareColSelect')?.value) || -1;
+            const durIdx = parseInt(document.getElementById('synDurColSelect')?.value) || -1;
+
+            let computedRows = [];
+
+            const pHeaderInput = document.getElementById('pivotHeaderRowInput');
+            const hIdx = Math.max(0, (parseInt(pHeaderInput?.value) || 1) - 1);
+
+            if (currentRawSheetData && currentRawSheetData.length > 2 && srcIdx >= 0 && shIdx >= 0) {
+                // Compute from actual raw data
+                const dateIdx = parseInt(document.getElementById('synPeriodASelect')?.dataset?.dateCol) >= 0 
+                    ? parseInt(document.getElementById('synPeriodASelect').dataset.dateCol) 
+                    : (pivotStudioState.colColIdx >= 0 ? pivotStudioState.colColIdx : findDateColIdx(hIdx));
+                const chanIdx = pivotStudioState.filterColIdx >= 0 ? pivotStudioState.filterColIdx : findChannelColIdx(hIdx);
+
+                const sourceMap = new Map();
+                let totDurA = 0, totDurB = 0;
+
+                for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
+                    const row = currentRawSheetData[r];
+                    if (!row) continue;
+
+                    // Channel filter
+                    if (chanIdx >= 0 && row[chanIdx] && String(row[chanIdx]).trim() !== chan) {
+                        continue;
+                    }
+
+                    const srcKey = String(row[srcIdx] || 'Lainnya').trim();
+                    const pVal = dateIdx >= 0 ? String(row[dateIdx] || '').trim() : '';
+
+                    if (!sourceMap.has(srcKey)) {
+                        sourceMap.set(srcKey, { source: srcKey, durA: 0, durB: 0, shSumA: 0, shCntA: 0, shSumB: 0, shCntB: 0 });
+                    }
+                    const item = sourceMap.get(srcKey);
+
+                    const shVal = parseFloat(String(row[shIdx] || '0').replace(',', '.').replace(/[^0-9.-]/g, '')) || 0;
+                    const dVal = durIdx >= 0 ? (parseFloat(String(row[durIdx] || '0').replace(',', '.').replace(/[^0-9.-]/g, '')) || 0) : 1;
+
+                    if (pVal === wA || pVal.includes(wA)) {
+                        item.durA += dVal;
+                        item.shSumA += shVal;
+                        item.shCntA++;
+                        totDurA += dVal;
+                    } else if (pVal === wB || pVal.includes(wB)) {
+                        item.durB += dVal;
+                        item.shSumB += shVal;
+                        item.shCntB++;
+                        totDurB += dVal;
+                    }
+                }
+
+                sourceMap.forEach(item => {
+                    const durPctA = totDurA > 0 ? Math.round((item.durA / totDurA) * 1000) / 10 : 0;
+                    const durPctB = totDurB > 0 ? Math.round((item.durB / totDurB) * 1000) / 10 : 0;
+                    const avgShA = item.shCntA > 0 ? Math.round((item.shSumA / item.shCntA) * 100) / 100 : 0;
+                    const avgShB = item.shCntB > 0 ? Math.round((item.shSumB / item.shCntB) * 100) / 100 : 0;
+
+                    if (item.shCntA > 0 || item.shCntB > 0 || item.durA > 0 || item.durB > 0) {
+                        computedRows.push({
+                            source: item.source,
+                            durA: durPctA,
+                            durB: durPctB,
+                            shareA: avgShA,
+                            shareB: avgShB
+                        });
+                    }
+                });
+            }
+
+            // Fallback to sample data if no computed rows
+            if (computedRows.length === 0) {
+                computedRows = DEFAULT_SYNDICATE_SAMPLE;
+            }
+
+            window.__cachedSyndicateComputedData = {
+                channel: chan,
+                weekA: wA,
+                weekB: wB,
+                rows: computedRows
+            };
+
+            // Render Preview Table
+            let rowsHtml = '';
+            computedRows.forEach((r, idx) => {
+                const deltaDur = Math.round((r.durB - r.durA) * 10) / 10;
+                const deltaSh = Math.round((r.shareB - r.shareA) * 100) / 100;
+                const dDurBadge = deltaDur > 0 ? `<span class="text-blue-600 font-bold">+${deltaDur.toFixed(1)}%</span>` : (deltaDur < 0 ? `<span class="text-rose-600 font-bold">${deltaDur.toFixed(1)}%</span>` : '<span class="text-slate-400">0.0%</span>');
+                const dShBadge = deltaSh > 0 ? `<span class="text-blue-600 font-bold">+${deltaSh.toFixed(2)}</span>` : (deltaSh < 0 ? `<span class="text-rose-600 font-bold">${deltaSh.toFixed(2)}</span>` : '<span class="text-slate-400">0.00</span>');
+
+                rowsHtml += `
+                    <tr class="${idx % 2 === 1 ? 'bg-slate-50/70' : 'bg-white'} border-b border-dotted border-slate-200">
+                        <td class="py-1.5 px-3 font-bold text-slate-800 border-r border-slate-200">${escapeHtml(r.source)}</td>
+                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-200">${r.durA.toFixed(1)}%</td>
+                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-200">${r.durB.toFixed(1)}%</td>
+                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-200">${dDurBadge}</td>
+                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-200">${r.shareA.toFixed(2)}</td>
+                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-200">${r.shareB.toFixed(2)}</td>
+                        <td class="py-1.5 px-2 text-center font-mono">${dShBadge}</td>
+                    </tr>
+                `;
+            });
+
+            previewContainer.innerHTML = `
+                <div class="overflow-x-auto max-h-[300px] custom-scrollbar">
+                    <table class="w-full text-xs border-collapse">
+                        <thead class="sticky top-0 bg-[#002060] text-white text-[11px] font-bold z-10 shadow-xs">
+                            <tr>
+                                <th class="py-2 px-3 border border-slate-400 text-left" rowspan="2">Program Source</th>
+                                <th class="py-2 px-3 border border-slate-400 text-center" colspan="3">Persentase Durasi</th>
+                                <th class="py-2 px-3 border border-slate-400 text-center" colspan="3">Share</th>
+                            </tr>
+                            <tr class="text-[10px]">
+                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1 px-2 border border-slate-400 text-center">+/-</th>
+                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1 px-2 border border-slate-400 text-center">+/-</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-mono text-[11px]">
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function loadSampleSyndicateData() {
+            const chanSel = document.getElementById('synChannelSelect');
+            const pASel = document.getElementById('synPeriodASelect');
+            const pBSel = document.getElementById('synPeriodBSelect');
+            if (chanSel) chanSel.value = 'KIDS TV';
+            if (pASel) pASel.value = 'Week 2627';
+            if (pBSel) pBSel.value = 'Week 2628';
+
+            window.__cachedSyndicateComputedData = {
+                channel: 'KIDS TV',
+                weekA: 'Week 2627',
+                weekB: 'Week 2628',
+                rows: DEFAULT_SYNDICATE_SAMPLE
+            };
+            updateSyndicatePreview();
+            showToast("✅ Contoh Data KIDS TV (Week 2627 vs 2628) dimuat!");
+        }
+
+        function applySyndicateToSlide() {
+            const data = window.__cachedSyndicateComputedData || {
+                channel: 'KIDS TV',
+                weekA: 'Week 2627',
+                weekB: 'Week 2628',
+                rows: DEFAULT_SYNDICATE_SAMPLE
+            };
+
+            const slide = getActiveSlide();
+            if (!slide) return;
+
+            slide.bentoLayout = 'syndicate-deck';
+            slide.chartHeight = 620;
+            slide.bentoCharts = ['bar-vertical', 'bar-vertical'];
+            slide.syndicateChannel = data.channel || 'KIDS TV';
+            slide.syndicateWeekA = data.weekA || 'Week 2627';
+            slide.syndicateWeekB = data.weekB || 'Week 2628';
+
+            slide.chartTitle = `Share dan Persentase Durasi Menurut Program Source di ${slide.syndicateChannel}`;
+            slide.chartSubtitle = `Based on Pay TV Syndicate Data, National Urban, SEC UML 5+, 48 Channels Non FTA, ${slide.syndicateWeekA} vs ${slide.syndicateWeekB}`;
+            slide.stackMode = 'grouped';
+            slide.datalabelPosition = 'outside';
+
+            // Configure Dataset 0 (Share)
+            slide.dataSets = slide.dataSets || [];
+            slide.dataSets[0] = {
+                id: 'ds_syn_share_' + Date.now(),
+                series: [
+                    { id: 's_syn_sh_a', name: slide.syndicateWeekA, type: 'auto', axis: 'y' },
+                    { id: 's_syn_sh_b', name: slide.syndicateWeekB, type: 'auto', axis: 'y' }
+                ],
+                rows: data.rows.map((r, idx) => ({
+                    id: 'r_sh_' + idx + '_' + Date.now(),
+                    label: r.source,
+                    icon: '',
+                    values: [
+                        { val: r.shareA, val2: 0, color: '#3b82f6', offset: 0, callout: false, calloutSub: '' },
+                        { val: r.shareB, val2: 0, color: '#1e40af', offset: 0, callout: false, calloutSub: '' }
+                    ]
+                }))
+            };
+
+            // Configure Dataset 1 (Persentase Durasi)
+            slide.dataSets[1] = {
+                id: 'ds_syn_dur_' + Date.now(),
+                series: [
+                    { id: 's_syn_dur_a', name: slide.syndicateWeekA, type: 'auto', axis: 'y' },
+                    { id: 's_syn_dur_b', name: slide.syndicateWeekB, type: 'auto', axis: 'y' }
+                ],
+                rows: data.rows.map((r, idx) => ({
+                    id: 'r_dur_' + idx + '_' + Date.now(),
+                    label: r.source,
+                    icon: '',
+                    values: [
+                        { val: r.durA, val2: 0, color: '#eab308', offset: 0, callout: false, calloutSub: '' },
+                        { val: r.durB, val2: 0, color: '#854d0e', offset: 0, callout: false, calloutSub: '' }
+                    ]
+                }))
+            };
+
+            closeSyndicateExecutiveModal();
+            closeRawImportModal();
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            renderWorkbenchFromActiveDataSet();
+            showToast("✅ Template Eksekutif Sindikasi berhasil diterapkan ke Slide Canvas!");
+        }
+
+        function findChannelColIdx(hIdx) {
+            if (!currentRawSheetData || !currentRawSheetData[hIdx]) return -1;
+            const headerRow = currentRawSheetData[hIdx];
+            for (let i = 0; i < headerRow.length; i++) {
+                const s = String(headerRow[i] || '').toLowerCase().trim();
+                if (s.includes('channel') || s.includes('stasiun') || s.includes('station') || s.includes('saluran')) return i;
+            }
+            return -1;
+        }
+
+        function findDateColIdx(hIdx) {
+            if (!currentRawSheetData || !currentRawSheetData[hIdx]) return -1;
+            const headerRow = currentRawSheetData[hIdx];
+            for (let i = 0; i < headerRow.length; i++) {
+                const s = String(headerRow[i] || '').toLowerCase().trim();
+                if (s.includes('week') || s.includes('minggu') || s.includes('date') || s.includes('tanggal') || s.includes('periode')) return i;
+            }
+            return 0;
+        }
+    
     </script>
     <!-- COMMAND PALETTE MODAL -->
     <div id="commandPaletteModal"
