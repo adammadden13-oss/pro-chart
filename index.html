@@ -1074,22 +1074,17 @@
 
     <!-- POPUP MODAL: TEMPLATE EKSEKUTIF SINDIKASI (SHARE & DURASI WOW) -->
     <div id="syndicateExecutiveModal" class="hidden fixed inset-0 z-[285] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeSyndicateExecutiveModal()">
-        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-2xl p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto custom-scrollbar">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-amber-600 text-white flex items-center justify-center font-bold shadow-md">
-                        <i class="ph-bold ph-television text-xl"></i>
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-3xl p-5 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h4 class="text-sm font-black text-slate-900 tracking-tight">Executive Presentation Decks &amp; Matrix Suite</h4>
+                        <span class="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Multi-Role Layouts</span>
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h4 class="text-sm font-black text-slate-900 tracking-tight">Template Eksekutif Sindikasi: Share &amp; Durasi</h4>
-                            <span class="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">WoW Executive Deck</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 font-medium">Format komparasi 2 minggu (Tabel Ringkasan + Dual Clustered Bar)</p>
-                    </div>
+                    <p class="text-[11px] text-slate-500 font-medium">Tata letak eksekutif serbaguna untuk Analis, Akuntan, Bisnis &amp; Media: Leaderboard, Multi-Column Data Grid, Matriks Kelompok, dan Dual Benchmark.</p>
                 </div>
-                <button type="button" onclick="closeSyndicateExecutiveModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
-                    <i class="ph-bold ph-x text-sm"></i>
+                <button type="button" onclick="closeSyndicateExecutiveModal()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition" title="Tutup">
+                    <i class="ph-bold ph-x text-xs"></i>
                 </button>
             </div>
 
@@ -1112,7 +1107,7 @@
 
                 <div class="flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Periode / Week A (Basis Awal):
+                        <span class="w-2 h-2 rounded-full bg-slate-800"></span> Periode / Week A (Basis Awal):
                     </label>
                     <select id="synPeriodASelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-blue-600 transition cursor-pointer">
                     </select>
@@ -1120,7 +1115,7 @@
 
                 <div class="flex flex-col gap-1">
                     <label class="text-[11px] font-bold text-slate-700 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-700"></span> Periode / Week B (Pembanding):
+                        <span class="w-2 h-2 rounded-full bg-slate-500"></span> Periode / Week B (Pembanding):
                     </label>
                     <select id="synPeriodBSelect" onchange="updateSyndicatePreview()" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:border-indigo-700 transition cursor-pointer">
                     </select>
@@ -1140,12 +1135,17 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <span class="text-xs font-black text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
-                    <i class="ph-bold ph-table text-indigo-600"></i> Live Preview Tabel &amp; Data
+                <span class="text-xs font-black text-slate-800 uppercase tracking-wider">
+                    Live Preview Tabel &amp; Data
                 </span>
-                <button type="button" onclick="loadSampleSyndicateData()" class="px-3 py-1 rounded-xl text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition flex items-center gap-1">
-                    <i class="ph-bold ph-magic-wand text-amber-600"></i> <span>Gunakan Contoh Kids TV (Week 2627 vs 2628)</span>
-                </button>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="loadMNCDeckSampleData()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition shadow-2xs">
+                        Dataset Contoh MNC (2639 vs 2640)
+                    </button>
+                    <button type="button" onclick="loadSampleSyndicateData()" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition">
+                        Kids TV WoW
+                    </button>
+                </div>
             </div>
 
             <!-- LIVE PREVIEW CONTAINER -->
@@ -1154,13 +1154,28 @@
             </div>
 
             <!-- ACTION FOOTER -->
-            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
-                <button type="button" onclick="closeSyndicateExecutiveModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
+                <button type="button" onclick="closeSyndicateExecutiveModal()" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition shrink-0">
                     Batal
                 </button>
-                <button type="button" onclick="applySyndicateToSlide()" class="px-5 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 hover:from-blue-800 hover:to-amber-700 text-white shadow-md transition flex items-center gap-2 cursor-pointer hover:scale-[1.02]">
-                    <i class="ph-bold ph-rocket-launch text-sm"></i> <span>Terapkan ke Slide Canvas</span>
-                </button>
+                <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
+                    <button type="button" onclick="applyChannelShareSummaryToSlide(null, false)" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-[#cafc03] border border-slate-700/60 shadow-xs transition cursor-pointer whitespace-nowrap text-left" title="Layout: Tabel Leaderboard + Ringkasan KPI + Catatan Eksekutif (Cocok untuk Top 20 OPEX, Top Produk, Top Channel)">
+                        <span class="block font-black leading-tight text-center">Top 20 Summary</span>
+                        <span class="block text-[8.5px] text-slate-300 font-normal leading-tight text-center">Tabel, Summary &amp; Note</span>
+                    </button>
+                    <button type="button" onclick="applyChannelShare48ToSlide(null, false)" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-[#cafc03] border border-slate-700/60 shadow-xs transition cursor-pointer whitespace-nowrap text-left" title="Layout: Tabel Data Komprehensif 1-48+ &amp; Ringkasan Kategori (Cocok untuk Chart of Accounts, Katalog Seluruh SKU, 48 Cabang)">
+                        <span class="block font-black leading-tight text-center">Channels 48</span>
+                        <span class="block text-[8.5px] text-slate-300 font-normal leading-tight text-center">Table Data &amp; Summary</span>
+                    </button>
+                    <button type="button" onclick="applyGenreShareMatrixToSlide(null, false)" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-[#cafc03] border border-slate-700/60 shadow-xs transition cursor-pointer whitespace-nowrap text-left" title="Layout: Matriks Kartu Multi-Kelompok (Cocok untuk Biaya per Departemen, Wilayah Sales, Segmentasi Genre)">
+                        <span class="block font-black leading-tight text-center">Genre Matrix</span>
+                        <span class="block text-[8.5px] text-slate-300 font-normal leading-tight text-center">Multi-Group Cards</span>
+                    </button>
+                    <button type="button" onclick="applySyndicateToSlide()" class="px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-900 hover:bg-slate-800 text-[#cafc03] border border-slate-700/60 shadow-xs transition cursor-pointer whitespace-nowrap text-left" title="Layout: Tabel Komparasi Multivariabel + 2 Grafik Clustered Bar (Cocok untuk Budget vs Actual, Volume vs Nilai, Share vs Durasi WoW)">
+                        <span class="block font-black leading-tight text-center">Share &amp; Durasi WoW</span>
+                        <span class="block text-[8.5px] text-slate-300 font-normal leading-tight text-center">Tabel &amp; 2 Grafik</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1320,6 +1335,8 @@
                         <select id="versusDateASelect" onchange="updateVersusRangeSummary()" class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
                         </select>
                     </div>
+
+
 
                     <div class="flex flex-col gap-1.5">
                         <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -2039,9 +2056,9 @@
                                 <i class="ph-bold ph-sliders text-indigo-500"></i> Kuadran Pivot (Bebas Kustom)
                             </span>
                             <button type="button" onclick="openSyndicateExecutiveModal()"
-                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 hover:from-blue-800 hover:to-amber-700 text-white flex items-center gap-1.5 shadow-2xs transition hover:scale-[1.02] cursor-pointer"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 hover:from-blue-800 hover:to-amber-700 text-white shadow-2xs transition hover:scale-[1.02] cursor-pointer"
                                 title="Template Eksekutif Sindikasi: Tabel + 2 Grafik WoW (Share & Durasi)">
-                                <i class="ph-bold ph-television text-amber-200"></i> <span>Template Sindikasi (WoW)</span>
+                                <span>Template Sindikasi (WoW)</span>
                             </button>
                             <button type="button" onclick="applyPresetSourceAirtimeROI()"
                                 class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white flex items-center gap-1.5 shadow-2xs transition hover:scale-[1.02] cursor-pointer"
@@ -2752,12 +2769,63 @@
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-black text-slate-900 focus:ring-2 focus:ring-[#cafc03] outline-none appearance-none shadow-sm border-l-4 border-l-[#cafc03] cursor-pointer transition">
                             <option value="1" data-i18n="g1">1 Grid (Standar Penuh)</option>
                             <option value="2-v" data-i18n="g2v">2 Grid (Kiri & Kanan)</option>
-                            <option value="syndicate-deck" class="font-bold text-indigo-900 bg-indigo-50">⭐ Executive Syndicate Deck (Tabel + 2 Grafik WoW)</option>
+                            <option value="syndicate-deck" class="font-bold text-indigo-900 bg-indigo-50">Share &amp; Durasi WoW (Layout: Tabel Komparasi + 2 Grafik)</option>
+                            <option value="channel-share-summary" class="font-bold text-orange-900 bg-orange-50">Top N Summary (Layout: Tabel + KPI Summary + Note)</option>
+                            <option value="channel-share-48" class="font-bold text-blue-900 bg-blue-50">Channels Matrix (Layout: Table Data &amp; Summary Kategori)</option>
+                            <option value="genre-share-matrix" class="font-bold text-emerald-900 bg-emerald-50">Genre Matrix (Layout: Multi-Group Matrix Cards)</option>
                             <option value="2-h" data-i18n="g2h">2 Grid (Atas & Bawah)</option>
                             <option value="3" data-i18n="g3">3 Grid (Bento: Kiri Besar, Kanan Kecil)</option>
                         </select>
                     </div>
-                    <div class="p-3 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
+                                        <!-- DYNAMIC CONTROLS FOR SYNDICATE DECKS (TOP N & CHANNELS LIMIT) -->
+                    <div id="syndicateDeckSettingsPanel" class="p-3 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3 hidden">
+                        <!-- TOP N CONTROLS -->
+                        <div id="synTopNSettings" class="space-y-2 hidden">
+                            <div class="flex items-center justify-between">
+                                <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider">Jumlah Data (Top N)</label>
+                                <span id="synTopNDisplay" class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">Top 20</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="synTopNInput" min="1" max="500" value="20" class="w-24 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-black text-slate-800 outline-none focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800">
+                                <span class="text-[10px] text-slate-500 font-medium">peringkat saluran</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1 pt-1">
+                                <span class="text-[9px] text-slate-400 font-bold mr-1">Preset:</span>
+                                <button type="button" onclick="setSyndicateTopN(10)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">Top 10</button>
+                                <button type="button" onclick="setSyndicateTopN(15)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">Top 15</button>
+                                <button type="button" onclick="setSyndicateTopN(20)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">Top 20</button>
+                                <button type="button" onclick="setSyndicateTopN(25)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">Top 25</button>
+                                <button type="button" onclick="setSyndicateTopN(30)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">Top 30</button>
+                                <button type="button" onclick="setSyndicateTopN(50)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">Top 50</button>
+                                <button type="button" onclick="setSyndicateTopN(999)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-900 text-[#cafc03] border border-slate-700 transition">Semua</button>
+                            </div>
+                        </div>
+
+                        <!-- CHANNEL LIMIT CONTROLS -->
+                        <div id="synChannelLimitSettings" class="space-y-2 hidden">
+                            <div class="flex items-center justify-between">
+                                <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider">Jumlah Saluran (Channels)</label>
+                                <span id="synChannelLimitDisplay" class="text-xs font-mono font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md">48 Saluran</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="synChannelLimitInput" min="10" max="500" value="48" class="w-24 px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-black text-slate-800 outline-none focus:bg-white focus:border-slate-800 focus:ring-1 focus:ring-slate-800">
+                                <span class="text-[10px] text-slate-500 font-medium">total saluran</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1 pt-1">
+                                <span class="text-[9px] text-slate-400 font-bold mr-1">Preset:</span>
+                                <button type="button" onclick="setSyndicateChannelLimit(30)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">30</button>
+                                <button type="button" onclick="setSyndicateChannelLimit(40)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">40</button>
+                                <button type="button" onclick="setSyndicateChannelLimit(48)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">48</button>
+                                <button type="button" onclick="setSyndicateChannelLimit(60)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">60</button>
+                                <button type="button" onclick="setSyndicateChannelLimit(65)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">65</button>
+                                <button type="button" onclick="setSyndicateChannelLimit(80)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">80</button>
+                                <button type="button" onclick="setSyndicateChannelLimit(100)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">100</button>
+                                <button type="button" onclick="setSyndicateChannelLimit(999)" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-900 text-[#cafc03] border border-slate-700 transition">Semua</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bentoChartTypesContainer" class="p-3 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3">
                         <div><label class="block text-[9px] font-bold text-slate-500 uppercase mb-1"
                                 data-i18n="type1">Tipe Grafik Grid 1 (Utama)</label><select id="bentoChart1"
                                 class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 outline-none cursor-pointer transition"></select>
@@ -9247,7 +9315,37 @@ ${escapeHtml(narrative)}
                 if (els.toggleSubtitle) els.toggleSubtitle.checked = slide.showSubtitle !== false;
                 if (els.toggleWatermark) els.toggleWatermark.checked = slide.showWatermark !== false;
                 if (slide.notes && slide.notes.length > 0) { if (!slide.notes.find(n => n.id === activeNoteId)) activeNoteId = slide.notes[0].id; } else { activeNoteId = null; } syncNoteController();
-                if (els.bentoLayout) els.bentoLayout.value = slide.bentoLayout; if (els.bentoChart1) els.bentoChart1.value = slide.bentoCharts[0]; if (els.bentoChart2) els.bentoChart2.value = slide.bentoCharts[1]; if (els.bentoChart3) els.bentoChart3.value = slide.bentoCharts[2];
+                if (els.bentoLayout) els.bentoLayout.value = slide.bentoLayout;
+                const synPanel = document.getElementById('syndicateDeckSettingsPanel');
+                const synTopNGroup = document.getElementById('synTopNSettings');
+                const synChanGroup = document.getElementById('synChannelLimitSettings');
+                const chartTypesBox = document.getElementById('bentoChartTypesContainer');
+                const isSynLayout = (slide.bentoLayout === 'channel-share-summary' || slide.bentoLayout === 'channel-share-48' || slide.bentoLayout === 'genre-share-matrix');
+                if (chartTypesBox) chartTypesBox.style.display = isSynLayout ? 'none' : 'block';
+
+                if (synPanel) {
+                    if (slide.bentoLayout === 'channel-share-summary') {
+                        synPanel.classList.remove('hidden');
+                        if (synTopNGroup) synTopNGroup.classList.remove('hidden');
+                        if (synChanGroup) synChanGroup.classList.add('hidden');
+                        const curTopN = parseInt(slide.syndicateTopN) || 20;
+                        const topNInp = document.getElementById('synTopNInput');
+                        const topNDisp = document.getElementById('synTopNDisplay');
+                        if (topNInp) topNInp.value = curTopN;
+                        if (topNDisp) topNDisp.innerText = `Top ${curTopN}`;
+                    } else if (slide.bentoLayout === 'channel-share-48') {
+                        synPanel.classList.remove('hidden');
+                        if (synTopNGroup) synTopNGroup.classList.add('hidden');
+                        if (synChanGroup) synChanGroup.classList.remove('hidden');
+                        const curLimit = parseInt(slide.syndicateChannelLimit) || 48;
+                        const chanInp = document.getElementById('synChannelLimitInput');
+                        const chanDisp = document.getElementById('synChannelLimitDisplay');
+                        if (chanInp) chanInp.value = curLimit;
+                        if (chanDisp) chanDisp.innerText = `${curLimit} Saluran`;
+                    } else {
+                        synPanel.classList.add('hidden');
+                    }
+                } if (els.bentoChart1) els.bentoChart1.value = slide.bentoCharts[0]; if (els.bentoChart2) els.bentoChart2.value = slide.bentoCharts[1]; if (els.bentoChart3) els.bentoChart3.value = slide.bentoCharts[2];
                 if (els.bentoGrid2Container) els.bentoGrid2Container.style.display = slide.bentoLayout === '1' ? 'none' : 'block'; if (els.bentoGrid3Container) els.bentoGrid3Container.style.display = slide.bentoLayout === '3' ? 'block' : 'none'; if (els.dataTargetSelectorPanel) els.dataTargetSelectorPanel.style.display = slide.bentoLayout === '1' ? 'none' : 'flex'; if (els.tabGrid1) els.tabGrid1.style.display = (slide.bentoLayout === '2-h' || slide.bentoLayout === '2-v' || slide.bentoLayout === '3' || slide.bentoLayout === 'syndicate-deck') ? 'block' : 'none'; if (els.tabGrid2) els.tabGrid2.style.display = slide.bentoLayout === '3' ? 'block' : 'none';
                 setActiveEditGrid(activeEditGridIndex);
                 if (els.colorTheme) els.colorTheme.value = slide.colorTheme; if (els.stackMode) els.stackMode.value = slide.stackMode || 'accumulate';
@@ -9438,6 +9536,10 @@ ${escapeHtml(narrative)}
         if (els.toggleMainTitle) els.toggleMainTitle.addEventListener('change', (e) => syncAndRender('showMainTitle', e.target.checked));
         if (els.toggleSubtitle) els.toggleSubtitle.addEventListener('change', (e) => syncAndRender('showSubtitle', e.target.checked));
         if (els.toggleWatermark) els.toggleWatermark.addEventListener('change', (e) => syncAndRender('showWatermark', e.target.checked));
+        const synTopNInpEl = document.getElementById('synTopNInput');
+        if (synTopNInpEl) synTopNInpEl.addEventListener('change', (e) => setSyndicateTopN(e.target.value));
+        const synChanInpEl = document.getElementById('synChannelLimitInput');
+        if (synChanInpEl) synChanInpEl.addEventListener('change', (e) => setSyndicateChannelLimit(e.target.value));
         if (els.bentoLayout) els.bentoLayout.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.bentoLayout = e.target.value; if (e.target.value === '1') activeEditGridIndex = 0; if ((e.target.value === '2-h' || e.target.value === '2-v') && activeEditGridIndex > 1) activeEditGridIndex = 0; syncUIToActiveSlide(); triggerVisUpdateWithDebounce(); saveState(); });[els.bentoChart1, els.bentoChart2, els.bentoChart3].forEach((el, index) => { if (el) el.addEventListener('change', (e) => { getActiveSlide().bentoCharts[index] = e.target.value; forceRecolor(getActiveSlide().colorTheme, getActiveSlide()); syncUIToActiveSlide(); triggerVisUpdateWithDebounce(); saveState(); }); });
         if (els.colorTheme) els.colorTheme.addEventListener('change', (e) => { const slide = getActiveSlide(); slide.colorTheme = e.target.value; forceRecolor(slide.colorTheme, slide); syncUIToActiveSlide(); triggerVisUpdateWithDebounce(); saveState(); });
         if (els.stackMode) els.stackMode.addEventListener('change', (e) => {
@@ -10791,30 +10893,16 @@ ${escapeHtml(narrative)}
                         }
                         
             if (slide.bentoLayout === 'syndicate-deck') {
-                if (blockIndex === 0) {
-                    // Share chart: Series 0 = #3b82f6, Series 1 = #0f3ba2
-                    if (datasets[0]) {
-                        datasets[0].backgroundColor = '#3b82f6';
-                        datasets[0].borderColor = '#2563eb';
-                        datasets[0].borderRadius = 4;
-                    }
-                    if (datasets[1]) {
-                        datasets[1].backgroundColor = '#0f3ba2';
-                        datasets[1].borderColor = '#002060';
-                        datasets[1].borderRadius = 4;
-                    }
-                } else if (blockIndex === 1) {
-                    // Durasi chart: Series 0 = #eab308, Series 1 = #854d0e
-                    if (datasets[0]) {
-                        datasets[0].backgroundColor = '#eab308';
-                        datasets[0].borderColor = '#ca8a04';
-                        datasets[0].borderRadius = 4;
-                    }
-                    if (datasets[1]) {
-                        datasets[1].backgroundColor = '#854d0e';
-                        datasets[1].borderColor = '#713f12';
-                        datasets[1].borderRadius = 4;
-                    }
+                // Unified Template Pattern: Series 0 (Week A) = #cafc03 (Neon Lime), Series 1 (Week B) = #0f172a (Dark Slate)
+                if (datasets[0]) {
+                    datasets[0].backgroundColor = '#cafc03';
+                    datasets[0].borderColor = '#84cc16';
+                    datasets[0].borderRadius = 4;
+                }
+                if (datasets[1]) {
+                    datasets[1].backgroundColor = '#0f172a';
+                    datasets[1].borderColor = '#1e293b';
+                    datasets[1].borderRadius = 4;
                 }
                 chartOptions.plugins = chartOptions.plugins || {};
                 chartOptions.plugins.legend = { display: false };
@@ -10878,30 +10966,16 @@ ${escapeHtml(narrative)}
             }
             
             if (slide.bentoLayout === 'syndicate-deck') {
-                if (blockIndex === 0) {
-                    // Share chart: Series 0 = #3b82f6 (Light Blue), Series 1 = #0f3ba2 (Dark Navy)
-                    if (datasets[0]) {
-                        datasets[0].backgroundColor = '#3b82f6';
-                        datasets[0].borderColor = '#2563eb';
-                        datasets[0].borderRadius = 4;
-                    }
-                    if (datasets[1]) {
-                        datasets[1].backgroundColor = '#0f3ba2';
-                        datasets[1].borderColor = '#002060';
-                        datasets[1].borderRadius = 4;
-                    }
-                } else if (blockIndex === 1) {
-                    // Durasi chart: Series 0 = #eab308 (Gold/Yellow), Series 1 = #854d0e (Dark Bronze)
-                    if (datasets[0]) {
-                        datasets[0].backgroundColor = '#eab308';
-                        datasets[0].borderColor = '#ca8a04';
-                        datasets[0].borderRadius = 4;
-                    }
-                    if (datasets[1]) {
-                        datasets[1].backgroundColor = '#854d0e';
-                        datasets[1].borderColor = '#713f12';
-                        datasets[1].borderRadius = 4;
-                    }
+                // Unified Template Pattern: Series 0 (Week A) = #cafc03 (Neon Lime), Series 1 (Week B) = #0f172a (Dark Slate)
+                if (datasets[0]) {
+                    datasets[0].backgroundColor = '#cafc03';
+                    datasets[0].borderColor = '#84cc16';
+                    datasets[0].borderRadius = 4;
+                }
+                if (datasets[1]) {
+                    datasets[1].backgroundColor = '#0f172a';
+                    datasets[1].borderColor = '#1e293b';
+                    datasets[1].borderRadius = 4;
                 }
                 chartOptions.plugins = chartOptions.plugins || {};
                 chartOptions.plugins.legend = { display: false };
@@ -11133,6 +11207,26 @@ ${escapeHtml(narrative)}
                     els.globalWatermark.style.display = 'none';
                 }
 
+                if (slide.bentoLayout === 'channel-share-summary' || slide.bentoLayout === 'channel-share-48' || slide.bentoLayout === 'genre-share-matrix') {
+                    if (els.globalHeader) els.globalHeader.style.display = 'none';
+                    if (mainCharts && mainCharts.length > 0) mainCharts.forEach(c => { if (c && c.destroy) c.destroy(); });
+                    mainCharts = [];
+                    els.bentoWrapper.innerHTML = '';
+                    els.bentoWrapper.className = 'w-full flex-1 box-border relative transition-all duration-300 min-h-0 flex flex-col p-1 select-none overflow-hidden';
+                    
+                    if (slide.bentoLayout === 'channel-share-summary') {
+                        els.bentoWrapper.innerHTML = buildChannelShareSummaryHTML(slide);
+                    } else if (slide.bentoLayout === 'channel-share-48') {
+                        els.bentoWrapper.innerHTML = buildChannelShare48HTML(slide);
+                    } else if (slide.bentoLayout === 'genre-share-matrix') {
+                        els.bentoWrapper.innerHTML = buildGenreShareMatrixHTML(slide);
+                    }
+                    
+                    mainCharts.push({ resize: () => { } });
+                    renderCalloutsOverlay();
+                    return;
+                }
+
                 let numCharts = (slide.bentoLayout === 'syndicate-deck' || slide.bentoLayout.startsWith('2')) ? 2 : (slide.bentoLayout === '1' ? 1 : 3); let preparedConfigs = [];
                 for (let i = 0; i < numCharts; i++) {
                     try {
@@ -11314,16 +11408,16 @@ ${escapeHtml(narrative)}
                             cardHdr.innerHTML = `
                                 <h4 class="text-xs font-black text-slate-800 tracking-wider uppercase font-['Inter']">KONTRIBUSI (PERFORMA SHARE)</h4>
                                 <div class="flex items-center justify-center gap-4 text-[10px] font-bold text-slate-600 mt-0.5">
-                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#3b82f6]"></span> ${escapeHtml(wA_name)}</span>
-                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#1e40af]"></span> ${escapeHtml(wB_name)}</span>
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#cafc03] ring-1 ring-slate-400"></span> ${escapeHtml(wA_name)}</span>
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#0f172a]"></span> ${escapeHtml(wB_name)}</span>
                                 </div>
                             `;
                         } else {
                             cardHdr.innerHTML = `
                                 <h4 class="text-xs font-black text-slate-800 tracking-wider uppercase font-['Inter']">PERSENTASE DURASI</h4>
                                 <div class="flex items-center justify-center gap-4 text-[10px] font-bold text-slate-600 mt-0.5">
-                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#eab308]"></span> ${escapeHtml(wA_name)}</span>
-                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#854d0e]"></span> ${escapeHtml(wB_name)}</span>
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#cafc03] ring-1 ring-slate-400"></span> ${escapeHtml(wA_name)}</span>
+                                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-2xs bg-[#0f172a]"></span> ${escapeHtml(wB_name)}</span>
                                 </div>
                             `;
                         }
@@ -16173,28 +16267,42 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         </div>
                     </div>
 
-                    <!-- TILE SYN: EXECUTIVE SYNDICATE DECK -->
+                    <!-- TILE SYN: EXECUTIVE PRESENTATION DECK SUITE -->
                     <div class="bg-gradient-to-br from-white to-blue-50/40 border border-blue-200 rounded-2xl p-4 flex flex-col gap-2 shadow-2xs hover:border-indigo-400 transition group col-span-1 md:col-span-2">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2.5">
                                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-700 text-white flex items-center justify-center font-bold shadow-xs">
-                                    <i class="ph-bold ph-television text-xl text-amber-300"></i>
+                                    <i class="ph-bold ph-presentation-chart text-xl text-amber-300"></i>
                                 </div>
                                 <div>
                                     <div class="flex items-center gap-2">
-                                        <h5 class="text-xs font-black text-slate-900">Laporan Eksekutif Sindikasi: Share &amp; Durasi (WoW)</h5>
-                                        <span class="bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-0.5 rounded-full">POPULAR TEMPLATE</span>
+                                        <h5 class="text-xs font-black text-slate-900">Executive Presentation Decks (Multi-Role Layouts)</h5>
+                                        <span class="bg-blue-100 text-blue-800 text-[9px] font-black px-2 py-0.5 rounded-full">UNIVERSAL EXECUTIVE</span>
                                     </div>
-                                    <span class="text-[10px] text-slate-400 font-medium">Format baku Pay TV Syndicate: Tabel Ringkasan Komparasi + 2 Grafik Clustered Bar</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">Layout siap pakai untuk Analis, Akuntan, &amp; Bisnis: Tabel + Summary + Note, Data Grid 48, Group Matrix &amp; Dual Benchmark</span>
                                 </div>
                             </div>
-                            <button type="button" onclick="openSyndicateExecutiveModal()"
-                                class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-                                <span>Buka Template</span> <i class="ph-bold ph-arrow-right text-xs"></i>
-                            </button>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button type="button" onclick="openSyndicateExecutiveModal()"
+                                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-xs" title="Buka Dialog Lengkap Template Eksekutif">
+                                    Dialog Layout
+                                </button>
+                                <button type="button" onclick="applyChannelShareSummaryToSlide(null, true)"
+                                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] border border-slate-700/60 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-xs" title="Buat Slide Baru: Top 20 Summary (Layout: Tabel + Summary + Note)">
+                                    + Top 20 Summary
+                                </button>
+                                <button type="button" onclick="applyChannelShare48ToSlide(null, true)"
+                                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] border border-slate-700/60 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-xs" title="Buat Slide Baru: Channels 48 (Layout: Table Data &amp; Summary)">
+                                    + Channels 48
+                                </button>
+                                <button type="button" onclick="applyGenreShareMatrixToSlide(null, true)"
+                                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] border border-slate-700/60 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-xs" title="Buat Slide Baru: Genre Matrix (Layout: Multi-Group Matrix Cards)">
+                                    + Genre Matrix
+                                </button>
+                            </div>
                         </div>
                         <p class="text-xs text-slate-600 leading-relaxed">
-                            Otomatis mengelompokkan Program Source per channel, menghitung porsi % alokasi jam siar dan rata-rata share, menyajikan kolom delta &plusmn; (merah untuk turun, biru untuk naik), dan menata 2 grafik berdampingan.
+                            Tata letak berstandar C-Level: <strong>Top 20 Summary</strong> (tabel peringkat, KPI card &amp; catatan narasi), <strong>Channels 48</strong> (data grid 48+ baris &amp; agregat kategori), <strong>Genre Matrix</strong> (kartu per departemen/kelompok), serta <strong>Dual-Metric Benchmark</strong> (komparasi 2 variabel berdampingan).
                         </p>
                     </div>
 
@@ -20450,28 +20558,28 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 const durB = (rDur && rDur.values && rDur.values[1] && rDur.values[1].val !== null && rDur.values[1].val !== undefined && rDur.values[1].val !== '') ? Number(rDur.values[1].val) : null;
                 const deltaDur = (durA !== null && durB !== null) ? Math.round((durB - durA) * 10) / 10 : null;
 
-                let deltaDurBadge = '<span class="text-slate-500 font-medium">0.0%</span>';
+                let deltaDurBadge = '<span class="text-slate-400 font-medium font-mono">0.0%</span>';
                 if (deltaDur !== null) {
-                    if (deltaDur > 0) deltaDurBadge = `<span class="text-blue-600 font-bold">+${deltaDur.toFixed(1)}%</span>`;
-                    else if (deltaDur < 0) deltaDurBadge = `<span class="text-rose-600 font-bold">${deltaDur.toFixed(1)}%</span>`;
+                    if (deltaDur > 0) deltaDurBadge = `<span class="text-emerald-600 font-bold font-mono">+${deltaDur.toFixed(1)}%</span>`;
+                    else if (deltaDur < 0) deltaDurBadge = `<span class="text-rose-600 font-bold font-mono">${deltaDur.toFixed(1)}%</span>`;
                 }
 
-                let deltaShBadge = '<span class="text-slate-500 font-medium">0.00</span>';
+                let deltaShBadge = '<span class="text-slate-400 font-medium font-mono">0.00</span>';
                 if (deltaSh !== null) {
-                    if (deltaSh > 0) deltaShBadge = `<span class="text-blue-600 font-bold">+${deltaSh.toFixed(2)}</span>`;
-                    else if (deltaSh < 0) deltaShBadge = `<span class="text-rose-600 font-bold">${deltaSh.toFixed(2)}</span>`;
+                    if (deltaSh > 0) deltaShBadge = `<span class="text-emerald-600 font-bold font-mono">+${deltaSh.toFixed(2)}</span>`;
+                    else if (deltaSh < 0) deltaShBadge = `<span class="text-rose-600 font-bold font-mono">${deltaSh.toFixed(2)}</span>`;
                 }
 
                 const isOdd = idx % 2 === 1;
 
                 rowsHTML += `
-                    <tr class="${isOdd ? 'bg-slate-50/70' : 'bg-white'} hover:bg-blue-50/40 transition border-b border-dotted border-slate-300">
-                        <td class="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-300">${escapeHtml(label)}</td>
-                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${durA !== null ? durA.toFixed(1) + '%' : '-'}</td>
-                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${durB !== null ? durB.toFixed(1) + '%' : '-'}</td>
-                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-300">${deltaDurBadge}</td>
-                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${shA !== null ? shA.toFixed(2) : '-'}</td>
-                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-800 border-r border-slate-300">${shB !== null ? shB.toFixed(2) : '-'}</td>
+                    <tr class="${isOdd ? 'bg-slate-50/70' : 'bg-white'} hover:bg-slate-100/70 transition border-b border-dotted border-slate-200">
+                        <td class="py-1.5 px-3 font-bold text-slate-900 border-r border-slate-200">${escapeHtml(label)}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-700 border-r border-slate-200">${durA !== null ? durA.toFixed(1) + '%' : '-'}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-700 border-r border-slate-200">${durB !== null ? durB.toFixed(1) + '%' : '-'}</td>
+                        <td class="py-1.5 px-2 text-center font-mono border-r border-slate-200">${deltaDurBadge}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-700 border-r border-slate-200">${shA !== null ? shA.toFixed(2) : '-'}</td>
+                        <td class="py-1.5 px-2 text-center font-mono font-medium text-slate-700 border-r border-slate-200">${shB !== null ? shB.toFixed(2) : '-'}</td>
                         <td class="py-1.5 px-2 text-center font-mono">${deltaShBadge}</td>
                     </tr>
                 `;
@@ -20480,35 +20588,35 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             return `
                 <div class="flex items-center justify-between pb-2 border-b border-slate-200 flex-wrap gap-2">
                     <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#002060]"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#cafc03] ring-2 ring-slate-900"></span>
                         <span class="text-xs font-black text-slate-900 uppercase tracking-wider font-['Inter']">Share dan Persentase Durasi Menurut Program Source di ${escapeHtml(channel)}</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="flex items-center border border-slate-300 rounded overflow-hidden shadow-2xs text-xs font-bold">
-                            <span class="bg-[#002060] text-white px-3 py-1 font-black text-[11px] tracking-wider uppercase">CHANNEL</span>
-                            <span class="bg-[#e8edf7] text-[#002060] px-4 py-1 font-black text-xs cursor-pointer hover:bg-blue-100 transition" onclick="promptChangeSyndicateChannel()" title="Klik untuk ganti Channel">${escapeHtml(channel)}</span>
+                        <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden shadow-2xs text-xs font-bold">
+                            <span class="bg-slate-900 text-[#cafc03] px-3 py-1 font-black text-[11px] tracking-wider uppercase font-['Inter']">CHANNEL</span>
+                            <span class="bg-slate-100 text-slate-900 px-4 py-1 font-bold text-xs cursor-pointer hover:bg-slate-200 transition" onclick="promptChangeSyndicateChannel()" title="Klik untuk ganti Channel">${escapeHtml(channel)}</span>
                         </div>
                         <span class="text-[10px] text-slate-400 italic">Pilih channel</span>
                     </div>
                 </div>
-                <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs">
+                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
                     <table class="w-full text-xs border-collapse">
                         <thead>
-                            <tr class="bg-[#002060] text-white text-[11px] font-bold">
-                                <th class="py-2 px-3 border border-slate-400 text-left uppercase tracking-wider" rowspan="2">Program Source</th>
-                                <th class="py-2 px-3 border border-slate-400 text-center uppercase tracking-wider" colspan="3">Persentase Durasi</th>
-                                <th class="py-2 px-3 border border-slate-400 text-center uppercase tracking-wider" colspan="3">Share</th>
+                            <tr class="bg-slate-900 text-white text-[11px] font-bold border-b-2 border-b-[#cafc03]">
+                                <th class="py-2 px-3 border border-slate-700/80 text-left uppercase tracking-wider font-['Inter']" rowspan="2">Program Source</th>
+                                <th class="py-2 px-3 border border-slate-700/80 text-center uppercase tracking-wider font-['Inter']" colspan="3">Persentase Durasi</th>
+                                <th class="py-2 px-3 border border-slate-700/80 text-center uppercase tracking-wider font-['Inter']" colspan="3">Share</th>
                             </tr>
-                            <tr class="bg-[#002060] text-white text-[10px] font-bold">
-                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
-                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
-                                <th class="py-1.5 px-2 border border-slate-400 text-center">+/-</th>
-                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
-                                <th class="py-1.5 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
-                                <th class="py-1.5 px-2 border border-slate-400 text-center">+/-</th>
+                            <tr class="bg-slate-900 text-white text-[10px] font-bold">
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">+/-</th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">+/-</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-200">
+                        <tbody class="divide-y divide-slate-100">
                             ${rowsHTML}
                         </tbody>
                     </table>
@@ -20742,8 +20850,8 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             computedRows.forEach((r, idx) => {
                 const deltaDur = Math.round((r.durB - r.durA) * 10) / 10;
                 const deltaSh = Math.round((r.shareB - r.shareA) * 100) / 100;
-                const dDurBadge = deltaDur > 0 ? `<span class="text-blue-600 font-bold">+${deltaDur.toFixed(1)}%</span>` : (deltaDur < 0 ? `<span class="text-rose-600 font-bold">${deltaDur.toFixed(1)}%</span>` : '<span class="text-slate-400">0.0%</span>');
-                const dShBadge = deltaSh > 0 ? `<span class="text-blue-600 font-bold">+${deltaSh.toFixed(2)}</span>` : (deltaSh < 0 ? `<span class="text-rose-600 font-bold">${deltaSh.toFixed(2)}</span>` : '<span class="text-slate-400">0.00</span>');
+                const dDurBadge = deltaDur > 0 ? `<span class="text-emerald-600 font-bold">+${deltaDur.toFixed(1)}%</span>` : (deltaDur < 0 ? `<span class="text-rose-600 font-bold">${deltaDur.toFixed(1)}%</span>` : '<span class="text-slate-400">0.0%</span>');
+                const dShBadge = deltaSh > 0 ? `<span class="text-emerald-600 font-bold">+${deltaSh.toFixed(2)}</span>` : (deltaSh < 0 ? `<span class="text-rose-600 font-bold">${deltaSh.toFixed(2)}</span>` : '<span class="text-slate-400">0.00</span>');
 
                 rowsHtml += `
                     <tr class="${idx % 2 === 1 ? 'bg-slate-50/70' : 'bg-white'} border-b border-dotted border-slate-200">
@@ -20761,19 +20869,19 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             previewContainer.innerHTML = `
                 <div class="overflow-x-auto max-h-[300px] custom-scrollbar">
                     <table class="w-full text-xs border-collapse">
-                        <thead class="sticky top-0 bg-[#002060] text-white text-[11px] font-bold z-10 shadow-xs">
+                        <thead class="sticky top-0 bg-slate-900 text-white text-[11px] font-bold z-10 shadow-xs">
                             <tr>
-                                <th class="py-2 px-3 border border-slate-400 text-left" rowspan="2">Program Source</th>
-                                <th class="py-2 px-3 border border-slate-400 text-center" colspan="3">Persentase Durasi</th>
-                                <th class="py-2 px-3 border border-slate-400 text-center" colspan="3">Share</th>
+                                <th class="py-2 px-3 border border-slate-700 text-left" rowspan="2">Program Source</th>
+                                <th class="py-2 px-3 border border-slate-700 text-center" colspan="3">Persentase Durasi</th>
+                                <th class="py-2 px-3 border border-slate-700 text-center" colspan="3">Share</th>
                             </tr>
                             <tr class="text-[10px]">
-                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
-                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
-                                <th class="py-1 px-2 border border-slate-400 text-center">+/-</th>
-                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wA)}</th>
-                                <th class="py-1 px-2 border border-slate-400 text-center">${escapeHtml(wB)}</th>
-                                <th class="py-1 px-2 border border-slate-400 text-center">+/-</th>
+                                <th class="py-1 px-2 border border-slate-700 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1 px-2 border border-slate-700 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1 px-2 border border-slate-700 text-center">+/-</th>
+                                <th class="py-1 px-2 border border-slate-700 text-center">${escapeHtml(wA)}</th>
+                                <th class="py-1 px-2 border border-slate-700 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1 px-2 border border-slate-700 text-center">+/-</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 font-mono text-[11px]">
@@ -20838,8 +20946,8 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     label: r.source,
                     icon: '',
                     values: [
-                        { val: r.shareA, val2: 0, color: '#3b82f6', offset: 0, callout: false, calloutSub: '' },
-                        { val: r.shareB, val2: 0, color: '#1e40af', offset: 0, callout: false, calloutSub: '' }
+                        { val: r.shareA, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' },
+                        { val: r.shareB, val2: 0, color: '#0f172a', offset: 0, callout: false, calloutSub: '' }
                     ]
                 }))
             };
@@ -20856,8 +20964,8 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     label: r.source,
                     icon: '',
                     values: [
-                        { val: r.durA, val2: 0, color: '#eab308', offset: 0, callout: false, calloutSub: '' },
-                        { val: r.durB, val2: 0, color: '#854d0e', offset: 0, callout: false, calloutSub: '' }
+                        { val: r.durA, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' },
+                        { val: r.durB, val2: 0, color: '#0f172a', offset: 0, callout: false, calloutSub: '' }
                     ]
                 }))
             };
@@ -20869,6 +20977,720 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             renderWorkbenchFromActiveDataSet();
             showToast("✅ Template Eksekutif Sindikasi berhasil diterapkan ke Slide Canvas!");
         }
+
+        // =========================================================================
+        // MNC CHANNELS PRESENTATION DECK SUITE (ATTACHMENTS 1, 2, 3)
+        // =========================================================================
+
+        const DEFAULT_CHANNEL_SUMMARY_SAMPLE = {
+            weekA: '2639',
+            weekB: '2640',
+            channels: [
+                { rankA: 1, rankB: 1, channel: 'VISION PRIME', shareA: 24.00, shareB: 25.55, genre: 'Entertainment', isMNC: true, highlight: 'none', daypartNote: 'Peningkatan Dominan di Morning.' },
+                { rankA: 3, rankB: 2, channel: 'NICKELODEON', shareA: 10.86, shareB: 12.74, genre: 'Kids', isMNC: false, highlight: 'none' },
+                { rankA: 2, rankB: 3, channel: 'ZEE BIOSKOP', shareA: 11.51, shareB: 8.99, genre: 'Movie', isMNC: false, highlight: 'none' },
+                { rankA: 4, rankB: 4, channel: 'CNN INDONESIA PAY', shareA: 10.53, shareB: 8.07, genre: 'News', isMNC: false, highlight: 'none' },
+                { rankA: 5, rankB: 5, channel: 'KIDS TV', shareA: 5.65, shareB: 6.97, genre: 'Kids', isMNC: true, highlight: 'none', daypartNote: 'Peningkatan Dominan di Noon.' },
+                { rankA: 6, rankB: 6, channel: 'TVN', shareA: 5.21, shareB: 5.00, genre: 'Entertainment', isMNC: false, highlight: 'none' },
+                { rankA: 7, rankB: 7, channel: 'MUSIC TV', shareA: 4.67, shareB: 4.14, genre: 'Music', isMNC: true, highlight: 'none', daypartNote: 'Penurunan terjadi di Early Morning sampai Noon, Early Prime dan Midnight.' },
+                { rankA: 10, rankB: 8, channel: 'NICK JUNIOR', shareA: 3.29, shareB: 3.88, genre: 'Kids', isMNC: false, highlight: 'none' },
+                { rankA: 14, rankB: 9, channel: 'IDX CHANNEL', shareA: 1.91, shareB: 3.11, genre: 'Business', isMNC: true, highlight: 'yellow', daypartNote: 'Peningkatan Dominan di Market Open.' },
+                { rankA: 19, rankB: 10, channel: 'TVN MOVIES', shareA: 0.60, shareB: 3.01, genre: 'Movie', isMNC: false, highlight: 'none' },
+                { rankA: 8, rankB: 11, channel: 'MUSLIM TV', shareA: 4.01, shareB: 2.82, genre: 'Religion', isMNC: true, highlight: 'none', daypartNote: 'Penurunan terjadi di Morning, Noon dan Early Prime sampai Late Prime.' },
+                { rankA: 9, rankB: 12, channel: 'SINDONEWS TV', shareA: 3.98, shareB: 2.29, genre: 'News', isMNC: true, highlight: 'none', daypartNote: 'Penurunan terjadi di Morning dan Noon sampai Late Prime.' },
+                { rankA: 18, rankB: 13, channel: 'ENTERTAINMENT', shareA: 0.77, shareB: 2.20, genre: 'Entertainment', isMNC: true, highlight: 'blue', daypartNote: 'Peningkatan Dominan di Early Prime.' },
+                { rankA: 13, rankB: 14, channel: 'CELESTIAL MOVIES', shareA: 2.04, shareB: 1.99, genre: 'Movie', isMNC: false, highlight: 'none' },
+                { rankA: 20, rankB: 15, channel: 'CINEMAX', shareA: 0.54, shareB: 1.51, genre: 'Movie', isMNC: false, highlight: 'none' },
+                { rankA: 24, rankB: 16, channel: 'SPOTV 2', shareA: 0.21, shareB: 1.26, genre: 'Sports', isMNC: false, highlight: 'none' },
+                { rankA: 11, rankB: 17, channel: 'THRILL', shareA: 2.43, shareB: 1.25, genre: 'Movie', isMNC: false, highlight: 'none' },
+                { rankA: 15, rankB: 18, channel: 'HBO', shareA: 1.45, shareB: 1.17, genre: 'Movie', isMNC: false, highlight: 'none' },
+                { rankA: 12, rankB: 19, channel: 'AXN', shareA: 2.09, shareB: 1.14, genre: 'Entertainment', isMNC: false, highlight: 'none' },
+                { rankA: 16, rankB: 20, channel: 'CCM', shareA: 1.42, shareB: 0.56, genre: 'Entertainment', isMNC: false, highlight: 'none' },
+                // 21 - 48
+                { rankA: 17, rankB: 21, channel: 'SPOTV', shareA: 0.92, shareB: 0.47, genre: 'Sports', isMNC: false },
+                { rankA: 26, rankB: 22, channel: 'HBO HITS', shareA: 0.17, shareB: 0.41, genre: 'Movie', isMNC: false },
+                { rankA: 23, rankB: 23, channel: 'HBO FAMILY', shareA: 0.36, shareB: 0.38, genre: 'Movie', isMNC: false },
+                { rankA: 22, rankB: 24, channel: 'ANIMAL PLANET', shareA: 0.36, shareB: 0.25, genre: 'Documentary', isMNC: false },
+                { rankA: 25, rankB: 25, channel: 'CELEBRITIES TV', shareA: 0.21, shareB: 0.23, genre: 'Lifestyle', isMNC: true },
+                { rankA: 34, rankB: 26, channel: 'ANIMAX', shareA: 0.01, shareB: 0.20, genre: 'Entertainment', isMNC: false },
+                { rankA: 27, rankB: 27, channel: 'CARTOON NETWORK', shareA: 0.11, shareB: 0.13, genre: 'Kids', isMNC: false },
+                { rankA: 29, rankB: 28, channel: 'SPORTSTARS 2', shareA: 0.09, shareB: 0.10, genre: 'Sports', isMNC: true },
+                { rankA: 33, rankB: 29, channel: 'LIFE CHANNEL', shareA: 0.01, shareB: 0.04, genre: 'Religion', isMNC: true },
+                { rankA: 21, rankB: 30, channel: 'SPORTSTARS', shareA: 0.40, shareB: 0.03, genre: 'Sports', isMNC: true },
+                { rankA: 28, rankB: 31, channel: 'SOCCER CHANNEL', shareA: 0.10, shareB: 0.02, genre: 'Sports', isMNC: true },
+                { rankA: 31, rankB: 32, channel: 'HANACARAKA TV', shareA: 0.03, shareB: 0.02, genre: 'Entertainment', isMNC: true },
+                { rankA: 36, rankB: 33, channel: 'TRAVEL LIVING CHANNEL', shareA: 0.00, shareB: 0.02, genre: 'Lifestyle', isMNC: false },
+                { rankA: 30, rankB: 34, channel: 'ASIAN FOOD NETWORK', shareA: 0.05, shareB: 0.02, genre: 'Lifestyle', isMNC: false },
+                { rankA: 32, rankB: 35, channel: 'FOOD TRAVEL', shareA: 0.03, shareB: 0.01, genre: 'Lifestyle', isMNC: true },
+                { rankA: 38, rankB: 36, channel: 'HBO SIGNATURE', shareA: 0.00, shareB: 0.01, genre: 'Movie', isMNC: false },
+                { rankA: 35, rankB: 37, channel: 'CNN INTERNATIONAL', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 37, rankB: 38, channel: 'CNBC ASIA', shareA: 0.00, shareB: 0.00, genre: 'Business', isMNC: false },
+                { rankA: 39, rankB: 39, channel: 'SPORTSTARS 3', shareA: 0.00, shareB: 0.00, genre: 'Sports', isMNC: true },
+                { rankA: 40, rankB: 40, channel: 'SPORTSTARS 4', shareA: 0.00, shareB: 0.00, genre: 'Sports', isMNC: true },
+                { rankA: 41, rankB: 41, channel: 'BABY TV', shareA: 0.00, shareB: 0.00, genre: 'Kids', isMNC: false },
+                { rankA: 42, rankB: 42, channel: 'BEIN SPORTS 1', shareA: 0.00, shareB: 0.00, genre: 'Sports', isMNC: false },
+                { rankA: 43, rankB: 43, channel: 'BTV PAY', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 44, rankB: 44, channel: 'DISCOVERY CHANNEL', shareA: 0.00, shareB: 0.00, genre: 'Documentary', isMNC: false },
+                { rankA: 45, rankB: 45, channel: 'NATIONAL GEOGRAPHIC CHANNEL', shareA: 0.00, shareB: 0.00, genre: 'Documentary', isMNC: false },
+                { rankA: 46, rankB: 46, channel: 'NGC WILD', shareA: 0.00, shareB: 0.00, genre: 'Documentary', isMNC: false },
+                { rankA: 47, rankB: 47, channel: 'S-ONE', shareA: 0.00, shareB: 0.00, genre: 'Entertainment', isMNC: true },
+                { rankA: 48, rankB: 48, channel: 'BOOMERANG', shareA: 0.00, shareB: 0.00, genre: 'Kids', isMNC: false },
+                { rankA: 49, rankB: 49, channel: 'DREAMWORKS', shareA: 0.00, shareB: 0.00, genre: 'Kids', isMNC: false },
+                { rankA: 50, rankB: 50, channel: 'DA VINCI', shareA: 0.00, shareB: 0.00, genre: 'Kids', isMNC: false },
+                { rankA: 51, rankB: 51, channel: 'DMAX', shareA: 0.00, shareB: 0.00, genre: 'Documentary', isMNC: false },
+                { rankA: 52, rankB: 52, channel: 'HGTV', shareA: 0.00, shareB: 0.00, genre: 'Lifestyle', isMNC: false },
+                { rankA: 53, rankB: 53, channel: 'TLC', shareA: 0.00, shareB: 0.00, genre: 'Lifestyle', isMNC: false },
+                { rankA: 54, rankB: 54, channel: 'EUROSPORT', shareA: 0.00, shareB: 0.00, genre: 'Sports', isMNC: false },
+                { rankA: 55, rankB: 55, channel: 'TVRI SPORT', shareA: 0.00, shareB: 0.00, genre: 'Sports', isMNC: false },
+                { rankA: 56, rankB: 56, channel: 'ROCK ENTERTAINMENT', shareA: 0.00, shareB: 0.00, genre: 'Entertainment', isMNC: false },
+                { rankA: 57, rankB: 57, channel: 'ROCK ACTION', shareA: 0.00, shareB: 0.00, genre: 'Movie', isMNC: false },
+                { rankA: 58, rankB: 58, channel: 'WARNER TV', shareA: 0.00, shareB: 0.00, genre: 'Entertainment', isMNC: false },
+                { rankA: 59, rankB: 59, channel: 'HITS', shareA: 0.00, shareB: 0.00, genre: 'Entertainment', isMNC: false },
+                { rankA: 60, rankB: 60, channel: 'HITS MOVIES', shareA: 0.00, shareB: 0.00, genre: 'Movie', isMNC: false },
+                { rankA: 61, rankB: 61, channel: 'LOTUS MACAU', shareA: 0.00, shareB: 0.00, genre: 'Entertainment', isMNC: false },
+                { rankA: 62, rankB: 62, channel: 'KBS WORLD', shareA: 0.00, shareB: 0.00, genre: 'Entertainment', isMNC: false },
+                { rankA: 63, rankB: 63, channel: 'NHK WORLD', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 64, rankB: 64, channel: 'ARIRANG', shareA: 0.00, shareB: 0.00, genre: 'Entertainment', isMNC: false },
+                { rankA: 65, rankB: 65, channel: 'FRANCE 24', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 66, rankB: 66, channel: 'DW ENGLISH', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 67, rankB: 67, channel: 'AL JAZEERA', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 68, rankB: 68, channel: 'CGTN', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 69, rankB: 69, channel: 'CNA', shareA: 0.00, shareB: 0.00, genre: 'News', isMNC: false },
+                { rankA: 70, rankB: 70, channel: 'BLOOMBERG', shareA: 0.00, shareB: 0.00, genre: 'Business', isMNC: false }
+            ],
+            genres: [
+                { rank: 1, name: 'ENTERTAINMENT', shareA: 32.1, shareB: 34.1, delta: 2.0 },
+                { rank: 2, name: 'KIDS', shareA: 19.9, shareB: 23.7, delta: 3.8 },
+                { rank: 3, name: 'MOVIE', shareA: 20.5, shareB: 19.3, delta: -1.2 },
+                { rank: 4, name: 'NEWS', shareA: 14.5, shareB: 10.4, delta: -4.1 },
+                { rank: 5, name: 'MUSIC', shareA: 4.7, shareB: 4.1, delta: -0.6 },
+                { rank: 6, name: 'BUSINESS', shareA: 1.9, shareB: 3.1, delta: 1.2 },
+                { rank: 7, name: 'RELIGION', shareA: 4.0, shareB: 2.9, delta: -1.1 },
+                { rank: 8, name: 'SPORTS', shareA: 1.7, shareB: 1.9, delta: 0.2 },
+                { rank: 9, name: 'LIFESTYLE', shareA: 0.3, shareB: 0.3, delta: 0.0 },
+                { rank: 10, name: 'DOCUMENTARY', shareA: 0.4, shareB: 0.3, delta: -0.1 }
+            ],
+            summary: {
+                mncTotalA: 44.0,
+                mncTotalB: 44.4,
+                mncTop20CountA: 6,
+                mncTop20CountB: 6
+            }
+        };
+
+        // Clean template header matching Attachment 2 (No background ornamens, pure corporate minimal)
+        function getCleanSlideHeaderHTML(title, subtitle, badgeText = '', badgeAction = '', badgeTooltip = '') {
+            const actionAttr = badgeAction ? `onclick="${badgeAction}" title="${escapeHtml(badgeTooltip || 'Klik untuk ubah jumlah data')}"` : '';
+            const actionClass = badgeAction ? 'cursor-pointer hover:bg-slate-200 hover:scale-[1.02] active:scale-[0.98] transition shadow-2xs' : '';
+            const badge_html = badgeText ? `
+                <div class="mt-1 inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-slate-100 border border-slate-200/90 text-[11px] font-bold text-slate-700 select-none ${actionClass}" ${actionAttr}>
+                    <span class="w-2 h-2 rounded-full bg-[#cafc03] ring-2 ring-slate-900"></span>
+                    <span>${escapeHtml(badgeText)}</span>
+                    ${badgeAction ? '<i class="ph-bold ph-pencil-simple text-[10px] text-slate-400"></i>' : ''}
+                </div>` : '';
+            return `
+            <div class="w-full text-center flex flex-col items-center justify-center shrink-0 pt-1 pb-2 select-none">
+                <h1 class="font-black text-slate-900 leading-tight font-['Inter'] text-xl sm:text-2xl tracking-tight">${escapeHtml(title)}</h1>
+                ${subtitle ? `<h2 class="font-medium text-slate-500 text-xs sm:text-sm mt-0.5 font-['Inter']">${escapeHtml(subtitle)}</h2>` : ''}
+                ${badge_html}
+            </div>
+            `;
+        }
+
+        function buildChannelShareSummaryHTML(slide) {
+            const data = slide.syndicateData || DEFAULT_CHANNEL_SUMMARY_SAMPLE;
+            const weekA = slide.syndicateWeekA || data.weekA || '2639';
+            const weekB = slide.syndicateWeekB || data.weekB || '2640';
+            const topN = parseInt(slide.syndicateTopN) || 20;
+
+            let allChannels = (data.channels && data.channels.length > 0) ? [...data.channels] : [...DEFAULT_CHANNEL_SUMMARY_SAMPLE.channels];
+            while (allChannels.length < topN) {
+                const nextRank = allChannels.length + 1;
+                allChannels.push({
+                    rankA: nextRank,
+                    rankB: nextRank,
+                    channel: `CHANNEL ${nextRank}`,
+                    shareA: 0.00,
+                    shareB: 0.00,
+                    genre: 'General',
+                    isMNC: false
+                });
+            }
+            const channels = allChannels.slice(0, topN);
+            const summary = data.summary || DEFAULT_CHANNEL_SUMMARY_SAMPLE.summary;
+            const badgeTitle = `Top ${channels.length} Channels Performance`;
+
+            let rowsHTML = '';
+            channels.forEach((c) => {
+                const rankDelta = (c.rankA !== undefined && c.rankB !== undefined) ? (c.rankA - c.rankB) : 0;
+                let rankBadge = '<span class="text-slate-400 font-bold">=</span>';
+                if (rankDelta > 0) {
+                    rankBadge = `<span class="bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-black text-[9px] inline-flex items-center">↑ ${rankDelta}</span>`;
+                } else if (rankDelta < 0) {
+                    rankBadge = `<span class="bg-rose-100 text-rose-800 px-1 py-0.5 rounded font-black text-[9px] inline-flex items-center">↓ ${Math.abs(rankDelta)}</span>`;
+                }
+
+                const shareDelta = Math.round((c.shareB - c.shareA) * 100) / 100;
+                let shareBadge = '<span class="text-slate-400 font-medium">0.00</span>';
+                if (shareDelta > 0) {
+                    shareBadge = `<span class="text-emerald-700 font-black">+${shareDelta.toFixed(2)}</span>`;
+                } else if (shareDelta < 0) {
+                    shareBadge = `<span class="text-rose-700 font-black">${shareDelta.toFixed(2)}</span>`;
+                }
+
+                let rowBg = '';
+                if (c.highlight === 'yellow' || c.channel === 'IDX CHANNEL') {
+                    rowBg = 'background-color: rgba(202, 252, 3, 0.16); border-left: 4px solid #cafc03; font-weight: 800;';
+                } else if (c.highlight === 'blue' || c.channel === 'ENTERTAINMENT') {
+                    rowBg = 'background-color: #f1f5f9; border-left: 4px solid #0f172a; font-weight: 800;';
+                }
+
+                rowsHTML += `
+                <tr class="border-b border-dotted border-slate-200 transition-colors hover:bg-slate-50" style="${rowBg}">
+                    <td class="py-1 px-1.5 text-center font-mono text-slate-600 border-r border-slate-200">${c.rankA || '-'}</td>
+                    <td class="py-1 px-1.5 text-center font-mono text-slate-900 font-bold border-r border-slate-200">${c.rankB || '-'}</td>
+                    <td class="py-1 px-1.5 text-center border-r border-slate-200">${rankBadge}</td>
+                    <td class="py-1 px-2.5 font-bold text-slate-900 border-r border-slate-200 flex items-center justify-between">
+                        <span>${escapeHtml(c.channel)}</span>
+                        ${c.isMNC ? '<span class="w-1.5 h-1.5 rounded-full bg-[#cafc03] ring-1 ring-slate-900" title="MNC Network Channel"></span>' : ''}
+                    </td>
+                    <td class="py-1 px-2 text-right font-mono text-slate-700 font-medium border-r border-slate-200 bg-slate-50/70">${c.shareA.toFixed(2)}</td>
+                    <td class="py-1 px-2 text-right font-mono text-slate-900 font-bold border-r border-slate-200 bg-slate-50/70">${c.shareB.toFixed(2)}</td>
+                    <td class="py-1 px-2 text-right font-mono">${shareBadge}</td>
+                </tr>
+                `;
+            });
+
+            // MNC Daypart narrative bullets
+            let mncBulletsHTML = '';
+            channels.filter(c => c.isMNC && c.daypartNote).forEach(c => {
+                mncBulletsHTML += `
+                <div class="flex items-start gap-2 text-[10px] sm:text-[11px] leading-snug text-slate-700 py-1.5 border-b border-slate-100 last:border-b-0">
+                    <span class="w-2 h-2 rounded-full bg-[#cafc03] ring-2 ring-slate-900 mt-1 shrink-0"></span>
+                    <span><strong class="text-slate-900 font-black">${escapeHtml(c.channel)}</strong> : ${escapeHtml(c.daypartNote)}</span>
+                </div>
+                `;
+            });
+
+            const mncShareDelta = Math.round((summary.mncTotalB - summary.mncTotalA) * 10) / 10;
+            const mncShareDeltaBadge = mncShareDelta >= 0 ? `+${mncShareDelta.toFixed(1)}%` : `${mncShareDelta.toFixed(1)}%`;
+
+            return `
+            <div class="w-full h-full flex flex-col bg-transparent select-none overflow-hidden relative font-['Inter',sans-serif]">
+                ${getCleanSlideHeaderHTML(slide.chartTitle || 'CHANNELS SHARE SUMMARY', slide.chartSubtitle || `Based on Pay TV Syndicate Data, National Urban, SEC UML 5+, ${channels.length} Channels Non FTA, ${weekA} vs ${weekB}`, badgeTitle, 'promptChangeSyndicateTopN()', 'Klik untuk ubah jumlah Top N (contoh: 10, 20, 30, 50)')}
+                
+                <div class="flex-1 flex gap-3 min-h-0 mt-1 overflow-hidden">
+                    <!-- Left Top 20 Table -->
+                    <div class="flex-[1.65] flex flex-col bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+                        <div class="overflow-x-auto flex-1 custom-scrollbar">
+                            <table class="w-full border-collapse text-left">
+                                <thead class="sticky top-0 z-10 bg-slate-900 text-white text-[10px] font-bold border-b-2 border-b-[#cafc03]">
+                                    <tr>
+                                        <th class="py-1.5 px-1.5 text-center border-r border-slate-700/80 font-['Inter']">Rank<br><span class="text-slate-400 font-normal">${weekA}</span></th>
+                                        <th class="py-1.5 px-1.5 text-center border-r border-slate-700/80 font-['Inter']">Rank<br><span class="text-[#cafc03]">${weekB}</span></th>
+                                        <th class="py-1.5 px-1.5 text-center border-r border-slate-700/80 font-['Inter']">+/-</th>
+                                        <th class="py-1.5 px-3 border-r border-slate-700/80 text-left font-['Inter']">Channel</th>
+                                        <th class="py-1.5 px-2.5 text-center border-r border-slate-700/80 font-['Inter']">${weekA}</th>
+                                        <th class="py-1.5 px-2.5 text-center border-r border-slate-700/80 font-['Inter']">${weekB}</th>
+                                        <th class="py-1.5 px-2.5 text-center font-['Inter']">+/-</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-[10px] divide-y divide-dotted divide-slate-200">
+                                    ${rowsHTML}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right Summary & Narrative -->
+                    <div class="flex-1 flex flex-col gap-2.5 overflow-hidden">
+                        <!-- Summary Card Box -->
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs shrink-0 flex flex-col gap-2">
+                            <div class="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2 pb-1.5 border-b border-slate-100">
+                                <span class="w-2 h-2 rounded-full bg-[#cafc03] ring-2 ring-slate-900"></span>
+                                <span>Channels Share MNC Channels</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="bg-slate-50/80 border border-slate-200/90 rounded-xl p-2.5 shadow-2xs">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Total Share MNC Chnl</div>
+                                    <div class="flex items-baseline justify-between mt-1">
+                                        <span class="font-mono text-[10px] font-medium text-slate-600">${weekA}: <strong class="text-slate-900">${summary.mncTotalA.toFixed(1)}</strong></span>
+                                        <span class="font-mono text-[10px] font-medium text-slate-600">${weekB}: <strong class="text-slate-900">${summary.mncTotalB.toFixed(1)}</strong></span>
+                                    </div>
+                                    <div class="mt-1.5 flex items-center justify-end">
+                                        <span class="bg-slate-900 text-[#cafc03] border border-slate-700 text-[9px] font-black px-2 py-0.5 rounded-full">${mncShareDeltaBadge}</span>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-50/80 border border-slate-200/90 rounded-xl p-2.5 shadow-2xs">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase tracking-wider">MNC in Top 20</div>
+                                    <div class="flex items-baseline justify-between mt-1">
+                                        <span class="font-mono text-[10px] font-medium text-slate-600">${weekA}: <strong class="text-slate-900">${summary.mncTop20CountA} Chnl</strong></span>
+                                        <span class="font-mono text-[10px] font-medium text-slate-600">${weekB}: <strong class="text-slate-900">${summary.mncTop20CountB} Chnl</strong></span>
+                                    </div>
+                                    <div class="mt-1.5 flex items-center justify-end">
+                                        <span class="bg-slate-200 text-slate-700 text-[9px] font-bold px-2 py-0.5 rounded-full">= Stable</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Executive Narrative Bullets -->
+                        <div class="flex-1 bg-white border border-slate-200/90 rounded-2xl p-3 shadow-2xs flex flex-col overflow-hidden">
+                            <div class="bg-slate-900 text-[#cafc03] px-3 py-1.5 rounded-xl text-xs font-black tracking-wider uppercase shrink-0 border border-slate-800">
+                                Executive Summary
+                            </div>
+                            <div class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-2 mb-1 shrink-0">
+                                Channels Share MNC Channels (Daypart Highlights)
+                            </div>
+                            <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-1 mt-0.5">
+                                ${mncBulletsHTML}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            `;
+        }
+
+        function buildChannelShare48HTML(slide) {
+            const data = slide.syndicateData || DEFAULT_CHANNEL_SUMMARY_SAMPLE;
+            const weekA = slide.syndicateWeekA || data.weekA || '2639';
+            const weekB = slide.syndicateWeekB || data.weekB || '2640';
+            const limit = parseInt(slide.syndicateChannelLimit) || 48;
+
+            let allChannels = (data.channels && data.channels.length > 0) ? [...data.channels] : [...DEFAULT_CHANNEL_SUMMARY_SAMPLE.channels];
+            while (allChannels.length < limit) {
+                const nextRank = allChannels.length + 1;
+                allChannels.push({
+                    rankA: nextRank,
+                    rankB: nextRank,
+                    channel: `CHANNEL ${nextRank}`,
+                    shareA: 0.00,
+                    shareB: 0.00,
+                    genre: 'General',
+                    isMNC: false
+                });
+            }
+            const channels = allChannels.slice(0, limit);
+            const totalShown = channels.length;
+            const splitMid = totalShown === 48 ? 30 : Math.ceil(totalShown / 2);
+            const col1 = channels.slice(0, splitMid);
+            const col2 = channels.slice(splitMid, totalShown);
+            const col1Header = `Channel (1-${col1.length})`;
+            const col2Header = `Channel (${col1.length + 1}-${totalShown})`;
+            const badgeTitle = `${totalShown} Channels Comprehensive Matrix`;
+            const genres = data.genres || DEFAULT_CHANNEL_SUMMARY_SAMPLE.genres;
+            const summary = data.summary || DEFAULT_CHANNEL_SUMMARY_SAMPLE.summary;
+
+            function renderRows(list) {
+                let html = '';
+                list.forEach(c => {
+                    const rankDelta = (c.rankA !== undefined && c.rankB !== undefined) ? (c.rankA - c.rankB) : 0;
+                    let rankBadge = '<span class="text-slate-400 font-bold">=</span>';
+                    if (rankDelta > 0) rankBadge = `<span class="text-emerald-700 font-black text-[8px]">↑${rankDelta}</span>`;
+                    else if (rankDelta < 0) rankBadge = `<span class="text-rose-700 font-black text-[8px]">↓${Math.abs(rankDelta)}</span>`;
+
+                    const shareDelta = Math.round((c.shareB - c.shareA) * 100) / 100;
+                    let shareBadge = '<span class="text-slate-400 font-mono text-[8px]">0.00</span>';
+                    if (shareDelta > 0) shareBadge = `<span class="text-emerald-700 font-bold font-mono text-[8px]">+${shareDelta.toFixed(2)}</span>`;
+                    else if (shareDelta < 0) shareBadge = `<span class="text-rose-700 font-bold font-mono text-[8px]">${shareDelta.toFixed(2)}</span>`;
+
+                    let rowBg = '';
+                    if (c.highlight === 'yellow' || c.channel === 'IDX CHANNEL') rowBg = 'background-color: rgba(202, 252, 3, 0.16); border-left: 3px solid #cafc03; font-weight: 800;';
+                    else if (c.highlight === 'blue' || c.channel === 'ENTERTAINMENT') rowBg = 'background-color: #f1f5f9; border-left: 3px solid #0f172a; font-weight: 800;';
+
+                    html += `
+                    <tr class="border-b border-dotted border-slate-200 text-[8.5px] hover:bg-slate-50" style="${rowBg}">
+                        <td class="py-0.5 px-0.5 text-center font-mono border-r border-slate-200 text-slate-500">${c.rankA || '-'}</td>
+                        <td class="py-0.5 px-0.5 text-center font-mono border-r border-slate-200 text-slate-900 font-bold">${c.rankB || '-'}</td>
+                        <td class="py-0.5 px-0.5 text-center border-r border-slate-200">${rankBadge}</td>
+                        <td class="py-0.5 px-1 font-bold text-slate-900 border-r border-slate-200 truncate max-w-[85px]" title="${escapeHtml(c.channel)}">${escapeHtml(c.channel)}</td>
+                        <td class="py-0.5 px-0.5 text-right font-mono border-r border-slate-200 bg-slate-50/70 text-slate-700">${c.shareA.toFixed(2)}</td>
+                        <td class="py-0.5 px-0.5 text-right font-mono font-bold border-r border-slate-200 bg-slate-50/70 text-slate-900">${c.shareB.toFixed(2)}</td>
+                        <td class="py-0.5 px-0.5 text-right font-mono">${shareBadge}</td>
+                    </tr>
+                    `;
+                });
+                return html;
+            }
+
+            let genreRowsHTML = '';
+            genres.forEach(g => {
+                let dBadge = '<span class="text-slate-400 font-mono">0.0</span>';
+                if (g.delta > 0) dBadge = `<span class="text-emerald-700 font-bold font-mono">+${g.delta.toFixed(1)}</span>`;
+                else if (g.delta < 0) dBadge = `<span class="text-rose-700 font-bold font-mono">${g.delta.toFixed(1)}</span>`;
+
+                genreRowsHTML += `
+                <tr class="border-b border-dotted border-slate-200 text-[9px] hover:bg-slate-50">
+                    <td class="py-0.5 px-1 text-center font-mono text-slate-500 border-r border-slate-200">${g.rank}</td>
+                    <td class="py-0.5 px-1.5 font-bold text-slate-900 border-r border-slate-200">${escapeHtml(g.name)}</td>
+                    <td class="py-0.5 px-1.5 text-right font-mono border-r border-slate-200 bg-slate-50/70 text-slate-700">${g.shareA.toFixed(1)}</td>
+                    <td class="py-0.5 px-1.5 text-right font-mono font-bold border-r border-slate-200 bg-slate-50/70 text-slate-900">${g.shareB.toFixed(1)}</td>
+                    <td class="py-0.5 px-1.5 text-right font-mono">${dBadge}</td>
+                </tr>
+                `;
+            });
+
+            return `
+            <div class="w-full h-full flex flex-col bg-transparent select-none overflow-hidden relative font-['Inter',sans-serif]">
+                ${getCleanSlideHeaderHTML(slide.chartTitle || 'CHANNELS SHARE', slide.chartSubtitle || `Based on Pay TV Syndicate Data, National Urban, SEC UML 5+, ${totalShown} Channels Non FTA, ${weekA} vs ${weekB}`, badgeTitle, 'promptChangeSyndicateChannelLimit()', 'Klik untuk ubah jumlah saluran (contoh: 30, 48, 65, 80)')}
+                
+                <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-2.5 min-h-0 mt-1 overflow-hidden">
+                    <!-- Col 1: Rank 1 - 30 -->
+                    <div class="flex flex-col bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+                        <div class="overflow-x-auto flex-1 custom-scrollbar">
+                            <table class="w-full border-collapse text-left">
+                                <thead class="sticky top-0 z-10 bg-slate-900 text-white text-[9px] font-bold border-b-2 border-b-[#cafc03]">
+                                    <tr>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-6">Rank<br><span class="text-slate-400 font-normal">${weekA}</span></th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-6">Rank<br><span class="text-[#cafc03]">${weekB}</span></th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-6">+/-</th>
+                                        <th class="py-1 px-1 border-r border-slate-700/80 text-left">${col1Header}</th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-8">${weekA}</th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-8">${weekB}</th>
+                                        <th class="py-1 px-0.5 text-center w-7">+/-</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-dotted divide-slate-200">
+                                    ${renderRows(col1)}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Col 2: Rank 31 - 48 -->
+                    <div class="flex flex-col bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+                        <div class="overflow-x-auto flex-1 custom-scrollbar">
+                            <table class="w-full border-collapse text-left">
+                                <thead class="sticky top-0 z-10 bg-slate-900 text-white text-[9px] font-bold border-b-2 border-b-[#cafc03]">
+                                    <tr>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-6">Rank<br><span class="text-slate-400 font-normal">${weekA}</span></th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-6">Rank<br><span class="text-[#cafc03]">${weekB}</span></th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-6">+/-</th>
+                                        <th class="py-1 px-1 border-r border-slate-700/80 text-left">${col2Header}</th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-8">${weekA}</th>
+                                        <th class="py-1 px-0.5 text-center border-r border-slate-700/80 w-8">${weekB}</th>
+                                        <th class="py-1 px-0.5 text-center w-7">+/-</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-dotted divide-slate-200">
+                                    ${renderRows(col2)}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Col 3: Summary + Genre Ranking Table -->
+                    <div class="flex flex-col gap-2.5 overflow-hidden">
+                        <div class="bg-white border border-slate-200/90 rounded-2xl p-2.5 shadow-2xs shrink-0 flex flex-col gap-2">
+                            <div class="text-[10px] font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5 pb-1 border-b border-slate-100">
+                                <span class="w-2 h-2 rounded-full bg-[#cafc03] ring-2 ring-slate-900"></span>
+                                <span>Summary MNC Channels</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-[9px]">
+                                <div class="bg-slate-50/80 border border-slate-200/90 rounded-xl p-2">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase">Total Share MNC</div>
+                                    <div class="font-mono text-[9px] font-bold text-slate-900 mt-0.5">${weekA}: ${summary.mncTotalA.toFixed(1)} | ${weekB}: ${summary.mncTotalB.toFixed(1)}</div>
+                                    <div class="mt-1 flex items-center">
+                                        <span class="bg-slate-900 text-[#cafc03] border border-slate-700 text-[8px] font-black px-1.5 py-0.2 rounded-full">+${(summary.mncTotalB - summary.mncTotalA).toFixed(1)}%</span>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-50/80 border border-slate-200/90 rounded-xl p-2">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase">MNC Top 20</div>
+                                    <div class="font-mono text-[9px] font-bold text-slate-900 mt-0.5">${summary.mncTop20CountA} Chnl vs ${summary.mncTop20CountB} Chnl</div>
+                                    <div class="mt-1 flex items-center">
+                                        <span class="bg-slate-200 text-slate-700 text-[8px] font-bold px-1.5 py-0.2 rounded-full">= Stable</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Genre Table -->
+                        <div class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+                            <div class="overflow-x-auto flex-1 custom-scrollbar">
+                                <table class="w-full border-collapse text-left">
+                                    <thead class="sticky top-0 z-10 bg-slate-900 text-white text-[9px] font-bold border-b-2 border-b-[#cafc03]">
+                                        <tr>
+                                            <th class="py-1 px-1 text-center border-r border-slate-700/80">Rank</th>
+                                            <th class="py-1 px-1.5 border-r border-slate-700/80">Genre</th>
+                                            <th class="py-1 px-1 text-center border-r border-slate-700/80">${weekA}</th>
+                                            <th class="py-1 px-1 text-center border-r border-slate-700/80">${weekB}</th>
+                                            <th class="py-1 px-1 text-center">+/-</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-dotted divide-slate-200">
+                                        ${genreRowsHTML}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            `;
+        }
+
+        function buildGenreShareMatrixHTML(slide) {
+            const data = slide.syndicateData || DEFAULT_CHANNEL_SUMMARY_SAMPLE;
+            const weekA = slide.syndicateWeekA || data.weekA || '2639';
+            const weekB = slide.syndicateWeekB || data.weekB || '2640';
+            const channels = data.channels || [];
+            let genres = ['Kids', 'Entertainment', 'News', 'Sports', 'Religion', 'Music', 'Lifestyle'];
+            if (data.genres && Array.isArray(data.genres) && data.genres.length > 0) {
+                genres = data.genres.map(g => (typeof g === 'string' ? g : g.name)).filter(Boolean);
+            } else if (channels.some(c => c.genre || c.category || c.department)) {
+                const catSet = new Set();
+                channels.forEach(c => {
+                    const val = c.genre || c.category || c.department;
+                    if (val) catSet.add(val);
+                });
+                if (catSet.size > 0) genres = Array.from(catSet);
+            }
+
+            let cardsHTML = '';
+            genres.forEach(gName => {
+                const gChannels = channels.filter(c => {
+                    const cGenre = (c.genre || c.category || c.department || '').toLowerCase().trim();
+                    return cGenre === gName.toLowerCase().trim();
+                }).sort((a, b) => (b.shareB || 0) - (a.shareB || 0));
+                
+                const totA = Math.round(gChannels.reduce((sum, c) => sum + (c.shareA || 0), 0) * 10) / 10;
+                const totB = Math.round(gChannels.reduce((sum, c) => sum + (c.shareB || 0), 0) * 10) / 10;
+                const gDelta = Math.round((totB - totA) * 10) / 10;
+                const deltaBadge = gDelta >= 0 ? `+${gDelta.toFixed(1)}%` : `${gDelta.toFixed(1)}%`;
+
+                let rowHTML = '';
+                gChannels.forEach((c, idx) => {
+                    const shDelta = Math.round((c.shareB - c.shareA) * 100) / 100;
+                    let shBadge = '<span class="text-slate-400 font-mono text-[8px]">0.00</span>';
+                    if (shDelta > 0) shBadge = `<span class="text-emerald-700 font-bold font-mono text-[8px]">+${shDelta.toFixed(2)}</span>`;
+                    else if (shDelta < 0) shBadge = `<span class="text-rose-700 font-bold font-mono text-[8px]">${shDelta.toFixed(2)}</span>`;
+
+                    let rowBg = '';
+                    if (c.highlight === 'yellow' || c.channel === 'IDX CHANNEL') rowBg = 'background-color: rgba(202, 252, 3, 0.16); border-left: 3px solid #cafc03; font-weight: 800;';
+                    else if (c.highlight === 'blue' || c.channel === 'ENTERTAINMENT') rowBg = 'background-color: #f1f5f9; border-left: 3px solid #0f172a; font-weight: 800;';
+
+                    rowHTML += `
+                    <tr class="border-b border-dotted border-slate-200 text-[8.5px] hover:bg-slate-50" style="${rowBg}">
+                        <td class="py-0.5 px-0.5 text-center font-mono text-slate-500 border-r border-slate-200">${c.rankB || '-'}</td>
+                        <td class="py-0.5 px-1 font-bold text-slate-900 border-r border-slate-200 truncate max-w-[80px]" title="${escapeHtml(c.channel)}">
+                            <div class="flex items-center justify-between gap-0.5">
+                                <span class="truncate">${escapeHtml(c.channel)}</span>
+                                ${c.isMNC ? '<span class="w-1.5 h-1.5 rounded-full bg-[#cafc03] ring-1 ring-slate-900 shrink-0" title="MNC Channel"></span>' : ''}
+                            </div>
+                        </td>
+                        <td class="py-0.5 px-0.5 text-center font-mono font-bold text-slate-900 border-r border-slate-200">#${idx + 1}</td>
+                        <td class="py-0.5 px-0.5 text-right font-mono border-r border-slate-200 bg-slate-50/70 text-slate-700">${c.shareA.toFixed(2)}</td>
+                        <td class="py-0.5 px-0.5 text-right font-mono font-bold border-r border-slate-200 bg-slate-50/70 text-slate-900">${c.shareB.toFixed(2)}</td>
+                        <td class="py-0.5 px-0.5 text-right font-mono">${shBadge}</td>
+                    </tr>
+                    `;
+                });
+
+                cardsHTML += `
+                <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col overflow-hidden">
+                    <div class="px-2.5 py-1.5 bg-slate-900 text-white flex items-center justify-between shrink-0 border-b-2 border-b-[#cafc03] gap-1">
+                        <div class="flex items-center gap-1.5 min-w-0 pr-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#cafc03] shrink-0"></span>
+                            <span class="text-[10px] sm:text-[11px] font-black tracking-wide uppercase font-['Inter'] truncate">${escapeHtml(gName)}</span>
+                        </div>
+                        <div class="flex items-center gap-1 font-mono text-[8px] sm:text-[8.5px] bg-slate-800 text-[#cafc03] border border-slate-700 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0">
+                            <span>${totA.toFixed(1)}% → ${totB.toFixed(1)}%</span>
+                            <span class="${gDelta >= 0 ? 'text-[#cafc03]' : 'text-rose-400'}">(${deltaBadge})</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto flex-1 custom-scrollbar">
+                        <table class="w-full border-collapse text-left">
+                            <thead class="sticky top-0 bg-slate-100 text-slate-700 text-[8px] font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="py-1 px-0.5 text-center border-r border-slate-200 font-['Inter'] w-6">#48</th>
+                                    <th class="py-1 px-1 border-r border-slate-200 font-['Inter'] text-left">Channel</th>
+                                    <th class="py-1 px-0.5 text-center border-r border-slate-200 font-['Inter'] w-6">Genre</th>
+                                    <th class="py-1 px-0.5 text-center border-r border-slate-200 font-['Inter'] w-8">${weekA}</th>
+                                    <th class="py-1 px-0.5 text-center border-r border-slate-200 font-['Inter'] w-8">${weekB}</th>
+                                    <th class="py-1 px-0.5 text-center font-['Inter'] w-7">+/-</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-dotted divide-slate-100">
+                                ${rowHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                `;
+            });
+
+            return `
+            <div class="w-full h-full flex flex-col bg-transparent select-none overflow-hidden relative font-['Inter',sans-serif]">
+                ${getCleanSlideHeaderHTML(slide.chartTitle || 'GENRE SHARE', slide.chartSubtitle || `Based on Pay TV Syndicate Data, National Urban, SEC UML 5+, 48 Channels Non FTA, ${weekA} vs ${weekB}`, '7 Key Broadcast Genres Breakdown')}
+                
+                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 min-h-0 mt-1 overflow-y-auto custom-scrollbar">
+                    ${cardsHTML}
+                </div>
+
+
+            </div>
+            `;
+        }
+
+        function applyChannelShareSummaryToSlide(customData = null, asNewSlide = false) {
+            let slide;
+            if (asNewSlide) {
+                slide = generateDefaultSlide(appSlides.length + 1);
+                appSlides.push(slide);
+                activeSlideIndex = appSlides.length - 1;
+                if (typeof expandedSlideFxSet !== 'undefined') expandedSlideFxSet.add(activeSlideIndex);
+            } else {
+                slide = getActiveSlide();
+            }
+            if (!slide) return;
+
+            const data = customData || DEFAULT_CHANNEL_SUMMARY_SAMPLE;
+            slide.bentoLayout = 'channel-share-summary';
+            slide.chartHeight = 650;
+            slide.syndicateData = JSON.parse(JSON.stringify(data));
+            slide.syndicateWeekA = data.weekA || '2639';
+            slide.syndicateWeekB = data.weekB || '2640';
+            slide.chartTitle = 'CHANNELS SHARE SUMMARY';
+            slide.chartSubtitle = `Based on Pay TV Syndicate Data, National Urban, SEC UML 5+, 48 Channels Non FTA, ${slide.syndicateWeekA} vs ${slide.syndicateWeekB}`;
+
+            if (asNewSlide) {
+                renderSlideList();
+            }
+            closeSyndicateExecutiveModal();
+            closeRawImportModal();
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            showToast("✅ Template Channels Share Summary (Top 20 + Daypart) berhasil diterapkan!");
+        }
+
+        function applyChannelShare48ToSlide(customData = null, asNewSlide = false) {
+            let slide;
+            if (asNewSlide) {
+                slide = generateDefaultSlide(appSlides.length + 1);
+                appSlides.push(slide);
+                activeSlideIndex = appSlides.length - 1;
+                if (typeof expandedSlideFxSet !== 'undefined') expandedSlideFxSet.add(activeSlideIndex);
+            } else {
+                slide = getActiveSlide();
+            }
+            if (!slide) return;
+
+            const data = customData || DEFAULT_CHANNEL_SUMMARY_SAMPLE;
+            slide.bentoLayout = 'channel-share-48';
+            slide.chartHeight = 650;
+            slide.syndicateData = JSON.parse(JSON.stringify(data));
+            slide.syndicateWeekA = data.weekA || '2639';
+            slide.syndicateWeekB = data.weekB || '2640';
+            slide.chartTitle = 'CHANNELS SHARE';
+            slide.chartSubtitle = `Based on Pay TV Syndicate Data, National Urban, SEC UML 5+, 48 Channels Non FTA, ${slide.syndicateWeekA} vs ${slide.syndicateWeekB}`;
+
+            if (asNewSlide) {
+                renderSlideList();
+            }
+            closeSyndicateExecutiveModal();
+            closeRawImportModal();
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            showToast("✅ Template Channels Share 48 (Tabel 1-48 + Genre Ranking) berhasil diterapkan!");
+        }
+
+        function applyGenreShareMatrixToSlide(customData = null, asNewSlide = false) {
+            let slide;
+            if (asNewSlide) {
+                slide = generateDefaultSlide(appSlides.length + 1);
+                appSlides.push(slide);
+                activeSlideIndex = appSlides.length - 1;
+                if (typeof expandedSlideFxSet !== 'undefined') expandedSlideFxSet.add(activeSlideIndex);
+            } else {
+                slide = getActiveSlide();
+            }
+            if (!slide) return;
+
+            const data = customData || DEFAULT_CHANNEL_SUMMARY_SAMPLE;
+            slide.bentoLayout = 'genre-share-matrix';
+            slide.chartHeight = 650;
+            slide.syndicateData = JSON.parse(JSON.stringify(data));
+            slide.syndicateWeekA = data.weekA || '2639';
+            slide.syndicateWeekB = data.weekB || '2640';
+            slide.chartTitle = 'GENRE SHARE';
+            slide.chartSubtitle = `Based on Pay TV Syndicate Data, National Urban, SEC UML 5+, 48 Channels Non FTA, ${slide.syndicateWeekA} vs ${slide.syndicateWeekB}`;
+
+            if (asNewSlide) {
+                renderSlideList();
+            }
+            closeSyndicateExecutiveModal();
+            closeRawImportModal();
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            showToast("✅ Template Genre Share Matrix (7 Genre Breakdown) berhasil diterapkan!");
+        }
+
+        // =========================================================================
+        // SYNDICATE DECK INTERACTIVE LIMIT CONTROLLERS (TOP N & CHANNELS LIMIT)
+        // =========================================================================
+
+        function setSyndicateTopN(val) {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const allCount = (slide.syndicateData && slide.syndicateData.channels) ? slide.syndicateData.channels.length : 70;
+            slide.syndicateTopN = (val >= 999) ? allCount : Math.max(1, parseInt(val) || 20);
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            showToast(`Peringkat diubah ke Top ${slide.syndicateTopN}`);
+        }
+
+        function setSyndicateChannelLimit(val) {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const allCount = (slide.syndicateData && slide.syndicateData.channels) ? slide.syndicateData.channels.length : 70;
+            slide.syndicateChannelLimit = (val >= 999) ? allCount : Math.max(5, parseInt(val) || 48);
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            showToast(`Jumlah data diubah ke ${slide.syndicateChannelLimit} Saluran`);
+        }
+
+        function promptChangeSyndicateTopN() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const current = parseInt(slide.syndicateTopN) || 20;
+            const input = prompt('Masukkan jumlah peringkat (Top N) yang ingin dimunculkan (contoh: 10, 15, 20, 25, 30, 50):', current);
+            if (input !== null) {
+                const val = parseInt(input);
+                if (!isNaN(val) && val > 0) {
+                    setSyndicateTopN(val);
+                }
+            }
+        }
+
+        function promptChangeSyndicateChannelLimit() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const current = parseInt(slide.syndicateChannelLimit) || 48;
+            const input = prompt('Masukkan jumlah saluran data yang ingin dimunculkan (contoh: 30, 40, 48, 60, 65, 80, 100):', current);
+            if (input !== null) {
+                const val = parseInt(input);
+                if (!isNaN(val) && val > 0) {
+                    setSyndicateChannelLimit(val);
+                }
+            }
+        }
+
+        function loadMNCDeckSampleData() {
+            window.__cachedSyndicateComputedData = DEFAULT_CHANNEL_SUMMARY_SAMPLE;
+            updateSyndicatePreview();
+            showToast("✅ Dataset Contoh Presentasi MNC (Week 2639 vs 2640) dimuat!");
+        }
+
 
         function findChannelColIdx(hIdx) {
             if (!currentRawSheetData || !currentRawSheetData[hIdx]) return -1;
