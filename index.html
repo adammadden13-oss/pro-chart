@@ -64,7 +64,52 @@
             transform: none !important;
             transition: none !important;
         }
+    
+        /* ========================================================
+           EXECUTIVE VIEWER MODE STYLES (?mode=viewer)
+           ======================================================== */
+        body.is-viewer-mode #leftPanel,
+        body.is-viewer-mode #rightLayerPanel,
+        body.is-viewer-mode #btnToggleRightPanel,
+        body.is-viewer-mode #btnToggleSidebar,
+        body.is-viewer-mode #whatIfPanel,
+        body.is-viewer-mode #elementPopup,
+        body.is-viewer-mode #appTopNavbar,
+        body.is-viewer-mode .panel-resize-edge,
+        body.is-viewer-mode .panel-resize-corner {
+            display: none !important;
+        }
+
+        body.is-viewer-mode #workspaceArea {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            background: #090d16 !important; /* Premium dark navy canvas for executive viewer */
+        }
+
+        body.is-viewer-mode #canvasWrapper {
+            width: 100% !important;
+            height: calc(100vh - 54px) !important;
+            max-width: 100% !important;
+            padding: 0.75rem 1.5rem !important;
+        }
+
+        body.is-viewer-mode #exportTarget {
+            margin: auto !important;
+            max-width: 96vw !important;
+            max-height: calc(100vh - 190px) !important;
+        }
+
+        #viewerTopNavbar {
+            display: none;
+        }
+        body.is-viewer-mode #viewerTopNavbar {
+            display: flex !important;
+        }
     </style>
+
 
     <style>
         @keyframes drillZoomTransition {
@@ -2137,206 +2182,210 @@
     <div id="rawImportModal"
         class="fixed inset-0 z-[260] hidden items-center justify-center bg-slate-900/35 backdrop-blur-md opacity-0 transition-opacity duration-300 px-2 sm:px-4 py-3"
         onclick="if(event.target === this) closeRawImportModal()">
-        <div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl w-full max-w-[1540px] max-h-[94vh] h-[90vh] flex flex-col overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800 window-modal-box"
+        <div class="bg-white border border-slate-200/90 rounded-3xl w-full max-w-[1540px] max-h-[94vh] h-[90vh] flex flex-col overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800 window-modal-box"
             id="rawImportModalContent">
             
             <!-- ========================================================================= -->
-            <!-- TIER 1: HERO HEADER (Spacious & Luxurious, Clear Slide Target)             -->
+            <!-- TIER 1: EXECUTIVE HERO HEADER BAR (Single Row, Pinned Window Controls)     -->
             <!-- ========================================================================= -->
             <div id="rawImportModalDragHandle"
-                class="flex items-center justify-between px-6 py-3.5 border-b border-slate-200/90 bg-white shrink-0 window-drag-handle group select-none gap-4 flex-wrap"
+                class="flex items-center justify-between px-5 py-2.5 border-b border-slate-200/90 bg-white shrink-0 window-drag-handle group select-none gap-4"
                 title="Tahan & geser untuk memindahkan jendela (Klik 2x untuk Maximize/Restore)">
                 
                 <!-- SISI KIRI: BRANDING & TARGET SLIDE SELECTOR -->
-                <div class="flex items-center gap-3.5 no-drag shrink-0">
-                    <div class="w-10 h-10 rounded-2xl bg-slate-900 text-[#cafc03] flex items-center justify-center shrink-0 shadow-md ring-1 ring-slate-800">
-                        <i class="ph-bold ph-file-xls text-xl"></i>
+                <div class="flex items-center gap-2.5 no-drag shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-slate-900 text-[#cafc03] flex items-center justify-center shrink-0 shadow-sm ring-1 ring-slate-800">
+                        <i class="ph-bold ph-file-xls text-lg"></i>
                     </div>
                     
-                    <div class="flex flex-col">
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
-                                <span>Excel Pivot Studio &amp; Data Workbench</span>
-                                <span class="text-[9px] font-mono bg-slate-900 text-[#cafc03] px-2.5 py-0.5 rounded-full border border-slate-700 font-bold">v19.0 PRO</span>
-                            </h3>
-                        </div>
-                        
-                        <!-- TARGET SLIDE HUB -->
-                        <div class="flex items-center gap-2 mt-1 flex-wrap">
-                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5 shrink-0">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                TARGET SLIDE:
-                            </span>
-                            <div class="relative inline-flex items-center bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-3 py-1 text-xs font-black shadow-xs transition cursor-pointer"
-                                 title="Ganti Slide Target yang diedit (Bisa juga gunakan tombol Panah Atas / Bawah ↑ ↓ di keyboard)">
-                                <i class="ph-bold ph-presentation text-[#cafc03] mr-1.5 text-xs"></i>
-                                <select id="pivotTargetSlideSelect" onchange="onPivotTargetSlideSelect(this.value)"
-                                    class="bg-transparent text-[#cafc03] font-black text-xs border-none outline-none cursor-pointer pr-4 appearance-none">
-                                    <!-- Populated dynamically: Slide 1, Slide 2, etc. -->
-                                </select>
-                                <i class="ph-bold ph-caret-down text-[10px] text-[#cafc03] absolute right-1.5 pointer-events-none"></i>
-                            </div>
-                            
-                            <span id="pivotTargetSlideSummaryBadge" class="bg-slate-100 text-slate-700 border border-slate-200/90 text-xs font-mono font-bold px-2.5 py-0.5 rounded-xl">
-                                0 Baris • 0 Series
-                            </span>
-                            
-                            <span class="text-[10px] text-slate-400 font-mono hidden md:inline ml-1">
-                                Navigasi: <kbd class="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200 text-slate-600 font-bold text-[9px]">↑</kbd> <kbd class="px-1.5 py-0.5 bg-slate-100 rounded border border-slate-200 text-slate-600 font-bold text-[9px]">↓</kbd>
-                            </span>
-                        </div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
+                            <span>Excel Pivot Studio</span>
+                            <span class="text-[9px] font-mono bg-slate-900 text-[#cafc03] px-2 py-0.5 rounded-full border border-slate-700 font-bold">v19.0 PRO</span>
+                        </h3>
                     </div>
+
+                    <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+                    <!-- TARGET SLIDE SELECTOR (COMPACT INLINE) -->
+                    <div class="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-2.5 py-1 text-xs font-black shadow-2xs transition cursor-pointer"
+                         title="Ganti Slide Target yang diedit (Bisa gunakan tombol Panah Atas / Bawah ↑ ↓ di keyboard)">
+                        <i class="ph-bold ph-presentation text-[#cafc03] text-xs"></i>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Target:</span>
+                        <select id="pivotTargetSlideSelect" onchange="onPivotTargetSlideSelect(this.value)"
+                            class="bg-transparent text-[#cafc03] font-black text-xs border-none outline-none cursor-pointer pr-3 appearance-none">
+                        </select>
+                        <i class="ph-bold ph-caret-down text-[10px] text-[#cafc03] pointer-events-none"></i>
+                    </div>
+
+                    <span id="pivotTargetSlideSummaryBadge" class="bg-slate-100 text-slate-700 border border-slate-200/90 text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg">
+                        0 Baris • 0 Series
+                    </span>
+
+                    <span class="text-[10px] text-slate-400 font-mono hidden xl:inline">
+                        <kbd class="px-1 py-0.2 bg-slate-100 rounded border border-slate-200 text-slate-600 font-bold text-[9px]">↑</kbd><kbd class="px-1 py-0.2 bg-slate-100 rounded border border-slate-200 text-slate-600 font-bold text-[9px] ml-0.5">↓</kbd>
+                    </span>
                 </div>
 
-                <!-- SISI KANAN: INGESTION ACTIONS, WINDOW CONTROLS & FILE AKTIF DI BAWAH UPLOAD EXCEL -->
-                <div class="flex flex-col items-end gap-1.5 no-drag shrink-0">
-                    <!-- BARIS ATAS: TOMBOL INGESTION & WINDOW CONTROL -->
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <button type="button" onclick="document.getElementById('workbenchFileInput').click()"
-                            class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs hover:border-slate-300"
-                            title="Upload file XLSX / XLS / CSV">
-                            <i class="ph-bold ph-upload-simple text-slate-500 text-sm"></i>
-                            <span>Upload Excel/CSV</span>
-                        </button>
-                        <button type="button" onclick="handleWorkbenchPaste()"
-                            class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs hover:border-slate-300"
-                            title="Paste tabel data dari Clipboard">
-                            <i class="ph-bold ph-clipboard-text text-slate-500 text-sm"></i>
-                            <span>Paste</span>
-                        </button>
-                        <button type="button" onclick="promptGSheetsSync()"
-                            class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs hover:border-slate-300"
-                            title="Sinkronkan dari Google Sheets atau URL CSV">
-                            <i class="ph-bold ph-google-logo text-emerald-600 text-sm"></i>
-                            <span>GSheets</span>
-                        </button>
-                        <button type="button" onclick="loadCurrentSlideDataToPivot()"
-                            class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-2xs hover:border-slate-300"
-                            title="Gunakan dataset grafik aktif saat ini">
-                            <i class="ph-bold ph-download-simple text-slate-500 text-sm"></i>
-                            <span>Ambil Slide</span>
-                        </button>
-                        <button type="button" onclick="resetPivotStudioToDefaults()"
-                            class="bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/90 px-2 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 transition shadow-2xs"
-                            title="Reset konfigurasi ke deteksi otomatis">
-                            <i class="ph-bold ph-arrows-clockwise text-xs"></i>
-                            <span>Reset</span>
-                        </button>
-                        <button type="button" onclick="openCodeInspectorModal('json')"
-                            class="bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/90 px-2 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1 transition shadow-2xs"
-                            title="Buka Editor JSON/Python/SQL untuk Developer">
-                            <i class="ph-bold ph-code text-xs"></i>
-                            <span>Dev</span>
-                        </button>
-
-                        <div class="h-5 w-px bg-slate-200 mx-0.5"></div>
-
-                        <button type="button" id="rawImportModalPinBtn"
-                            class="w-7 h-7 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition"
-                            title="Pin Jendela"><i class="ph-bold ph-push-pin text-xs"></i></button>
-                        <button type="button" id="rawImportModalMaxBtn"
-                            class="w-7 h-7 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition"
-                            title="Perbesar / Perkecil (Maximize/Restore)"><i class="ph-bold ph-corners-out text-xs"></i></button>
-                        <button type="button" onclick="closeRawImportModal()"
-                            class="w-7 h-7 flex items-center justify-center rounded-xl text-slate-400 hover:text-red-500 hover:bg-slate-100 transition"
-                            title="Tutup (Esc)"><i class="ph ph-x text-sm"></i></button>
+                <!-- SISI KANAN (POJOK KANAN ATAS): FILE STATUS, HEADER BADGE, & WINDOW CONTROLS -->
+                <!-- ANCHORED PERMANENTLY AT THE TOP RIGHT WITH ZERO CLUTTER -->
+                <div class="flex items-center gap-2 no-drag shrink-0">
+                    <!-- POOL / DAFTAR FILE EXCEL YANG SUDAH PERNAH DIUPLOAD -->
+                    <div id="pivotSourceFileSelectorContainer"
+                        class="hidden items-center gap-1.5 bg-slate-50 border border-indigo-200/90 rounded-xl px-2.5 py-1 text-xs shadow-2xs hover:border-indigo-400 transition"
+                        title="Beralih ke file Excel lain yang sudah pernah di-upload">
+                        <i class="ph-bold ph-files text-indigo-600 text-xs"></i>
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">File:</span>
+                        <select id="pivotSourceFileSelect" onchange="switchPivotSourceFile(this.value)"
+                            class="text-xs font-bold text-slate-800 bg-transparent border-none outline-none cursor-pointer max-w-[150px] truncate">
+                        </select>
                     </div>
 
-                    <!-- BARIS BAWAH: FILE AKTIF (DI TARUH DI BAWAH UPLOAD EXCEL) & HEADER INDICATOR -->
-                    <div class="flex items-center gap-2">
-                        <!-- POOL / DAFTAR FILE EXCEL YANG SUDAH PERNAH DIUPLOAD -->
-                        <div id="pivotSourceFileSelectorContainer"
-                            class="hidden items-center gap-1.5 bg-slate-50/90 border border-indigo-200/90 rounded-xl px-2.5 py-1 text-xs shadow-2xs group hover:border-indigo-400 transition"
-                            title="Beralih ke file Excel lain yang sudah pernah di-upload tanpa perlu upload ulang">
-                            <i class="ph-bold ph-files text-indigo-600 text-xs"></i>
-                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-wider">File Aktif:</span>
-                            <select id="pivotSourceFileSelect" onchange="switchPivotSourceFile(this.value)"
-                                class="text-xs font-bold text-slate-800 bg-transparent border-none outline-none cursor-pointer max-w-[200px] sm:max-w-[280px] truncate">
-                            </select>
-                        </div>
+                    <!-- HEADER INDICATOR BADGE -->
+                    <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200/90 shadow-2xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="pivotHeaderIndicator" class="text-[11px] font-mono font-bold text-slate-700">Header: Baris 1</span>
+                    </div>
+                    <span id="rawImportSheetCountBadge" class="hidden">0 Sheets</span>
+                    <span id="rawImportFileNameDisplay" class="hidden">Belum ada file</span>
 
-                        <div class="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200/90 shadow-2xs">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span id="pivotHeaderIndicator" class="text-[11px] font-mono font-bold text-slate-700">Header: Baris 1</span>
-                        </div>
-                        <span id="rawImportSheetCountBadge" class="hidden">0 Sheets</span>
-                        <span id="rawImportFileNameDisplay" class="hidden">Belum ada file</span>
+                    <div class="h-4 w-px bg-slate-200 mx-0.5"></div>
+
+                    <!-- WINDOW CONTROLS WITH RELIABLE INLINE ICONS -->
+                    <div class="flex items-center gap-1 bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80">
+                        <button type="button" id="rawImportModalPinBtn"
+                            class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white transition shadow-2xs cursor-pointer"
+                            title="Pin Jendela">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+                        </button>
+                        <button type="button" id="rawImportModalMaxBtn"
+                            class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white transition shadow-2xs cursor-pointer"
+                            title="Perbesar / Perkecil (Maximize/Restore)">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+                        </button>
+                        <button type="button" onclick="closeRawImportModal()"
+                            class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-white hover:bg-rose-500 transition shadow-2xs cursor-pointer"
+                            title="Tutup (Esc)">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
                     </div>
                 </div>
             </div>
 
             <!-- ========================================================================= -->
-            <!-- MAIN WORKSPACE: SPLIT LEFT & RIGHT (Right panel starts aligned with S1!)  -->
+            <!-- MAIN WORKSPACE: TWO COLUMNS (LEFT DATA & RIGHT PIVOT CONTROLLER)            -->
             <!-- ========================================================================= -->
             <div class="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden bg-slate-50/40">
                 
-                <!-- LEFT PANEL: DATA SOURCES, WORKFLOW STEPPERS, AND PREVIEWS/KITS -->
+                <!-- LEFT PANEL: DATA SOURCES, INGESTION TOOLS, WORKFLOW & GRID -->
                 <div class="flex-1 min-w-0 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-200/90 bg-white overflow-hidden" id="studioLeftWorkspace">
                     
-                    <!-- LEFT TIER 1: DATA SOURCES (S1, S2, MULTI-SOURCE) & SHEET SELECTION BAR -->
-                    <div class="bg-slate-50/90 border-b border-slate-200/90 px-5 py-2.5 flex items-center justify-between gap-3 shrink-0 flex-wrap">
-                        <div class="flex items-center gap-2.5 flex-wrap flex-1 min-w-0">
-                            <!-- MULTI-DATA SOURCE CLUSTER -->
-                            <div class="flex items-center gap-1.5 bg-white border border-slate-200/90 rounded-2xl p-1 shadow-2xs shrink-0">
-                                <!-- SUMBER 1 (UTAMA) -->
-                                <div id="pivotSourcePrimaryBadge" class="flex items-center gap-1.5 bg-emerald-50/80 border border-emerald-200/90 px-2.5 py-1 rounded-xl text-xs shadow-2xs max-w-[220px] truncate"
+                    <!-- LEFT TIER 1: COMPACT SINGLE-ROW TOOLBAR (INGESTION ACTIONS + MULTI-SOURCE + SHEET TABS) -->
+                    <div class="bg-slate-50/90 border-b border-slate-200/90 px-4 py-1.5 flex items-center justify-between gap-2.5 shrink-0 overflow-x-auto custom-scrollbar">
+                        <div class="flex items-center gap-2 shrink-0">
+                            <!-- INGESTION TOOLBAR CLUSTER -->
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="document.getElementById('workbenchFileInput').click()"
+                                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                                    title="Upload file XLSX / XLS / CSV">
+                                    <i class="ph-bold ph-upload-simple text-[#cafc03] text-xs"></i>
+                                    <span>Upload</span>
+                                </button>
+                                <button type="button" onclick="handleWorkbenchPaste()"
+                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs hover:border-slate-300 cursor-pointer"
+                                    title="Paste tabel data dari Clipboard">
+                                    <i class="ph-bold ph-clipboard-text text-slate-500 text-xs"></i>
+                                    <span>Paste</span>
+                                </button>
+                                <button type="button" onclick="promptGSheetsSync()"
+                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs hover:border-slate-300 cursor-pointer"
+                                    title="Sinkronkan dari Google Sheets atau URL CSV">
+                                    <i class="ph-bold ph-google-logo text-emerald-600 text-xs"></i>
+                                    <span>GSheets</span>
+                                </button>
+                                <button type="button" onclick="loadCurrentSlideDataToPivot()"
+                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs hover:border-slate-300 cursor-pointer"
+                                    title="Gunakan dataset grafik aktif saat ini">
+                                    <i class="ph-bold ph-download-simple text-slate-500 text-xs"></i>
+                                    <span>Ambil Slide</span>
+                                </button>
+                                <button type="button" onclick="resetPivotStudioToDefaults()"
+                                    class="bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/90 px-1.5 py-1 rounded-xl text-xs font-medium flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                                    title="Reset konfigurasi ke deteksi otomatis">
+                                    <i class="ph-bold ph-arrows-clockwise text-xs"></i>
+                                    <span>Reset</span>
+                                </button>
+                                <button type="button" onclick="openCodeInspectorModal('json')"
+                                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/90 px-1.5 py-1 rounded-xl text-xs font-mono font-bold flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                                    title="Buka Editor JSON/Python/SQL untuk Developer">
+                                    <i class="ph-bold ph-code text-xs"></i>
+                                    <span>Dev</span>
+                                </button>
+                            </div>
+
+                            <!-- DIVIDER -->
+                            <div class="h-4 w-px bg-slate-200 shrink-0 mx-0.5"></div>
+
+                            <!-- MULTI-DATA SOURCES -->
+                            <div class="flex items-center gap-1 bg-white border border-slate-200/90 rounded-xl p-0.5 shadow-2xs shrink-0">
+                                <!-- S1 (UTAMA) -->
+                                <div id="pivotSourcePrimaryBadge" class="flex items-center gap-1.5 bg-emerald-50/80 border border-emerald-200/90 px-2 py-0.5 rounded-lg text-xs shadow-2xs max-w-[170px] truncate"
                                      title="Sumber Data 1 (Utama): File/Sheet aktif yang sedang di-pivot">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                                    <span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider shrink-0">S1 (Utama):</span>
+                                    <span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider shrink-0">S1:</span>
                                     <span id="pivotSource1Name" class="text-xs font-bold text-slate-800 truncate">Memuat...</span>
                                 </div>
 
-                                <!-- SUMBER 2 (TARGET / BENCHMARK / PEMBANDING) -->
+                                <!-- S2 (TARGET) -->
                                 <div id="pivotSourceSecondaryBadge" onclick="openSecondarySourcePickerModal()"
-                                     class="flex items-center gap-1.5 bg-indigo-50/60 hover:bg-indigo-100/80 border border-indigo-200/90 hover:border-indigo-400 px-2.5 py-1 rounded-xl text-xs shadow-2xs max-w-[220px] truncate cursor-pointer transition group"
+                                     class="flex items-center gap-1.5 bg-indigo-50/60 hover:bg-indigo-100/80 border border-indigo-200/90 hover:border-indigo-400 px-2 py-0.5 rounded-lg text-xs shadow-2xs max-w-[170px] truncate cursor-pointer transition group"
                                      title="Sumber Data 2: File/Sheet pembanding untuk Target, KPI, atau Cross-Period. Klik untuk atur.">
                                     <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
-                                    <span class="text-[10px] font-black text-indigo-700 uppercase tracking-wider shrink-0">S2 (Target):</span>
-                                    <span id="pivotSource2Name" class="text-xs font-semibold text-slate-600 group-hover:text-indigo-600 truncate">+ Tambah Sumber 2</span>
+                                    <span class="text-[10px] font-black text-indigo-700 uppercase tracking-wider shrink-0">S2:</span>
+                                    <span id="pivotSource2Name" class="text-xs font-semibold text-slate-600 group-hover:text-indigo-600 truncate">+ Target</span>
                                 </div>
 
                                 <!-- TOMBOL MULTI-SOURCE HUB -->
                                 <button type="button" onclick="openSecondarySourcePickerModal()"
-                                    class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-xs font-bold flex items-center gap-1 transition shadow-2xs shrink-0 cursor-pointer"
-                                    title="Konfigurasi multi-sumber data untuk slide ini (Target KPI, Budget, Benchmark, Sheet lain)">
-                                    <i class="ph-bold ph-plus text-xs"></i>
+                                    class="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-[11px] font-bold flex items-center gap-1 transition shadow-2xs shrink-0 cursor-pointer"
+                                    title="Konfigurasi multi-sumber data untuk slide ini">
+                                    <i class="ph-bold ph-plus text-[10px]"></i>
                                     <span>Multi-Source</span>
                                 </button>
                             </div>
 
                             <!-- DIVIDER -->
-                            <div class="h-5 w-px bg-slate-200 hidden sm:block shrink-0"></div>
+                            <div class="h-4 w-px bg-slate-200 shrink-0 mx-0.5"></div>
 
-                            <!-- DYNAMIC SHEET TABS CONTAINER -->
-                            <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-0.5" id="rawImportSheetTabsContainer">
+                            <!-- DYNAMIC SHEET TABS -->
+                            <div class="flex items-center gap-1 shrink-0" id="rawImportSheetTabsContainer">
                                 <!-- Populated dynamically by renderSheetTabs() -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- LEFT TIER 2: WORKFLOW STEPPER TABS & BARIS AKTIF (GESER KE KIRI) -->
-                    <div class="px-5 py-2 border-b border-slate-200/90 bg-white flex items-center justify-between shrink-0 gap-3 flex-wrap">
-                        <div class="flex items-center gap-2 flex-wrap">
+                    <!-- LEFT TIER 2: WORKFLOW STEPPER TABS & ROW COUNT STATUS -->
+                    <div class="px-4 py-1.5 border-b border-slate-200/90 bg-white flex items-center justify-between shrink-0 gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
                             <button type="button" id="kitTabBtn_pivot" onclick="switchStudioKit('pivot')"
-                                class="kit-tab-btn py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-[#cafc03] shadow-xs cursor-pointer">
-                                <span class="w-4 h-4 rounded-full bg-[#cafc03] text-slate-900 text-[10px] font-black flex items-center justify-center">1</span>
+                                class="kit-tab-btn py-1 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 bg-slate-900 text-[#cafc03] shadow-xs cursor-pointer">
+                                <span class="w-3.5 h-3.5 rounded-full bg-[#cafc03] text-slate-900 text-[9px] font-black flex items-center justify-center">1</span>
                                 <span>Excel Pivot Builder</span>
-                                <span class="text-[9px] font-mono bg-slate-800 text-[#cafc03] px-1.5 py-0.2 rounded-full border border-slate-700">Aktif</span>
+                                <span class="text-[9px] font-mono bg-slate-800 text-[#cafc03] px-1 py-0.2 rounded-full border border-slate-700">Aktif</span>
                             </button>
                             <button type="button" id="kitTabBtn_analysis" onclick="switchStudioKit('analysis')"
-                                class="kit-tab-btn py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer">
-                                <span class="w-4 h-4 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center">2</span>
+                                class="kit-tab-btn py-1 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer">
+                                <span class="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-600 text-[9px] font-bold flex items-center justify-center">2</span>
                                 <span>Tools Analisa &amp; Insights</span>
-                                <span class="text-[9px] bg-slate-100 text-slate-500 font-medium px-1.5 py-0.2 rounded-full border border-slate-200/80">Tahap 2</span>
+                                <span class="text-[9px] bg-slate-100 text-slate-500 font-medium px-1 py-0.2 rounded-full border border-slate-200/80">Tahap 2</span>
                             </button>
                             <button type="button" id="kitTabBtn_raw" onclick="switchStudioKit('raw')"
-                                class="kit-tab-btn py-1.5 px-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer">
-                                <i class="ph-bold ph-table text-slate-400 text-sm"></i>
+                                class="kit-tab-btn py-1 px-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 cursor-pointer">
+                                <i class="ph-bold ph-table text-slate-400 text-xs"></i>
                                 <span>Raw Sheet Data</span>
                             </button>
 
-                            <!-- USER REQUEST: 39.873 BARIS AKTIF DIGESER KE KIRI SEBELAH TAB WORKFLOW -->
-                            <span id="pivotActiveRowCountDisplay" class="bg-slate-50 border border-slate-200/90 text-slate-800 px-3 py-1 rounded-xl text-xs font-mono font-bold shadow-2xs shrink-0">
+                            <span id="pivotActiveRowCountDisplay" class="bg-slate-50 border border-slate-200/90 text-slate-800 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold shadow-2xs shrink-0">
                                 0 / 0 baris aktif
                             </span>
                         </div>
@@ -2344,25 +2393,45 @@
                         <div class="flex items-center gap-2 text-xs font-mono text-slate-600 shrink-0">
                             <span id="pivotKitHeaderSummary" class="text-slate-400 font-sans font-medium text-xs hidden sm:inline">WYSIWYG Live Pivot</span>
                             <span class="text-slate-200 hidden sm:inline">|</span>
-                            <span id="pivotTargetSlideSummaryText" class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl flex items-center gap-1.5">
+                            <span id="pivotTargetSlideSummaryText" class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1.5">
                                 <i class="ph-bold ph-target text-emerald-600"></i> Target: Slide 1
                             </span>
                         </div>
                     </div>
 
                     <!-- DYNAMIC KIT CONTAINER -->
-                    <div id="studioKitContentArea" class="flex-1 min-h-0 overflow-auto p-5 custom-scrollbar">
+                    <div id="studioKitContentArea" class="flex-1 min-h-0 overflow-auto p-4 custom-scrollbar">
                         <!-- Content rendered dynamically: Pivot Grid, Macro Radar, Talent Booster, Efficiency, Story, Raw Data -->
                     </div>
 
                 </div>
 
                 <!-- RIGHT PANEL: EXCEL 4-QUADRANT FIELD CONTROLLER (w-[460px]) -->
-                <!-- NAIIK KE ATAS SEDERET BARIS S1 (UTAMA)! -->
+                <!-- STARTS AT THE EXACT SAME HEIGHT WITH EXECUTIVE PRESET BAR -->
                 <div class="w-full lg:w-[460px] shrink-0 bg-slate-50/50 flex flex-col overflow-hidden border-t lg:border-t-0" id="studioRightWorkspace">
                     
+                    <!-- RIGHT TIER 1: EXECUTIVE PRESET ACTIONS (WoW & ROI) - FILLS TOP RIGHT BEAUTIFULLY -->
+                    <div class="bg-slate-50/90 border-b border-slate-200/90 px-4 py-1.5 flex items-center justify-between gap-2 shrink-0">
+                        <span class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="ph-bold ph-sliders text-indigo-600"></i>
+                            <span>Preset Eksekutif:</span>
+                        </span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="openSyndicateExecutiveModal()"
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 hover:from-blue-800 hover:to-amber-700 text-white shadow-2xs transition hover:scale-[1.02] cursor-pointer"
+                                title="Template Eksekutif Sindikasi: Tabel + 2 Grafik WoW (Share & Durasi)">
+                                <span>⚡ Template Sindikasi (WoW)</span>
+                            </button>
+                            <button type="button" onclick="applyPresetSourceAirtimeROI()"
+                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white flex items-center gap-1 shadow-2xs transition hover:scale-[1.02] cursor-pointer"
+                                title="Otomatis susun kuadran: Baris = Source, Nilai 1 = Share, Nilai 2 = Durasi/Menit">
+                                <i class="ph-bold ph-lightning text-amber-200"></i> <span>Source &amp; Durasi</span>
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- FIELD LIST SEARCH & HEADER ROW SETTING -->
-                    <div class="p-3.5 bg-white border-b border-slate-100 flex flex-col gap-2 shrink-0">
+                    <div class="p-3 bg-white border-b border-slate-100 flex flex-col gap-2 shrink-0">
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-[10px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
                                 <i class="ph-bold ph-database text-slate-400"></i> Daftar Field (Kolom Excel)
@@ -2383,30 +2452,20 @@
                         </div>
 
                         <!-- SCROLLABLE DETECTED FIELD BADGES -->
-                        <div class="max-h-24 overflow-y-auto custom-scrollbar flex flex-wrap gap-1 p-1 bg-slate-50/70 rounded-xl border border-slate-200/60" id="pivotDetectedFieldsList">
+                        <div class="max-h-20 overflow-y-auto custom-scrollbar flex flex-wrap gap-1 p-1 bg-slate-50/70 rounded-xl border border-slate-200/60" id="pivotDetectedFieldsList">
                             <!-- Populated with field pills -->
                         </div>
                     </div>
 
                     <!-- THE 4 EXCEL QUADRANTS (2x2 GRID) - CLEAN CARDS LIKE ATTACHMENT 2 -->
                     <div class="flex-1 min-h-0 overflow-y-auto p-3 flex flex-col gap-2.5 custom-scrollbar">
-                        <!-- QUICK PRESET HELPER / CUSTOM USER ACTION BAR -->
-                        <div class="flex items-center justify-between gap-1.5 px-0.5 pb-0.5">
+                        <!-- HEADER BAR KUADRAN -->
+                        <div class="flex items-center justify-between gap-1.5 px-0.5 pb-0.5 border-b border-slate-100">
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                                <i class="ph-bold ph-sliders text-indigo-500"></i> Kuadran Pivot (Bebas Kustom)
+                                <i class="ph-bold ph-grid-four text-indigo-500"></i> Kuadran Pivot (Bebas Kustom)
                             </span>
-                            <button type="button" onclick="openSyndicateExecutiveModal()"
-                                class="px-2.5 py-1 rounded-lg text-[10px] font-black bg-gradient-to-r from-blue-700 via-indigo-700 to-amber-600 hover:from-blue-800 hover:to-amber-700 text-white shadow-2xs transition hover:scale-[1.02] cursor-pointer"
-                                title="Template Eksekutif Sindikasi: Tabel + 2 Grafik WoW (Share & Durasi)">
-                                <span>Template Sindikasi (WoW)</span>
-                            </button>
-                            <button type="button" onclick="applyPresetSourceAirtimeROI()"
-                                class="px-2.5 py-1 rounded-xl text-[10px] font-black bg-gradient-to-r from-amber-500 via-amber-600 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white flex items-center gap-1.5 shadow-2xs transition hover:scale-[1.02] cursor-pointer"
-                                title="Otomatis susun kuadran: Baris = Source, Nilai 1 = Share, Nilai 2 = Durasi/Menit">
-                                <i class="ph-bold ph-lightning text-amber-200"></i> <span>Setup: Source &amp; Durasi</span>
-                            </button>
+                            <span class="text-[9px] text-slate-400 font-medium">Drag atau klik (+) slot</span>
                         </div>
-
                         <!-- THE 4 EXCEL QUADRANTS (2x2 GRID) - DYNAMIC +/- SLOTS -->
                         <div class="grid grid-cols-2 gap-2" id="pivotQuadrantsContainer">
                             
@@ -3277,7 +3336,7 @@
                             <div class="text-left">
                                 <div
                                     class="text-xs font-black text-white group-hover:text-[#cafc03] transition flex items-center gap-1.5">
-                                    🛠️ Buka Data Workbench & Spreadsheet Sync
+                                    Buka Data Workbench & Spreadsheet Sync
                                 </div>
                                 <div class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
                                     <span>Pivot Studio, Live Grid & GSheets Sync</span>
@@ -4027,7 +4086,41 @@
     <!-- RIGHT PANEL: CANVAS WORKSPACE -->
     <div class="flex-1 min-w-0 bg-[#f8fafc] flex flex-col relative overflow-hidden transition-all duration-500"
         id="workspaceArea">
-        <div id="appTopNavbar"
+                <!-- TOP NAVBAR KHUSUS MODE AUDIENS / VIEWER (?mode=viewer) -->
+        <div id="viewerTopNavbar" class="h-12 md:h-13 px-4 md:px-6 items-center justify-between z-20 shrink-0 bg-slate-900/90 backdrop-blur-md border-b border-slate-700/80 text-white w-full">
+            <div class="flex items-center gap-3">
+                <div class="w-7 h-7 rounded-lg bg-[#cafc03] flex items-center justify-center text-slate-900 font-black shadow-xs">
+                    <i class="ph-bold ph-chart-line-up text-sm"></i>
+                </div>
+                <div>
+                    <h1 id="viewerDeckTitle" class="text-xs font-black tracking-tight text-white flex items-center gap-2">
+                        <span id="viewerBrandText">MNC CHANNELS</span>
+                        <span class="bg-[#cafc03]/20 text-[#cafc03] text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">Executive Viewer</span>
+                    </h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="prevSlide()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer" title="Slide Sebelumnya (Panah Kiri)">
+                    <i class="ph-bold ph-caret-left text-sm"></i>
+                </button>
+                <span id="viewerSlideIndicator" class="px-3 py-1 rounded-lg bg-slate-800 text-[11px] font-mono font-bold text-[#cafc03] border border-slate-700">1 / 1</span>
+                <button type="button" onclick="nextSlide()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer" title="Slide Berikutnya (Panah Kanan / Spasi)">
+                    <i class="ph-bold ph-caret-right text-sm"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="refreshViewerData()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition border border-slate-700 cursor-pointer" title="Ambil Data Terbaru dari GitHub / Cloud">
+                    <i class="ph-bold ph-arrows-clockwise text-xs"></i> <span>Refresh Data</span>
+                </button>
+                <button type="button" onclick="toggleFullscreenPresentation()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer" title="Layar Penuh (F)">
+                    <i class="ph-bold ph-arrows-out text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="appTopNavbar" 
             class="hide-on-fullscreen h-13 md:h-14 px-3 md:px-6 flex items-center justify-between z-10 shrink-0 border-b border-slate-200/60 bg-white/80 backdrop-blur-md shadow-xs">
             <div class="flex items-center gap-2 sm:gap-3">
                 <button id="btnToggleSidebar"
@@ -4089,6 +4182,12 @@
                     class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 flex items-center justify-center shadow-xs border border-[#b5e002]/50 transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer relative group"
                     title="Studio Tools & Slides (Layers)" aria-label="Studio Tools & Slides">
                     <i class="ph-bold ph-magic-wand text-lg text-slate-900 transition-colors"></i>
+                </button>
+
+                <button id="btnSharePresentation" onclick="openSharePresentationModal()"
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs flex items-center justify-center transition-all duration-200 transform hover:scale-105 active:scale-95 cursor-pointer relative group"
+                    title="Bagikan Presentasi Interaktif (Viewer Mode / Link Live)" aria-label="Bagikan Presentasi">
+                    <i class="ph-bold ph-share-network text-lg text-white"></i>
                 </button>
 
                 <button id="btnFullscreen"
@@ -4194,19 +4293,19 @@
 
 
                         <!-- INTERACTIVE DRILL-DOWN BREADCRUMB NAVIGATOR (POINT 3) -->
-                        <div id="canvasDrillBreadcrumbsBar"
+                        <div id="canvasDrillBreadcrumbsBar" onclick="event.stopPropagation()"
                             class="hidden w-full flex items-center justify-between mb-2.5 px-3.5 py-2 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-slate-700/80 shadow-lg text-white z-[70] transition-all">
                             <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar text-xs min-w-0 pr-2"
                                 id="canvasDrillBreadcrumbsList">
                                 <!-- Injected dynamically -->
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
-                                <button type="button" onclick="openDrillDeepDiveModal()"
+                                <button type="button" onclick="openDrillDeepDiveModal(event); event.stopPropagation();"
                                     class="px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition shadow-xs"
                                     title="Buka Deep-Dive Sub-Category Matrix & Komposisi">
                                     <i class="ph-bold ph-chart-donut text-xs"></i> <span>Deep-Dive Matrix</span>
                                 </button>
-                                <button type="button" onclick="drillUpBack()"
+                                <button type="button" onclick="drillUpBack(event); event.stopPropagation();"
                                     class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-[#cafc03] text-[11px] font-bold flex items-center gap-1.5 transition border border-slate-700"
                                     title="Kembali ke Slide Induk">
                                     <i class="ph-bold ph-arrow-left text-xs"></i> <span>Kembali</span>
@@ -7185,7 +7284,9 @@
             showToast(`🔍 Masuk ke Breakdown: ${appSlides[targetIdx].chartTitle || 'Detail Area'}`);
         }
 
-        function drillUpBack() {
+        function drillUpBack(event) {
+            if (event && event.stopPropagation) event.stopPropagation();
+            if (typeof window !== 'undefined' && window.event && window.event.stopPropagation) window.event.stopPropagation();
             if (drillHistoryStack.length === 0) return;
             closeElementPopup();
             closeDrillDeepDiveModal();
@@ -7203,7 +7304,9 @@
             showToast("Kembali ke slide induk.");
         }
 
-        function drillJumpTo(stackIndex) {
+        function drillJumpTo(stackIndex, event) {
+            if (event && event.stopPropagation) event.stopPropagation();
+            if (typeof window !== 'undefined' && window.event && window.event.stopPropagation) window.event.stopPropagation();
             if (stackIndex < 0 || stackIndex >= drillHistoryStack.length) return;
             closeElementPopup();
             closeDrillDeepDiveModal();
@@ -7241,7 +7344,7 @@
                 const s = appSlides[slideIdx];
                 const title = s ? (s.chartTitle || `Slide ${slideIdx + 1}`) : `Slide ${slideIdx + 1}`;
                 html += `
-                    <button type="button" onclick="drillJumpTo(${stackPos})" class="text-slate-300 hover:text-[#cafc03] hover:underline flex items-center gap-1 shrink-0 transition" title="Lompat ke level ini">
+                    <button type="button" onclick="drillJumpTo(${stackPos}, event); event.stopPropagation();" class="text-slate-300 hover:text-[#cafc03] hover:underline flex items-center gap-1 shrink-0 transition cursor-pointer" title="Lompat ke level ini">
                         ${stackPos === 0 ? '<i class="ph-bold ph-house text-xs"></i>' : '<i class="ph-bold ph-folder text-xs"></i>'}
                         <span class="max-w-[120px] truncate">${escapeHtml(title)}</span>
                     </button>
@@ -7966,7 +8069,7 @@ ${escapeHtml(narrative)}
             if (isSidebarOpen) { isSidebarOpen = false; applySidebarState(); }
             if (isRightPanelOpen) { isRightPanelOpen = false; applyRightPanelState(); }
             if (typeof updateWorkspacePaddingForSidebar === 'function') updateWorkspacePaddingForSidebar();
-            if (activeSlideIndex !== 0) switchSlide(0); else { if (els.exportTarget) { els.exportTarget.classList.remove('chart-wrapper-transition'); void els.exportTarget.offsetWidth; els.exportTarget.classList.add('chart-wrapper-transition'); } syncUIToActiveSlide(); }
+            if (els.exportTarget) { els.exportTarget.classList.remove('chart-wrapper-transition'); void els.exportTarget.offsetWidth; els.exportTarget.classList.add('chart-wrapper-transition'); } syncUIToActiveSlide();
             setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); if (typeof clampHudPosition === 'function') clampHudPosition(); }, 150);
             if (typeof presenterDock !== 'undefined' && presenterDock) {
                 presenterDock.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
@@ -8103,7 +8206,19 @@ ${escapeHtml(narrative)}
                 }
             }
         });
-        if (els.canvasWrapper) els.canvasWrapper.addEventListener('click', (e) => { if (isPresenting && !e.target.closest('.draggable-note') && !e.target.closest('.callout-box') && !e.target.closest('#btnDrillBack') && e.target.tagName !== 'CANVAS') nextSlide(); });
+        if (els.canvasWrapper) els.canvasWrapper.addEventListener('click', (e) => {
+            if (isPresenting && 
+                !e.target.closest('#canvasDrillBreadcrumbsBar') && 
+                !e.target.closest('#btnDrillBack') && 
+                !e.target.closest('#canvasExecutiveBanner') && 
+                !e.target.closest('#elementPopup') && 
+                !e.target.closest('.draggable-note') && 
+                !e.target.closest('.callout-box') && 
+                !e.target.closest('button, a, input, select, textarea, [onclick]') && 
+                e.target.tagName !== 'CANVAS') {
+                nextSlide();
+            }
+        });
 
         function salinTeks(text) {
             const textArea = document.createElement("textarea");
@@ -8194,6 +8309,12 @@ ${escapeHtml(narrative)}
 
         function openElementEditor(datasetIndex, index, clientX, clientY, cType, blockIndex) {
             const slide = getActiveSlide(); const ds = slide.dataSets[blockIndex] || slide.dataSets[0]; let rowIdx, sIdx; let originalType = slide.bentoCharts[blockIndex]; let isTape = originalType === 'tape'; let isWindrose = originalType === 'windrose'; let isConcentric = originalType === 'concentric'; let isMap = originalType === 'choropleth-world' || originalType === 'choropleth-indo'; let isWordCloud = originalType === 'wordCloud';
+            if (window.isViewerMode) {
+                if (row && row.drillTarget && appSlides.some(s => s.id === row.drillTarget)) {
+                    drillDownTo(row.drillTarget);
+                }
+                return;
+            }
             if (isMap || isWordCloud || originalType === 'treemap') return;
             if (isTape) { rowIdx = datasetIndex; sIdx = index; } else if (isConcentric || isWindrose) { sIdx = datasetIndex; rowIdx = index; if (isWindrose) sIdx = (ds.series.length - 1) - datasetIndex; } else if (['pie', 'doughnut', 'polarArea', 'radar'].includes(originalType)) { sIdx = 0; rowIdx = index; } else { sIdx = datasetIndex; rowIdx = index; }
             let row = ds.rows[rowIdx]; if (!row) return; let valObj = row.values[sIdx]; if (!valObj) return;
@@ -12900,19 +13021,19 @@ ${escapeHtml(narrative)}
             { name: '📊 Change Chart: Waterfall', action: () => { getActiveSlide().bentoCharts[activeEditGridIndex] = 'waterfall'; triggerVisUpdateWithDebounce(); syncUIToActiveSlide(); } },
             { name: '📊 Change Chart: Treemap', action: () => { getActiveSlide().bentoCharts[activeEditGridIndex] = 'treemap'; triggerVisUpdateWithDebounce(); syncUIToActiveSlide(); } },
             { name: '📊 Change Chart: Table', action: () => { getActiveSlide().bentoCharts[activeEditGridIndex] = 'table'; triggerVisUpdateWithDebounce(); syncUIToActiveSlide(); } },
-            { name: '🛠️ Tools & Analytics: Toggle Trend & Radar', action: () => toggleAnalyticsRadar() },
-            { name: '🛠️ Tools & Analytics: Open What-If Sandbox', action: () => toggleWhatIfPanel() },
-            { name: '🛠️ Tools & Analytics: Toggle Spotlight Mode', action: () => toggleSpotlightMode() },
-            { name: '🛠️ Tools & Analytics: Toggle Laser Pointer', action: () => toggleLaserMode() },
-            { name: '🛠️ Tools & Analytics: Replay Race Animation', action: () => triggerEsportsRaceAnimation() },
-            { name: '🛠️ Tools & Analytics: Show All Callouts', action: () => toggleAllCallouts(true) },
-            { name: '🛠️ Tools & Analytics: Hide All Callouts', action: () => toggleAllCallouts(false) },
+            { name: 'Tools & Analytics: Toggle Trend & Radar', action: () => toggleAnalyticsRadar() },
+            { name: 'Tools & Analytics: Open What-If Sandbox', action: () => toggleWhatIfPanel() },
+            { name: 'Tools & Analytics: Toggle Spotlight Mode', action: () => toggleSpotlightMode() },
+            { name: 'Tools & Analytics: Toggle Laser Pointer', action: () => toggleLaserMode() },
+            { name: 'Tools & Analytics: Replay Race Animation', action: () => triggerEsportsRaceAnimation() },
+            { name: 'Tools & Analytics: Show All Callouts', action: () => toggleAllCallouts(true) },
+            { name: 'Tools & Analytics: Hide All Callouts', action: () => toggleAllCallouts(false) },
             { name: '✨ Smart Narrative: Buka Generator Narasi & Insight Eksekutif (AI Storytelling)', action: () => openExecutiveNarrativeModal() },
             { name: '📁 File, Proyek & Riwayat: Buka Manajemen File, Proyek & Timeline', action: () => openProjectModal('files') },
             { name: '🕒 Riwayat & Versi: Buka Timeline & Titik Pemulihan (Snapshots)', action: () => openProjectModal('history') },
             { name: '💾 Version History: Create Manual Checkpoint / Snapshot', action: () => promptCreateManualSnapshot() },
-            { name: '⚡ Data Workbench: Open Smart Formula Builder', action: () => openWorkbenchFormulaModal() },
-            { name: '📊 Data Workbench: Open Spreadsheet & Analytics Kit', action: () => openCodeInspectorModal('workbench') },
+            { name: 'Data Workbench: Open Smart Formula Builder', action: () => openWorkbenchFormulaModal() },
+            { name: 'Data Workbench: Open Spreadsheet & Analytics Kit', action: () => openCodeInspectorModal('workbench') },
             { name: '🔮 One-Click Analytics: Run AI Forecast (+2 Periods)', action: () => runAnalyticsKit('forecast') },
             { name: '⚖️ One-Click Analytics: Generate Pareto 80/20 Curve', action: () => runAnalyticsKit('pareto') },
             { name: '💻 Developer & Presets: Open Code Inspector JSON/Python/SQL', action: () => openCodeInspectorModal('json') },
@@ -21580,6 +21701,7 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
 
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
+        checkAndInitViewerMode();
 
             // ZERO-GLITCH: If Pivot Studio was open, restore it fast synchronously BEFORE painting the slide canvas!
             let restoredFast = false;
@@ -22788,7 +22910,196 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             return 0;
         }
     
-    </script>
+    
+        /* ========================================================
+           EXECUTIVE VIEWER MODE & SHARE MODAL LOGIC
+           ======================================================== */
+        window.isViewerMode = false;
+
+        function checkAndInitViewerMode() {
+            const params = new URLSearchParams(window.location.search);
+            const isViewer = params.has('mode') && (params.get('mode') === 'viewer' || params.get('mode') === 'present');
+            const isDirectViewer = params.has('viewer') || params.has('view');
+
+            if (isViewer || isDirectViewer) {
+                window.isViewerMode = true;
+                document.body.classList.add('is-viewer-mode');
+                
+                // Set page title for executive viewer
+                if (appSlides && appSlides[0] && appSlides[0].chartTitle) {
+                    document.title = appSlides[0].chartTitle + ' — Executive Viewer';
+                } else {
+                    document.title = 'MNC Channels — Executive Presentation Viewer';
+                }
+
+                // Show viewer top navbar
+                const viewerNav = document.getElementById('viewerTopNavbar');
+                if (viewerNav) viewerNav.style.display = 'flex';
+
+                // Automatically enter presentation UI state (no edit handles, no sidebar)
+                if (typeof enterPresentationUI === 'function') {
+                    enterPresentationUI();
+                }
+
+                updateViewerSlideIndicator();
+                console.log("Active: Executive Viewer Mode (No Editor Tools, Pure Drill-Down Experience)");
+            }
+        }
+
+        function updateViewerSlideIndicator() {
+            const ind = document.getElementById('viewerSlideIndicator');
+            const brand = document.getElementById('viewerBrandText');
+            if (ind && Array.isArray(appSlides)) {
+                ind.textContent = `${activeSlideIndex + 1} / ${appSlides.length}`;
+            }
+            if (brand && appSlides && appSlides[activeSlideIndex]) {
+                brand.textContent = appSlides[activeSlideIndex].chartTitle || 'MNC CHANNELS';
+            }
+        }
+
+        function refreshViewerData() {
+            if (window.location.protocol.startsWith('http')) {
+                // Fetch latest slides_data.json
+                showToast("Memperbarui data dari server...");
+                fetch('slides_data.json?t=' + Date.now())
+                    .then(res => {
+                        if (!res.ok) throw new Error("Gagal mengambil slides_data.json");
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (Array.isArray(data) && data.length > 0) {
+                            appSlides = data;
+                            activeSlideIndex = 0;
+                            renderApp();
+                            updateViewerSlideIndicator();
+                            showToast("✅ Data presentasi berhasil diperbarui!");
+                        }
+                    })
+                    .catch(err => {
+                        console.warn(err);
+                        showToast("Data sudah up-to-date atau slides_data.json belum di-deploy.", true);
+                    });
+            } else {
+                location.reload();
+            }
+        }
+
+        function openSharePresentationModal() {
+            const modal = document.getElementById('shareViewerModal');
+            if (!modal) return;
+
+            // Generate Live GitHub Pages URL
+            let liveUrl = window.location.origin + window.location.pathname;
+            if (!liveUrl.endsWith('/')) {
+                liveUrl = liveUrl.replace(/\/[^\/]*$/, '/');
+            }
+            // Append ?mode=viewer
+            const finalLiveUrl = window.location.protocol.startsWith('http') 
+                ? (window.location.origin + window.location.pathname + '?mode=viewer')
+                : (window.location.href.split('?')[0].split('#')[0] + '?mode=viewer');
+            
+            const liveInput = document.getElementById('shareLiveUrlInput');
+            if (liveInput) liveInput.value = finalLiveUrl;
+
+            // Generate Direct URL with compressed state (#v=...)
+            let directUrl = finalLiveUrl;
+            try {
+                if (typeof LZString !== 'undefined' && typeof appSlides !== 'undefined') {
+                    const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(appSlides));
+                    directUrl = finalLiveUrl + '#v=' + compressed;
+                }
+            } catch (e) {
+                console.warn("Could not compress state:", e);
+            }
+            const directInput = document.getElementById('shareDirectUrlInput');
+            if (directInput) directInput.value = directUrl;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeShareViewerModal() {
+            const modal = document.getElementById('shareViewerModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function copyShareLiveUrl() {
+            const input = document.getElementById('shareLiveUrlInput');
+            if (input) {
+                input.select();
+                navigator.clipboard.writeText(input.value).then(() => {
+                    showToast("✅ Link Live GitHub Pages berhasil disalin!");
+                }).catch(() => {
+                    document.execCommand('copy');
+                    showToast("✅ Link Live GitHub Pages berhasil disalin!");
+                });
+            }
+        }
+
+        function copyShareDirectUrl() {
+            const input = document.getElementById('shareDirectUrlInput');
+            if (input) {
+                input.select();
+                navigator.clipboard.writeText(input.value).then(() => {
+                    showToast("✅ Link Viewer Mandiri berhasil disalin!");
+                }).catch(() => {
+                    document.execCommand('copy');
+                    showToast("✅ Link Viewer Mandiri berhasil disalin!");
+                });
+            }
+        }
+
+        function downloadSlidesJsonFile() {
+            try {
+                const jsonStr = JSON.stringify(appSlides, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'slides_data.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("✅ File slides_data.json berhasil didownload! Silakan push ke GitHub repo.");
+            } catch (e) {
+                console.error(e);
+                showToast("Gagal mendownload slides_data.json", true);
+            }
+        }
+
+        function exportStandaloneViewerHtml() {
+            try {
+                let html = document.documentElement.outerHTML;
+                // Embed current appSlides state directly into HTML
+                const serializedSlides = JSON.stringify(appSlides).replace(/</g, '\u003c');
+                const embedScript = '<' + 'script>\n' +
+                    'window.EMBEDDED_INITIAL_SLIDES = ' + serializedSlides + ';\n' +
+                    'window.isViewerMode = true;\n' +
+                    'document.addEventListener("DOMContentLoaded", () => {\n' +
+                    '    if (window.EMBEDDED_INITIAL_SLIDES && Array.isArray(window.EMBEDDED_INITIAL_SLIDES)) {\n' +
+                    '        appSlides = window.EMBEDDED_INITIAL_SLIDES;\n' +
+                    '    }\n' +
+                    '});\n' +
+                    '<' + '/script>';
+                html = html.replace('</head>', embedScript + '</head>');
+                
+                const blob = new Blob([html], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'presentation_executive_viewer.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast("✅ File HTML Viewer Mandiri berhasil didownload!");
+            } catch (e) {
+                console.error(e);
+                showToast("Gagal mengekspor file HTML viewer.", true);
+            }
+        }
+
+</script>
     <!-- COMMAND PALETTE MODAL -->
     <div id="commandPaletteModal"
         class="hidden fixed inset-0 z-[250] bg-slate-900/20 items-start justify-center pt-[12vh] opacity-0 pointer-events-none transition-opacity duration-200">
@@ -22876,7 +23187,7 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 class="flex items-center gap-1.5 p-2 border-b border-slate-100 bg-slate-50/70 shrink-0 overflow-x-auto custom-scrollbar">
                 <button onclick="switchCodeTab('workbench')" id="codeTab-workbench"
                     class="code-tab-btn flex-1 min-w-[190px] py-2 text-xs font-bold rounded-xl transition bg-slate-900 text-[#cafc03] flex items-center justify-center gap-2 shadow-sm"><i
-                        class="ph-fill ph-table text-[#cafc03]"></i> 📊 Data Workbench & Sync</button>
+                        class="ph-fill ph-table text-[#cafc03]"></i> Data Workbench & Sync</button>
                 <button onclick="switchCodeTab('json')" id="codeTab-json"
                     class="code-tab-btn flex-1 min-w-[130px] py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 flex items-center justify-center gap-2"><i
                         class="ph-fill ph-brackets-curly text-amber-500"></i> JSON (Live Editor)</button>
@@ -23445,6 +23756,85 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             </div>
         </div>
     </div>
+
+    <!-- MODAL: BAGIKAN PRESENTASI INTERAKTIF (EXECUTIVE VIEWER) -->
+    <div id="shareViewerModal" class="hidden fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-xl overflow-hidden flex flex-col transition-all">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/70">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md">
+                        <i class="ph-bold ph-share-network text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900 tracking-tight">Bagikan Presentasi Interaktif (Viewer Mode)</h3>
+                        <p class="text-[11px] text-slate-400 font-medium">Bagi grafik &amp; fitur drill-down ke audiens tanpa menu setting editor</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeShareViewerModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition cursor-pointer">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-5">
+                <!-- OPSI 1: LINK LIVE GITHUB PAGES (AUTO-UPDATE) -->
+                <div class="p-4 rounded-2xl bg-slate-900 text-white border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-[#cafc03] animate-pulse"></span>
+                            <h4 class="text-xs font-black text-white uppercase tracking-wider">1. Link Live GitHub Pages (Auto-Update)</h4>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-[#cafc03] text-slate-900 font-mono">RECOMMENDED</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">
+                        Bagikan link ini ke tim/klien. Setiap kali Anda commit file <code class="text-[#cafc03] font-mono">slides_data.json</code> ke GitHub, data audiens otomatis terupdate tanpa perlu mengganti link!
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="shareLiveUrlInput" readonly class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 select-all outline-none">
+                        <button type="button" onclick="copyShareLiveUrl()" class="px-3.5 py-2 rounded-xl bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 text-xs font-black shrink-0 transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                            <i class="ph-bold ph-copy"></i> <span>Salin Link</span>
+                        </button>
+                    </div>
+                    <div class="pt-2 flex items-center justify-between border-t border-slate-800">
+                        <span class="text-[10px] text-slate-400 font-medium">Langkah update: Download data lalu push ke repo GitHub</span>
+                        <button type="button" onclick="downloadSlidesJsonFile()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="ph-bold ph-download-simple"></i> <span>Download slides_data.json</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OPSI 2: LINK MANDIRI / SNAPSHOT TERKINI -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">2. Link Viewer Mandiri (Data Tersemat Langsung)</h4>
+                        <span class="text-[10px] text-slate-400 font-mono">Snapshot Instan</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-relaxed">
+                        Seluruh data slide saat ini langsung terkompresi di dalam link URL. Penonton langsung melihat mode viewer interaktif tanpa perlu file JSON terpisah.
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="shareDirectUrlInput" readonly class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-700 select-all outline-none">
+                        <button type="button" onclick="copyShareDirectUrl()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="ph-bold ph-copy"></i> <span>Salin</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- OPSI 3: DOWNLOAD FILE HTML AUDIENS STANDALONE -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">3. File HTML Viewer Mandiri (Offline)</h4>
+                        <p class="text-[11px] text-slate-500">Download 1 file HTML murni untuk dikirim via WhatsApp / Email (bisa dibuka offline).</p>
+                    </div>
+                    <button type="button" onclick="exportStandaloneViewerHtml()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="ph-bold ph-file-html"></i> <span>Download HTML</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
