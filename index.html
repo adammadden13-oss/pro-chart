@@ -1367,6 +1367,165 @@
         </div>
     </div>
 
+    <!-- ========================================================================= -->
+    <!-- POPUP MODAL: EDIT KONTEN & CATATAN CALLOUT (NOTE & ANNOTATION EDITOR)      -->
+    <!-- ========================================================================= -->
+    <div id="calloutNoteModal" class="hidden fixed inset-0 z-[285] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5" onclick="if(event.target === this) closeCalloutNoteModal()">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 text-slate-800">
+            <!-- MODAL HEADER -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-900 text-[#cafc03] flex items-center justify-center font-bold shadow-md ring-1 ring-slate-800">
+                        <i class="ph-bold ph-note-pencil text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+                            <span>Edit Catatan &amp; Callout Note</span>
+                            <span class="text-[9px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200 font-bold">Kustom Bebas</span>
+                        </h4>
+                        <p class="text-[11px] text-slate-500 font-medium">Ubah label, badge kategori, teks nilai, dan catatan analisis untuk keperluan presentasi</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCalloutNoteModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+            </div>
+
+            <!-- LIVE PREVIEW CARD BOX -->
+            <div class="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 relative overflow-hidden">
+                <div class="w-full flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <i class="ph-bold ph-eye text-indigo-500"></i> Pratinjau Tampilan Note di Kanvas:
+                    </span>
+                    <span id="calloutPreviewElementInfo" class="text-[10px] font-mono text-slate-400 truncate max-w-[200px]">Elemen: -</span>
+                </div>
+                
+                <!-- LIVE PREVIEW BOX -->
+                <div id="calloutLivePreviewBox" class="bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl shadow-md border border-slate-200/90 font-['Inter'] min-w-[200px] max-w-[340px] transition-all">
+                    <div class="text-[11px] font-semibold text-slate-800 leading-snug flex items-center justify-between gap-2">
+                        <span id="calloutPreviewLabel" class="font-bold truncate">CREATIVE INDIGO PRODUCTION</span>
+                        <span id="calloutPreviewBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0">Hours</span>
+                    </div>
+                    <div id="calloutPreviewVal" class="text-xs sm:text-[13px] text-slate-900 leading-tight mt-0.5">
+                        <span class="font-black font-mono-tech">741 unit</span>
+                        <span class="font-normal text-slate-500"> (26,2%)</span>
+                    </div>
+                    <div id="calloutPreviewSub" class="text-[10px] text-slate-500 mt-1.5 pt-1.5 border-t border-slate-100 leading-snug whitespace-pre-wrap">Keterangan tambahan...</div>
+                </div>
+            </div>
+
+            <!-- FORM EDITING -->
+            <div class="flex flex-col gap-3 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1">
+                <!-- ROW 1: JUDUL / LABEL & BADGE -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center justify-between">
+                            <span>1. Judul Note (Label):</span>
+                            <button type="button" onclick="resetCalloutField('label')" class="text-[9px] text-indigo-600 hover:underline">Reset Asli</button>
+                        </label>
+                        <input type="text" id="calloutInputLabel" oninput="updateCalloutLivePreview()" placeholder="Ikuti nama baris..."
+                            class="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition">
+                        <span class="text-[9px] text-slate-400">Kosongkan untuk memakai nama elemen asli.</span>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center justify-between">
+                            <span>2. Badge Kategori:</span>
+                            <button type="button" onclick="toggleCalloutBadgeVisibility()" id="btnToggleCalloutBadge" class="text-[9px] text-slate-500 hover:text-slate-800">Sembunyikan</button>
+                        </label>
+                        <input type="text" id="calloutInputBadge" oninput="updateCalloutLivePreview()" placeholder="misal: Hours, Top 1, Target"
+                            class="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition">
+                        <span class="text-[9px] text-slate-400">Ketik teks badge atau klik sembunyikan.</span>
+                    </div>
+                </div>
+
+                <!-- ROW 2: TEKS NILAI / FORMAT KUSTOM -->
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider flex items-center justify-between">
+                        <span>3. Teks Nilai (Kustom):</span>
+                        <button type="button" onclick="resetCalloutField('value')" class="text-[9px] text-indigo-600 hover:underline">Kalkulasi Otomatis</button>
+                    </label>
+                    <input type="text" id="calloutInputValue" oninput="updateCalloutLivePreview()" placeholder="Otomatis: [Angka] [Satuan] ([Persentase]%)..."
+                        class="bg-slate-50 border border-slate-200/90 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition">
+                    <span class="text-[9px] text-slate-400">Kosongkan untuk otomatis. Anda bisa ketik misal: <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-700">741 Jam (26,2%)</code> atau <code class="bg-slate-100 px-1 py-0.5 rounded text-slate-700">Rp 741 Juta (Target 100%)</code>.</span>
+                </div>
+
+                <!-- ROW 3: CATATAN TAMBAHAN / INSIGHT (NOTE MULTILINE) -->
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider">
+                            4. Catatan Tambahan (Keterangan/Note):
+                        </label>
+                        <!-- QUICK PRESET CHIPS -->
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="insertCalloutNotePreset('💡 Insight: ')" class="px-1.5 py-0.5 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 text-[9px] font-bold transition">💡 Insight</button>
+                            <button type="button" onclick="insertCalloutNotePreset('🎯 Target: ')" class="px-1.5 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[9px] font-bold transition">🎯 Target</button>
+                            <button type="button" onclick="insertCalloutNotePreset('📈 Naek: ')" class="px-1.5 py-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-[9px] font-bold transition">📈 Pertumbuhan</button>
+                        </div>
+                    </div>
+                    <textarea id="calloutInputSub" rows="3" oninput="updateCalloutLivePreview()" placeholder="Tuliskan keterangan analisis, ringkasan kinerja, atau catatan rapat di sini..."
+                        class="bg-slate-50 border border-slate-200/90 rounded-xl p-2.5 text-xs text-slate-800 font-medium outline-none focus:bg-white focus:border-slate-800 transition custom-scrollbar"></textarea>
+                    <span class="text-[9px] text-slate-400">Mendukung teks multi-baris (Enter). Muncul di bagian bawah kartu note.</span>
+                </div>
+
+                <!-- ROW 4: TEMA / GAYA KARTU CALLOUT -->
+                <div class="flex flex-col gap-1.5 pt-1">
+                    <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider">
+                        5. Gaya &amp; Warna Tema Kartu:
+                    </label>
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                        <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 bg-white cursor-pointer hover:border-slate-400 transition text-center group">
+                            <input type="radio" name="calloutThemeRadio" value="default" onchange="updateCalloutLivePreview()" class="sr-only">
+                            <span class="w-4 h-4 rounded-full bg-white border border-slate-300 shadow-xs mb-1 group-has-[:checked]:ring-2 group-has-[:checked]:ring-slate-900"></span>
+                            <span class="text-[9px] font-bold text-slate-700">Putih Bersih</span>
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-700 bg-slate-900 cursor-pointer hover:border-slate-500 transition text-center group">
+                            <input type="radio" name="calloutThemeRadio" value="dark" onchange="updateCalloutLivePreview()" class="sr-only">
+                            <span class="w-4 h-4 rounded-full bg-slate-800 border border-slate-600 shadow-xs mb-1 group-has-[:checked]:ring-2 group-has-[:checked]:ring-white"></span>
+                            <span class="text-[9px] font-bold text-slate-200">Obsidian</span>
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-indigo-200 bg-indigo-50/60 cursor-pointer hover:border-indigo-400 transition text-center group">
+                            <input type="radio" name="calloutThemeRadio" value="indigo" onchange="updateCalloutLivePreview()" class="sr-only">
+                            <span class="w-4 h-4 rounded-full bg-indigo-600 border border-indigo-400 shadow-xs mb-1 group-has-[:checked]:ring-2 group-has-[:checked]:ring-indigo-600"></span>
+                            <span class="text-[9px] font-bold text-indigo-900">Indigo</span>
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-emerald-200 bg-emerald-50/60 cursor-pointer hover:border-emerald-400 transition text-center group">
+                            <input type="radio" name="calloutThemeRadio" value="emerald" onchange="updateCalloutLivePreview()" class="sr-only">
+                            <span class="w-4 h-4 rounded-full bg-emerald-600 border border-emerald-400 shadow-xs mb-1 group-has-[:checked]:ring-2 group-has-[:checked]:ring-emerald-600"></span>
+                            <span class="text-[9px] font-bold text-emerald-900">Emerald</span>
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer hover:border-slate-600 transition text-center group">
+                            <input type="radio" name="calloutThemeRadio" value="lime" onchange="updateCalloutLivePreview()" class="sr-only">
+                            <span class="w-4 h-4 rounded-full bg-[#cafc03] border border-slate-700 shadow-xs mb-1 group-has-[:checked]:ring-2 group-has-[:checked]:ring-[#cafc03]"></span>
+                            <span class="text-[9px] font-bold text-[#cafc03]">Tech Lime</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL ACTIONS FOOTER -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 mt-1">
+                <button type="button" onclick="deleteCurrentEditingCallout()" class="px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-rose-200 transition flex items-center gap-1.5 cursor-pointer" title="Hapus bubble callout ini dari grafik">
+                    <i class="ph-bold ph-trash"></i>
+                    <span>Hapus Callout</span>
+                </button>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="resetCurrentCalloutToDefault()" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition cursor-pointer" title="Kembalikan semua teks & gaya ke bawaan data">
+                        Reset Asli
+                    </button>
+                    <button type="button" onclick="closeCalloutNoteModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                        Batal
+                    </button>
+                    <button type="button" onclick="saveCalloutNoteEditor()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-xs font-black flex items-center gap-1.5 shadow-md transition cursor-pointer">
+                        <i class="ph-bold ph-check text-xs"></i>
+                        <span>Simpan &amp; Terapkan</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- POPUP MODAL: BURGER MENU PILIH TANGGAL / KATEGORI (GRID & SEARCH) -->
     <div id="burgerFilterModal" class="hidden fixed inset-0 z-[280] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5" onclick="if(event.target === this) closeBurgerFilterModal()">
         <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-4xl p-5 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
@@ -2522,11 +2681,16 @@
                 </label>
             </div>
             <div id="popupCalloutDetails"
-                class="hidden space-y-1.5 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
+                class="hidden space-y-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
                 <input type="text" id="popupCalloutSubInput" placeholder="Keterangan tambahan (opsional)..."
                     class="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-[10px] font-medium text-slate-700 outline-none focus:ring-1 focus:ring-[#cafc03]">
-                <p class="text-[8px] text-slate-400 leading-tight">💡 Kotak petunjuk di kanvas bisa di-drag (geser)
-                    bebas!</p>
+                <button type="button" onclick="if(activeElementData) openCalloutNoteEditor(activeElementData.gridIndex, activeElementData.rowId, activeElementData.sIdx)"
+                    class="w-full py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                    title="Buka Editor Lengkap untuk mengubah judul, badge, teks nilai, dan catatan khusus">
+                    <i class="ph-bold ph-note-pencil text-xs text-indigo-600"></i>
+                    <span>Edit Lengkap Note &amp; Callout...</span>
+                </button>
+                <p class="text-[8px] text-slate-400 leading-tight">💡 Kotak petunjuk di kanvas bisa di-drag (geser) bebas &amp; klik 2x untuk edit teks!</p>
             </div>
         </div>
         <div id="popupDrillSection" class="pt-2 border-t border-slate-100 hidden">
@@ -8302,6 +8466,11 @@ ${escapeHtml(narrative)}
                 delete r.values[sIdx].calloutX;
                 delete r.values[sIdx].calloutY;
                 delete r.values[sIdx].calloutSub;
+                delete r.values[sIdx].calloutCustomLabel;
+                delete r.values[sIdx].calloutCustomBadge;
+                delete r.values[sIdx].calloutCustomValue;
+                delete r.values[sIdx].calloutTheme;
+                delete r.values[sIdx]._calloutUserMoved;
                 renderDataInputs();
                 saveState();
                 requestAnimationFrame(() => {
@@ -8309,6 +8478,305 @@ ${escapeHtml(narrative)}
                 });
                 showToast("🗑️ Bubble callout berhasil dihapus!");
             }
+        }
+
+        // =========================================================================
+        // CALLOUT NOTE & ANNOTATIONS EDITOR CONTROLLER
+        // =========================================================================
+        let currentEditingCallout = null;
+
+        function openCalloutNoteEditor(bIdx, rowId, sIdx) {
+            bIdx = parseInt(bIdx || 0);
+            sIdx = parseInt(sIdx || 0);
+            const slide = getActiveSlide();
+            const ds = (slide && slide.dataSets && slide.dataSets[bIdx]) ? slide.dataSets[bIdx] : getActiveDataSet();
+            if (!ds || !ds.rows) return;
+            const row = ds.rows.find(x => x.id === rowId);
+            if (!row || !row.values || !row.values[sIdx]) return;
+            const valObj = row.values[sIdx];
+
+            let seriesTotals = [];
+            ds.series.forEach((s, idx) => {
+                let sum = 0;
+                ds.rows.forEach(r => {
+                    const v = getEffectiveValue(r.values[idx]?.val, r.id, idx) || 0;
+                    sum += v;
+                });
+                seriesTotals.push(sum);
+            });
+            const total = seriesTotals[sIdx] || 0;
+            const numVal = getEffectiveValue(valObj.val, row.id, sIdx) || 0;
+            const pctRaw = total > 0 ? (numVal / total) * 100 : 0;
+            const pctFormatted = pctRaw < 1 && pctRaw > 0 ? pctRaw.toFixed(2).replace('.', ',') : (pctRaw % 1 === 0 ? pctRaw.toFixed(0) : pctRaw.toFixed(1).replace('.', ','));
+            const unitStr = slide.valueUnit ? ` ${slide.valueUnit}` : '';
+            const defaultValFormatted = `${Math.round(numVal).toLocaleString('id-ID')}${unitStr} (${pctFormatted}%)`;
+            const defaultBadge = ds.series.length > 1 ? (ds.series[sIdx]?.name || '') : '';
+
+            currentEditingCallout = {
+                bIdx,
+                rowId,
+                sIdx,
+                defaultLabel: row.label || '',
+                defaultBadge: defaultBadge,
+                defaultValFormatted: defaultValFormatted,
+                rawNumVal: numVal,
+                unitStr: unitStr,
+                pctFormatted: pctFormatted
+            };
+
+            const inputLabel = document.getElementById('calloutInputLabel');
+            const inputBadge = document.getElementById('calloutInputBadge');
+            const inputValue = document.getElementById('calloutInputValue');
+            const inputSub = document.getElementById('calloutInputSub');
+
+            if (inputLabel) inputLabel.value = valObj.calloutCustomLabel !== undefined ? valObj.calloutCustomLabel : '';
+            if (inputBadge) {
+                if (valObj.calloutCustomBadge === '__NONE__') {
+                    inputBadge.value = '';
+                    inputBadge.disabled = true;
+                    const btn = document.getElementById('btnToggleCalloutBadge');
+                    if (btn) btn.textContent = 'Munculkan';
+                } else {
+                    inputBadge.value = valObj.calloutCustomBadge !== undefined ? valObj.calloutCustomBadge : defaultBadge;
+                    inputBadge.disabled = false;
+                    const btn = document.getElementById('btnToggleCalloutBadge');
+                    if (btn) btn.textContent = 'Sembunyikan';
+                }
+            }
+            if (inputValue) inputValue.value = valObj.calloutCustomValue !== undefined ? valObj.calloutCustomValue : '';
+            if (inputSub) inputSub.value = valObj.calloutSub || '';
+
+            const theme = valObj.calloutTheme || 'default';
+            const radios = document.querySelectorAll('input[name="calloutThemeRadio"]');
+            radios.forEach(r => {
+                r.checked = (r.value === theme);
+            });
+
+            const infoEl = document.getElementById('calloutPreviewElementInfo');
+            if (infoEl) infoEl.textContent = `${row.label} (${ds.series[sIdx]?.name || 'Series 1'})`;
+
+            updateCalloutLivePreview();
+
+            const modal = document.getElementById('calloutNoteModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeCalloutNoteModal() {
+            const modal = document.getElementById('calloutNoteModal');
+            if (modal) modal.classList.add('hidden');
+            currentEditingCallout = null;
+        }
+
+        function updateCalloutLivePreview() {
+            if (!currentEditingCallout) return;
+            const inputLabel = document.getElementById('calloutInputLabel');
+            const inputBadge = document.getElementById('calloutInputBadge');
+            const inputValue = document.getElementById('calloutInputValue');
+            const inputSub = document.getElementById('calloutInputSub');
+
+            const previewBox = document.getElementById('calloutLivePreviewBox');
+            const prevLabel = document.getElementById('calloutPreviewLabel');
+            const prevBadge = document.getElementById('calloutPreviewBadge');
+            const prevVal = document.getElementById('calloutPreviewVal');
+            const prevSub = document.getElementById('calloutPreviewSub');
+
+            const selectedTheme = document.querySelector('input[name="calloutThemeRadio"]:checked')?.value || 'default';
+
+            const customLabel = inputLabel?.value?.trim();
+            if (prevLabel) prevLabel.textContent = customLabel || currentEditingCallout.defaultLabel;
+
+            const btn = document.getElementById('btnToggleCalloutBadge');
+            const isBadgeHidden = (btn && btn.textContent === 'Munculkan');
+            const badgeText = isBadgeHidden ? '' : (inputBadge?.value?.trim() || currentEditingCallout.defaultBadge);
+            if (prevBadge) {
+                if (badgeText) {
+                    prevBadge.classList.remove('hidden');
+                    prevBadge.textContent = badgeText;
+                } else {
+                    prevBadge.classList.add('hidden');
+                }
+            }
+
+            const customVal = inputValue?.value?.trim();
+            if (prevVal) {
+                if (customVal) {
+                    prevVal.innerHTML = `<span class="font-black font-mono-tech">${typeof escapeHtml === 'function' ? escapeHtml(customVal) : customVal}</span>`;
+                } else {
+                    prevVal.innerHTML = `<span class="font-black font-mono-tech">${Math.round(currentEditingCallout.rawNumVal).toLocaleString('id-ID')}${currentEditingCallout.unitStr}</span> <span class="font-normal text-slate-500">(${currentEditingCallout.pctFormatted}%)</span>`;
+                }
+            }
+
+            const subText = inputSub?.value?.trim();
+            if (prevSub) {
+                if (subText) {
+                    prevSub.classList.remove('hidden');
+                    prevSub.textContent = subText;
+                } else {
+                    prevSub.classList.add('hidden');
+                }
+            }
+
+            if (previewBox) {
+                previewBox.className = "px-3.5 py-2.5 rounded-xl shadow-md border font-['Inter'] min-w-[200px] max-w-[340px] transition-all";
+                if (selectedTheme === 'dark') {
+                    previewBox.classList.add('bg-slate-900', 'text-white', 'border-slate-700');
+                    if (prevBadge) prevBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0';
+                    if (prevSub) prevSub.className = 'text-[10px] text-slate-400 mt-1.5 pt-1.5 border-t border-slate-800 leading-snug whitespace-pre-wrap';
+                } else if (selectedTheme === 'indigo') {
+                    previewBox.classList.add('bg-indigo-950', 'text-indigo-100', 'border-indigo-700');
+                    if (prevBadge) prevBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-900 text-indigo-200 border border-indigo-700/50 shrink-0';
+                    if (prevSub) prevSub.className = 'text-[10px] text-indigo-300 mt-1.5 pt-1.5 border-t border-indigo-900 leading-snug whitespace-pre-wrap';
+                } else if (selectedTheme === 'emerald') {
+                    previewBox.classList.add('bg-emerald-950', 'text-emerald-100', 'border-emerald-700');
+                    if (prevBadge) prevBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-900 text-emerald-200 border border-emerald-700/50 shrink-0';
+                    if (prevSub) prevSub.className = 'text-[10px] text-emerald-300 mt-1.5 pt-1.5 border-t border-emerald-900 leading-snug whitespace-pre-wrap';
+                } else if (selectedTheme === 'lime') {
+                    previewBox.classList.add('bg-slate-950', 'text-[#cafc03]', 'border-slate-700', 'ring-1', 'ring-[#cafc03]/30');
+                    if (prevBadge) prevBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-900 text-[#cafc03] border border-slate-700 shrink-0';
+                    if (prevSub) prevSub.className = 'text-[10px] text-slate-300 mt-1.5 pt-1.5 border-t border-slate-800 leading-snug whitespace-pre-wrap';
+                } else {
+                    previewBox.classList.add('bg-white', 'text-slate-800', 'border-slate-200/90');
+                    if (prevBadge) prevBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0';
+                    if (prevSub) prevSub.className = 'text-[10px] text-slate-500 mt-1.5 pt-1.5 border-t border-slate-100 leading-snug whitespace-pre-wrap';
+                }
+            }
+        }
+
+        function resetCalloutField(type) {
+            if (type === 'label') {
+                const inp = document.getElementById('calloutInputLabel');
+                if (inp) inp.value = '';
+            } else if (type === 'value') {
+                const inp = document.getElementById('calloutInputValue');
+                if (inp) inp.value = '';
+            }
+            updateCalloutLivePreview();
+        }
+
+        function toggleCalloutBadgeVisibility() {
+            const btn = document.getElementById('btnToggleCalloutBadge');
+            const inputBadge = document.getElementById('calloutInputBadge');
+            if (!btn || !inputBadge) return;
+            if (btn.textContent === 'Sembunyikan') {
+                btn.textContent = 'Munculkan';
+                inputBadge.disabled = true;
+            } else {
+                btn.textContent = 'Sembunyikan';
+                inputBadge.disabled = false;
+                if (!inputBadge.value && currentEditingCallout) {
+                    inputBadge.value = currentEditingCallout.defaultBadge;
+                }
+            }
+            updateCalloutLivePreview();
+        }
+
+        function insertCalloutNotePreset(prefix) {
+            const textarea = document.getElementById('calloutInputSub');
+            if (!textarea) return;
+            if (!textarea.value.trim()) {
+                textarea.value = prefix;
+            } else {
+                textarea.value += '\n' + prefix;
+            }
+            textarea.focus();
+            updateCalloutLivePreview();
+        }
+
+        function saveCalloutNoteEditor() {
+            if (!currentEditingCallout) return;
+            const { bIdx, rowId, sIdx } = currentEditingCallout;
+            const slide = getActiveSlide();
+            const ds = (slide && slide.dataSets && slide.dataSets[bIdx]) ? slide.dataSets[bIdx] : getActiveDataSet();
+            if (!ds || !ds.rows) return;
+            const row = ds.rows.find(x => x.id === rowId);
+            if (!row || !row.values || !row.values[sIdx]) return;
+            const valObj = row.values[sIdx];
+
+            const inputLabel = document.getElementById('calloutInputLabel');
+            const inputBadge = document.getElementById('calloutInputBadge');
+            const inputValue = document.getElementById('calloutInputValue');
+            const inputSub = document.getElementById('calloutInputSub');
+            const btnBadge = document.getElementById('btnToggleCalloutBadge');
+            const isBadgeHidden = (btnBadge && btnBadge.textContent === 'Munculkan');
+
+            const customLabel = inputLabel ? inputLabel.value.trim() : '';
+            const customVal = inputValue ? inputValue.value.trim() : '';
+            const customSub = inputSub ? inputSub.value.trim() : '';
+            const selectedTheme = document.querySelector('input[name="calloutThemeRadio"]:checked')?.value || 'default';
+
+            if (customLabel) {
+                valObj.calloutCustomLabel = customLabel;
+            } else {
+                delete valObj.calloutCustomLabel;
+            }
+
+            if (isBadgeHidden) {
+                valObj.calloutCustomBadge = '__NONE__';
+            } else if (inputBadge && inputBadge.value.trim()) {
+                valObj.calloutCustomBadge = inputBadge.value.trim();
+            } else {
+                delete valObj.calloutCustomBadge;
+            }
+
+            if (customVal) {
+                valObj.calloutCustomValue = customVal;
+            } else {
+                delete valObj.calloutCustomValue;
+            }
+
+            if (customSub) {
+                valObj.calloutSub = customSub;
+            } else {
+                delete valObj.calloutSub;
+            }
+
+            valObj.calloutTheme = selectedTheme;
+            valObj.callout = true;
+
+            saveState();
+            requestAnimationFrame(() => {
+                renderCalloutsOverlay();
+            });
+
+            closeCalloutNoteModal();
+            showToast('✅ Catatan callout berhasil disimpan & diperbarui!');
+        }
+
+        function resetCurrentCalloutToDefault() {
+            if (!currentEditingCallout) return;
+            const { bIdx, rowId, sIdx } = currentEditingCallout;
+            const slide = getActiveSlide();
+            const ds = (slide && slide.dataSets && slide.dataSets[bIdx]) ? slide.dataSets[bIdx] : getActiveDataSet();
+            if (!ds || !ds.rows) return;
+            const row = ds.rows.find(x => x.id === rowId);
+            if (!row || !row.values || !row.values[sIdx]) return;
+            const valObj = row.values[sIdx];
+
+            delete valObj.calloutCustomLabel;
+            delete valObj.calloutCustomBadge;
+            delete valObj.calloutCustomValue;
+            delete valObj.calloutSub;
+            delete valObj.calloutTheme;
+            delete valObj.calloutX;
+            delete valObj.calloutY;
+            delete valObj._calloutUserMoved;
+
+            saveState();
+            requestAnimationFrame(() => {
+                renderCalloutsOverlay();
+            });
+
+            closeCalloutNoteModal();
+            showToast('🔄 Callout dikembalikan ke pengaturan asli bawaan grafik.');
+        }
+
+        function deleteCurrentEditingCallout() {
+            if (!currentEditingCallout) return;
+            const { bIdx, rowId, sIdx } = currentEditingCallout;
+            closeCalloutNoteModal();
+            removeCalloutBubble(bIdx, rowId, sIdx);
         }
 
         function showToast(msg, isError = false) { const toast = document.getElementById('toastNotification'), msgEl = document.getElementById('toastMessage'), iconEl = document.getElementById('toastIcon'); if (!toast || !msgEl || !iconEl) return; msgEl.innerText = msg; if (isError) { toast.classList.replace('bg-slate-900', 'bg-red-600'); iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-white"></i>'; } else { toast.classList.replace('bg-red-600', 'bg-slate-900'); iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-lime-400"></i>'; } toast.classList.remove('translate-y-20', 'opacity-0'); setTimeout(() => { toast.classList.add('translate-y-20', 'opacity-0'); }, 3000); }
@@ -10550,30 +11018,81 @@ ${escapeHtml(narrative)}
                         const hasDrill = row.drillTarget && appSlides.some(s => s.id === row.drillTarget);
                         const seriesBadge = isMultiSeries ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 ml-1">${ds.series[sIdx]?.name || ''}</span>` : '';
 
+                        // Kustomisasi Label, Badge, Nilai & Tema Callout Note
+                        const displayLabel = (valObj.calloutCustomLabel !== undefined && valObj.calloutCustomLabel !== '') 
+                            ? valObj.calloutCustomLabel 
+                            : row.label;
+
+                        let displayBadge = '';
+                        if (valObj.calloutCustomBadge === '__NONE__') {
+                            displayBadge = '';
+                        } else if (valObj.calloutCustomBadge !== undefined && valObj.calloutCustomBadge !== '') {
+                            displayBadge = valObj.calloutCustomBadge;
+                        } else if (isMultiSeries) {
+                            displayBadge = ds.series[sIdx]?.name || '';
+                        }
+
+                        const hasCustomVal = (valObj.calloutCustomValue !== undefined && valObj.calloutCustomValue !== '');
+                        const displayValHtml = hasCustomVal 
+                            ? `<span class="font-black font-mono-tech">${typeof escapeHtml === 'function' ? escapeHtml(valObj.calloutCustomValue) : valObj.calloutCustomValue}</span>`
+                            : `<span class="font-black font-mono-tech">${Math.round(numVal).toLocaleString('id-ID')}${unitStr}</span> <span class="font-normal text-slate-500">(${pctFormatted}%)</span>`;
+
+                        const calloutTheme = valObj.calloutTheme || 'default';
+                        let themeClasses = 'bg-white/95 backdrop-blur-md text-slate-800 border-slate-200/90 shadow-md';
+                        let badgeClasses = 'bg-slate-100 text-slate-600';
+                        let noteBorderClass = 'border-slate-100 text-slate-500';
+
+                        if (calloutTheme === 'dark') {
+                            themeClasses = 'bg-slate-900/95 backdrop-blur-md text-white border-slate-700 shadow-xl';
+                            badgeClasses = 'bg-slate-800 text-slate-300';
+                            noteBorderClass = 'border-slate-800 text-slate-400';
+                        } else if (calloutTheme === 'indigo') {
+                            themeClasses = 'bg-indigo-950/95 backdrop-blur-md text-indigo-100 border-indigo-700/80 shadow-xl';
+                            badgeClasses = 'bg-indigo-900/90 text-indigo-200 border border-indigo-700/50';
+                            noteBorderClass = 'border-indigo-900 text-indigo-300';
+                        } else if (calloutTheme === 'emerald') {
+                            themeClasses = 'bg-emerald-950/95 backdrop-blur-md text-emerald-100 border-emerald-700/80 shadow-xl';
+                            badgeClasses = 'bg-emerald-900/90 text-emerald-200 border border-emerald-700/50';
+                            noteBorderClass = 'border-emerald-900 text-emerald-300';
+                        } else if (calloutTheme === 'lime') {
+                            themeClasses = 'bg-slate-950/95 backdrop-blur-md text-[#cafc03] border-slate-700 shadow-xl ring-1 ring-[#cafc03]/30';
+                            badgeClasses = 'bg-slate-900 text-[#cafc03] border border-slate-700';
+                            noteBorderClass = 'border-slate-800 text-slate-300';
+                        }
+
+                        const seriesBadgeHtml = displayBadge ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${badgeClasses} ml-1 shrink-0">${typeof escapeHtml === 'function' ? escapeHtml(displayBadge) : displayBadge}</span>` : '';
+
                         const boxEl = document.createElement('div');
-                        boxEl.className = 'callout-box group absolute bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl shadow-md border border-slate-200/90 font-[\'Inter\'] min-w-[160px] max-w-[320px] cursor-move pointer-events-auto transition-all duration-150';
+                        boxEl.className = `callout-box group absolute px-3.5 py-2.5 rounded-xl border font-['Inter'] min-w-[160px] max-w-[340px] cursor-move pointer-events-auto transition-all duration-150 ${themeClasses}`;
                         boxEl.style.left = valObj.calloutX + '%';
                         boxEl.style.top = valObj.calloutY + '%';
                         boxEl.style.transform = 'translate(-50%, -50%)';
                         boxEl.dataset.bIdx = bIdx;
                         boxEl.dataset.rowId = row.id;
                         boxEl.dataset.sIdx = sIdx;
+                        boxEl.ondblclick = (e) => {
+                            e.stopPropagation();
+                            openCalloutNoteEditor(bIdx, row.id, sIdx);
+                        };
+                        boxEl.title = "Tahan & geser untuk memindahkan. Klik 2x atau klik ikon pensil untuk mengedit teks & catatan.";
 
                         boxEl.innerHTML = `
-                            <div class="text-[11px] font-semibold text-slate-800 leading-snug flex items-center justify-between gap-2 whitespace-nowrap">
-                                <span class="flex items-center gap-1">${row.icon ? row.icon + ' ' : ''}<span>${row.label}</span></span>
+                            <div class="text-[11px] font-semibold leading-snug flex items-center justify-between gap-2 whitespace-nowrap">
+                                <span class="flex items-center gap-1 font-bold truncate max-w-[200px]" title="${typeof escapeHtml === 'function' ? escapeHtml(displayLabel) : displayLabel}">${row.icon ? row.icon + ' ' : ''}<span>${typeof escapeHtml === 'function' ? escapeHtml(displayLabel) : displayLabel}</span></span>
                                 <div class="flex items-center gap-1 shrink-0">
-                                    ${seriesBadge}
+                                    ${seriesBadgeHtml}
+                                    <button type="button" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); openCalloutNoteEditor(${bIdx}, '${row.id}', ${sIdx})" class="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-150 w-5 h-5 rounded-md bg-slate-100 hover:bg-indigo-600 text-slate-500 hover:text-white flex items-center justify-center cursor-pointer shadow-xs ml-0.5" title="Edit Teks & Catatan (Klik 2x)">
+                                        <i class="ph-bold ph-pencil-simple text-[10px]"></i>
+                                    </button>
                                     <button type="button" onmousedown="event.stopPropagation();" ontouchstart="event.stopPropagation();" onclick="event.stopPropagation(); removeCalloutBubble(${bIdx}, '${row.id}', ${sIdx})" class="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-150 w-5 h-5 rounded-md bg-slate-100 hover:bg-rose-500 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer shadow-xs ml-0.5" title="Hapus Bubble Callout">
                                         <i class="ph-bold ph-x text-[10px]"></i>
                                     </button>
                                 </div>
                             </div>
-                            <div class="text-xs sm:text-[13px] text-slate-900 leading-tight mt-0.5 whitespace-nowrap">
-                                <span class="font-black font-mono-tech">${Math.round(numVal).toLocaleString('id-ID')}${unitStr}</span>
-                                <span class="font-normal text-slate-600"> (${pctFormatted}%)</span>
+                            <div class="text-xs sm:text-[13px] leading-tight mt-0.5 whitespace-nowrap">
+                                ${displayValHtml}
                             </div>
-                            ${valObj.calloutSub ? `<div class="text-[9px] text-slate-500 mt-1 pt-1 border-t border-slate-100 leading-tight">${valObj.calloutSub}</div>` : ''}
+                            ${valObj.calloutSub ? `<div class="text-[10px] mt-1.5 pt-1.5 border-t ${noteBorderClass} leading-snug whitespace-pre-wrap font-normal">${typeof escapeHtml === 'function' ? escapeHtml(valObj.calloutSub) : valObj.calloutSub}</div>` : ''}
                             ${hasDrill ? `<button onclick="event.stopPropagation(); drillDownTo('${row.drillTarget}')" class="mt-1.5 w-full bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white text-[9px] font-bold py-1 px-2 rounded-lg transition flex items-center justify-center gap-1"><i class="ph-bold ph-arrows-out-simple"></i> Breakdown Area</button>` : ''}
                         `;
 
@@ -12518,6 +13037,7 @@ ${escapeHtml(narrative)}
                 closeDrillDeepDiveModal();
                 closeMultiSlideExportModal(); closeRawImportModal();
                 if (typeof closeSecondarySourcePickerModal === 'function') closeSecondarySourcePickerModal();
+                if (typeof closeCalloutNoteModal === 'function') closeCalloutNoteModal();
             }
             if (e.key === 'Delete' || e.key === 'Backspace') {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
