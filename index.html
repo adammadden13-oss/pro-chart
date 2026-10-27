@@ -274,19 +274,21 @@
             align-items: center !important;
             justify-content: flex-start !important;
             padding: 0.75rem 1rem !important;
-            overflow: hidden !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
         }
 
         body.is-fullscreen:not(.portrait-mode) #exportTarget {
             width: 100% !important;
             max-width: 96vw !important;
-            height: calc(100vh - 225px) !important;
-            max-height: calc(100vh - 225px) !important;
+            min-height: calc(100vh - 120px);
+            height: auto;
             margin: 0 auto !important;
             padding: 1rem 2rem 0.5rem 2rem !important;
             display: flex !important;
             flex-direction: column !important;
-            transform: none !important;
+            transform-origin: top center;
+            transition: transform 0.15s ease-out;
             border-radius: 0 !important;
         }
 
@@ -701,13 +703,13 @@
         body.is-fullscreen:not(.portrait-mode) #exportTarget {
             width: 100% !important;
             max-width: 96vw !important;
-            height: calc(100vh - 225px) !important;
-            max-height: calc(100vh - 225px) !important;
+            min-height: calc(100vh - 120px);
+            height: auto;
             margin: 0 auto !important;
             padding: 1rem 2rem 0.5rem 2rem !important;
             display: flex !important;
             flex-direction: column !important;
-            transform-origin: center center !important;
+            transform-origin: top center;
             transition: transform 0.15s ease-out;
             border-radius: 0 !important;
         }
@@ -3194,6 +3196,28 @@
                     </div>
                                         <!-- DYNAMIC CONTROLS FOR SYNDICATE DECKS (TOP N & CHANNELS LIMIT) -->
                     <div id="syndicateDeckSettingsPanel" class="p-3 bg-white rounded-xl border border-slate-200 shadow-sm space-y-3 hidden">
+                        <!-- SYNDICATE DECK (WOW SHARE & DURASI) CONTROLS -->
+                        <div id="synDeckSettings" class="space-y-2.5 hidden">
+                            <div class="flex items-center justify-between">
+                                <label class="text-[10px] font-black text-slate-700 uppercase tracking-wider">Mode Tampilan Slide</label>
+                                <span id="synModeDisplay" class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">Hanya Tabel</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button type="button" onclick="setSyndicateChartsVisible(false)" id="btnSynModeTableOnly" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition text-center bg-slate-900 text-[#cafc03] border-slate-700">
+                                    📄 Hanya Tabel
+                                </button>
+                                <button type="button" onclick="setSyndicateChartsVisible(true)" id="btnSynModeWithCharts" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition text-center bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200">
+                                    📊 Tabel + Grafik
+                                </button>
+                            </div>
+                            <div class="pt-1">
+                                <button type="button" onclick="autoFitSyndicateHeight()" class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-[#cafc03] text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-xs">
+                                    <i class="ph-bold ph-arrows-out-line-vertical"></i> <span>⚡ Auto-Fit Tinggi Kanvas</span>
+                                </button>
+                                <p class="text-[9.5px] text-slate-400 mt-1 leading-tight text-center">Menyesuaikan tinggi slide otomatis agar tabel dan grafik tidak terpotong.</p>
+                            </div>
+                        </div>
+
                         <!-- TOP N CONTROLS -->
                         <div id="synTopNSettings" class="space-y-2 hidden">
                             <div class="flex items-center justify-between">
@@ -8052,25 +8076,82 @@ ${escapeHtml(narrative)}
         let prePresentationSidebarOpen = true;
         let prePresentationRightPanelOpen = false;
 
+        function fitSlideToPresentationScreen() {
+            if (!isPresenting || !els.exportTarget) return;
+            const target = els.exportTarget;
+            const slide = getActiveSlide();
+            if (!slide) return;
+
+            // If manual pan/zoom was triggered by user, respect it
+            if (presentZoomScale !== 1 || (slide.chartPanX && slide.chartPanX !== 0) || (slide.chartPanY && slide.chartPanY !== 0)) {
+                applyChartPanTransform();
+                return;
+            }
+
+            target.style.height = 'auto';
+            target.style.maxHeight = 'none';
+
+            const hudDock = document.getElementById('hudTelemetryDock');
+            const hudContent = document.getElementById('hudDockContent');
+            const isHudOpen = hudDock && hudContent && hudContent.style.display !== 'none' && !hudDock.classList.contains('hidden');
+
+            const bottomReserve = isHudOpen ? 180 : 95;
+            const availH = window.innerHeight - bottomReserve;
+            const availW = window.innerWidth - 48;
+
+            const contentH = target.scrollHeight || target.offsetHeight;
+            const contentW = target.offsetWidth || 1200;
+
+            if (contentH > availH || contentW > availW) {
+                const scaleH = availH / contentH;
+                const scaleW = availW / contentW;
+                const fitScale = Math.max(0.45, Math.min(1, Math.min(scaleH, scaleW)));
+                target.style.setProperty('transform', `scale(${fitScale})`, 'important');
+                target.style.setProperty('transform-origin', 'top center', 'important');
+            } else {
+                target.style.setProperty('transform', 'scale(1)', 'important');
+                target.style.setProperty('transform-origin', 'center center', 'important');
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (isPresenting && typeof fitSlideToPresentationScreen === 'function') {
+                fitSlideToPresentationScreen();
+            }
+        });
+
         function enterPresentationUI() {
             prePresentationSidebarOpen = isSidebarOpen;
             prePresentationRightPanelOpen = isRightPanelOpen;
             isPresenting = true; document.body.classList.add('is-fullscreen'); activeEditGridIndex = 0;
             presentZoomScale = 1;
+
+            // Auto-minimize HUD in presentation mode to avoid covering presentation slides
+            const hudContent = document.getElementById('hudDockContent');
+            const btnMin = document.getElementById('btnMinimizeHud');
+            if (hudContent) {
+                hudContent.style.display = 'none';
+                if (btnMin) btnMin.innerHTML = '<i class="ph-bold ph-plus text-xs"></i>';
+            }
+
             if (els.exportTarget) {
-                els.exportTarget.style.transform = 'scale(1)';
                 els.exportTarget.style.width = '100%';
-                els.exportTarget.style.height = 'calc(100vh - 225px)';
                 els.exportTarget.style.maxWidth = '96vw';
-                els.exportTarget.style.maxHeight = 'calc(100vh - 225px)';
+                els.exportTarget.style.height = 'auto';
+                els.exportTarget.style.maxHeight = 'none';
                 els.exportTarget.style.margin = '0 auto';
-                els.exportTarget.style.transformOrigin = 'center center';
+                els.exportTarget.style.transformOrigin = 'top center';
             }
             if (isSidebarOpen) { isSidebarOpen = false; applySidebarState(); }
             if (isRightPanelOpen) { isRightPanelOpen = false; applyRightPanelState(); }
             if (typeof updateWorkspacePaddingForSidebar === 'function') updateWorkspacePaddingForSidebar();
             if (els.exportTarget) { els.exportTarget.classList.remove('chart-wrapper-transition'); void els.exportTarget.offsetWidth; els.exportTarget.classList.add('chart-wrapper-transition'); } syncUIToActiveSlide();
-            setTimeout(() => { mainCharts.forEach(c => c && c.resize && c.resize()); renderCalloutsOverlay(); if (typeof clampHudPosition === 'function') clampHudPosition(); }, 150);
+            setTimeout(() => { 
+                mainCharts.forEach(c => c && c.resize && c.resize()); 
+                renderCalloutsOverlay(); 
+                if (typeof clampHudPosition === 'function') clampHudPosition(); 
+                if (typeof fitSlideToPresentationScreen === 'function') fitSlideToPresentationScreen();
+            }, 150);
             if (typeof presenterDock !== 'undefined' && presenterDock) {
                 presenterDock.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
                 document.body.style.cursor = 'default';
@@ -8080,8 +8161,18 @@ ${escapeHtml(narrative)}
             if (!isPresenting) return; isPresenting = false; document.body.classList.remove('is-fullscreen'); document.body.classList.remove('portrait-mode'); const slide = getActiveSlide();
             presentZoomScale = 1;
             resetChartPanPosition();
+
+            // Restore HUD content
+            const hudContent = document.getElementById('hudDockContent');
+            const btnMin = document.getElementById('btnMinimizeHud');
+            if (hudContent) {
+                hudContent.style.display = 'flex';
+                if (btnMin) btnMin.innerHTML = '<i class="ph-bold ph-minus text-xs"></i>';
+            }
+
             if (els.exportTarget && slide) {
                 els.exportTarget.style.removeProperty('transform');
+                els.exportTarget.style.removeProperty('transform-origin');
                 els.exportTarget.style.transform = `scale(${slide.chartScale / 100})`;
                 els.exportTarget.style.transformOrigin = 'center center';
                 els.exportTarget.style.margin = 'auto';
@@ -10124,10 +10215,34 @@ ${escapeHtml(narrative)}
                 if (chartTypesBox) chartTypesBox.style.display = isSynLayout ? 'none' : 'block';
 
                 if (synPanel) {
-                    if (slide.bentoLayout === 'channel-share-summary') {
+                    const synDeckGroup = document.getElementById('synDeckSettings');
+                    if (slide.bentoLayout === 'syndicate-deck') {
+                        synPanel.classList.remove('hidden');
+                        if (synTopNGroup) synTopNGroup.classList.add('hidden');
+                        if (synChanGroup) synChanGroup.classList.add('hidden');
+                        if (synDeckGroup) {
+                            synDeckGroup.classList.remove('hidden');
+                            const isHide = slide.syndicateHideCharts === true;
+                            const synModeDisp = document.getElementById('synModeDisplay');
+                            const btnTable = document.getElementById('btnSynModeTableOnly');
+                            const btnCharts = document.getElementById('btnSynModeWithCharts');
+                            if (synModeDisp) synModeDisp.innerText = isHide ? 'Hanya Tabel' : 'Tabel + Grafik';
+                            if (btnTable) {
+                                btnTable.className = isHide 
+                                    ? 'px-2.5 py-1.5 rounded-lg text-xs font-bold border transition text-center bg-slate-900 text-[#cafc03] border-slate-700' 
+                                    : 'px-2.5 py-1.5 rounded-lg text-xs font-bold border transition text-center bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200';
+                            }
+                            if (btnCharts) {
+                                btnCharts.className = !isHide 
+                                    ? 'px-2.5 py-1.5 rounded-lg text-xs font-bold border transition text-center bg-slate-900 text-[#cafc03] border-slate-700' 
+                                    : 'px-2.5 py-1.5 rounded-lg text-xs font-bold border transition text-center bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200';
+                            }
+                        }
+                    } else if (slide.bentoLayout === 'channel-share-summary') {
                         synPanel.classList.remove('hidden');
                         if (synTopNGroup) synTopNGroup.classList.remove('hidden');
                         if (synChanGroup) synChanGroup.classList.add('hidden');
+                        if (synDeckGroup) synDeckGroup.classList.add('hidden');
                         const curTopN = parseInt(slide.syndicateTopN) || 20;
                         const topNInp = document.getElementById('synTopNInput');
                         const topNDisp = document.getElementById('synTopNDisplay');
@@ -10137,6 +10252,7 @@ ${escapeHtml(narrative)}
                         synPanel.classList.remove('hidden');
                         if (synTopNGroup) synTopNGroup.classList.add('hidden');
                         if (synChanGroup) synChanGroup.classList.remove('hidden');
+                        if (synDeckGroup) synDeckGroup.classList.add('hidden');
                         const curLimit = parseInt(slide.syndicateChannelLimit) || 48;
                         const chanInp = document.getElementById('synChannelLimitInput');
                         const chanDisp = document.getElementById('synChannelLimitDisplay');
@@ -10144,6 +10260,7 @@ ${escapeHtml(narrative)}
                         if (chanDisp) chanDisp.innerText = `${curLimit} Saluran`;
                     } else {
                         synPanel.classList.add('hidden');
+                        if (synDeckGroup) synDeckGroup.classList.add('hidden');
                     }
                 } if (els.bentoChart1) els.bentoChart1.value = slide.bentoCharts[0]; if (els.bentoChart2) els.bentoChart2.value = slide.bentoCharts[1]; if (els.bentoChart3) els.bentoChart3.value = slide.bentoCharts[2];
                 if (els.bentoGrid2Container) els.bentoGrid2Container.style.display = slide.bentoLayout === '1' ? 'none' : 'block'; if (els.bentoGrid3Container) els.bentoGrid3Container.style.display = slide.bentoLayout === '3' ? 'block' : 'none'; if (els.dataTargetSelectorPanel) els.dataTargetSelectorPanel.style.display = slide.bentoLayout === '1' ? 'none' : 'flex'; if (els.tabGrid1) els.tabGrid1.style.display = (slide.bentoLayout === '2-h' || slide.bentoLayout === '2-v' || slide.bentoLayout === '3' || slide.bentoLayout === 'syndicate-deck') ? 'block' : 'none'; if (els.tabGrid2) els.tabGrid2.style.display = slide.bentoLayout === '3' ? 'block' : 'none';
@@ -12078,7 +12195,10 @@ ${escapeHtml(narrative)}
                     return;
                 }
 
-                let numCharts = (slide.bentoLayout === 'syndicate-deck' || slide.bentoLayout.startsWith('2')) ? 2 : (slide.bentoLayout === '1' ? 1 : 3); let preparedConfigs = [];
+                const isSynDeck = slide.bentoLayout === 'syndicate-deck';
+                const hideSynCharts = isSynDeck && slide.syndicateHideCharts === true;
+                let numCharts = isSynDeck ? (hideSynCharts ? 0 : 2) : (slide.bentoLayout.startsWith('2') ? 2 : (slide.bentoLayout === '1' ? 1 : 3)); 
+                let preparedConfigs = [];
                 for (let i = 0; i < numCharts; i++) {
                     try {
                         let cType = slide.bentoCharts[i] || 'bar-vertical';
@@ -12100,16 +12220,18 @@ ${escapeHtml(narrative)}
 
                 let layoutClass = 'flex items-center justify-center';
                 let syndicateChartGrid = null;
-                if (slide.bentoLayout === 'syndicate-deck') {
+                if (isSynDeck) {
                     layoutClass = 'flex flex-col gap-3 w-full h-full';
                     const synTableWrapper = document.createElement('div');
-                    synTableWrapper.className = 'w-full bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-3.5 flex flex-col gap-2 shrink-0 select-none';
+                    synTableWrapper.className = 'w-full bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-2.5 flex flex-col shrink-0 select-none';
                     synTableWrapper.innerHTML = buildSyndicateTableHTML(slide);
                     els.bentoWrapper.appendChild(synTableWrapper);
 
-                    syndicateChartGrid = document.createElement('div');
-                    syndicateChartGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-[220px] w-full';
-                    els.bentoWrapper.appendChild(syndicateChartGrid);
+                    if (!hideSynCharts) {
+                        syndicateChartGrid = document.createElement('div');
+                        syndicateChartGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-[220px] w-full';
+                        els.bentoWrapper.appendChild(syndicateChartGrid);
+                    }
                 } else if (slide.bentoLayout === '2-v') layoutClass = 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full h-full';
                 else if (slide.bentoLayout === '2-h') layoutClass = 'grid grid-rows-2 gap-4 sm:gap-6 w-full h-full';
                 else if (slide.bentoLayout === '3') layoutClass = 'grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 sm:gap-6 w-full h-full';
@@ -21783,34 +21905,26 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 `;
             });
 
+            const colSource = slide.syndicateColSource || 'Program Source';
+            const colDur = slide.syndicateColDur || 'Persentase Durasi';
+            const colShare = slide.syndicateColShare || 'Share';
+
+            const isHideCharts = slide.syndicateHideCharts === true;
             return `
-                <div class="flex items-center justify-between pb-2 border-b border-slate-200 flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#cafc03] ring-2 ring-slate-900"></span>
-                        <span class="text-xs font-black text-slate-900 uppercase tracking-wider font-['Inter']">Share dan Persentase Durasi Menurut Program Source di ${escapeHtml(channel)}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center border border-slate-300 rounded-lg overflow-hidden shadow-2xs text-xs font-bold">
-                            <span class="bg-slate-900 text-[#cafc03] px-3 py-1 font-black text-[11px] tracking-wider uppercase font-['Inter']">CHANNEL</span>
-                            <span class="bg-slate-100 text-slate-900 px-4 py-1 font-bold text-xs cursor-pointer hover:bg-slate-200 transition" onclick="promptChangeSyndicateChannel()" title="Klik untuk ganti Channel">${escapeHtml(channel)}</span>
-                        </div>
-                        <span class="text-[10px] text-slate-400 italic">Pilih channel</span>
-                    </div>
-                </div>
-                <div class="overflow-x-auto rounded-xl border border-slate-200 shadow-2xs">
+                <div class="overflow-x-auto rounded-xl border border-slate-200/80 shadow-2xs">
                     <table class="w-full text-xs border-collapse">
                         <thead>
                             <tr class="bg-slate-900 text-white text-[11px] font-bold border-b-2 border-b-[#cafc03]">
-                                <th class="py-2 px-3 border border-slate-700/80 text-left uppercase tracking-wider font-['Inter']" rowspan="2">Program Source</th>
-                                <th class="py-2 px-3 border border-slate-700/80 text-center uppercase tracking-wider font-['Inter']" colspan="3">Persentase Durasi</th>
-                                <th class="py-2 px-3 border border-slate-700/80 text-center uppercase tracking-wider font-['Inter']" colspan="3">Share</th>
+                                <th class="py-2 px-3 border border-slate-700/80 text-left uppercase tracking-wider font-['Inter'] cursor-pointer hover:bg-slate-800 hover:text-[#cafc03] transition select-none" onclick="promptChangeSyndicateColTitle('source')" title="Klik untuk ganti judul kolom (saat ini: ${escapeHtml(colSource)})" rowspan="2">${escapeHtml(colSource)} <i class="ph-bold ph-pencil-simple text-[9px] text-[#cafc03]/60 ml-0.5"></i></th>
+                                <th class="py-2 px-3 border border-slate-700/80 text-center uppercase tracking-wider font-['Inter'] cursor-pointer hover:bg-slate-800 hover:text-[#cafc03] transition select-none" onclick="promptChangeSyndicateColTitle('dur')" title="Klik untuk ganti judul metrik 1 (saat ini: ${escapeHtml(colDur)})" colspan="3">${escapeHtml(colDur)} <i class="ph-bold ph-pencil-simple text-[9px] text-[#cafc03]/60 ml-0.5"></i></th>
+                                <th class="py-2 px-3 border border-slate-700/80 text-center uppercase tracking-wider font-['Inter'] cursor-pointer hover:bg-slate-800 hover:text-[#cafc03] transition select-none" onclick="promptChangeSyndicateColTitle('share')" title="Klik untuk ganti judul metrik 2 (saat ini: ${escapeHtml(colShare)})" colspan="3">${escapeHtml(colShare)} <i class="ph-bold ph-pencil-simple text-[9px] text-[#cafc03]/60 ml-0.5"></i></th>
                             </tr>
                             <tr class="bg-slate-900 text-white text-[10px] font-bold">
-                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wA)}</th>
-                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center cursor-pointer hover:bg-slate-800 hover:text-[#cafc03] transition select-none" onclick="promptChangeSyndicateWeek(0)" title="Klik untuk ganti Periode A (saat ini: ${escapeHtml(wA)})">${escapeHtml(wA)} <i class="ph-bold ph-pencil-simple text-[8px] text-[#cafc03]/60 ml-0.5"></i></th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center cursor-pointer hover:bg-slate-800 hover:text-[#cafc03] transition select-none" onclick="promptChangeSyndicateWeek(1)" title="Klik untuk ganti Periode B (saat ini: ${escapeHtml(wB)})">${escapeHtml(wB)} <i class="ph-bold ph-pencil-simple text-[8px] text-[#cafc03]/60 ml-0.5"></i></th>
                                 <th class="py-1.5 px-2 border border-slate-700/80 text-center">+/-</th>
-                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wA)}</th>
-                                <th class="py-1.5 px-2 border border-slate-700/80 text-center">${escapeHtml(wB)}</th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center cursor-pointer hover:bg-slate-800 hover:text-[#cafc03] transition select-none" onclick="promptChangeSyndicateWeek(0)" title="Klik untuk ganti Periode A (saat ini: ${escapeHtml(wA)})">${escapeHtml(wA)} <i class="ph-bold ph-pencil-simple text-[8px] text-[#cafc03]/60 ml-0.5"></i></th>
+                                <th class="py-1.5 px-2 border border-slate-700/80 text-center cursor-pointer hover:bg-slate-800 hover:text-[#cafc03] transition select-none" onclick="promptChangeSyndicateWeek(1)" title="Klik untuk ganti Periode B (saat ini: ${escapeHtml(wB)})">${escapeHtml(wB)} <i class="ph-bold ph-pencil-simple text-[8px] text-[#cafc03]/60 ml-0.5"></i></th>
                                 <th class="py-1.5 px-2 border border-slate-700/80 text-center">+/-</th>
                             </tr>
                         </thead>
@@ -21818,6 +21932,21 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                             ${rowsHTML}
                         </tbody>
                     </table>
+                </div>
+                <div data-html2canvas-ignore="true" class="mt-2.5 pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-bold text-slate-600 text-[10px] uppercase tracking-wider">Mode Slide:</span>
+                        <button type="button" onclick="setSyndicateChartsVisible(${isHideCharts ? 'true' : 'false'})" class="px-2.5 py-1 rounded-lg font-bold text-[10px] ${isHideCharts ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300' : 'bg-slate-900 text-[#cafc03] border border-slate-800'} transition flex items-center gap-1.5 shadow-2xs" title="Beralih antara mode Hanya Tabel (fokus analisa) atau Tabel + 2 Grafik">
+                            <i class="ph-bold ${isHideCharts ? 'ph-chart-bar' : 'ph-table'} text-xs"></i>
+                            <span>${isHideCharts ? '+ Tampilkan 2 Grafik' : 'Sembunyikan Grafik (Hanya Tabel)'}</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" onclick="autoFitSyndicateHeight()" class="px-2.5 py-1 rounded-lg font-bold text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition flex items-center gap-1.5 shadow-2xs" title="Sesuaikan tinggi kanvas otomatis agar tabel & grafik proporsional sempurna dan tidak terpotong">
+                            <i class="ph-bold ph-arrows-out-line-vertical text-xs text-indigo-600"></i>
+                            <span>⚡ Pas-kan Tinggi (Auto-Fit)</span>
+                        </button>
+                    </div>
                 </div>
             `;
         }
@@ -21832,7 +21961,133 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 slide.chartTitle = 'Share dan Persentase Durasi Menurut Program Source di ' + slide.syndicateChannel;
                 syncUIToActiveSlide();
                 triggerVisUpdateWithDebounce();
+                saveState();
                 showToast(`✅ Channel diubah ke ${slide.syndicateChannel}`);
+            }
+        }
+
+        function promptChangeSyndicateChannelBadgeLabel() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const current = slide.syndicateChannelBadgeLabel !== undefined ? slide.syndicateChannelBadgeLabel : 'CHANNEL';
+            const newVal = prompt('Masukkan nama label badge (contoh: STASIUN, ENTITY, CABANG, DIVISI, PRODUK) atau ketik KOSONG untuk menghilangkan label hitam:', current || 'CHANNEL');
+            if (newVal !== null) {
+                if (newVal.trim().toLowerCase() === 'kosong' || newVal.trim().toLowerCase() === 'hapus' || newVal.trim() === '-') {
+                    slide.syndicateChannelBadgeLabel = '';
+                } else {
+                    slide.syndicateChannelBadgeLabel = newVal.trim().toUpperCase();
+                }
+                syncUIToActiveSlide();
+                triggerVisUpdateWithDebounce();
+                saveState();
+                showToast('✅ Label badge diperbarui!');
+            }
+        }
+
+        function promptChangeSyndicateWeek(seriesIndex) {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const isA = seriesIndex === 0;
+            const dsShare = (slide.dataSets && slide.dataSets[0]) ? slide.dataSets[0] : null;
+            const current = (dsShare && dsShare.series && dsShare.series[seriesIndex] ? dsShare.series[seriesIndex].name : '') 
+                || (isA ? (slide.syndicateWeekA || 'Week 2627') : (slide.syndicateWeekB || 'Week 2628'));
+            const newName = prompt(`Masukkan nama Kolom / Periode ${isA ? 'A (Awal)' : 'B (Pembanding)'} (contoh: Week 2627, Minggu 1, 26 Okt):`, current);
+            if (newName && newName.trim()) {
+                const val = newName.trim();
+                if (isA) slide.syndicateWeekA = val;
+                else slide.syndicateWeekB = val;
+
+                if (slide.dataSets) {
+                    slide.dataSets.forEach(ds => {
+                        if (ds && ds.series && ds.series[seriesIndex]) {
+                            ds.series[seriesIndex].name = val;
+                        }
+                    });
+                }
+                syncUIToActiveSlide();
+                triggerVisUpdateWithDebounce();
+                saveState();
+                showToast(`✅ Periode ${isA ? 'A' : 'B'} diubah ke: ${val}`);
+            }
+        }
+
+        function promptChangeSyndicateColTitle(field) {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            let current = '';
+            let label = '';
+            if (field === 'source') {
+                current = slide.syndicateColSource || 'Program Source';
+                label = 'Judul Kolom Kiri (Kategori / Program Source):';
+            } else if (field === 'dur') {
+                current = slide.syndicateColDur || 'Persentase Durasi';
+                label = 'Judul Kolom Tengah (Metrik 1):';
+            } else if (field === 'share') {
+                current = slide.syndicateColShare || 'Share';
+                label = 'Judul Kolom Kanan (Metrik 2):';
+            }
+            const newVal = prompt(label, current);
+            if (newVal && newVal.trim()) {
+                if (field === 'source') slide.syndicateColSource = newVal.trim();
+                else if (field === 'dur') slide.syndicateColDur = newVal.trim();
+                else if (field === 'share') slide.syndicateColShare = newVal.trim();
+                syncUIToActiveSlide();
+                triggerVisUpdateWithDebounce();
+                saveState();
+                showToast(`✅ Judul kolom diubah ke: ${newVal.trim()}`);
+            }
+        }
+
+        function setSyndicateChartsVisible(visible) {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            slide.syndicateHideCharts = !visible;
+            const rowsCount = (slide.dataSets && slide.dataSets[0] && slide.dataSets[0].rows) ? slide.dataSets[0].rows.length : 5;
+            if (slide.syndicateHideCharts) {
+                slide.chartHeight = Math.max(480, Math.min(850, rowsCount * 42 + 220));
+            } else {
+                slide.chartHeight = Math.max(760, rowsCount * 38 + 520);
+            }
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            if (typeof isPresenting !== 'undefined' && isPresenting) {
+                setTimeout(() => { if (typeof fitSlideToPresentationScreen === 'function') fitSlideToPresentationScreen(); }, 200);
+            }
+            showToast(visible ? '📊 Mode Tabel + 2 Grafik diaktifkan' : '📄 Mode Hanya Tabel diaktifkan (Fokus Analisis Bersih)');
+        }
+
+        function autoFitSyndicateHeight() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const hideCharts = slide.syndicateHideCharts === true;
+            const rowsCount = (slide.dataSets && slide.dataSets[0] && slide.dataSets[0].rows) ? slide.dataSets[0].rows.length : 5;
+            
+            let idealHeight = 520;
+            if (hideCharts) {
+                idealHeight = Math.max(480, rowsCount * 42 + 200);
+            } else {
+                idealHeight = Math.max(760, rowsCount * 38 + 520);
+            }
+            slide.chartHeight = idealHeight;
+            syncUIToActiveSlide();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            showToast(`⚡ Tinggi Kanvas disesuaikan otomatis ke ${idealHeight}px`);
+        }
+
+        function promptChangeSyndicateCardTitle() {
+            const slide = getActiveSlide();
+            if (!slide) return;
+            const channel = slide.syndicateChannel || 'KIDS TV';
+            const current = slide.syndicateCardTitle || `Share dan Persentase Durasi Menurut Program Source di ${channel}`;
+            const newVal = prompt('Masukkan judul kartu tabel sindikasi:', current);
+            if (newVal && newVal.trim()) {
+                slide.syndicateCardTitle = newVal.trim();
+                syncUIToActiveSlide();
+                triggerVisUpdateWithDebounce();
+                saveState();
+                showToast(`✅ Judul kartu tabel diubah!`);
             }
         }
 
