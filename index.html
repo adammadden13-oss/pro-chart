@@ -7275,6 +7275,13 @@
                 parentLabel: row.label,
                 parentVal: rowVal
             };
+            newSlide.drillParentId = currentSlide.id;
+            newSlide.lastImportFileName = currentSlide.lastImportFileName;
+            newSlide.lastImportSheetName = currentSlide.lastImportSheetName;
+            newSlide.pivotStateSnapshot = currentSlide.pivotStateSnapshot;
+            if (typeof currentImportWorkbook !== 'undefined' && currentImportWorkbook && typeof sessionWorkbooksBySlide !== 'undefined') {
+                sessionWorkbooksBySlide.set(newSlide.id, currentImportWorkbook);
+            }
 
             row.drillTarget = newSlide.id;
             appSlides.push(newSlide);
@@ -13331,7 +13338,7 @@ ${escapeHtml(narrative)}
 
         function openCodeInspectorModal(tab = 'workbench') {
             if (tab === 'workbench') {
-                openRawImportModalManual();
+                reopenPivotStudio();
                 return;
             }
             if (typeof initModalWindowSystems === 'function') initModalWindowSystems();
@@ -13516,6 +13523,41 @@ ${escapeHtml(narrative)}
 
         // Table Rows Registry for Selection & Right-Click Context Actions
         let pivotStudioTableRowsRegistry = new Map();
+
+        function ensurePivotStudioSets() {
+            if (typeof pivotStudioState === 'undefined' || !pivotStudioState) return;
+            if (!(pivotStudioState.selectedRowKeys instanceof Set)) {
+                pivotStudioState.selectedRowKeys = new Set(Array.isArray(pivotStudioState.selectedRowKeys) ? pivotStudioState.selectedRowKeys : []);
+            }
+            if (!(pivotStudioState.filterSelectedValues instanceof Set)) {
+                pivotStudioState.filterSelectedValues = new Set(Array.isArray(pivotStudioState.filterSelectedValues) ? pivotStudioState.filterSelectedValues : []);
+            }
+            if (!(pivotStudioState.filter2SelectedValues instanceof Set)) {
+                pivotStudioState.filter2SelectedValues = new Set(Array.isArray(pivotStudioState.filter2SelectedValues) ? pivotStudioState.filter2SelectedValues : []);
+            }
+            if (!(pivotStudioState.unselectedExportColumns instanceof Set)) {
+                pivotStudioState.unselectedExportColumns = new Set(Array.isArray(pivotStudioState.unselectedExportColumns) ? pivotStudioState.unselectedExportColumns : []);
+            }
+            if (pivotStudioState.periodComparison) {
+                if (!(pivotStudioState.periodComparison.valuesA instanceof Set)) {
+                    pivotStudioState.periodComparison.valuesA = new Set(Array.isArray(pivotStudioState.periodComparison.valuesA) ? pivotStudioState.periodComparison.valuesA : []);
+                }
+                if (!(pivotStudioState.periodComparison.valuesB instanceof Set)) {
+                    pivotStudioState.periodComparison.valuesB = new Set(Array.isArray(pivotStudioState.periodComparison.valuesB) ? pivotStudioState.periodComparison.valuesB : []);
+                }
+            }
+        }
+
+        function isPivotRowSelected(rowId) {
+            if (!pivotStudioState || !pivotStudioState.selectedRowKeys) return false;
+            if (typeof pivotStudioState.selectedRowKeys.has === 'function') {
+                return pivotStudioState.selectedRowKeys.has(rowId);
+            }
+            if (Array.isArray(pivotStudioState.selectedRowKeys)) {
+                return pivotStudioState.selectedRowKeys.includes(rowId);
+            }
+            return false;
+        }
 
         
         // =========================================================================
@@ -14530,6 +14572,7 @@ ${escapeHtml(narrative)}
         }
 
         function selectSheetForImport(sheetName, preserveState = false) {
+            ensurePivotStudioSets();
             if (!currentImportWorkbook || !currentImportWorkbook.Sheets[sheetName]) return;
             currentActiveSheetName = sheetName;
 
@@ -15598,49 +15641,80 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         // REOPEN PIVOT STUDIO WITH FULL STATE PERSISTENCE
         // =========================================================================
         function reopenPivotStudio() {
-            const slide = getActiveSlide();
-            const storedWb = (slide && slide.id && sessionWorkbooksBySlide.get(slide.id)) || (slide && slide.lastImportWorkbook);
-            if (storedWb) {
-                currentImportWorkbook = storedWb;
-                currentImportFileName = (slide && slide.lastImportFileName) || currentImportFileName;
-                currentActiveSheetName = (slide && slide.lastImportSheetName) || currentActiveSheetName;
-            } else if (slide && slide.lastImportFileName && typeof sessionWorkbookLibrary !== 'undefined') {
-                const libEntry = sessionWorkbookLibrary.get(slide.lastImportFileName);
-                if (libEntry && libEntry.workbook) {
-                    currentImportWorkbook = libEntry.workbook;
-                    currentImportFileName = libEntry.fileName;
-                    currentActiveSheetName = (slide && slide.lastImportSheetName) || currentActiveSheetName;
+            ensurePivotStudioSets();
+            let slide = getActiveSlide();
+            
+            // Check if current slide is a breakdown / drill-down slide without its own workbook
+            let parentSlide = null;
+            if (slide) {
+                if (slide.drillParentId) {
+                    parentSlide = appSlides.find(s => s.id === slide.drillParentId);
+                } else if (slide.drillParentInfo && slide.drillParentInfo.parentSlideId) {
+                    parentSlide = appSlides.find(s => s.id === slide.drillParentInfo.parentSlideId);
                 }
             }
+
+            let storedWb = (slide && slide.id && sessionWorkbooksBySlide.get(slide.id)) || (slide && slide.lastImportWorkbook);
+            if (!storedWb && parentSlide) {
+                storedWb = (parentSlide.id && sessionWorkbooksBySlide.get(parentSlide.id)) || parentSlide.lastImportWorkbook;
+            }
+
+            if (storedWb) {
+                currentImportWorkbook = storedWb;
+                currentImportFileName = (slide && slide.lastImportFileName) || (parentSlide && parentSlide.lastImportFileName) || currentImportFileName;
+                currentActiveSheetName = (slide && slide.lastImportSheetName) || (parentSlide && parentSlide.lastImportSheetName) || currentActiveSheetName;
+            } else {
+                const targetFileName = (slide && slide.lastImportFileName) || (parentSlide && parentSlide.lastImportFileName) || currentOpenedFileName;
+                if (targetFileName && typeof sessionWorkbookLibrary !== 'undefined') {
+                    const libEntry = sessionWorkbookLibrary.get(targetFileName);
+                    if (libEntry && libEntry.workbook) {
+                        currentImportWorkbook = libEntry.workbook;
+                        currentImportFileName = libEntry.fileName;
+                        currentActiveSheetName = (slide && slide.lastImportSheetName) || (parentSlide && parentSlide.lastImportSheetName) || currentActiveSheetName;
+                    }
+                }
+            }
+
             if (slide && slide.lastImportWorkbook) {
                 delete slide.lastImportWorkbook;
             }
 
-            if (slide && slide.pivotStateSnapshot) {
+            const targetSnapshot = (slide && slide.pivotStateSnapshot) || (parentSlide && parentSlide.pivotStateSnapshot);
+            if (targetSnapshot) {
                 // Restore snapshot without data loss
                 try {
-                    const snap = slide.pivotStateSnapshot;
-                    Object.keys(snap).forEach(k => {
-                        if (k === 'filterSelectedValues' || k === 'unselectedExportColumns') {
-                            pivotStudioState[k] = new Set(Array.isArray(snap[k]) ? snap[k] : []);
-                        } else if (k === 'periodComparison' && snap[k]) {
-                            pivotStudioState[k] = {
-                                ...snap[k],
-                                valuesA: new Set(Array.isArray(snap[k].valuesA) ? snap[k].valuesA : []),
-                                valuesB: new Set(Array.isArray(snap[k].valuesB) ? snap[k].valuesB : [])
-                            };
-                        } else {
-                            pivotStudioState[k] = snap[k];
-                        }
-                    });
+                    if (typeof PivotStudioStorage !== 'undefined' && typeof PivotStudioStorage.deserializeState === 'function') {
+                        PivotStudioStorage.deserializeState(targetSnapshot);
+                    } else {
+                        Object.keys(targetSnapshot).forEach(k => {
+                            if (k === 'filterSelectedValues' || k === 'filter2SelectedValues' || k === 'unselectedExportColumns' || k === 'selectedRowKeys') {
+                                pivotStudioState[k] = new Set(Array.isArray(targetSnapshot[k]) ? targetSnapshot[k] : []);
+                            } else if (k === 'periodComparison' && targetSnapshot[k]) {
+                                pivotStudioState[k] = {
+                                    ...targetSnapshot[k],
+                                    valuesA: new Set(Array.isArray(targetSnapshot[k].valuesA) ? targetSnapshot[k].valuesA : []),
+                                    valuesB: new Set(Array.isArray(targetSnapshot[k].valuesB) ? targetSnapshot[k].valuesB : [])
+                                };
+                            } else {
+                                pivotStudioState[k] = targetSnapshot[k];
+                            }
+                        });
+                    }
                 } catch (e) {
                     console.warn("Failed restoring pivot state snapshot:", e);
                 }
             }
+            ensurePivotStudioSets();
 
-            if (currentImportWorkbook) {
-                openRawImportModal(currentImportWorkbook, currentImportFileName, true);
-            } else {
+            try {
+                if (currentImportWorkbook) {
+                    openRawImportModal(currentImportWorkbook, currentImportFileName, true);
+                } else {
+                    openRawImportModalManual();
+                }
+            } catch (err) {
+                console.error("Error reopening Pivot Studio:", err);
+                showToast("Membuka Data Workbench dalam mode pemulihan...", false);
                 openRawImportModalManual();
             }
         }
@@ -16916,6 +16990,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         let currentComputedPivotResult = null;
 
         function runStudioPivotComputation() {
+            ensurePivotStudioSets();
             if (!currentRawSheetData || currentRawSheetData.length < 2) {
                 renderStudioKitView();
                 return;
@@ -17661,7 +17736,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 // High Performance: update only single targeted row element in O(1) time
                 const tr = document.querySelector(`tr[data-pivot-row-id="${specificRowId}"]`);
                 if (tr) {
-                    const isSel = pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(specificRowId);
+                    const isSel = isPivotRowSelected(specificRowId);
                     const cb = tr.querySelector('.pivot-row-select-cb');
                     if (cb) cb.checked = !!isSel;
                     if (isSel) {
@@ -17674,7 +17749,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 // Full sync only on mass selection / clearing
                 document.querySelectorAll('tr[data-pivot-row-id]').forEach(tr => {
                     const rId = tr.getAttribute('data-pivot-row-id');
-                    const isSel = pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rId);
+                    const isSel = isPivotRowSelected(rId);
                     const cb = tr.querySelector('.pivot-row-select-cb');
                     if (cb) cb.checked = !!isSel;
                     if (isSel) {
@@ -17744,7 +17819,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
             let copiedCount = 0;
             pivotStudioTableRowsRegistry.forEach((data, rowId) => {
-                if (pivotStudioState.selectedRowKeys.has(rowId)) {
+                if (isPivotRowSelected(rowId)) {
                     copiedCount++;
                     tsv += data.join('\t') + '\n';
                 }
@@ -17770,7 +17845,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
             const selectedRowsData = [];
             pivotStudioTableRowsRegistry.forEach((data, rowId) => {
-                if (pivotStudioState.selectedRowKeys.has(rowId)) {
+                if (isPivotRowSelected(rowId)) {
                     selectedRowsData.push(data);
                 }
             });
@@ -18201,7 +18276,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         const rowAvg = (v1Num + v2Num) / 2;
 
                         const rowId = `${parentPathId}_${idx}`;
-                        const isSelected = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rowId));
+                        const isSelected = isPivotRowSelected(rowId);
 
                         const rowVals = [node.key, v1Num];
                         if (hasV2) rowVals.push(v2Num);
@@ -18408,7 +18483,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         const isRoot = (depth === 0);
 
                         const rowId = `${parentPathId}_${idx}`;
-                        const isSelected = !!(pivotStudioState.selectedRowKeys && pivotStudioState.selectedRowKeys.has(rowId));
+                        const isSelected = isPivotRowSelected(rowId);
 
                         const pVals = [node.key, ...node.vals];
                         if (has2MatrixCols && pivotStudioState.showDelta) pVals.push((node.vals[1] || 0) - (node.vals[0] || 0));
@@ -19697,6 +19772,11 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     childSlide.stackMode = slide.stackMode || 'grouped';
                     childSlide.bentoCharts = Array.isArray(slide.bentoCharts) ? [...slide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
                     childSlide.drillParentId = parentSlideId;
+                    childSlide.lastImportFileName = currentImportFileName;
+                    childSlide.lastImportSheetName = currentActiveSheetName;
+                    if (currentImportWorkbook && typeof sessionWorkbooksBySlide !== 'undefined') {
+                        sessionWorkbooksBySlide.set(childSlide.id, currentImportWorkbook);
+                    }
 
                     const childDs = childSlide.dataSets[0];
                     childDs.series = ds.series.map((s, sIdx) => ({
@@ -19756,6 +19836,16 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             try {
                 const snap = JSON.parse(JSON.stringify(pivotStudioState, (k, v) => (v instanceof Set ? Array.from(v) : v)));
                 slide.pivotStateSnapshot = snap;
+                appSlides.forEach(s => {
+                    if (s.drillParentId === slide.id) {
+                        s.pivotStateSnapshot = snap;
+                        s.lastImportFileName = currentImportFileName;
+                        s.lastImportSheetName = currentActiveSheetName;
+                        if (currentImportWorkbook && typeof sessionWorkbooksBySlide !== 'undefined') {
+                            sessionWorkbooksBySlide.set(s.id, currentImportWorkbook);
+                        }
+                    }
+                });
             } catch (err) {
                 console.warn("Could not serialize pivot state snapshot:", err);
             }
