@@ -38,16 +38,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 
-    <!-- ZERO-GLITCH PIVOT STUDIO RESTORATION PRE-INIT (Runs before DOM is painted) -->
+    <!-- ZERO-GLITCH MODAL RESTORATION PRE-INIT (Runs before DOM is painted) -->
     <script>
         (function() {
             try {
-                var raw = localStorage.getItem('ProChart_Pivot_Session_Status');
-                if (raw) {
-                    var p = JSON.parse(raw);
-                    if (p && p.isOpen) {
-                        document.documentElement.classList.add('pivot-studio-reopening');
-                    }
+                var activeRaw = localStorage.getItem('ProChart_Active_Edit_Modal');
+                var devRaw = localStorage.getItem('ProChart_Dev_Modal_Status');
+                var pivotRaw = localStorage.getItem('ProChart_Pivot_Session_Status');
+
+                var activeType = null;
+                if (activeRaw) {
+                    try { var a = JSON.parse(activeRaw); if (a && a.modal) activeType = a.modal; } catch(e) {}
+                }
+                if (!activeType && devRaw) {
+                    try { var d = JSON.parse(devRaw); if (d && d.isOpen) activeType = 'dev'; } catch(e) {}
+                }
+                if (!activeType && pivotRaw) {
+                    try { var p = JSON.parse(pivotRaw); if (p && p.isOpen) activeType = 'pivot'; } catch(e) {}
+                }
+
+                if (activeType === 'dev') {
+                    document.documentElement.classList.add('code-inspector-reopening');
+                } else if (activeType === 'pivot') {
+                    document.documentElement.classList.add('pivot-studio-reopening');
                 }
             } catch(e) {}
         })();
@@ -61,6 +74,18 @@
             transition: none !important;
         }
         html.pivot-studio-reopening #rawImportModalContent {
+            transform: none !important;
+            transition: none !important;
+        }
+
+        html.code-inspector-reopening #codeInspectorModal {
+            display: flex !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            transition: none !important;
+            z-index: 280 !important;
+        }
+        html.code-inspector-reopening #codeInspectorInner {
             transform: none !important;
             transition: none !important;
         }
@@ -486,6 +511,20 @@
             cursor: grabbing !important;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             transform: scale(1.02);
+        }
+
+        /* QUADRANT ROW LEVEL DRAG AND DROP */
+        .quad-row-level-item {
+            transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .quad-row-level-item.quad-dragging {
+            opacity: 0.35 !important;
+            transform: scale(0.98);
+        }
+        .quad-row-level-item.quad-drag-over {
+            border-color: #6366f1 !important;
+            background-color: #eef2ff !important;
+            box-shadow: 0 0 0 2px #a5b4fc !important;
         }
 
         /* CALLOUT BOX & LEADER LINE CSS */
@@ -946,8 +985,7 @@
         <div
             class="bg-[#1a1a1a] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300 border border-slate-700/50 p-6 flex flex-col gap-4">
             <div class="flex items-center gap-2 text-white">
-                <i class="ph ph-globe text-xl"></i>
-                <span class="font-medium text-sm">Pro Chart Vision</span>
+                <span class="font-bold text-sm tracking-wide">Pro Chart Vision</span>
             </div>
             <p class="text-slate-200 text-sm leading-relaxed font-['Inter']">
                 Anda yakin ingin mereset seluruh data ke pengaturan awal?<br>Semua perubahan yang belum disimpan akan
@@ -971,11 +1009,7 @@
             <div id="projectModalDragHandle"
                 class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-white/70 shrink-0 window-drag-handle group select-none"
                 title="Tahan & geser untuk memindahkan jendela (Klik 2x untuk Maximize/Restore)">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-slate-900 text-[#cafc03] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="ph-bold ph-folder-notch-open text-lg"></i>
-                    </div>
+                <div>
                     <div>
                         <h3
                             class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
@@ -1260,14 +1294,9 @@
     <div id="versusDateModal" class="hidden fixed inset-0 z-[280] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4" onclick="if(event.target === this) closeVersusDateModal()">
         <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center font-bold shadow-md">
-                        <i class="ph-bold ph-sword text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black text-slate-900 tracking-tight">Versus 2 Tanggal / Periode</h4>
-                        <p class="text-[11px] text-slate-400 font-medium">Bandingkan 2 tanggal atau rentang periode secara head-to-head</p>
-                    </div>
+                <div>
+                    <h4 class="text-sm font-black text-slate-900 tracking-tight">Versus 2 Tanggal / Periode</h4>
+                    <p class="text-[11px] text-slate-400 font-medium">Bandingkan 2 tanggal atau rentang periode secara head-to-head</p>
                 </div>
                 <button type="button" onclick="closeVersusDateModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
                     <i class="ph-bold ph-x text-sm"></i>
@@ -1450,17 +1479,12 @@
         <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200 text-slate-800">
             <!-- MODAL HEADER -->
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-2xl bg-slate-900 text-[#cafc03] flex items-center justify-center font-bold shadow-md ring-1 ring-slate-800">
-                        <i class="ph-bold ph-note-pencil text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <span>Edit Catatan &amp; Callout Note</span>
-                            <span class="text-[9px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200 font-bold">Kustom Bebas</span>
-                        </h4>
-                        <p class="text-[11px] text-slate-500 font-medium">Ubah label, badge kategori, teks nilai, dan catatan analisis untuk keperluan presentasi</p>
-                    </div>
+                <div>
+                    <h4 class="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+                        <span>Edit Catatan &amp; Callout Note</span>
+                        <span class="text-[9px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200 font-bold">Kustom Bebas</span>
+                    </h4>
+                    <p class="text-[11px] text-slate-500 font-medium">Ubah label, badge kategori, teks nilai, dan catatan analisis untuk keperluan presentasi</p>
                 </div>
                 <button type="button" onclick="closeCalloutNoteModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
                     <i class="ph-bold ph-x text-sm"></i>
@@ -1760,15 +1784,11 @@
             <div id="executiveNarrativeDragHandle"
                 class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-white/70 shrink-0 window-drag-handle group select-none"
                 title="Tahan & geser untuk memindahkan jendela (Klik 2x untuk Maximize/Restore)">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="ph-bold ph-sparkle text-lg"></i>
-                    </div>
+                <div>
                     <div>
                         <h3
                             class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
-                            <span>Smart Executive Narrative &amp; AI Insight</span>
+                            <span>Executive Narrative &amp; Insight</span>
                             <span
                                 class="text-[9px] font-mono bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200">DATA
                                 STORYTELLING</span>
@@ -1873,11 +1893,7 @@
             <div id="drillDeepDiveDragHandle"
                 class="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-100 bg-white/70 shrink-0 window-drag-handle group select-none gap-2 flex-wrap sm:flex-nowrap"
                 title="Tahan & geser untuk memindahkan jendela (Klik 2x untuk Maximize/Restore)">
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="ph-bold ph-tree-structure text-lg"></i>
-                    </div>
+                <div>
                     <div>
                         <h3
                             class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
@@ -1975,11 +1991,7 @@
             <div id="multiSlideExportDragHandle"
                 class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-100 bg-white/70 shrink-0 window-drag-handle group select-none"
                 title="Tahan & geser untuk memindahkan jendela (Klik 2x untuk Maximize/Restore)">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-600 to-red-500 text-white flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="ph-bold ph-file-pdf text-lg"></i>
-                    </div>
+                <div>
                     <div>
                         <h3
                             class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
@@ -2225,10 +2237,6 @@
                 
                 <!-- SISI KIRI: BRANDING & TARGET SLIDE SELECTOR -->
                 <div class="flex items-center gap-2.5 no-drag shrink-0">
-                    <div class="w-8 h-8 rounded-xl bg-slate-900 text-[#cafc03] flex items-center justify-center shrink-0 shadow-sm ring-1 ring-slate-800">
-                        <i class="ph-bold ph-file-xls text-lg"></i>
-                    </div>
-                    
                     <div class="flex items-center gap-2">
                         <h3 class="text-xs sm:text-sm font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
                             <span>Excel Pivot Studio</span>
@@ -2317,40 +2325,34 @@
                             <!-- INGESTION TOOLBAR CLUSTER -->
                             <div class="flex items-center gap-1 shrink-0">
                                 <button type="button" onclick="document.getElementById('workbenchFileInput').click()"
-                                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 transition shadow-2xs cursor-pointer"
+                                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-2.5 py-1 rounded-xl text-xs font-black transition shadow-2xs cursor-pointer"
                                     title="Upload file XLSX / XLS / CSV">
-                                    <i class="ph-bold ph-upload-simple text-[#cafc03] text-xs"></i>
-                                    <span>Upload</span>
+                                    Upload
                                 </button>
                                 <button type="button" onclick="handleWorkbenchPaste()"
-                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs hover:border-slate-300 cursor-pointer"
+                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold transition shadow-2xs hover:border-slate-300 cursor-pointer"
                                     title="Paste tabel data dari Clipboard">
-                                    <i class="ph-bold ph-clipboard-text text-slate-500 text-xs"></i>
-                                    <span>Paste</span>
+                                    Paste
                                 </button>
                                 <button type="button" onclick="promptGSheetsSync()"
-                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs hover:border-slate-300 cursor-pointer"
+                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold transition shadow-2xs hover:border-slate-300 cursor-pointer"
                                     title="Sinkronkan dari Google Sheets atau URL CSV">
-                                    <i class="ph-bold ph-google-logo text-emerald-600 text-xs"></i>
-                                    <span>GSheets</span>
+                                    GSheets
                                 </button>
                                 <button type="button" onclick="loadCurrentSlideDataToPivot()"
-                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition shadow-2xs hover:border-slate-300 cursor-pointer"
+                                    class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-bold transition shadow-2xs hover:border-slate-300 cursor-pointer"
                                     title="Gunakan dataset grafik aktif saat ini">
-                                    <i class="ph-bold ph-download-simple text-slate-500 text-xs"></i>
-                                    <span>Ambil Slide</span>
+                                    Ambil Slide
                                 </button>
                                 <button type="button" onclick="resetPivotStudioToDefaults()"
-                                    class="bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/90 px-1.5 py-1 rounded-xl text-xs font-medium flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                                    class="bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 border border-slate-200/90 px-1.5 py-1 rounded-xl text-xs font-medium transition shadow-2xs cursor-pointer"
                                     title="Reset konfigurasi ke deteksi otomatis">
-                                    <i class="ph-bold ph-arrows-clockwise text-xs"></i>
-                                    <span>Reset</span>
+                                    Reset
                                 </button>
                                 <button type="button" onclick="openCodeInspectorModal('json')"
-                                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/90 px-1.5 py-1 rounded-xl text-xs font-mono font-bold flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                                    class="bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200/90 px-2 py-1 rounded-xl text-xs font-mono font-bold transition shadow-2xs cursor-pointer"
                                     title="Buka Editor JSON/Python/SQL untuk Developer">
-                                    <i class="ph-bold ph-code text-xs"></i>
-                                    <span>Dev</span>
+                                    Dev
                                 </button>
                             </div>
 
@@ -2544,11 +2546,11 @@
                                         <span>3. Rows (Baris)</span>
                                     </span>
                                     <div class="flex items-center gap-1">
-                                        <button type="button" onclick="swapRowHierarchy()" id="btnQuadSwapRows" title="Tukar Level 1 & Level 2"
+                                        <button type="button" onclick="swapRowHierarchy()" id="btnQuadSwapRows" title="Tukar Posisi Baris"
                                             class="hidden hover:text-slate-800 text-slate-400 hover:bg-slate-100 transition p-1 rounded-lg">
                                             <i class="ph-bold ph-arrows-down-up text-xs"></i>
                                         </button>
-                                        <button type="button" onclick="addQuadrantRowLevel()" id="btnQuadAddRow" title="Tambah Level Baris (Hierarki)"
+                                        <button type="button" onclick="addQuadrantRowLevel()" id="btnQuadAddRow" title="Tambah Baris"
                                             class="w-5 h-5 rounded-md bg-slate-100 hover:bg-indigo-100 hover:text-indigo-800 text-slate-600 flex items-center justify-center text-xs font-bold transition">
                                             <i class="ph-bold ph-plus"></i>
                                         </button>
@@ -2679,20 +2681,17 @@
                         Batal
                     </button>
                     <button type="button" onclick="switchStudioKit('analysis')" id="btnGoToAnalysis"
-                        class="px-4 py-2 rounded-xl border border-indigo-200/90 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
-                        <span>Tools Analisa 🔬</span>
-                        <i class="ph-bold ph-arrow-right text-xs"></i>
+                        class="px-4 py-2 rounded-xl border border-indigo-200/90 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition shadow-2xs">
+                        Tools Analisa
                     </button>
                     <button type="button" onclick="applyPivotStudioToActiveSlide(false)" id="btnApplyToSlideTarget"
-                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-5 py-2 rounded-xl text-xs font-black flex items-center gap-2 shadow-sm hover:shadow transition cursor-pointer">
-                        <i class="ph-bold ph-check text-sm text-[#cafc03]"></i>
+                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-5 py-2 rounded-xl text-xs font-black shadow-sm hover:shadow transition cursor-pointer">
                         <span id="btnApplyToSlideTargetText">Terapkan ke Slide 1</span>
                     </button>
                     <button type="button" onclick="applyPivotStudioToActiveSlide(true)" id="btnApplyToNewSlide"
-                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs hover:border-slate-500 transition cursor-pointer"
+                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold shadow-2xs hover:border-slate-500 transition cursor-pointer"
                         title="Buat slide baru dan suntikkan data hasil pivot ini">
-                        <i class="ph-bold ph-plus text-xs text-indigo-600"></i>
-                        <span>+ Slide Baru</span>
+                        Slide Baru
                     </button>
                 </div>
             </div>
@@ -13451,48 +13450,159 @@ ${escapeHtml(narrative)}
 
         // --- DEVELOPER DATA WORKBENCH & CODE INSPECTOR ---
         let currentCodeTab = 'workbench';
+        let codeInspectorCloseTimer = null;
 
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
+        window.wasPivotStudioOpenBeforeDev = false;
+
         function openCodeInspectorModal(tab = 'workbench') {
             if (tab === 'workbench') {
                 reopenPivotStudio();
                 return;
             }
+            if (codeInspectorCloseTimer) {
+                clearTimeout(codeInspectorCloseTimer);
+                codeInspectorCloseTimer = null;
+            }
             if (typeof initModalWindowSystems === 'function') initModalWindowSystems();
+
+            // Cek apakah Excel Pivot Studio sedang terbuka
+            const pivotModal = document.getElementById('rawImportModal');
+            if (pivotModal && !pivotModal.classList.contains('hidden')) {
+                window.wasPivotStudioOpenBeforeDev = true;
+                try {
+                    if (typeof PivotStudioStorage !== 'undefined' && PivotStudioStorage && PivotStudioStorage.saveSessionSync) {
+                        PivotStudioStorage.saveSessionSync(true);
+                    }
+                } catch (e) {}
+                pivotModal.classList.add('hidden', 'opacity-0');
+                pivotModal.classList.remove('flex');
+                document.getElementById('rawImportModalContent')?.classList.add('scale-95');
+            }
+
             const modal = document.getElementById('codeInspectorModal');
             const inner = document.getElementById('codeInspectorInner');
             if (modal) {
                 modal.onclick = (e) => { if (e.target === modal) closeCodeInspector(); };
+                modal.style.zIndex = '280';
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0', 'pointer-events-none');
-                    inner.classList.remove('scale-95');
-                }, 10);
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                if (inner) inner.classList.remove('scale-95');
             }
+
+            // Tampilkan tombol "Balik ke Excel Pivot" di footer bawah jika dibuka dari Pivot Studio atau ada workbook aktif
+            const shouldShowBackToPivot = window.wasPivotStudioOpenBeforeDev || !!currentImportWorkbook;
+            ['btnBackToPivotFromJsonFooter', 'btnBackToPivotFromWbFooter'].forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    if (shouldShowBackToPivot) {
+                        btn.classList.remove('hidden');
+                        btn.classList.add('inline-flex');
+                    } else {
+                        btn.classList.add('hidden');
+                        btn.classList.remove('inline-flex');
+                    }
+                }
+            });
+
             switchCodeTab(tab || 'json');
             if (typeof bringFloatingPanelToFront === 'function') bringFloatingPanelToFront(inner);
+
+            // SIMPAN STATUS POP UP DEV KE LOCALSTORAGE SECARA INSTAN AGAR TETAP TERBUKA SAAT REFRESH
+            try {
+                localStorage.setItem('ProChart_Active_Edit_Modal', JSON.stringify({
+                    modal: 'dev',
+                    tab: tab || 'json',
+                    wasPivotOpen: !!window.wasPivotStudioOpenBeforeDev,
+                    timestamp: Date.now()
+                }));
+                localStorage.setItem('ProChart_Dev_Modal_Status', JSON.stringify({
+                    isOpen: true,
+                    tab: tab || 'json',
+                    wasPivotOpen: !!window.wasPivotStudioOpenBeforeDev
+                }));
+            } catch (e) {}
         }
 
-        function closeCodeInspector() {
+        function returnToPivotFromDev() {
+            window.wasPivotStudioOpenBeforeDev = false;
+            try {
+                localStorage.setItem('ProChart_Active_Edit_Modal', JSON.stringify({ modal: 'pivot', timestamp: Date.now() }));
+                localStorage.removeItem('ProChart_Dev_Modal_Status');
+                document.documentElement.classList.remove('code-inspector-reopening');
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    PivotStudioStorage.saveSessionSync(true);
+                }
+            } catch (e) {}
+            closeCodeInspector(true); // Immediate close, no timer!
+            setTimeout(() => {
+                reopenPivotStudio();
+                if (typeof showToast === 'function') {
+                    showToast("Kembali ke Excel Pivot Studio");
+                }
+            }, 50);
+        }
+
+        function closeCodeInspector(immediate = false) {
+            if (codeInspectorCloseTimer) {
+                clearTimeout(codeInspectorCloseTimer);
+                codeInspectorCloseTimer = null;
+            }
             const modal = document.getElementById('codeInspectorModal');
             const inner = document.getElementById('codeInspectorInner');
             if (modal) {
                 modal.classList.add('opacity-0', 'pointer-events-none');
-                inner.classList.add('scale-95');
-                setTimeout(() => {
+                if (inner) inner.classList.add('scale-95');
+                if (immediate) {
                     modal.classList.add('hidden');
                     modal.classList.remove('flex');
-                }, 300);
+                } else {
+                    codeInspectorCloseTimer = setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                        codeInspectorCloseTimer = null;
+                    }, 300);
+                }
             }
+            window.wasPivotStudioOpenBeforeDev = false;
+            try {
+                const cur = localStorage.getItem('ProChart_Active_Edit_Modal');
+                if (cur) {
+                    const parsed = JSON.parse(cur);
+                    if (parsed && parsed.modal === 'dev') {
+                        localStorage.removeItem('ProChart_Active_Edit_Modal');
+                    }
+                }
+                localStorage.removeItem('ProChart_Dev_Modal_Status');
+                document.documentElement.classList.remove('code-inspector-reopening');
+            } catch (e) {}
         }
 
         function switchCodeTab(tab) {
             currentCodeTab = tab;
+            try {
+                const cur = localStorage.getItem('ProChart_Active_Edit_Modal');
+                if (cur) {
+                    const parsed = JSON.parse(cur);
+                    if (parsed && parsed.modal === 'dev') {
+                        parsed.tab = tab;
+                        localStorage.setItem('ProChart_Active_Edit_Modal', JSON.stringify(parsed));
+                    }
+                }
+                const curDev = localStorage.getItem('ProChart_Dev_Modal_Status');
+                if (curDev) {
+                    const parsedDev = JSON.parse(curDev);
+                    if (parsedDev && parsedDev.isOpen) {
+                        parsedDev.tab = tab;
+                        localStorage.setItem('ProChart_Dev_Modal_Status', JSON.stringify(parsedDev));
+                    }
+                }
+            } catch (e) {}
             document.querySelectorAll('.code-tab-btn').forEach(btn => {
                 btn.classList.remove('bg-slate-900', 'text-[#cafc03]', 'shadow-sm', 'bg-slate-800', 'text-white', 'border', 'border-slate-700/70');
                 btn.classList.add('text-slate-500');
@@ -14253,16 +14363,57 @@ ${escapeHtml(narrative)}
 
         window.addEventListener('beforeunload', () => {
             if (typeof saveState === 'function') saveState(true);
-            const modal = document.getElementById('rawImportModal');
-            const isOpen = modal && !modal.classList.contains('hidden') && modal.classList.contains('flex');
-            if (isOpen) {
-                PivotStudioStorage.saveSessionSync(true);
+
+            const devModal = document.getElementById('codeInspectorModal');
+            const isDevOpen = devModal && !devModal.classList.contains('hidden') && devModal.classList.contains('flex');
+
+            const pivotModal = document.getElementById('rawImportModal');
+            const isPivotOpen = pivotModal && !pivotModal.classList.contains('hidden') && pivotModal.classList.contains('flex');
+
+            if (isDevOpen) {
+                const area = document.getElementById('codeEditorArea');
+                let draftCode = (area && !area.hasAttribute('readonly') && area.value) ? area.value : null;
+                try {
+                    localStorage.setItem('ProChart_Active_Edit_Modal', JSON.stringify({
+                        modal: 'dev',
+                        tab: (typeof currentCodeTab !== 'undefined' ? currentCodeTab : 'json'),
+                        wasPivotOpen: !!window.wasPivotStudioOpenBeforeDev,
+                        draftCode: draftCode,
+                        timestamp: Date.now()
+                    }));
+                    localStorage.setItem('ProChart_Dev_Modal_Status', JSON.stringify({
+                        isOpen: true,
+                        tab: (typeof currentCodeTab !== 'undefined' ? currentCodeTab : 'json'),
+                        wasPivotOpen: !!window.wasPivotStudioOpenBeforeDev,
+                        draftCode: draftCode
+                    }));
+                } catch (e) {}
+
+                // Keep fast workbook available so "Balik ke Excel Pivot" works
+                if (window.wasPivotStudioOpenBeforeDev || currentImportWorkbook) {
+                    if (typeof PivotStudioStorage !== 'undefined') {
+                        PivotStudioStorage.saveSessionSync(true);
+                    }
+                }
+            } else if (isPivotOpen) {
+                try {
+                    localStorage.setItem('ProChart_Active_Edit_Modal', JSON.stringify({ modal: 'pivot', timestamp: Date.now() }));
+                    localStorage.removeItem('ProChart_Dev_Modal_Status');
+                } catch (e) {}
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    PivotStudioStorage.saveSessionSync(true);
+                }
             } else {
-                PivotStudioStorage.saveSessionSync(false);
+                try {
+                    localStorage.removeItem('ProChart_Active_Edit_Modal');
+                    localStorage.removeItem('ProChart_Dev_Modal_Status');
+                } catch (e) {}
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    PivotStudioStorage.saveSessionSync(false);
+                }
             }
         });
 
-        
         // =========================================================================
         // PIVOT STUDIO TARGET SLIDE SELECTOR & MULTI-SOURCE HUB (KLASTER 1 & 2)
         // =========================================================================
@@ -14562,10 +14713,13 @@ ${escapeHtml(narrative)}
                 return;
             }
 
-            // Auto-close developer workbench if open
+            // Auto-close developer workbench if open (immediate = true to prevent pending 300ms hide timer)
             if (typeof closeCodeInspector === 'function') {
-                closeCodeInspector();
+                closeCodeInspector(true);
             }
+            try {
+                localStorage.setItem('ProChart_Active_Edit_Modal', JSON.stringify({ modal: 'pivot', timestamp: Date.now() }));
+            } catch (e) {}
 
             currentImportWorkbook = workbook;
             currentImportFileName = fileName;
@@ -14656,8 +14810,18 @@ ${escapeHtml(narrative)}
                 modal.classList.remove('flex');
             }, 300);
             if (typeof PivotStudioStorage !== 'undefined') {
-                PivotStudioStorage.saveSessionDebounced(false);
+                PivotStudioStorage.saveSessionSync(false);
             }
+            try {
+                const cur = localStorage.getItem('ProChart_Active_Edit_Modal');
+                if (cur) {
+                    const parsed = JSON.parse(cur);
+                    if (parsed && parsed.modal === 'pivot') {
+                        localStorage.removeItem('ProChart_Active_Edit_Modal');
+                    }
+                }
+                document.documentElement.classList.remove('pivot-studio-reopening');
+            } catch (e) {}
         }
 
         function renderSheetTabs(sheetNames) {
@@ -15079,62 +15243,57 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             if (rContainer) {
                 let rHtml = '';
                 rowIndices.forEach((colIdx, lvlIdx) => {
-                    const isMain = (lvlIdx === 0);
-                    const lvlNum = lvlIdx + 1;
+                    rHtml += `
+                    <!-- Row Item (1 Baris Ringkas) -->
+                    <div class="quad-row-level-item flex items-center gap-1.5 p-1.5 bg-slate-50/80 hover:bg-slate-100/70 rounded-xl border border-slate-200/90 transition-all select-none group"
+                         draggable="true"
+                         data-lvl-idx="${lvlIdx}"
+                         ondragstart="onQuadRowDragStart(event, ${lvlIdx})"
+                         ondragover="onQuadRowDragOver(event, ${lvlIdx})"
+                         ondragenter="onQuadRowDragEnter(event, ${lvlIdx})"
+                         ondragleave="onQuadRowDragLeave(event, ${lvlIdx})"
+                         ondrop="onQuadRowDrop(event, ${lvlIdx})"
+                         ondragend="onQuadRowDragEnd(event)">
+                        
+                        <!-- Drag Handle -->
+                        <div class="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-700 px-0.5 flex items-center justify-center transition shrink-0" title="Drag untuk atur urutan posisi">
+                            <i class="ph-bold ph-dots-six-vertical text-sm"></i>
+                        </div>
 
-                    if (isMain) {
-                        rHtml += `
-                        <!-- Level 1 (Utama) -->
-                        <div class="flex flex-col gap-0.5">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Level 1 (Utama):</span>
-                                <span class="text-[9px] font-mono text-indigo-600 font-bold bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100">Utama</span>
-                            </div>
-                            <select id="quadRow1Select" onchange="onQuadRowLvlSelectChange(0, this.value)"
-                                class="w-full bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
-                                ${buildOptions(colIdx, false)}
-                            </select>
-                        </div>`;
-                    } else {
-                        rHtml += `
-                        <!-- Level ${lvlNum} (Sub / Drill) -->
-                        <div class="flex flex-col gap-0.5 pt-1 border-t border-slate-100">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[9px] font-medium text-slate-500 uppercase tracking-wider">Level ${lvlNum} (Sub / Drill):</span>
-                                <div class="flex items-center gap-1">
-                                    ${lvlIdx > 1 ? `
-                                    <button type="button" onclick="moveQuadrantRowLevel(${lvlIdx}, 'up')" title="Pindah Level ke Atas"
-                                        class="w-4 h-4 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center text-[10px] transition cursor-pointer">
-                                        <i class="ph-bold ph-caret-up"></i>
-                                    </button>` : ''}
-                                    ${lvlIdx < rowIndices.length - 1 ? `
-                                    <button type="button" onclick="moveQuadrantRowLevel(${lvlIdx}, 'down')" title="Pindah Level ke Bawah"
-                                        class="w-4 h-4 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center text-[10px] transition cursor-pointer">
-                                        <i class="ph-bold ph-caret-down"></i>
-                                    </button>` : ''}
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <select onchange="onQuadRowLvlSelectChange(${lvlIdx}, this.value)"
-                                    class="flex-1 min-w-0 bg-slate-50 border border-slate-200/90 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-700 outline-none focus:bg-white focus:border-slate-800 transition cursor-pointer">
-                                    ${buildOptions(colIdx, true, '[ Hapus Level Ini ]')}
-                                </select>
-                                <button type="button" onclick="removeQuadrantRowLevel(${lvlIdx})" title="Hapus Level ${lvlNum}"
-                                    class="w-7 h-7 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-400 border border-slate-200/80 flex items-center justify-center transition shrink-0 cursor-pointer">
-                                    <i class="ph-bold ph-minus text-xs"></i>
-                                </button>
-                            </div>
-                        </div>`;
-                    }
+                        <!-- Dropdown Baris -->
+                        <select ${lvlIdx === 0 ? 'id="quadRow1Select"' : (lvlIdx === 1 ? 'id="quadRow2Select"' : '')} onchange="onQuadRowLvlSelectChange(${lvlIdx}, this.value)" onmousedown="event.stopPropagation()"
+                            class="flex-1 min-w-0 bg-white border border-slate-200/90 rounded-xl px-2.5 py-1.5 text-xs ${lvlIdx === 0 ? 'font-bold text-slate-800' : 'font-medium text-slate-700'} outline-none focus:border-slate-800 transition cursor-pointer shadow-2xs">
+                            ${buildOptions(colIdx, false)}
+                        </select>
+                        
+                        <!-- Tools Urutan (Up / Down / Delete) -->
+                        <div class="flex items-center gap-0.5 shrink-0" onmousedown="event.stopPropagation()">
+                            ${lvlIdx > 0 ? `
+                            <button type="button" onclick="moveQuadrantRowLevel(${lvlIdx}, 'up')" title="Pindah ke Atas"
+                                class="w-6 h-6 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center text-xs transition cursor-pointer">
+                                <i class="ph-bold ph-caret-up"></i>
+                            </button>` : ''}
+                            ${lvlIdx < rowIndices.length - 1 ? `
+                            <button type="button" onclick="moveQuadrantRowLevel(${lvlIdx}, 'down')" title="Pindah ke Bawah"
+                                class="w-6 h-6 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center text-xs transition cursor-pointer">
+                                <i class="ph-bold ph-caret-down"></i>
+                            </button>` : ''}
+                            ${rowIndices.length > 1 ? `
+                            <button type="button" onclick="removeQuadrantRowLevel(${lvlIdx})" title="Hapus Baris"
+                                class="w-6 h-6 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center text-xs transition cursor-pointer">
+                                <i class="ph-bold ph-x text-xs"></i>
+                            </button>` : ''}
+                        </div>
+                    </div>`;
                 });
 
-                // ALWAYS show the "+ Tambah Level X (Sub / Drill)" button at the bottom!
+                // ALWAYS show "+ Tambah Baris" button at the bottom!
                 rHtml += `
                 <div class="pt-1 border-t border-dashed border-slate-200">
                     <button type="button" onclick="addQuadrantRowLevel()"
                         class="w-full py-1.5 px-2.5 border border-dashed border-slate-200 hover:border-indigo-300 bg-slate-50/70 hover:bg-indigo-50/50 rounded-xl text-[11px] font-semibold text-slate-500 hover:text-indigo-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
                         <i class="ph-bold ph-plus text-xs"></i>
-                        <span>Tambah Level ${rowIndices.length + 1} (Sub / Drill)</span>
+                        <span>Tambah Baris</span>
                     </button>
                 </div>`;
 
@@ -16786,13 +16945,13 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         // --- MULTI-LEVEL ROW HIERARCHY ENGINE ---
         function getActiveRowColIndices() {
             if (!Array.isArray(pivotStudioState.rowColIndices) || pivotStudioState.rowColIndices.length === 0) {
-                pivotStudioState.rowColIndices = [pivotStudioState.row1ColIdx !== undefined ? pivotStudioState.row1ColIdx : 0];
+                pivotStudioState.rowColIndices = [pivotStudioState.row1ColIdx !== undefined && pivotStudioState.row1ColIdx >= 0 ? pivotStudioState.row1ColIdx : 0];
                 if (pivotStudioState.row2ColIdx !== undefined && pivotStudioState.row2ColIdx >= 0) {
                     pivotStudioState.rowColIndices.push(pivotStudioState.row2ColIdx);
                 }
             }
-            // Keep indices sanitized (valid positive integers, no duplicate column indices)
-            pivotStudioState.rowColIndices = pivotStudioState.rowColIndices.filter((idx, p, self) => typeof idx === 'number' && idx >= 0 && self.indexOf(idx) === p);
+            // Keep indices sanitized (valid positive integers) - DO NOT filter duplicates so user can add unlimited levels even with 2 columns
+            pivotStudioState.rowColIndices = pivotStudioState.rowColIndices.filter(idx => typeof idx === 'number' && idx >= 0);
             if (pivotStudioState.rowColIndices.length === 0) {
                 pivotStudioState.rowColIndices = [0];
             }
@@ -16807,11 +16966,6 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
             let targetIdx = -1;
             if (specificColIdx !== undefined && specificColIdx !== null && specificColIdx >= 0) {
-                if (indices.includes(specificColIdx)) {
-                    const lvl = indices.indexOf(specificColIdx) + 1;
-                    showToast(`Field [${getColLetter(specificColIdx)}] sudah ada di Level ${lvl}`);
-                    return;
-                }
                 targetIdx = specificColIdx;
             } else {
                 // Find next text/categorical column not already in row hierarchy
@@ -16830,11 +16984,14 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                         }
                     }
                 }
-            }
-
-            if (targetIdx === -1) {
-                showToast("Semua kolom sheet sudah digunakan dalam hierarki baris!", true);
-                return;
+                // If all distinct columns are in hierarchy, pick cyclically or first column to allow UNLIMITED levels!
+                if (targetIdx === -1) {
+                    if (meta.headerRow && meta.headerRow.length > 0) {
+                        targetIdx = (indices.length > 0) ? ((indices[indices.length - 1] + 1) % meta.headerRow.length) : 0;
+                    } else {
+                        targetIdx = 0;
+                    }
+                }
             }
 
             indices.push(targetIdx);
@@ -16842,27 +16999,26 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             pivotStudioState.row1ColIdx = indices[0];
             pivotStudioState.row2ColIdx = indices.length > 1 ? indices[1] : -1;
 
-            const colName = cleanHeaderName(meta.headerRow[targetIdx]) || `Kolom ${getColLetter(targetIdx)}`;
+            const colName = (meta.headerRow && meta.headerRow[targetIdx]) ? cleanHeaderName(meta.headerRow[targetIdx]) : `Kolom ${getColLetter(targetIdx)}`;
             renderQuadrantControls();
             runStudioPivotComputation();
-            showToast(`Level ${indices.length} (${colName}) berhasil ditambahkan untuk analisa in-depth.`);
+            showToast(`Field [${colName}] ditambahkan ke Baris.`);
         }
 
-        function removeQuadrantRowLevel(lvl = 1) {
+        function removeQuadrantRowLevel(lvlIndex = 1) {
             const indices = getActiveRowColIndices();
-            if (indices.length <= 1) return;
-            let targetArrIdx = lvl;
-            if (targetArrIdx >= indices.length) {
-                targetArrIdx = lvl - 1;
+            if (indices.length <= 1) {
+                showToast("Minimal harus ada 1 level baris!", true);
+                return;
             }
-            if (targetArrIdx >= 1 && targetArrIdx < indices.length) {
-                indices.splice(targetArrIdx, 1);
+            if (lvlIndex >= 0 && lvlIndex < indices.length) {
+                indices.splice(lvlIndex, 1);
                 pivotStudioState.rowColIndices = indices;
                 pivotStudioState.row1ColIdx = indices[0];
                 pivotStudioState.row2ColIdx = indices.length > 1 ? indices[1] : -1;
                 renderQuadrantControls();
                 runStudioPivotComputation();
-                showToast('Level ' + (targetArrIdx + 1) + ' dihapus.');
+                showToast("Baris berhasil dihapus.");
             }
         }
 
@@ -16897,8 +17053,81 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
                 renderQuadrantControls();
                 runStudioPivotComputation();
-                showToast(`Level ${lvlIndex + 1} dipindah ke Level ${target + 1}.`);
+                showToast("Posisi baris dipindahkan.");
             }
+        }
+
+        function reorderQuadrantRowLevel(sourceIdx, targetIdx) {
+            if (sourceIdx === targetIdx) return;
+            const indices = getActiveRowColIndices();
+            if (sourceIdx < 0 || sourceIdx >= indices.length || targetIdx < 0 || targetIdx >= indices.length) return;
+
+            const [moved] = indices.splice(sourceIdx, 1);
+            indices.splice(targetIdx, 0, moved);
+            pivotStudioState.rowColIndices = indices;
+            pivotStudioState.row1ColIdx = indices[0];
+            pivotStudioState.row2ColIdx = indices.length > 1 ? indices[1] : -1;
+
+            renderQuadrantControls();
+            runStudioPivotComputation();
+            showToast("Urutan baris berhasil diubah.");
+        }
+
+        // HTML5 Drag and Drop handlers for Quadrant Row Levels
+        let quadRowDragSourceIdx = null;
+
+        function onQuadRowDragStart(event, lvlIdx) {
+            quadRowDragSourceIdx = lvlIdx;
+            if (event.dataTransfer) {
+                event.dataTransfer.effectAllowed = 'move';
+                try {
+                    event.dataTransfer.setData('text/plain', String(lvlIdx));
+                } catch (e) {}
+            }
+            const item = event.currentTarget;
+            if (item) {
+                setTimeout(() => item.classList.add('quad-dragging'), 0);
+            }
+        }
+
+        function onQuadRowDragOver(event, lvlIdx) {
+            event.preventDefault();
+            if (event.dataTransfer) {
+                event.dataTransfer.dropEffect = 'move';
+            }
+        }
+
+        function onQuadRowDragEnter(event, lvlIdx) {
+            event.preventDefault();
+            const item = event.currentTarget;
+            if (item && quadRowDragSourceIdx !== null && quadRowDragSourceIdx !== lvlIdx) {
+                item.classList.add('quad-drag-over');
+            }
+        }
+
+        function onQuadRowDragLeave(event, lvlIdx) {
+            const item = event.currentTarget;
+            if (item) {
+                item.classList.remove('quad-drag-over');
+            }
+        }
+
+        function onQuadRowDrop(event, targetLvlIdx) {
+            event.preventDefault();
+            const item = event.currentTarget;
+            if (item) {
+                item.classList.remove('quad-drag-over');
+            }
+            const sourceIdx = quadRowDragSourceIdx;
+            if (sourceIdx === null || sourceIdx === undefined || sourceIdx === targetLvlIdx) return;
+            reorderQuadrantRowLevel(sourceIdx, targetLvlIdx);
+        }
+
+        function onQuadRowDragEnd(event) {
+            quadRowDragSourceIdx = null;
+            document.querySelectorAll('.quad-row-level-item').forEach(el => {
+                el.classList.remove('quad-dragging', 'quad-drag-over');
+            });
         }
 
         function swapRowHierarchy() {
@@ -16913,7 +17142,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
                 renderQuadrantControls();
                 runStudioPivotComputation();
-                showToast("Hierarki Baris Level 1 & Level 2 ditukar.");
+                showToast("Urutan baris ditukar.");
             }
         }
 
@@ -22034,12 +22263,61 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
 
         window.addEventListener('DOMContentLoaded', () => {
             loadState();
-        checkAndInitViewerMode();
+            checkAndInitViewerMode();
 
-            // ZERO-GLITCH: If Pivot Studio was open, restore it fast synchronously BEFORE painting the slide canvas!
+            // Determine which edit modal was active before refresh
+            let activeModalToRestore = null;
+            let devModalState = null;
+            try {
+                const activeRaw = localStorage.getItem('ProChart_Active_Edit_Modal');
+                if (activeRaw) {
+                    const parsed = JSON.parse(activeRaw);
+                    if (parsed && parsed.modal) {
+                        activeModalToRestore = parsed.modal;
+                        if (activeModalToRestore === 'dev') devModalState = parsed;
+                    }
+                }
+                if (!activeModalToRestore) {
+                    const devRaw = localStorage.getItem('ProChart_Dev_Modal_Status');
+                    if (devRaw) {
+                        const parsedDev = JSON.parse(devRaw);
+                        if (parsedDev && parsedDev.isOpen) {
+                            activeModalToRestore = 'dev';
+                            devModalState = parsedDev;
+                        }
+                    }
+                }
+                if (!activeModalToRestore) {
+                    const pivotRaw = localStorage.getItem('ProChart_Pivot_Session_Status');
+                    if (pivotRaw) {
+                        const parsedPivot = JSON.parse(pivotRaw);
+                        if (parsedPivot && parsedPivot.isOpen) {
+                            activeModalToRestore = 'pivot';
+                        }
+                    }
+                }
+            } catch (e) {}
+
             let restoredFast = false;
-            if (typeof PivotStudioStorage !== 'undefined') {
-                restoredFast = PivotStudioStorage.restoreSessionSyncFast();
+            if (activeModalToRestore === 'pivot') {
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    restoredFast = PivotStudioStorage.restoreSessionSyncFast();
+                }
+            } else if (activeModalToRestore === 'dev') {
+                // Silently prepare workbook in memory without opening rawImportModal
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    try {
+                        const fastWbRaw = localStorage.getItem(PivotStudioStorage.FAST_WB_KEY);
+                        if (fastWbRaw) {
+                            const parsedFast = JSON.parse(fastWbRaw);
+                            if (parsedFast && parsedFast.wbBase64) {
+                                currentImportWorkbook = PivotStudioStorage.base64ToWorkbook(parsedFast.wbBase64);
+                                currentImportFileName = parsedFast.fileName || 'Data Workbench Saat Ini';
+                                currentActiveSheetName = parsedFast.sheetName || 'Workbench_Active';
+                            }
+                        }
+                    } catch (e) {}
+                }
             }
 
             applySidebarState();
@@ -22054,15 +22332,29 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             initCanvasToSidebarLinking();
             initFloatingPanelsFocusManager();
 
-            if (typeof PivotStudioStorage !== 'undefined') {
-                if (!restoredFast) {
-                    PivotStudioStorage.restoreSession();
-                } else {
-                    PivotStudioStorage.syncBackgroundLibrary();
+            if (activeModalToRestore === 'pivot') {
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    if (!restoredFast) {
+                        PivotStudioStorage.restoreSession();
+                    } else {
+                        PivotStudioStorage.syncBackgroundLibrary();
+                    }
                 }
+                document.documentElement.classList.remove('pivot-studio-reopening');
+            } else if (activeModalToRestore === 'dev') {
+                window.wasPivotStudioOpenBeforeDev = !!(devModalState && devModalState.wasPivotOpen);
+                const targetTab = (devModalState && devModalState.tab) ? devModalState.tab : 'json';
+                openCodeInspectorModal(targetTab);
+                if (devModalState && devModalState.draftCode) {
+                    const area = document.getElementById('codeEditorArea');
+                    if (area && !area.hasAttribute('readonly')) {
+                        area.value = devModalState.draftCode;
+                    }
+                }
+                document.documentElement.classList.remove('code-inspector-reopening');
             }
         });
-    
+
         // =========================================================================
         // EXECUTIVE SYNDICATE DECK MODULE (SHARE & DURASI WOW)
         // =========================================================================
@@ -23519,6 +23811,16 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             }
         }
 
+        // Close Share Modal saat tekan ESC
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('shareViewerModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    closeShareViewerModal();
+                }
+            }
+        });
+
         function copyShareLiveUrl() {
             const input = document.getElementById('shareLiveUrlInput');
             if (input) {
@@ -23639,27 +23941,21 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
 
     <!-- CODE INSPECTOR & DEVELOPER DATA WORKBENCH MODAL -->
     <div id="codeInspectorModal"
-        class="hidden fixed inset-0 z-[240] bg-slate-900/20 items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        class="hidden fixed inset-0 z-[280] bg-slate-900/35 backdrop-blur-md items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl w-[95%] max-w-5xl h-[86vh] max-h-[92vh] flex flex-col overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800 window-modal-box"
             id="codeInspectorInner">
             <div id="codeInspectorDragHandle"
                 class="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-100 bg-white/70 shrink-0 window-drag-handle group select-none"
                 title="Tahan & geser untuk memindahkan jendela (Klik 2x untuk Maximize/Restore)">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-slate-900 text-[#cafc03] flex items-center justify-center shrink-0 shadow-sm">
-                        <i class="ph-bold ph-table text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
-                            Developer Data Workbench
-                            <span
-                                class="text-[9px] font-mono bg-slate-900 text-[#cafc03] px-2 py-0.5 rounded-full border border-slate-700">Live
-                                Sync & Analytics</span>
-                        </h3>
-                        <p class="text-[9px] font-medium text-slate-400">Live Spreadsheet Grid, GSheets Sync & 1-Click
-                            Analytics Kit</p>
-                    </div>
+                <div>
+                    <h3 class="text-xs font-black text-slate-800 tracking-wider uppercase flex items-center gap-2">
+                        Developer Data Workbench
+                        <span
+                            class="text-[9px] font-mono bg-slate-900 text-[#cafc03] px-2 py-0.5 rounded-full border border-slate-700">Live
+                            Sync & Analytics</span>
+                    </h3>
+                    <p class="text-[9px] font-medium text-slate-400">Live Spreadsheet Grid, GSheets Sync & 1-Click
+                        Analytics Kit</p>
                 </div>
                 <div class="flex items-center gap-1.5 no-drag">
                     <button type="button" id="btnPinWorkbench"
@@ -23683,17 +23979,13 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             <div
                 class="flex items-center gap-1.5 p-2 border-b border-slate-100 bg-slate-50/70 shrink-0 overflow-x-auto custom-scrollbar">
                 <button onclick="switchCodeTab('workbench')" id="codeTab-workbench"
-                    class="code-tab-btn flex-1 min-w-[190px] py-2 text-xs font-bold rounded-xl transition bg-slate-900 text-[#cafc03] flex items-center justify-center gap-2 shadow-sm"><i
-                        class="ph-fill ph-table text-[#cafc03]"></i> Data Workbench & Sync</button>
+                    class="code-tab-btn flex-1 min-w-[190px] py-2 text-xs font-bold rounded-xl transition bg-slate-900 text-[#cafc03] flex items-center justify-center shadow-sm">Data Workbench & Sync</button>
                 <button onclick="switchCodeTab('json')" id="codeTab-json"
-                    class="code-tab-btn flex-1 min-w-[130px] py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 flex items-center justify-center gap-2"><i
-                        class="ph-fill ph-brackets-curly text-amber-500"></i> JSON (Live Editor)</button>
+                    class="code-tab-btn flex-1 min-w-[130px] py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 flex items-center justify-center">JSON (Live Editor)</button>
                 <button onclick="switchCodeTab('python')" id="codeTab-python"
-                    class="code-tab-btn flex-1 min-w-[130px] py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 flex items-center justify-center gap-2"><i
-                        class="ph-fill ph-file-py text-blue-500"></i> Python (Pandas)</button>
+                    class="code-tab-btn flex-1 min-w-[130px] py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 flex items-center justify-center">Python (Pandas)</button>
                 <button onclick="switchCodeTab('sql')" id="codeTab-sql"
-                    class="code-tab-btn flex-1 min-w-[130px] py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 flex items-center justify-center gap-2"><i
-                        class="ph-fill ph-database text-purple-500"></i> SQL (DDL & DML)</button>
+                    class="code-tab-btn flex-1 min-w-[130px] py-2 text-xs font-bold rounded-xl transition text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 flex items-center justify-center">SQL (DDL & DML)</button>
             </div>
 
             <!-- WORKBENCH CONTAINER -->
@@ -23710,121 +24002,108 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                             placeholder="Tempel URL Google Sheets (/edit... atau pub) atau CSV publik..."
                             class="bg-transparent border-none text-xs text-slate-800 placeholder-slate-400 outline-none w-full font-mono">
                         <button onclick="syncFromGoogleSheetUrl()"
-                            class="ml-2 bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shrink-0 transition shadow-sm"
+                            class="ml-2 bg-slate-900 hover:bg-slate-800 text-[#cafc03] px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 transition shadow-sm"
                             title="Sinkronkan data dari URL Google Sheets / CSV">
-                            <i class="ph-bold ph-arrows-clockwise text-xs"></i> <span>Sync URL</span>
+                            Sync URL
                         </button>
                     </div>
                     <input type="file" id="workbenchFileInput" accept=".xlsx, .xls, .csv" class="hidden"
                         onchange="handleWorkbenchFileChange(event)">
                     <div class="flex items-center gap-2 flex-wrap">
                         <button type="button" onclick="openRawImportModalManual()"
-                            class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-900 border border-indigo-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                            class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-900 border border-indigo-200 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm"
                             title="Buka Alat Auto-Pivot & Raw Data Inspector">
-                            <i class="ph-bold ph-lightning text-indigo-600"></i> <span>⚡ Auto-Pivot & Sheets Hub</span>
+                            Auto-Pivot & Sheets Hub
                         </button>
                         <button onclick="importWorkbenchExcelFile()"
-                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm"
                             title="Import file XLSX / CSV dari komputer">
-                            <i class="ph-bold ph-file-arrow-up text-emerald-600"></i> <span>Upload .XLSX / .CSV</span>
+                            Upload .XLSX / .CSV
                         </button>
                         <button onclick="handleWorkbenchPaste()"
-                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm"
                             title="Paste data tabel dari Clipboard (Excel/CSV)">
-                            <i class="ph-bold ph-clipboard-text text-amber-600"></i> <span>Paste Clipboard</span>
+                            Paste Clipboard
                         </button>
                         <button onclick="exportWorkbenchToExcel()"
-                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm"
+                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition shadow-sm"
                             title="Download data sebagai file Excel (.xlsx)">
-                            <i class="ph-bold ph-file-arrow-down text-blue-600"></i> <span>Export .XLSX</span>
+                            Export .XLSX
                         </button>
                     </div>
                 </div>
 
-                <!-- B. 1-CLICK DATA WRANGLING & CLEANING KIT -->
+                <!-- B. DATA WRANGLING & CLEANING KIT -->
                 <div class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col gap-2 shadow-sm">
                     <div class="flex items-center justify-between">
                         <span
-                            class="text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="ph-fill ph-broom text-slate-900"></i> 1-Click Data Wrangling & Cleaning Kit
+                            class="text-[10px] font-black text-slate-600 uppercase tracking-widest">
+                            Data Wrangling & Cleaning Kit
                         </span>
                         <span class="text-[9px] text-slate-400 font-mono">Modifikasi Cepat Tabel & Grafik</span>
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <button onclick="runDataWrangling('sort_desc')"
-                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-sort-descending text-indigo-600"></i> <span>Sort Desc (Tertinggi →
-                                Terendah)</span>
+                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-full px-3 py-1.5 text-[10px] font-bold transition shadow-sm">
+                            Sort Desc (Tertinggi → Terendah)
                         </button>
                         <button onclick="runDataWrangling('sort_asc')"
-                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-sort-ascending text-indigo-600"></i> <span>Sort Asc (Terendah →
-                                Tertinggi)</span>
+                            class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-full px-3 py-1.5 text-[10px] font-bold transition shadow-sm">
+                            Sort Asc (Terendah → Tertinggi)
                         </button>
                         <button onclick="runDataWrangling('filter_top5')"
-                            class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-trophy text-amber-600"></i> <span>Filter Top 5 (Gabung Sisanya)</span>
+                            class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-full px-3 py-1.5 text-[10px] font-bold transition shadow-sm">
+                            Filter Top 5 (Gabung Sisanya)
                         </button>
                         <button onclick="runDataWrangling('fill_nulls')"
-                            class="bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-magic-wand text-cyan-600"></i> <span>Clean & Fill Nulls (Mean)</span>
+                            class="bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 rounded-full px-3 py-1.5 text-[10px] font-bold transition shadow-sm">
+                            Clean & Fill Nulls (Mean)
                         </button>
                         <button onclick="runDataWrangling('normalize')"
-                            class="bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 rounded-full px-3 py-1.5 text-[10px] font-bold flex items-center gap-1.5 transition shadow-sm">
-                            <i class="ph-bold ph-percent text-purple-600"></i> <span>Normalize (0 - 100%)</span>
+                            class="bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 rounded-full px-3 py-1.5 text-[10px] font-bold transition shadow-sm">
+                            Normalize (0 - 100%)
                         </button>
                     </div>
                 </div>
 
-                <!-- C. 1-CLICK ADVANCED ANALYTICS KIT -->
+                <!-- C. ADVANCED ANALYTICS KIT -->
                 <div class="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-col gap-2 shadow-sm">
                     <div class="flex items-center justify-between">
                         <span
-                            class="text-[10px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5">
-                            <i class="ph-fill ph-lightning text-slate-900"></i> 1-Click Advanced Analytics Kit (Analisis
-                            Sulit Jadi 1-Klik)
+                            class="text-[10px] font-black text-slate-800 uppercase tracking-widest">
+                            Advanced Analytics Kit
                         </span>
-                        <span class="text-[9px] text-slate-400 font-mono">Auto Layer & Canvas AI Note</span>
+                        <span class="text-[9px] text-slate-400 font-mono">Auto Layer & Canvas Note</span>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
                         <button onclick="runAnalyticsKit('forecast')"
-                            class="bg-indigo-50/70 hover:bg-indigo-100/90 border border-indigo-200 text-indigo-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-1 transition shadow-sm group">
-                            <i
-                                class="ph-bold ph-crystal-ball text-lg text-indigo-600 group-hover:scale-110 transition"></i>
-                            <span>AI Auto-Forecast</span>
+                            class="bg-indigo-50/70 hover:bg-indigo-100/90 border border-indigo-200 text-indigo-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-0.5 transition shadow-sm group">
+                            <span class="font-black">Auto-Forecast</span>
                             <span class="text-[9px] text-indigo-600/80 font-normal">(+2 Periode Regresi)</span>
                         </button>
                         <button onclick="runAnalyticsKit('moving_avg')"
-                            class="bg-emerald-50/70 hover:bg-emerald-100/90 border border-emerald-200 text-emerald-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-1 transition shadow-sm group">
-                            <i
-                                class="ph-bold ph-chart-line-up text-lg text-emerald-600 group-hover:scale-110 transition"></i>
-                            <span>Moving Average</span>
+                            class="bg-emerald-50/70 hover:bg-emerald-100/90 border border-emerald-200 text-emerald-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-0.5 transition shadow-sm group">
+                            <span class="font-black">Moving Average</span>
                             <span class="text-[9px] text-emerald-600/80 font-normal">(Tren Halus Line)</span>
                         </button>
                         <button onclick="runAnalyticsKit('pareto')"
-                            class="bg-amber-50/70 hover:bg-amber-100/90 border border-amber-200 text-amber-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-1 transition shadow-sm group">
-                            <i class="ph-bold ph-scales text-lg text-amber-600 group-hover:scale-110 transition"></i>
-                            <span>Pareto 80/20</span>
+                            class="bg-amber-50/70 hover:bg-amber-100/90 border border-amber-200 text-amber-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-0.5 transition shadow-sm group">
+                            <span class="font-black">Pareto 80/20</span>
                             <span class="text-[9px] text-amber-600/80 font-normal">(Kurva Kumulatif Y2)</span>
                         </button>
                         <button onclick="runAnalyticsKit('append_summary')"
-                            class="bg-teal-50/70 hover:bg-teal-100/90 border border-teal-200 text-teal-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-1 transition shadow-sm group">
-                            <i class="ph-bold ph-rows-plus text-lg text-teal-600 group-hover:scale-110 transition"></i>
-                            <span>Append Summary</span>
+                            class="bg-teal-50/70 hover:bg-teal-100/90 border border-teal-200 text-teal-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-0.5 transition shadow-sm group">
+                            <span class="font-black">Append Summary</span>
                             <span class="text-[9px] text-teal-600/80 font-normal">(Baris Rata-Rata)</span>
                         </button>
                         <button onclick="runAnalyticsKit('correlation')"
-                            class="bg-cyan-50/70 hover:bg-cyan-100/90 border border-cyan-200 text-cyan-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-1 transition shadow-sm group">
-                            <i
-                                class="ph-bold ph-chart-polar text-lg text-cyan-600 group-hover:scale-110 transition"></i>
-                            <span>Matrix Korelasi</span>
+                            class="bg-cyan-50/70 hover:bg-cyan-100/90 border border-cyan-200 text-cyan-900 p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-0.5 transition shadow-sm group">
+                            <span class="font-black">Matrix Korelasi</span>
                             <span class="text-[9px] text-cyan-600/80 font-normal">(Pearson r & CAGR)</span>
                         </button>
                         <button onclick="runAnalyticsKit('exec_note')"
-                            class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[#cafc03] p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-1 transition shadow-sm group">
-                            <i
-                                class="ph-bold ph-note-pencil text-lg text-[#cafc03] group-hover:scale-110 transition"></i>
-                            <span>Exec Summary Note</span>
+                            class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[#cafc03] p-2.5 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center text-center gap-0.5 transition shadow-sm group">
+                            <span class="font-black">Exec Summary Note</span>
                             <span class="text-[9px] text-slate-300 font-normal">(Draggable Canvas)</span>
                         </button>
                     </div>
@@ -23845,8 +24124,8 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div class="flex items-center gap-2">
                             <span
-                                class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                                <i class="ph-bold ph-table text-slate-900"></i> Live Interactive Spreadsheet Grid
+                                class="text-xs font-black text-slate-800 uppercase tracking-wider">
+                                Live Interactive Spreadsheet Grid
                             </span>
                             <span id="workbenchGridMeta"
                                 class="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">0
@@ -23854,23 +24133,22 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                         </div>
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <button onclick="addWorkbenchRow()"
-                                class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition shadow-2xs">
-                                <i class="ph-bold ph-plus text-emerald-600"></i> + Baris
+                                class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs">
+                                + Baris
                             </button>
                             <button onclick="addWorkbenchSeries()"
-                                class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition shadow-2xs">
-                                <i class="ph-bold ph-columns-plus text-blue-600"></i> + Kolom Series
+                                class="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs">
+                                + Kolom Series
                             </button>
                             <button onclick="openWorkbenchFormulaModal()"
-                                class="bg-purple-50 hover:bg-purple-100 text-purple-700 hover:text-purple-900 border border-purple-200 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition shadow-2xs"
+                                class="bg-purple-50 hover:bg-purple-100 text-purple-700 hover:text-purple-900 border border-purple-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs"
                                 title="Buat Kolom Rumus / Kalkulasi">
-                                <i class="ph-bold ph-function text-purple-600"></i> + Rumus (fx)
+                                + Rumus (fx)
                             </button>
                             <button id="btnWorkbenchScienceTools" onclick="toggleWorkbenchScienceMenu(event)"
-                                class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-900 border border-indigo-200 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition shadow-2xs"
+                                class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 hover:text-indigo-900 border border-indigo-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs"
                                 title="Tools Sains, Statistik & Analisis">
-                                <i class="ph-bold ph-flask text-indigo-600"></i> <span>Science Tools</span> <i
-                                    class="ph-bold ph-caret-down text-[10px]"></i>
+                                <span>Science Tools</span>
                             </button>
                             <button onclick="renderWorkbenchFromActiveDataSet()"
                                 class="bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-2xs"
@@ -23912,13 +24190,18 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 <!-- FOOTER ACTION BAR INSIDE WORKBENCH -->
                 <div
                     class="p-3 border-t border-slate-100 bg-white rounded-2xl flex items-center justify-between flex-wrap gap-2 shadow-sm">
-                    <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
-                        <i class="ph-fill ph-info text-slate-900"></i>
-                        <span>Setiap perubahan dapat dibatalkan kapan saja dengan <b>Ctrl + Z (Undo)</b>.</span>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="returnToPivotFromDev()" id="btnBackToPivotFromWbFooter"
+                            class="hidden items-center border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer">
+                            Balik ke Excel Pivot
+                        </button>
+                        <div class="text-[11px] text-slate-500">
+                            Setiap perubahan dapat dibatalkan kapan saja dengan <b>Ctrl + Z (Undo)</b>.
+                        </div>
                     </div>
                     <button onclick="applyWorkbenchToChart()"
-                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider flex items-center gap-2 transition shadow-md">
-                        <i class="ph-bold ph-lightning"></i> ⚡ Terapkan & Update Grafik
+                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider transition shadow-md">
+                        Terapkan & Update Grafik
                     </button>
                 </div>
 
@@ -23929,12 +24212,12 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 class="hidden flex-1 relative bg-slate-950 p-4 overflow-hidden flex flex-col font-mono-tech">
                 <div class="absolute top-4 right-4 z-10 flex gap-2">
                     <button onclick="copyCodeInspector()"
-                        class="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-md px-3 py-1.5 text-[10px] font-bold flex items-center gap-1.5 transition shadow-lg">
-                        <i class="ph-bold ph-copy"></i> Copy Code
+                        class="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-md px-3 py-1.5 text-[10px] font-bold transition shadow-lg">
+                        Copy Code
                     </button>
                     <button onclick="downloadCodeInspector()"
-                        class="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-md px-3 py-1.5 text-[10px] font-bold flex items-center gap-1.5 transition shadow-lg">
-                        <i class="ph-bold ph-download-simple"></i> Download
+                        class="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-md px-3 py-1.5 text-[10px] font-bold transition shadow-lg">
+                        Download
                     </button>
                 </div>
 
@@ -23943,11 +24226,17 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     spellcheck="false"></textarea>
             </div>
 
-            <div id="jsonFooterAction" class="hidden p-3 border-t border-slate-100 bg-white flex justify-end">
-                <button onclick="applyJsonFromEditor()"
-                    class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider flex items-center gap-2 transition shadow-md">
-                    <i class="ph-bold ph-lightning"></i> Apply JSON to Chart
+            <div id="jsonFooterAction" class="hidden p-3 border-t border-slate-100 bg-white flex items-center justify-between gap-3">
+                <button type="button" onclick="returnToPivotFromDev()" id="btnBackToPivotFromJsonFooter"
+                    class="hidden items-center border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer">
+                    Balik ke Excel Pivot
                 </button>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button onclick="applyJsonFromEditor()"
+                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider transition shadow-md">
+                        Apply JSON to Chart
+                    </button>
+                </div>
             </div>
             <!-- Corner Resize Grip Handle -->
             <div id="codeInspectorResizeCorner" class="window-resize-corner"
@@ -24255,18 +24544,13 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
     </div>
 
     <!-- MODAL: BAGIKAN PRESENTASI INTERAKTIF (EXECUTIVE VIEWER) -->
-    <div id="shareViewerModal" class="hidden fixed inset-0 z-[99999] bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4" style="z-index: 99999 !important;">
-        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-xl overflow-hidden flex flex-col transition-all">
+    <div id="shareViewerModal" onclick="if (event.target === this) closeShareViewerModal()" class="hidden fixed inset-0 z-[99999] bg-slate-900/75 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer" style="z-index: 99999 !important;">
+        <div onclick="event.stopPropagation()" class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-xl overflow-hidden flex flex-col transition-all cursor-default">
             <!-- Header -->
             <div class="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/70">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md">
-                        <i class="ph-bold ph-share-network text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-black text-slate-900 tracking-tight">Bagikan Presentasi Interaktif (Viewer Mode)</h3>
-                        <p class="text-[11px] text-slate-400 font-medium">Bagi grafik &amp; fitur drill-down ke audiens tanpa menu setting editor</p>
-                    </div>
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 tracking-tight">Bagikan Presentasi Interaktif (Viewer Mode)</h3>
+                    <p class="text-[11px] text-slate-400 font-medium">Bagi grafik &amp; fitur drill-down ke audiens tanpa menu setting editor</p>
                 </div>
                 <button type="button" onclick="closeShareViewerModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition cursor-pointer">
                     <i class="ph-bold ph-x text-sm"></i>
@@ -24289,14 +24573,14 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     </p>
                     <div class="flex items-center gap-2">
                         <input type="text" id="shareLiveUrlInput" readonly class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 select-all outline-none">
-                        <button type="button" onclick="copyShareLiveUrl()" class="px-3.5 py-2 rounded-xl bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 text-xs font-black shrink-0 transition flex items-center gap-1.5 shadow-sm cursor-pointer">
-                            <i class="ph-bold ph-copy"></i> <span>Salin Link</span>
+                        <button type="button" onclick="copyShareLiveUrl()" class="px-3.5 py-2 rounded-xl bg-[#cafc03] hover:bg-[#b5e002] text-slate-900 text-xs font-black shrink-0 transition shadow-sm cursor-pointer">
+                            Salin Link
                         </button>
                     </div>
                     <div class="pt-2 flex items-center justify-between border-t border-slate-800">
                         <span class="text-[10px] text-slate-400 font-medium">Langkah update: Download data lalu push ke repo GitHub</span>
-                        <button type="button" onclick="downloadSlidesJsonFile()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
-                            <i class="ph-bold ph-download-simple"></i> <span>Download slides_data.json</span>
+                        <button type="button" onclick="downloadSlidesJsonFile()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold border border-slate-700 transition cursor-pointer">
+                            Download slides_data.json
                         </button>
                     </div>
                 </div>
@@ -24312,8 +24596,8 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     </p>
                     <div class="flex items-center gap-2">
                         <input type="text" id="shareDirectUrlInput" readonly class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-700 select-all outline-none">
-                        <button type="button" onclick="copyShareDirectUrl()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shrink-0 transition flex items-center gap-1.5 cursor-pointer">
-                            <i class="ph-bold ph-copy"></i> <span>Salin</span>
+                        <button type="button" onclick="copyShareDirectUrl()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shrink-0 transition cursor-pointer">
+                            Salin Link
                         </button>
                     </div>
                 </div>
@@ -24324,8 +24608,8 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                         <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider">3. File HTML Viewer Mandiri (Offline)</h4>
                         <p class="text-[11px] text-slate-500">Download 1 file HTML murni untuk dikirim via WhatsApp / Email (bisa dibuka offline).</p>
                     </div>
-                    <button type="button" onclick="exportStandaloneViewerHtml()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer">
-                        <i class="ph-bold ph-file-html"></i> <span>Download HTML</span>
+                    <button type="button" onclick="exportStandaloneViewerHtml()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0 transition cursor-pointer">
+                        Download HTML
                     </button>
                 </div>
             </div>
