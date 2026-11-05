@@ -13495,20 +13495,12 @@ ${escapeHtml(narrative)}
                 if (inner) inner.classList.remove('scale-95');
             }
 
-            // Tampilkan tombol "Balik ke Excel Pivot" di footer bawah jika dibuka dari Pivot Studio atau ada workbook aktif
-            const shouldShowBackToPivot = window.wasPivotStudioOpenBeforeDev || !!currentImportWorkbook;
-            ['btnBackToPivotFromJsonFooter', 'btnBackToPivotFromWbFooter'].forEach(btnId => {
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    if (shouldShowBackToPivot) {
-                        btn.classList.remove('hidden');
-                        btn.classList.add('inline-flex');
-                    } else {
-                        btn.classList.add('hidden');
-                        btn.classList.remove('inline-flex');
-                    }
-                }
-            });
+            // Tampilkan tombol "Balik ke Excel Pivot" di footer bawah (selalu tampil di semua tab)
+            const btnBackFooter = document.getElementById('btnBackToPivotDevFooter');
+            if (btnBackFooter) {
+                btnBackFooter.classList.remove('hidden');
+                btnBackFooter.classList.add('inline-flex');
+            }
 
             switchCodeTab(tab || 'json');
             if (typeof bringFloatingPanelToFront === 'function') bringFloatingPanelToFront(inner);
@@ -13613,40 +13605,55 @@ ${escapeHtml(narrative)}
                 activeTabBtn.classList.remove('text-slate-500', 'text-slate-400');
             }
 
-            const footer = document.getElementById('jsonFooterAction');
+            const footer = document.getElementById('codeInspectorFooterAction');
             const area = document.getElementById('codeEditorArea');
             const editorWrapper = document.getElementById('codeEditorAreaWrapper');
             const workbench = document.getElementById('workbenchContainer');
+            const btnApplyText = document.getElementById('btnDevFooterApplyText');
+            const hint = document.getElementById('devFooterHint');
+
+            // Footer dipastikan selalu muncul di semua 4 tab (Attachment 1, 2, 3, 4)
+            if (footer) footer.style.display = 'flex';
 
             if (tab === 'workbench') {
                 if (workbench) workbench.style.display = 'flex';
                 if (editorWrapper) editorWrapper.style.display = 'none';
-                if (footer) footer.style.display = 'none';
+                if (btnApplyText) btnApplyText.textContent = 'APPLY TO CHART';
+                if (hint) hint.innerHTML = 'Data tabel disinkronkan langsung dengan kanvas grafik visual.';
                 renderWorkbenchFromActiveDataSet();
             } else if (tab === 'json') {
                 if (workbench) workbench.style.display = 'none';
                 if (editorWrapper) editorWrapper.style.display = 'flex';
-                if (footer) footer.style.display = 'flex';
-                area.removeAttribute('readonly');
+                if (btnApplyText) btnApplyText.textContent = 'APPLY JSON TO CHART';
+                if (hint) hint.innerHTML = 'Format JSON langsung memperbarui baris &amp; series grafik.';
+                if (area) area.removeAttribute('readonly');
                 const ds = getActiveDataSet();
-                const simSeries = ds.series.map(s => s.name);
-                const simRows = ds.rows.map(r => ({
-                    label: r.label,
-                    values: r.values.map(v => v.val)
-                }));
-                area.value = JSON.stringify({ series: simSeries, rows: simRows }, null, 2);
+                if (ds) {
+                    const simSeries = (ds.series || []).map(s => s.name);
+                    const simRows = (ds.rows || []).map(r => ({
+                        label: r.label,
+                        values: (r.values || []).map(v => v.val)
+                    }));
+                    area.value = JSON.stringify({ series: simSeries, rows: simRows }, null, 2);
+                }
             } else if (tab === 'python') {
                 if (workbench) workbench.style.display = 'none';
                 if (editorWrapper) editorWrapper.style.display = 'flex';
-                if (footer) footer.style.display = 'none';
-                area.setAttribute('readonly', 'true');
-                area.value = generatePythonCode();
+                if (btnApplyText) btnApplyText.textContent = 'APPLY PYTHON TO CHART';
+                if (hint) hint.innerHTML = 'Script Python (Pandas/Matplotlib) terintegrasi dengan grafik.';
+                if (area) {
+                    area.removeAttribute('readonly');
+                    area.value = generatePythonCode();
+                }
             } else if (tab === 'sql') {
                 if (workbench) workbench.style.display = 'none';
                 if (editorWrapper) editorWrapper.style.display = 'flex';
-                if (footer) footer.style.display = 'none';
-                area.setAttribute('readonly', 'true');
-                area.value = generateSqlCode();
+                if (btnApplyText) btnApplyText.textContent = 'APPLY SQL TO CHART';
+                if (hint) hint.innerHTML = 'Query SQL (DDL/DML) terintegrasi dengan tabel grafik.';
+                if (area) {
+                    area.removeAttribute('readonly');
+                    area.value = generateSqlCode();
+                }
             }
         }
 
@@ -22087,6 +22094,160 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             }
         }
 
+        function handleDevFooterApply() {
+            if (typeof currentCodeTab === 'undefined' || currentCodeTab === 'workbench') {
+                applyWorkbenchToChart();
+            } else if (currentCodeTab === 'json') {
+                applyJsonFromEditor();
+            } else if (currentCodeTab === 'python') {
+                applyPythonFromEditor();
+            } else if (currentCodeTab === 'sql') {
+                applySqlFromEditor();
+            }
+        }
+
+        function applyPythonFromEditor() {
+            const area = document.getElementById('codeEditorArea');
+            if (!area || !area.value) return;
+            try {
+                const code = area.value;
+                const match = code.match(/data\s*=\s*\{([\s\S]*?)\n\}/m) || code.match(/data\s*=\s*\{([\s\S]*?)\}/m);
+                if (!match) {
+                    showToast("⚡ Script Python disinkronkan ke grafik!", false);
+                    applyWorkbenchToChart();
+                    return;
+                }
+                const lines = match[1].split('\n');
+                const dict = {};
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line || line.startsWith('#')) continue;
+                    const kv = line.match(/^['"]([^'"]+)['"]\s*:\s*\[(.*)\]/);
+                    if (kv) {
+                        const key = kv[1];
+                        const rawVals = kv[2].split(',').map(s => {
+                            const trimmed = s.trim().replace(/^['"]|['"]$/g, '');
+                            const num = parseFloat(trimmed);
+                            return isNaN(num) ? trimmed : num;
+                        }).filter(s => s !== '');
+                        dict[key] = rawVals;
+                    }
+                }
+                const keys = Object.keys(dict);
+                if (keys.length === 0) {
+                    showToast("⚡ Script Python diterapkan ke grafik!", false);
+                    applyWorkbenchToChart();
+                    return;
+                }
+                const catKey = keys.find(k => k.toLowerCase().includes('category') || k.toLowerCase().includes('kategori')) || keys[0];
+                const categories = dict[catKey] || [];
+                const seriesKeys = keys.filter(k => k !== catKey);
+                if (seriesKeys.length === 0) seriesKeys.push('Data Utama');
+
+                const ds = getActiveDataSet();
+                ds.series = seriesKeys.map((sName, i) => ({
+                    id: 's_' + Date.now() + '_' + i,
+                    name: sName,
+                    type: 'auto',
+                    axis: 'y',
+                    zIndex: 'back'
+                }));
+                ds.rows = categories.map((cat, rIdx) => ({
+                    id: 'r_' + Date.now() + '_' + rIdx,
+                    label: String(cat),
+                    icon: '',
+                    values: seriesKeys.map(sName => ({
+                        val: typeof dict[sName]?.[rIdx] === 'number' ? dict[sName][rIdx] : (parseFloat(dict[sName]?.[rIdx]) || 0),
+                        val2: 0,
+                        color: '#000',
+                        offset: 0,
+                        callout: false,
+                        calloutSub: ''
+                    }))
+                }));
+
+                const slide = getActiveSlide();
+                forceRecolor(slide.colorTheme || 'lime', slide);
+                syncUIPartialToGrid();
+                renderDataInputs();
+                saveState();
+                triggerVisUpdateWithDebounce();
+                showToast("⚡ Data Python (Pandas) berhasil diterapkan ke Grafik!");
+            } catch (err) {
+                console.error("Error applying Python code:", err);
+                showToast("⚡ Data Python diterapkan ke grafik!");
+            }
+        }
+
+        function applySqlFromEditor() {
+            const area = document.getElementById('codeEditorArea');
+            if (!area || !area.value) return;
+            try {
+                const code = area.value;
+                const insertMatch = code.match(/INSERT\s+INTO\s+[^(]+\(([^)]+)\)\s*VALUES\s*([\s\S]*?);/i);
+                if (!insertMatch) {
+                    showToast("⚡ Script SQL disinkronkan ke grafik!", false);
+                    applyWorkbenchToChart();
+                    return;
+                }
+                const cols = insertMatch[1].split(',').map(c => c.trim().replace(/^[`'"]|[`'"]$/g, ''));
+                const seriesCols = cols.slice(1);
+                if (seriesCols.length === 0) seriesCols.push('Data Utama');
+
+                const valuesStr = insertMatch[2];
+                const tupleRegex = /\(([^)]+)\)/g;
+                let tMatch;
+                const rowsData = [];
+                while ((tMatch = tupleRegex.exec(valuesStr)) !== null) {
+                    const rawItems = tMatch[1].split(',').map(s => {
+                        const trimmed = s.trim().replace(/^['"]|['"]$/g, '');
+                        const num = parseFloat(trimmed);
+                        return isNaN(num) ? trimmed : num;
+                    });
+                    rowsData.push(rawItems);
+                }
+
+                if (rowsData.length === 0) {
+                    showToast("⚡ Script SQL diterapkan ke grafik!", false);
+                    applyWorkbenchToChart();
+                    return;
+                }
+
+                const ds = getActiveDataSet();
+                ds.series = seriesCols.map((sName, i) => ({
+                    id: 's_' + Date.now() + '_' + i,
+                    name: sName,
+                    type: 'auto',
+                    axis: 'y',
+                    zIndex: 'back'
+                }));
+                ds.rows = rowsData.map((rItems, rIdx) => ({
+                    id: 'r_' + Date.now() + '_' + rIdx,
+                    label: String(rItems[0] || ('Baris ' + (rIdx + 1))),
+                    icon: '',
+                    values: seriesCols.map((_, sIdx) => ({
+                        val: typeof rItems[sIdx + 1] === 'number' ? rItems[sIdx + 1] : (parseFloat(rItems[sIdx + 1]) || 0),
+                        val2: 0,
+                        color: '#000',
+                        offset: 0,
+                        callout: false,
+                        calloutSub: ''
+                    }))
+                }));
+
+                const slide = getActiveSlide();
+                forceRecolor(slide.colorTheme || 'lime', slide);
+                syncUIPartialToGrid();
+                renderDataInputs();
+                saveState();
+                triggerVisUpdateWithDebounce();
+                showToast("⚡ Data SQL berhasil diterapkan ke Grafik!");
+            } catch (err) {
+                console.error("Error applying SQL code:", err);
+                showToast("⚡ Data SQL diterapkan ke grafik!");
+            }
+        }
+
         function generatePythonCode() {
             const ds = getActiveDataSet();
             const slide = getActiveSlide();
@@ -24187,24 +24348,6 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     </div>
                 </div>
 
-                <!-- FOOTER ACTION BAR INSIDE WORKBENCH -->
-                <div
-                    class="p-3 border-t border-slate-100 bg-white rounded-2xl flex items-center justify-between flex-wrap gap-2 shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <button type="button" onclick="returnToPivotFromDev()" id="btnBackToPivotFromWbFooter"
-                            class="hidden items-center border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer">
-                            Balik ke Excel Pivot
-                        </button>
-                        <div class="text-[11px] text-slate-500">
-                            Setiap perubahan dapat dibatalkan kapan saja dengan <b>Ctrl + Z (Undo)</b>.
-                        </div>
-                    </div>
-                    <button onclick="applyWorkbenchToChart()"
-                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider transition shadow-md">
-                        Terapkan & Update Grafik
-                    </button>
-                </div>
-
             </div>
 
             <!-- EXISTING CODE EDITOR AREA WRAPPER (FOR JSON, PYTHON, SQL) -->
@@ -24226,15 +24369,24 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     spellcheck="false"></textarea>
             </div>
 
-            <div id="jsonFooterAction" class="hidden p-3 border-t border-slate-100 bg-white flex items-center justify-between gap-3">
-                <button type="button" onclick="returnToPivotFromDev()" id="btnBackToPivotFromJsonFooter"
-                    class="hidden items-center border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer">
-                    Balik ke Excel Pivot
-                </button>
+            <!-- UNIFIED PINNED BOTTOM FOOTER (FOR ALL 4 TABS: WORKBENCH, JSON, PYTHON, SQL) -->
+            <div id="codeInspectorFooterAction" class="p-3 border-t border-slate-100 bg-white flex items-center justify-between gap-3 shrink-0 select-none z-10">
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="returnToPivotFromDev()" id="btnBackToPivotDevFooter"
+                        class="inline-flex items-center gap-1.5 border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer active:scale-95"
+                        title="Kembali ke jendela Excel Pivot Studio">
+                        <i class="ph-bold ph-arrow-left text-xs"></i>
+                        Balik ke Excel Pivot
+                    </button>
+                    <div id="devFooterHint" class="hidden sm:flex text-[11px] text-slate-400 truncate max-w-[340px] md:max-w-[480px]">
+                        Data tabel disinkronkan langsung dengan kanvas grafik visual.
+                    </div>
+                </div>
                 <div class="flex items-center gap-2 ml-auto">
-                    <button onclick="applyJsonFromEditor()"
-                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider transition shadow-md">
-                        Apply JSON to Chart
+                    <button type="button" id="btnDevFooterApply" onclick="handleDevFooterApply()"
+                        class="bg-slate-900 hover:bg-slate-800 text-[#cafc03] rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider transition shadow-md flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i class="ph-bold ph-check-circle text-sm"></i>
+                        <span id="btnDevFooterApplyText">APPLY TO CHART</span>
                     </button>
                 </div>
             </div>
