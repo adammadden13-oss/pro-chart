@@ -3426,18 +3426,33 @@
                         </div>
                     </div>
                     <div
-                        class="flex justify-between items-center mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase" data-i18n="rowCount">Baris
-                            Kategori</span>
-                        <div class="flex items-center bg-white rounded-lg border border-slate-200 p-0.5 shadow-sm">
-                            <button id="btnRemoveRow"
-                                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-md transition"><i
-                                    class="ph ph-minus"></i></button>
-                            <span id="rowCountDisplay"
-                                class="w-8 sm:w-10 text-center text-xs font-bold text-slate-800">4</span>
-                            <button id="btnAddRow"
-                                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-[#cafc03] hover:bg-slate-900 rounded-md transition"><i
-                                    class="ph ph-plus"></i></button>
+                        class="flex justify-between items-center mb-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex-wrap gap-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-black text-slate-500 uppercase tracking-wider" data-i18n="rowCount">Baris Kategori</span>
+                            <div class="flex items-center bg-white rounded-lg border border-slate-200 p-0.5 shadow-2xs">
+                                <button id="btnRemoveRow"
+                                    class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-md transition"><i
+                                        class="ph ph-minus text-xs"></i></button>
+                                <span id="rowCountDisplay"
+                                    class="w-6 text-center text-xs font-bold text-slate-800">4</span>
+                                <button id="btnAddRow"
+                                    class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-[#cafc03] hover:bg-slate-900 rounded-md transition"><i
+                                        class="ph ph-plus text-xs"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="sortActiveSlideRows('desc')" class="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-200 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Urutkan dari nilai tertinggi ke terendah">
+                                <i class="ph-bold ph-sort-descending text-indigo-600"></i>
+                                <span>Tertinggi</span>
+                            </button>
+                            <button type="button" onclick="sortActiveSlideRows('asc')" class="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-200 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Urutkan dari nilai terendah ke tertinggi">
+                                <i class="ph-bold ph-sort-ascending text-indigo-600"></i>
+                                <span>Terendah</span>
+                            </button>
+                            <button type="button" onclick="sortActiveSlideRows('alpha')" class="px-2 py-1 bg-white hover:bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold border border-slate-200 transition shadow-2xs flex items-center gap-1 cursor-pointer" title="Urutkan abjad A-Z">
+                                <i class="ph-bold ph-text-aa text-indigo-600"></i>
+                                <span>A-Z</span>
+                            </button>
                         </div>
                     </div>
                     <div id="dataRowsContainer"
@@ -10777,6 +10792,26 @@ ${escapeHtml(narrative)}
         function updateSeriesProp(index, prop, val) { const ds = getActiveDataSet(); if (ds.series[index]) { ds.series[index][prop] = val; triggerVisUpdateWithDebounce(); saveState(); } }
         function updateSeriesName(index, val) { const ds = getActiveDataSet(); if (ds.series[index]) { ds.series[index].name = val; renderDataInputs(); triggerVisUpdateWithDebounce(); saveState(); } }
 
+        function sortActiveSlideRows(mode = 'desc') {
+            const ds = getActiveDataSet();
+            if (!ds || !ds.rows || ds.rows.length <= 1) return;
+            const slide = getActiveSlide();
+            const focusSeriesIdx = (slide && slide.hudActiveSeriesIdx) || 0;
+            ds.rows.sort((a, b) => {
+                if (mode === 'alpha') {
+                    return String(a.label || '').localeCompare(String(b.label || ''));
+                }
+                const vA = a.values[focusSeriesIdx]?.val ?? 0;
+                const vB = b.values[focusSeriesIdx]?.val ?? 0;
+                return mode === 'asc' ? (vA - vB) : (vB - vA);
+            });
+            renderDataInputs();
+            syncUIPartialToGrid();
+            triggerVisUpdateWithDebounce();
+            saveState();
+            showToast(mode === 'alpha' ? '✅ Diurutkan abjad A-Z' : (mode === 'asc' ? '✅ Diurutkan dari nilai terendah' : '✅ Diurutkan dari nilai tertinggi'));
+        }
+
         function renderDataInputs() {
             try {
                 const slide = getActiveSlide(); const ds = getActiveDataSet(); if (!slide || !ds || !els.dataRowsContainer) return; els.dataRowsContainer.innerHTML = '';
@@ -15783,6 +15818,15 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             };
             pivotStudioState.showDelta = true;
             pivotStudioState.showAverage = true;
+            if (!pivotStudioState.unselectedExportColumns) {
+                pivotStudioState.unselectedExportColumns = new Set();
+            }
+            pivotStudioState.unselectedExportColumns.add('delta');
+            pivotStudioState.unselectedExportColumns.add('Δ Selisih');
+            pivotStudioState.unselectedExportColumns.add('Δ SELISIH (±)');
+            pivotStudioState.unselectedExportColumns.add('avg');
+            pivotStudioState.unselectedExportColumns.add('Rata-rata');
+            pivotStudioState.unselectedExportColumns.add('AVERAGE (X̄)');
             pivotStudioState.timeGranularity = 'raw';
 
             closeVersusDateModal();
@@ -15851,6 +15895,15 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             };
             pivotStudioState.showDelta = true;
             pivotStudioState.showAverage = true;
+            if (!pivotStudioState.unselectedExportColumns) {
+                pivotStudioState.unselectedExportColumns = new Set();
+            }
+            pivotStudioState.unselectedExportColumns.add('delta');
+            pivotStudioState.unselectedExportColumns.add('Δ Selisih');
+            pivotStudioState.unselectedExportColumns.add('Δ SELISIH (±)');
+            pivotStudioState.unselectedExportColumns.add('avg');
+            pivotStudioState.unselectedExportColumns.add('Rata-rata');
+            pivotStudioState.unselectedExportColumns.add('AVERAGE (X̄)');
             pivotStudioState.timeGranularity = 'raw';
 
             closeVersusDateModal();
@@ -15880,11 +15933,44 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         // =========================================================================
         // EXPORT CHECKBOXES & COLUMN EXPORT SELECTOR
         // =========================================================================
+        function isDeltaColName(name) {
+            if (!name) return false;
+            const s = String(name).toLowerCase();
+            return s === 'delta' || s.includes('selisih') || s.includes('δ') || s.includes('Δ');
+        }
+
+        function isAvgColName(name) {
+            if (!name) return false;
+            const s = String(name).toLowerCase();
+            return s === 'avg' || s.includes('average') || s.includes('rata') || s.includes('x̄');
+        }
+
         function isExportColumnSelected(colKey) {
             if (!pivotStudioState.unselectedExportColumns) {
                 pivotStudioState.unselectedExportColumns = new Set();
             }
-            return !pivotStudioState.unselectedExportColumns.has(String(colKey).trim());
+            if (!colKey) return true;
+            const str = String(colKey).trim();
+            const lower = str.toLowerCase();
+
+            if (isDeltaColName(str)) {
+                for (const item of pivotStudioState.unselectedExportColumns) {
+                    if (isDeltaColName(item)) return false;
+                }
+                return true;
+            }
+
+            if (isAvgColName(str)) {
+                for (const item of pivotStudioState.unselectedExportColumns) {
+                    if (isAvgColName(item)) return false;
+                }
+                return true;
+            }
+
+            for (const item of pivotStudioState.unselectedExportColumns) {
+                if (String(item).trim().toLowerCase() === lower) return false;
+            }
+            return true;
         }
 
         function toggleExportColumn(colKey, isChecked) {
@@ -15892,10 +15978,36 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 pivotStudioState.unselectedExportColumns = new Set();
             }
             const k = String(colKey).trim();
+            const lower = k.toLowerCase();
+            const isDelta = isDeltaColName(k);
+            const isAvg = isAvgColName(k);
+
             if (isChecked) {
-                pivotStudioState.unselectedExportColumns.delete(k);
+                if (isDelta) {
+                    for (const item of [...pivotStudioState.unselectedExportColumns]) {
+                        if (isDeltaColName(item)) pivotStudioState.unselectedExportColumns.delete(item);
+                    }
+                } else if (isAvg) {
+                    for (const item of [...pivotStudioState.unselectedExportColumns]) {
+                        if (isAvgColName(item)) pivotStudioState.unselectedExportColumns.delete(item);
+                    }
+                } else {
+                    for (const item of [...pivotStudioState.unselectedExportColumns]) {
+                        if (String(item).trim().toLowerCase() === lower) pivotStudioState.unselectedExportColumns.delete(item);
+                    }
+                }
             } else {
-                pivotStudioState.unselectedExportColumns.add(k);
+                if (isDelta) {
+                    pivotStudioState.unselectedExportColumns.add('delta');
+                    pivotStudioState.unselectedExportColumns.add('Δ Selisih');
+                    pivotStudioState.unselectedExportColumns.add('Δ SELISIH (±)');
+                } else if (isAvg) {
+                    pivotStudioState.unselectedExportColumns.add('avg');
+                    pivotStudioState.unselectedExportColumns.add('Rata-rata');
+                    pivotStudioState.unselectedExportColumns.add('AVERAGE (X̄)');
+                } else {
+                    pivotStudioState.unselectedExportColumns.add(k);
+                }
             }
             renderStudioKitView();
             updatePivotExportStatusBadge();
@@ -15907,15 +16019,9 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             let activeCount = 0;
             for (let i = 1; i < headers.length; i++) {
                 const h = headers[i];
-                let isColActive = true;
-                if (h.includes('Δ Selisih') || h.includes('Selisih')) {
-                    isColActive = isExportColumnSelected('delta') && isExportColumnSelected(h);
-                } else if (h.includes('Rata-rata') || h.includes('Average')) {
-                    isColActive = isExportColumnSelected('avg') && isExportColumnSelected(h);
-                } else {
-                    isColActive = isExportColumnSelected(h);
+                if (isExportColumnSelected(h)) {
+                    activeCount++;
                 }
-                if (isColActive) activeCount++;
             }
 
             const status = document.getElementById('rawImportSummaryStatus');
@@ -15930,60 +16036,75 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         function reopenPivotStudio() {
             ensurePivotStudioSets();
             let slide = getActiveSlide();
+            if (!slide) return;
             
-            // Check if current slide is a breakdown / drill-down slide without its own workbook
+            // 1. Check if current slide is a breakdown / drill-down slide
             let parentSlide = null;
-            if (slide) {
-                if (slide.drillParentId) {
-                    parentSlide = appSlides.find(s => s.id === slide.drillParentId);
-                } else if (slide.drillParentInfo && slide.drillParentInfo.parentSlideId) {
-                    parentSlide = appSlides.find(s => s.id === slide.drillParentInfo.parentSlideId);
-                }
+            if (slide.drillParentId) {
+                parentSlide = appSlides.find(s => s.id === slide.drillParentId);
+            } else if (slide.drillParentInfo && slide.drillParentInfo.parentSlideId) {
+                parentSlide = appSlides.find(s => s.id === slide.drillParentInfo.parentSlideId);
             }
 
-            let storedWb = (slide && slide.id && sessionWorkbooksBySlide.get(slide.id)) || (slide && slide.lastImportWorkbook);
+            const isDrillSlide = !!(
+                parentSlide ||
+                slide.drillParentId ||
+                slide.drillInfo ||
+                slide.drillParentInfo ||
+                (slide.chartTitle && slide.chartTitle.includes('• Breakdown'))
+            );
+
+            // 2. Resolve workbook source
+            let storedWb = (slide.id && sessionWorkbooksBySlide.get(slide.id)) || slide.lastImportWorkbook;
             if (!storedWb && parentSlide) {
                 storedWb = (parentSlide.id && sessionWorkbooksBySlide.get(parentSlide.id)) || parentSlide.lastImportWorkbook;
             }
 
             if (storedWb) {
                 currentImportWorkbook = storedWb;
-                currentImportFileName = (slide && slide.lastImportFileName) || (parentSlide && parentSlide.lastImportFileName) || currentImportFileName;
-                currentActiveSheetName = (slide && slide.lastImportSheetName) || (parentSlide && parentSlide.lastImportSheetName) || currentActiveSheetName;
+                currentImportFileName = slide.lastImportFileName || (parentSlide && parentSlide.lastImportFileName) || currentImportFileName;
+                currentActiveSheetName = slide.lastImportSheetName || (parentSlide && parentSlide.lastImportSheetName) || currentActiveSheetName;
             } else {
-                const targetFileName = (slide && slide.lastImportFileName) || (parentSlide && parentSlide.lastImportFileName) || currentOpenedFileName;
+                const targetFileName = slide.lastImportFileName || (parentSlide && parentSlide.lastImportFileName) || currentOpenedFileName;
                 if (targetFileName && typeof sessionWorkbookLibrary !== 'undefined') {
                     const libEntry = sessionWorkbookLibrary.get(targetFileName);
                     if (libEntry && libEntry.workbook) {
                         currentImportWorkbook = libEntry.workbook;
                         currentImportFileName = libEntry.fileName;
-                        currentActiveSheetName = (slide && slide.lastImportSheetName) || (parentSlide && parentSlide.lastImportSheetName) || currentActiveSheetName;
+                        currentActiveSheetName = slide.lastImportSheetName || (parentSlide && parentSlide.lastImportSheetName) || currentActiveSheetName;
                     }
                 }
             }
 
-            if (slide && slide.lastImportWorkbook) {
+            if (slide.lastImportWorkbook) {
                 delete slide.lastImportWorkbook;
             }
 
-            const targetSnapshot = (slide && slide.pivotStateSnapshot) || (parentSlide && parentSlide.pivotStateSnapshot);
-            if (targetSnapshot) {
-                // Restore snapshot without data loss
+            // 3. For an independent slide (Slide 2+) that has no raw workbook and is NOT a drilldown slide:
+            // directly open this slide's own dataset so it discusses that slide's data!
+            if (activeSlideIndex > 0 && !isDrillSlide && (!slide.lastImportFileName && !sessionWorkbooksBySlide.has(slide.id))) {
+                loadCurrentSlideDataToPivot();
+                return;
+            }
+
+            // 4. Restore snapshot: baseline from slide or parent
+            const baseSnapshot = slide.pivotStateSnapshot || (parentSlide && parentSlide.pivotStateSnapshot);
+            if (baseSnapshot) {
                 try {
                     if (typeof PivotStudioStorage !== 'undefined' && typeof PivotStudioStorage.deserializeState === 'function') {
-                        PivotStudioStorage.deserializeState(targetSnapshot);
+                        PivotStudioStorage.deserializeState(baseSnapshot);
                     } else {
-                        Object.keys(targetSnapshot).forEach(k => {
+                        Object.keys(baseSnapshot).forEach(k => {
                             if (k === 'filterSelectedValues' || k === 'filter2SelectedValues' || k === 'unselectedExportColumns' || k === 'selectedRowKeys') {
-                                pivotStudioState[k] = new Set(Array.isArray(targetSnapshot[k]) ? targetSnapshot[k] : []);
-                            } else if (k === 'periodComparison' && targetSnapshot[k]) {
+                                pivotStudioState[k] = new Set(Array.isArray(baseSnapshot[k]) ? baseSnapshot[k] : []);
+                            } else if (k === 'periodComparison' && baseSnapshot[k]) {
                                 pivotStudioState[k] = {
-                                    ...targetSnapshot[k],
-                                    valuesA: new Set(Array.isArray(targetSnapshot[k].valuesA) ? targetSnapshot[k].valuesA : []),
-                                    valuesB: new Set(Array.isArray(targetSnapshot[k].valuesB) ? targetSnapshot[k].valuesB : [])
+                                    ...baseSnapshot[k],
+                                    valuesA: new Set(Array.isArray(baseSnapshot[k].valuesA) ? baseSnapshot[k].valuesA : []),
+                                    valuesB: new Set(Array.isArray(baseSnapshot[k].valuesB) ? baseSnapshot[k].valuesB : [])
                                 };
                             } else {
-                                pivotStudioState[k] = targetSnapshot[k];
+                                pivotStudioState[k] = baseSnapshot[k];
                             }
                         });
                     }
@@ -15992,6 +16113,63 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 }
             }
             ensurePivotStudioSets();
+
+            // 5. If this is a drilldown/breakdown slide (e.g. "KISS PAGI • Breakdown CATEGORY"):
+            // Ensure the pivot state is focused strictly on this item and breakdown level!
+            if (isDrillSlide) {
+                let parentKey = slide.drillInfo?.parentKey || slide.drillParentInfo?.parentLabel || '';
+                let childLevelName = slide.drillInfo?.childColName || '';
+                if (!parentKey && slide.chartTitle && slide.chartTitle.includes('• Breakdown')) {
+                    const parts = slide.chartTitle.split('• Breakdown');
+                    parentKey = parts[0].trim();
+                    childLevelName = parts[1].trim();
+                }
+
+                let parentColIdx = (slide.drillInfo && slide.drillInfo.parentColIdx >= 0) ? slide.drillInfo.parentColIdx : -1;
+                let childColIdx = (slide.drillInfo && slide.drillInfo.childColIdx >= 0) ? slide.drillInfo.childColIdx : -1;
+
+                if (parentSlide && parentSlide.pivotStateSnapshot) {
+                    const pSnap = parentSlide.pivotStateSnapshot;
+                    if (parentColIdx < 0 && pSnap.row1ColIdx >= 0) parentColIdx = pSnap.row1ColIdx;
+                    if (childColIdx < 0 && pSnap.row2ColIdx >= 0) childColIdx = pSnap.row2ColIdx;
+                }
+
+                // If indices still not found, search in raw sheet headers
+                if ((childColIdx < 0 || parentColIdx < 0) && currentImportWorkbook && currentActiveSheetName) {
+                    try {
+                        const ws = currentImportWorkbook.Sheets[currentActiveSheetName];
+                        if (ws) {
+                            const sheetAoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+                            const hIdx = Math.max(0, (parseInt(document.getElementById('pivotHeaderRowInput')?.value) || 1) - 1);
+                            const hRow = sheetAoa[hIdx] || sheetAoa[0] || [];
+                            if (childColIdx < 0 && childLevelName) {
+                                childColIdx = hRow.findIndex(h => cleanHeaderName(h).toLowerCase() === childLevelName.toLowerCase());
+                            }
+                        }
+                    } catch (e) {}
+                }
+
+                if (childColIdx >= 0) {
+                    pivotStudioState.row1ColIdx = childColIdx;
+                    pivotStudioState.row2ColIdx = -1;
+                    pivotStudioState.rowColIndices = [childColIdx];
+                }
+
+                if (parentColIdx >= 0 && parentKey) {
+                    if (pivotStudioState.filterColIdx >= 0 && pivotStudioState.filterColIdx !== parentColIdx) {
+                        pivotStudioState.filter2ColIdx = parentColIdx;
+                        pivotStudioState.filter2SelectedValues = new Set([parentKey]);
+                    } else {
+                        pivotStudioState.filterColIdx = parentColIdx;
+                        pivotStudioState.filterSelectedValues = new Set([parentKey]);
+                    }
+                }
+
+                // Keep tailored breakdown snapshot persisted for this slide
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    slide.pivotStateSnapshot = PivotStudioStorage.serializeState(pivotStudioState);
+                }
+            }
 
             try {
                 if (currentImportWorkbook) {
@@ -16360,6 +16538,15 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 };
                 pivotStudioState.showDelta = true;
                 pivotStudioState.showAverage = true;
+                if (!pivotStudioState.unselectedExportColumns) {
+                    pivotStudioState.unselectedExportColumns = new Set();
+                }
+                pivotStudioState.unselectedExportColumns.add('delta');
+                pivotStudioState.unselectedExportColumns.add('Δ Selisih');
+                pivotStudioState.unselectedExportColumns.add('Δ SELISIH (±)');
+                pivotStudioState.unselectedExportColumns.add('avg');
+                pivotStudioState.unselectedExportColumns.add('Rata-rata');
+                pivotStudioState.unselectedExportColumns.add('AVERAGE (X̄)');
                 pivotStudioState.timeGranularity = 'raw';
 
                 closeVersusDateModal();
@@ -16410,6 +16597,15 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 };
                 pivotStudioState.showDelta = true;
                 pivotStudioState.showAverage = true;
+                if (!pivotStudioState.unselectedExportColumns) {
+                    pivotStudioState.unselectedExportColumns = new Set();
+                }
+                pivotStudioState.unselectedExportColumns.add('delta');
+                pivotStudioState.unselectedExportColumns.add('Δ Selisih');
+                pivotStudioState.unselectedExportColumns.add('Δ SELISIH (±)');
+                pivotStudioState.unselectedExportColumns.add('avg');
+                pivotStudioState.unselectedExportColumns.add('Rata-rata');
+                pivotStudioState.unselectedExportColumns.add('AVERAGE (X̄)');
                 pivotStudioState.timeGranularity = 'raw';
 
                 closeVersusDateModal();
@@ -16756,6 +16952,15 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
 
             pivotStudioState.showDelta = true;
             pivotStudioState.showAverage = true;
+            if (!pivotStudioState.unselectedExportColumns) {
+                pivotStudioState.unselectedExportColumns = new Set();
+            }
+            pivotStudioState.unselectedExportColumns.add('delta');
+            pivotStudioState.unselectedExportColumns.add('Δ Selisih');
+            pivotStudioState.unselectedExportColumns.add('Δ SELISIH (±)');
+            pivotStudioState.unselectedExportColumns.add('avg');
+            pivotStudioState.unselectedExportColumns.add('Rata-rata');
+            pivotStudioState.unselectedExportColumns.add('AVERAGE (X̄)');
             pivotStudioState.colColIdx = colIdx;
             pivotStudioState.periodComparison = {
                 active: true,
@@ -18580,26 +18785,26 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                                 ${(hasV2 && pivotStudioState.showDelta) ? `
                                 <!-- COLUMN DELTA (WITH CHART EXPORT CHECKBOX) -->
                                 <th onclick="onStudioHeaderSort('delta')" title="Klik untuk mengurutkan Selisih Nilai 2 - Nilai 1"
-                                    class="group cursor-pointer hover:bg-amber-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-amber-900 bg-amber-50/70 select-none border-x border-amber-200/80 ${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? '' : 'opacity-60 bg-slate-100/60'}">
+                                    class="group cursor-pointer hover:bg-amber-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-amber-900 bg-amber-50/70 select-none border-x border-amber-200/80 ${isExportColumnSelected('delta') ? '' : 'opacity-60 bg-slate-100/60'}">
                                     <div class="inline-flex items-center justify-end gap-1.5 w-full">
                                         <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan selisih ke Grafik Slide">
-                                            <input type="checkbox" ${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? 'checked' : ''} onchange="toggleExportColumn('delta', this.checked); toggleExportColumn('Δ Selisih', this.checked);" class="w-3.5 h-3.5 rounded text-amber-600 accent-amber-600 cursor-pointer">
+                                            <input type="checkbox" ${isExportColumnSelected('delta') ? 'checked' : ''} onchange="toggleExportColumn('delta', this.checked)" class="w-3.5 h-3.5 rounded text-amber-600 accent-amber-600 cursor-pointer">
                                         </label>
-                                        <span class="${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? '' : 'text-slate-400 line-through'}">Δ Selisih (±)</span>
-                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-slate-200 text-slate-500'}">${(isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih')) ? 'Chart' : 'Tabel'}</span>
+                                        <span class="${isExportColumnSelected('delta') ? '' : 'text-slate-400 line-through'}">Δ Selisih (±)</span>
+                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isExportColumnSelected('delta') ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-slate-200 text-slate-500'}">${isExportColumnSelected('delta') ? 'Chart' : 'Tabel'}</span>
                                         ${getSortIconHtml('delta')}
                                     </div>
                                 </th>` : ''}
                                 ${(hasV2 && pivotStudioState.showAverage) ? `
                                 <!-- COLUMN AVERAGE (WITH CHART EXPORT CHECKBOX) -->
                                 <th onclick="onStudioHeaderSort('avg')" title="Klik untuk mengurutkan Rata-rata"
-                                    class="group cursor-pointer hover:bg-cyan-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-cyan-900 bg-cyan-50/70 select-none border-r border-cyan-200/80 ${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? '' : 'opacity-60 bg-slate-100/60'}">
+                                    class="group cursor-pointer hover:bg-cyan-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-cyan-900 bg-cyan-50/70 select-none border-r border-cyan-200/80 ${isExportColumnSelected('avg') ? '' : 'opacity-60 bg-slate-100/60'}">
                                     <div class="inline-flex items-center justify-end gap-1.5 w-full">
                                         <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan rata-rata ke Grafik Slide">
-                                            <input type="checkbox" ${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? 'checked' : ''} onchange="toggleExportColumn('avg', this.checked); toggleExportColumn('Rata-rata', this.checked);" class="w-3.5 h-3.5 rounded text-cyan-600 accent-cyan-600 cursor-pointer">
+                                            <input type="checkbox" ${isExportColumnSelected('avg') ? 'checked' : ''} onchange="toggleExportColumn('avg', this.checked)" class="w-3.5 h-3.5 rounded text-cyan-600 accent-cyan-600 cursor-pointer">
                                         </label>
-                                        <span class="${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? '' : 'text-slate-400 line-through'}">Average (x̄)</span>
-                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? 'bg-cyan-200 text-cyan-900 border border-cyan-400' : 'bg-slate-200 text-slate-500'}">${(isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata')) ? 'Chart' : 'Tabel'}</span>
+                                        <span class="${isExportColumnSelected('avg') ? '' : 'text-slate-400 line-through'}">Average (x̄)</span>
+                                        <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isExportColumnSelected('avg') ? 'bg-cyan-200 text-cyan-900 border border-cyan-400' : 'bg-slate-200 text-slate-500'}">${isExportColumnSelected('avg') ? 'Chart' : 'Tabel'}</span>
                                         ${getSortIconHtml('avg')}
                                     </div>
                                 </th>` : ''}
@@ -18797,13 +19002,13 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 });
 
                 if (has2MatrixCols && pivotStudioState.showDelta) {
-                    const isDeltaActive = isExportColumnSelected('delta') && isExportColumnSelected('Δ Selisih');
+                    const isDeltaActive = isExportColumnSelected('delta');
                     tableHtml += `
                     <th onclick="onStudioHeaderSort('delta')" title="Klik untuk mengurutkan Selisih ${escapeHtml(res.colKeys[1])} - ${escapeHtml(res.colKeys[0])}"
                         class="group cursor-pointer hover:bg-amber-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-amber-900 bg-amber-50/70 select-none border-x border-amber-200/80 ${isDeltaActive ? '' : 'opacity-60 bg-slate-100/60'}">
                         <div class="inline-flex items-center justify-end gap-1.5 w-full">
                             <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan selisih ke Grafik Slide">
-                                <input type="checkbox" ${isDeltaActive ? 'checked' : ''} onchange="toggleExportColumn('delta', this.checked); toggleExportColumn('Δ Selisih', this.checked);" class="w-3.5 h-3.5 rounded text-amber-600 accent-amber-600 cursor-pointer">
+                                <input type="checkbox" ${isDeltaActive ? 'checked' : ''} onchange="toggleExportColumn('delta', this.checked)" class="w-3.5 h-3.5 rounded text-amber-600 accent-amber-600 cursor-pointer">
                             </label>
                             <span class="${isDeltaActive ? '' : 'text-slate-400 line-through'}">Δ Selisih (±)</span>
                             <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isDeltaActive ? 'bg-amber-200 text-amber-900 border border-amber-400' : 'bg-slate-200 text-slate-500'}">${isDeltaActive ? 'Chart' : 'Tabel'}</span>
@@ -18813,13 +19018,13 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                 }
 
                 if (has2MatrixCols && pivotStudioState.showAverage) {
-                    const isAvgActive = isExportColumnSelected('avg') && isExportColumnSelected('Rata-rata');
+                    const isAvgActive = isExportColumnSelected('avg');
                     tableHtml += `
                     <th onclick="onStudioHeaderSort('avg')" title="Klik untuk mengurutkan Rata-rata"
                         class="group cursor-pointer hover:bg-cyan-100/70 transition py-2 px-3 font-black text-[11px] tracking-wider text-right uppercase text-cyan-900 bg-cyan-50/70 select-none border-r border-cyan-200/80 ${isAvgActive ? '' : 'opacity-60 bg-slate-100/60'}">
                         <div class="inline-flex items-center justify-end gap-1.5 w-full">
                             <label class="inline-flex items-center cursor-pointer select-none" onclick="event.stopPropagation()" title="Centang untuk memasukkan rata-rata ke Grafik Slide">
-                                <input type="checkbox" ${isAvgActive ? 'checked' : ''} onchange="toggleExportColumn('avg', this.checked); toggleExportColumn('Rata-rata', this.checked);" class="w-3.5 h-3.5 rounded text-cyan-600 accent-cyan-600 cursor-pointer">
+                                <input type="checkbox" ${isAvgActive ? 'checked' : ''} onchange="toggleExportColumn('avg', this.checked)" class="w-3.5 h-3.5 rounded text-cyan-600 accent-cyan-600 cursor-pointer">
                             </label>
                             <span class="${isAvgActive ? '' : 'text-slate-400 line-through'}">Average (x̄)</span>
                             <span class="text-[9px] font-mono px-1 py-0.2 rounded font-bold ${isAvgActive ? 'bg-cyan-200 text-cyan-900 border border-cyan-400' : 'bg-slate-200 text-slate-500'}">${isAvgActive ? 'Chart' : 'Tabel'}</span>
@@ -19978,15 +20183,7 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             const activeColIndices = [];
             for (let i = 1; i < headers.length; i++) {
                 const h = headers[i];
-                let isColActive = true;
-                if (h.includes('Δ Selisih') || h.includes('Selisih')) {
-                    isColActive = isExportColumnSelected('delta') && isExportColumnSelected(h);
-                } else if (h.includes('Rata-rata') || h.includes('Average')) {
-                    isColActive = isExportColumnSelected('avg') && isExportColumnSelected(h);
-                } else {
-                    isColActive = isExportColumnSelected(h);
-                }
-                if (isColActive) {
+                if (isExportColumnSelected(h)) {
                     activeColIndices.push(i);
                 }
             }
@@ -20135,6 +20332,42 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                         sessionWorkbooksBySlide.set(childSlide.id, currentImportWorkbook);
                     }
 
+                    // Store tailored breakdown snapshot directly on child slide
+                    try {
+                        const childSnapshot = JSON.parse(JSON.stringify(pivotStudioState, (k, v) => (v instanceof Set ? Array.from(v) : v)));
+                        const childColIdx = (rowIndices && rowIndices[depthIndex] !== undefined) ? rowIndices[depthIndex] : -1;
+                        const parentColIdx = (rowIndices && rowIndices[depthIndex - 1] !== undefined) ? rowIndices[depthIndex - 1] : -1;
+
+                        if (childColIdx >= 0) {
+                            childSnapshot.row1ColIdx = childColIdx;
+                            childSnapshot.row2ColIdx = (depthIndex + 1 < rowIndices.length) ? rowIndices[depthIndex + 1] : -1;
+                            childSnapshot.rowColIndices = [childColIdx, ...(childSnapshot.row2ColIdx >= 0 ? [childSnapshot.row2ColIdx] : [])];
+                        }
+
+                        if (parentColIdx >= 0) {
+                            if (childSnapshot.filterColIdx >= 0 && childSnapshot.filterColIdx !== parentColIdx) {
+                                childSnapshot.filter2ColIdx = parentColIdx;
+                                childSnapshot.filter2SelectedValues = [node.key];
+                            } else {
+                                childSnapshot.filterColIdx = parentColIdx;
+                                childSnapshot.filterSelectedValues = [node.key];
+                            }
+                        }
+
+                        childSlide.pivotStateSnapshot = childSnapshot;
+                        childSlide.drillInfo = {
+                            parentSlideId: parentSlideId,
+                            parentKey: node.key,
+                            parentColIdx: parentColIdx,
+                            parentColName: rowNames[depthIndex - 1] || '',
+                            childColIdx: childColIdx,
+                            childColName: childLevelName,
+                            depthIndex: depthIndex
+                        };
+                    } catch (snapErr) {
+                        console.warn("Could not create child pivot state snapshot:", snapErr);
+                    }
+
                     const childDs = childSlide.dataSets[0];
                     childDs.series = ds.series.map((s, sIdx) => ({
                         id: 's_child_' + Date.now() + '_' + sIdx,
@@ -20195,7 +20428,7 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                 slide.pivotStateSnapshot = snap;
                 appSlides.forEach(s => {
                     if (s.drillParentId === slide.id) {
-                        s.pivotStateSnapshot = snap;
+                        if (!s.pivotStateSnapshot) s.pivotStateSnapshot = snap;
                         s.lastImportFileName = currentImportFileName;
                         s.lastImportSheetName = currentActiveSheetName;
                         if (currentImportWorkbook && typeof sessionWorkbooksBySlide !== 'undefined') {
@@ -20277,15 +20510,7 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
             const activeColIndices = [];
             for (let i = 1; i < headers.length; i++) {
                 const h = headers[i];
-                let isColActive = true;
-                if (h.includes('Δ Selisih') || h.includes('Selisih')) {
-                    isColActive = isExportColumnSelected('delta') && isExportColumnSelected(h);
-                } else if (h.includes('Rata-rata') || h.includes('Average')) {
-                    isColActive = isExportColumnSelected('avg') && isExportColumnSelected(h);
-                } else {
-                    isColActive = isExportColumnSelected(h);
-                }
-                if (isColActive) {
+                if (isExportColumnSelected(h)) {
                     activeColIndices.push(i);
                 }
             }
