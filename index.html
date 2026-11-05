@@ -1692,6 +1692,75 @@
         </div>
     </div>
 
+    <!-- MODAL PILIH KOLOM BREAKDOWN (USER CONTROL - TANPA TEBAK-TEBAKAN) -->
+    <div id="breakdownColumnPickerModal" class="hidden fixed inset-0 z-[285] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5" onclick="if(event.target === this) closeBreakdownColumnPickerModal()">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-lg p-5 sm:p-6 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+            <!-- HEADER -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md">
+                        <i class="ph-bold ph-git-fork text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 tracking-tight">Tentukan Kolom Breakdown</h4>
+                        <p class="text-[11px] text-slate-500 font-medium">Pilih kolom dari Excel yang ingin dijadikan rincian baris</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeBreakdownColumnPickerModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition">
+                    <i class="ph-bold ph-x text-sm"></i>
+                </button>
+            </div>
+
+            <!-- TARGET VALUE INFO -->
+            <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-black uppercase text-indigo-400 tracking-wider">Nilai Induk:</span>
+                    <span id="breakdownPickerTargetVal" class="text-xs font-black text-indigo-900 px-2.5 py-1 rounded-lg bg-white border border-indigo-200">Kasus</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] text-indigo-600 font-bold">
+                    <span>Kolom Induk:</span>
+                    <span id="breakdownPickerParentCol" class="font-black text-indigo-950 underline">[J] CATEGORY</span>
+                </div>
+            </div>
+
+            <!-- COLUMN SELECTION -->
+            <div class="space-y-1.5">
+                <label class="block text-[10px] font-black uppercase text-slate-500 tracking-wider">
+                    Pilih Kolom Rincian Baris (Dari Excel):
+                </label>
+                <div class="relative">
+                    <select id="breakdownPickerColSelect"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:bg-white focus:border-indigo-600 transition cursor-pointer appearance-none">
+                    </select>
+                    <div class="absolute right-3 top-3 text-slate-400 pointer-events-none">
+                        <i class="ph-bold ph-caret-down"></i>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400">💡 Anda memegang kendali penuh atas kolom yang ingin dimunculkan dari Excel ke Pivot (tanpa tebak-tebakan).</p>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
+                <button type="button" onclick="openPivotStudioFromBreakdownPicker()"
+                    class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 transition">
+                    <i class="ph-bold ph-table text-indigo-600"></i>
+                    <span>Atur di Excel Pivot</span>
+                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeBreakdownColumnPickerModal()"
+                        class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition">
+                        Batal
+                    </button>
+                    <button type="button" onclick="confirmBreakdownColumnSelection()"
+                        class="px-4 py-2 rounded-xl text-xs font-black bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1.5 shadow-md transition cursor-pointer">
+                        <i class="ph-bold ph-check text-amber-300"></i>
+                        <span>Terapkan ke Slide Baru</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL PRATINJAU & KOMPARASI VERSI (DIFF & ROLLBACK PREVIEW) -->
     <div id="historyDiffModal"
         class="fixed inset-0 z-[230] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 transition-all duration-300"
@@ -7213,8 +7282,383 @@
             updateCanvasDrillBreadcrumbs();
         }
 
-        // --- POINT 3: INTERACTIVE SUB-CATEGORY DRILL-THROUGH ENGINE ---
-        function createSmartSubBreakdown(gridIndex = 0, rowId = null) {
+        // --- DATA SHEET AND DRILLDOWN HELPER UTILITIES (ROBUST & NO GUESSWORK) ---
+        function getActiveRawDataSheetAoa(targetWb, targetSheetName) {
+            if (typeof currentRawSheetData !== 'undefined' && Array.isArray(currentRawSheetData) && currentRawSheetData.length > 0) {
+                return currentRawSheetData;
+            }
+            const wb = targetWb || currentImportWorkbook;
+            const sName = targetSheetName || currentActiveSheetName;
+            if (wb && sName && wb.Sheets && wb.Sheets[sName]) {
+                try {
+                    return XLSX.utils.sheet_to_json(wb.Sheets[sName], { header: 1, defval: '' });
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        function getColHeaderName(colIdx, rawSheetData, hIdx = 0) {
+            if (colIdx < 0) return 'Kategori';
+            if (rawSheetData && rawSheetData[hIdx] && rawSheetData[hIdx][colIdx] !== undefined) {
+                const raw = rawSheetData[hIdx][colIdx];
+                return (typeof cleanHeaderName === 'function' ? cleanHeaderName(raw) : String(raw).trim()) || `Kolom ${typeof getColLetter === 'function' ? getColLetter(colIdx) : (colIdx + 1)}`;
+            }
+            if (typeof currentPreparedHeaderRow !== 'undefined' && currentPreparedHeaderRow && currentPreparedHeaderRow[colIdx]) {
+                return currentPreparedHeaderRow[colIdx];
+            }
+            return `Kolom ${typeof getColLetter === 'function' ? getColLetter(colIdx) : (colIdx + 1)}`;
+        }
+
+        function findHeaderIdxByName(name, rawSheetData, hIdx = 0) {
+            if (!name) return -1;
+            const target = (typeof cleanHeaderName === 'function' ? cleanHeaderName(name) : String(name).trim()).toLowerCase();
+            const hRow = (rawSheetData && rawSheetData[hIdx]) ? rawSheetData[hIdx] : (typeof currentPreparedHeaderRow !== 'undefined' ? currentPreparedHeaderRow : null);
+            if (hRow && Array.isArray(hRow)) {
+                for (let c = 0; c < hRow.length; c++) {
+                    const hName = (typeof cleanHeaderName === 'function' ? cleanHeaderName(hRow[c]) : String(hRow[c]).trim()).toLowerCase();
+                    if (hName === target) return c;
+                }
+            }
+            return -1;
+        }
+
+        function isValuePresentInCol(val, colIdx, rawSheetData, hIdx = 0) {
+            if (colIdx < 0 || val === undefined || val === null || !rawSheetData || rawSheetData.length <= hIdx + 1) return false;
+            const target = String(val).trim().toLowerCase();
+            const checkRows = Math.min(rawSheetData.length, 1000);
+            for (let r = hIdx + 1; r < checkRows; r++) {
+                if (String(rawSheetData[r]?.[colIdx] ?? '').trim().toLowerCase() === target) return true;
+            }
+            return false;
+        }
+
+        function findColumnForValueInSheet(val, rawSheetData, hIdx = 0) {
+            if (val === undefined || val === null || !rawSheetData || rawSheetData.length <= hIdx + 1) return -1;
+            const target = String(val).trim().toLowerCase();
+            const hRow = rawSheetData[hIdx] || [];
+            const checkRows = Math.min(rawSheetData.length, 1000);
+            for (let c = 0; c < hRow.length; c++) {
+                for (let r = hIdx + 1; r < checkRows; r++) {
+                    if (String(rawSheetData[r]?.[c] ?? '').trim().toLowerCase() === target) return c;
+                }
+            }
+            return -1;
+        }
+
+        // --- UNIVERSAL DRILLDOWN & HIERARCHICAL LINEAGE ENGINE (LEVEL 1 -> LEVEL 2 -> LEVEL 3 -> LEVEL N) ---
+        function resolveSlideDrillLineage(targetSlide) {
+            if (!targetSlide) return { depth: 0, path: [], masterIndices: [], masterNames: [], rootSlide: null, activeRowColIdx: -1, nextRowColIdx: -1 };
+
+            // Trace slide ancestry up to root slide
+            const lineage = [];
+            let cur = targetSlide;
+            const visited = new Set();
+            while (cur && !visited.has(cur.id)) {
+                visited.add(cur.id);
+                lineage.unshift(cur);
+                const pId = cur.drillParentId || cur.drillParentInfo?.parentSlideId || cur.drillInfo?.parentSlideId;
+                if (!pId) break;
+                const pSlide = appSlides.find(s => s.id === pId);
+                if (!pSlide) break;
+                cur = pSlide;
+            }
+
+            const rootSlide = lineage[0] || targetSlide;
+
+            // 1. Resolve master row hierarchy column indices & names
+            let masterIndices = targetSlide.masterRowColIndices || rootSlide.masterRowColIndices;
+            let masterNames = targetSlide.masterRowNames || rootSlide.masterRowNames;
+
+            if (!masterIndices || masterIndices.length === 0) {
+                const rSnap = rootSlide.pivotStateSnapshot || targetSlide.pivotStateSnapshot;
+                if (rSnap && Array.isArray(rSnap.rowColIndices) && rSnap.rowColIndices.length > 0) {
+                    masterIndices = [...rSnap.rowColIndices];
+                } else if (rSnap && rSnap.row1ColIdx >= 0) {
+                    masterIndices = [rSnap.row1ColIdx, ...(rSnap.row2ColIdx >= 0 ? [rSnap.row2ColIdx] : [])];
+                } else if (typeof pivotStudioState !== 'undefined' && Array.isArray(pivotStudioState.rowColIndices) && pivotStudioState.rowColIndices.length > 0) {
+                    masterIndices = [...pivotStudioState.rowColIndices];
+                } else {
+                    masterIndices = [];
+                }
+            }
+
+            if ((!masterNames || masterNames.length === 0) && masterIndices && masterIndices.length > 0) {
+                masterNames = masterIndices.map((idx, pos) => {
+                    const h = (typeof currentPreparedHeaderRow !== 'undefined' && currentPreparedHeaderRow && currentPreparedHeaderRow[idx])
+                        ? currentPreparedHeaderRow[idx]
+                        : (typeof currentRawSheetData !== 'undefined' && currentRawSheetData[0] && currentRawSheetData[0][idx] ? (typeof cleanHeaderName === 'function' ? cleanHeaderName(currentRawSheetData[0][idx]) : String(currentRawSheetData[0][idx])) : `Level ${pos + 1}`);
+                    return h;
+                });
+            }
+
+            // 2. Resolve depth (0 = root, 1 = drill level 1, 2 = drill level 2, etc.)
+            let depth = typeof targetSlide.drillDepth === 'number' ? targetSlide.drillDepth : (lineage.length - 1);
+            if (depth < 0) depth = 0;
+
+            // 3. Resolve drillPath filters
+            let path = [];
+            if (Array.isArray(targetSlide.drillPath) && targetSlide.drillPath.length > 0) {
+                path = [...targetSlide.drillPath];
+            } else {
+                for (let i = 1; i < lineage.length; i++) {
+                    const s = lineage[i];
+                    const pSlide = lineage[i - 1];
+                    const pDepth = i - 1;
+                    let colIdx = (masterIndices && masterIndices[pDepth] !== undefined) ? masterIndices[pDepth] : -1;
+                    let colName = (masterNames && masterNames[pDepth]) ? masterNames[pDepth] : '';
+                    let val = s.drillInfo?.parentKey || s.drillParentInfo?.parentLabel || '';
+                    if (!val && s.chartTitle && s.chartTitle.includes('• Breakdown')) {
+                        val = s.chartTitle.split('• Breakdown')[0].trim();
+                    } else if (!val && s.chartTitle && s.chartTitle.startsWith('Breakdown: ')) {
+                        val = s.chartTitle.replace('Breakdown: ', '').trim();
+                    }
+                    if (val) {
+                        path.push({ colIdx, colName, val });
+                    }
+                }
+            }
+
+            // AUTO-HEAL & VERIFY: Ensure each filter column accurately contains its filter value!
+            // Completely fixes accidental guessing (e.g. STATION assigned to "Kasus" instead of CATEGORY)
+            const rawDataForLineage = getActiveRawDataSheetAoa();
+            const hIdx = Math.max(0, (parseInt(document.getElementById('pivotHeaderRowInput')?.value) || 1) - 1);
+            if (rawDataForLineage && rawDataForLineage.length > hIdx + 1) {
+                path.forEach((df, pIdx) => {
+                    if (!df || !df.val) return;
+                    const isValidInCol = isValuePresentInCol(df.val, df.colIdx, rawDataForLineage, hIdx);
+                    if (!isValidInCol) {
+                        const pSlide = lineage[pIdx];
+                        let healedColIdx = -1;
+                        if (pSlide && pSlide.chartTitle && pSlide.chartTitle.includes('• Breakdown')) {
+                            const titleColName = pSlide.chartTitle.split('• Breakdown')[1]?.trim();
+                            if (titleColName) {
+                                healedColIdx = findHeaderIdxByName(titleColName, rawDataForLineage, hIdx);
+                            }
+                        }
+                        if (healedColIdx < 0 && pSlide && pSlide.pivotStateSnapshot && pSlide.pivotStateSnapshot.row1ColIdx >= 0) {
+                            if (isValuePresentInCol(df.val, pSlide.pivotStateSnapshot.row1ColIdx, rawDataForLineage, hIdx)) {
+                                healedColIdx = pSlide.pivotStateSnapshot.row1ColIdx;
+                            }
+                        }
+                        if (healedColIdx < 0) {
+                            healedColIdx = findColumnForValueInSheet(df.val, rawDataForLineage, hIdx);
+                        }
+                        if (healedColIdx >= 0) {
+                            df.colIdx = healedColIdx;
+                            df.colName = getColHeaderName(healedColIdx, rawDataForLineage, hIdx);
+                            if (masterIndices && masterIndices[pIdx] !== undefined) {
+                                masterIndices[pIdx] = healedColIdx;
+                            }
+                            if (masterNames && masterNames[pIdx] !== undefined) {
+                                masterNames[pIdx] = df.colName;
+                            }
+                        }
+                    }
+                });
+                targetSlide.drillPath = [...path];
+            }
+
+            // 4. Resolve active row and next child column for this slide
+            let activeRowColIdx = -1;
+            if (targetSlide.pivotStateSnapshot && targetSlide.pivotStateSnapshot.row1ColIdx >= 0) {
+                activeRowColIdx = targetSlide.pivotStateSnapshot.row1ColIdx;
+            } else if (targetSlide.chartTitle && targetSlide.chartTitle.includes('• Breakdown')) {
+                const curDim = targetSlide.chartTitle.split('• Breakdown')[1]?.trim();
+                activeRowColIdx = findHeaderIdxByName(curDim, rawDataForLineage, hIdx);
+            }
+            if (activeRowColIdx < 0) {
+                activeRowColIdx = (masterIndices && masterIndices[depth] !== undefined) ? masterIndices[depth] : -1;
+            }
+
+            let nextRowColIdx = -1;
+            if (targetSlide.pivotStateSnapshot && targetSlide.pivotStateSnapshot.row2ColIdx >= 0) {
+                nextRowColIdx = targetSlide.pivotStateSnapshot.row2ColIdx;
+            } else {
+                nextRowColIdx = (masterIndices && masterIndices[depth + 1] !== undefined) ? masterIndices[depth + 1] : -1;
+            }
+
+            return {
+                depth,
+                path,
+                masterIndices: masterIndices || [],
+                masterNames: masterNames || [],
+                rootSlide,
+                activeRowColIdx,
+                nextRowColIdx
+            };
+        }
+
+                function computeDrilldownDataFromRawSheet(wb, sheetName, drillPath, targetColIdx, val1Idx, val1Agg, val2Idx, val2Agg) {
+            if (!wb || !sheetName || targetColIdx < 0) return null;
+            try {
+                const ws = wb.Sheets[sheetName];
+                if (!ws) return null;
+                const sheetAoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+                if (!sheetAoa || sheetAoa.length < 2) return null;
+                const hIdx = Math.max(0, (parseInt(document.getElementById('pivotHeaderRowInput')?.value) || 1) - 1);
+                const headerRow = sheetAoa[hIdx] || sheetAoa[0] || [];
+
+                const validPath = Array.isArray(drillPath) ? drillPath.filter(df => df.colIdx >= 0 && df.val !== undefined && df.val !== null) : [];
+                const matched = [];
+                for (let r = hIdx + 1; r < sheetAoa.length; r++) {
+                    const row = sheetAoa[r];
+                    if (!row || row.length === 0) continue;
+                    let match = true;
+                    for (const df of validPath) {
+                        const rVal = (row[df.colIdx] !== undefined && row[df.colIdx] !== null) ? String(row[df.colIdx]).trim() : '';
+                        if (rVal !== String(df.val).trim()) {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match) matched.push(row);
+                }
+
+                if (matched.length === 0) return null;
+
+                const groupMap = new Map();
+                const v1Col = val1Idx >= 0 ? val1Idx : 1;
+                const v2Col = val2Idx >= 0 ? val2Idx : -1;
+                const agg1 = val1Agg || 'AVERAGE';
+                const agg2 = val2Agg || 'SUM';
+
+                const targetHeader = headerRow[targetColIdx] ? (typeof cleanHeaderName === 'function' ? cleanHeaderName(headerRow[targetColIdx]) : String(headerRow[targetColIdx])) : `Kolom ${targetColIdx + 1}`;
+
+                matched.forEach(row => {
+                    const rawKey = row[targetColIdx];
+                    const key = (rawKey !== undefined && rawKey !== null && String(rawKey).trim() !== '') ? String(rawKey).trim() : `(Tanpa ${targetHeader})`;
+                    const num1 = (typeof parseCleanNum === 'function') ? parseCleanNum(row[v1Col]) : (Number(row[v1Col]) || 0);
+                    const num2 = (v2Col >= 0) ? ((typeof parseCleanNum === 'function') ? parseCleanNum(row[v2Col]) : (Number(row[v2Col]) || 0)) : 0;
+
+                    if (!groupMap.has(key)) {
+                        groupMap.set(key, { key, sum1: num1, min1: num1, max1: num1, sum2: num2, min2: num2, max2: num2, count: 1 });
+                    } else {
+                        const item = groupMap.get(key);
+                        item.sum1 += num1;
+                        item.min1 = Math.min(item.min1, num1);
+                        item.max1 = Math.max(item.max1, num1);
+                        item.sum2 += num2;
+                        item.min2 = Math.min(item.min2, num2);
+                        item.max2 = Math.max(item.max2, num2);
+                        item.count += 1;
+                    }
+                });
+
+                const results = [];
+                groupMap.forEach(item => {
+                    const val1 = (typeof computeAgg === 'function') ? computeAgg(item.sum1, item.count, item.min1, item.max1, agg1) : (agg1 === 'AVERAGE' ? Number((item.sum1 / item.count).toFixed(2)) : Number(item.sum1.toFixed(2)));
+                    const val2 = (v2Col >= 0) ? ((typeof computeAgg === 'function') ? computeAgg(item.sum2, item.count, item.min2, item.max2, agg2) : (agg2 === 'AVERAGE' ? Number((item.sum2 / item.count).toFixed(2)) : Number(item.sum2.toFixed(2)))) : null;
+                    results.push({ key: item.key, val1, val2, count: item.count });
+                });
+
+                results.sort((a, b) => (b.val1 || 0) - (a.val1 || 0));
+                return results;
+            } catch (err) {
+                console.warn("computeDrilldownDataFromRawSheet error:", err);
+                return null;
+            }
+        }
+
+        // --- POINT 3: INTERACTIVE MULTI-LEVEL SUB-CATEGORY DRILL-THROUGH ENGINE ---
+        let activeBreakdownPickerContext = null;
+
+        function openBreakdownColumnPickerModal(gridIndex, rowId, parentColIdx, parentColName, targetVal) {
+            activeBreakdownPickerContext = { gridIndex, rowId, parentColIdx, parentColName, targetVal };
+
+            const modal = document.getElementById('breakdownColumnPickerModal');
+            if (!modal) return;
+
+            const valBadge = document.getElementById('breakdownPickerTargetVal');
+            const parentBadge = document.getElementById('breakdownPickerParentCol');
+            const select = document.getElementById('breakdownPickerColSelect');
+
+            if (valBadge) valBadge.innerText = targetVal || 'Data Terpilih';
+            if (parentBadge) parentBadge.innerText = parentColIdx >= 0 ? `[${typeof getColLetter === 'function' ? getColLetter(parentColIdx) : parentColIdx}] ${parentColName}` : parentColName;
+
+            // Populate columns from current sheet
+            if (select) {
+                select.innerHTML = '';
+                const hIdx = Math.max(0, (parseInt(document.getElementById('pivotHeaderRowInput')?.value) || 1) - 1);
+                const rawData = getActiveRawDataSheetAoa();
+                const headerRow = (rawData && rawData[hIdx]) ? rawData[hIdx] : ((typeof currentPreparedHeaderRow !== 'undefined' && currentPreparedHeaderRow) ? currentPreparedHeaderRow : []);
+
+                const curSlide = getActiveSlide();
+                const lineage = resolveSlideDrillLineage(curSlide);
+                const usedCols = new Set([...lineage.path.map(p => p.colIdx), parentColIdx]);
+
+                let preferredIdx = -1;
+                for (let c = 0; c < headerRow.length; c++) {
+                    const rawH = headerRow[c];
+                    if (rawH === undefined || rawH === null || String(rawH).trim() === '') continue;
+                    const hName = typeof cleanHeaderName === 'function' ? cleanHeaderName(rawH) : String(rawH).trim();
+                    const isUsed = usedCols.has(c);
+                    const opt = document.createElement('option');
+                    opt.value = c;
+                    const letter = typeof getColLetter === 'function' ? getColLetter(c) : (c + 1);
+                    opt.textContent = `[${letter}] ${hName}${isUsed ? ' (Sudah dipakai di filter)' : ''}`;
+                    if (isUsed) {
+                        opt.className = 'text-slate-400 bg-slate-100';
+                    }
+                    select.appendChild(opt);
+
+                    // Suggest the first unused non-metric column as default
+                    if (preferredIdx < 0 && !isUsed) {
+                        const low = hName.toLowerCase();
+                        if (!low.includes('date') && !low.includes('tanggal') && !low.includes('share') && !low.includes('tvr') && !low.includes('rating') && !low.includes('durasi') && !low.includes('minutes') && !low.includes('cost')) {
+                            preferredIdx = c;
+                        }
+                    }
+                }
+                if (preferredIdx >= 0) {
+                    select.value = preferredIdx;
+                }
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeBreakdownColumnPickerModal() {
+            const modal = document.getElementById('breakdownColumnPickerModal');
+            if (modal) modal.classList.add('hidden');
+            activeBreakdownPickerContext = null;
+        }
+
+        function confirmBreakdownColumnSelection() {
+            if (!activeBreakdownPickerContext) return;
+            const select = document.getElementById('breakdownPickerColSelect');
+            const chosenColIdx = select ? parseInt(select.value) : -1;
+            if (chosenColIdx < 0) {
+                showToast("Pilih kolom terlebih dahulu!", true);
+                return;
+            }
+            const { gridIndex, rowId } = activeBreakdownPickerContext;
+            closeBreakdownColumnPickerModal();
+            createSmartSubBreakdown(gridIndex, rowId, chosenColIdx);
+        }
+
+        function openPivotStudioFromBreakdownPicker() {
+            if (!activeBreakdownPickerContext) return;
+            const select = document.getElementById('breakdownPickerColSelect');
+            const chosenColIdx = select ? parseInt(select.value) : -1;
+            const { parentColIdx, parentColName, targetVal } = activeBreakdownPickerContext;
+            closeBreakdownColumnPickerModal();
+
+            ensurePivotStudioSets();
+            const curSlide = getActiveSlide();
+            const lineage = resolveSlideDrillLineage(curSlide);
+            const drillPath = [
+                ...lineage.path,
+                { colIdx: parentColIdx, colName: parentColName, val: targetVal }
+            ];
+            pivotStudioState.drillFilters = drillPath;
+            if (chosenColIdx >= 0) {
+                pivotStudioState.row1ColIdx = chosenColIdx;
+                pivotStudioState.rowColIndices = [chosenColIdx];
+            }
+            reopenPivotStudio();
+        }
+
+        function createSmartSubBreakdown(gridIndex = 0, rowId = null, chosenColIdx = -1) {
             const currentSlide = getActiveSlide();
             if (!currentSlide) return;
             const ds = currentSlide.dataSets[gridIndex] || currentSlide.dataSets[0];
@@ -7229,13 +7673,181 @@
             const rowVal = row.values && row.values[0] ? parseFloat(row.values[0].val) || 100 : 100;
             const newSlideNumber = appSlides.length + 1;
             const newSlide = generateDefaultSlide(newSlideNumber);
-            newSlide.chartTitle = `Breakdown: ${row.label}`;
-            newSlide.chartSubtitle = `Distribusi Sub-Kategori ${row.label} (Total Induk: ${formatChartNumber(rowVal)})`;
+            newSlide.colorTheme = currentSlide.colorTheme || 'lime';
+            newSlide.stackMode = currentSlide.stackMode || 'grouped';
+            newSlide.bentoCharts = Array.isArray(currentSlide.bentoCharts) ? [...currentSlide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
 
-            // Check if real pivot multi-level hierarchy data exists for this row
-            let realChildren = null;
-            let realSubLevelName = 'Sub-Kategori';
-            if (typeof currentComputedPivotResult !== 'undefined' && currentComputedPivotResult) {
+            // 1. Trace lineage & hierarchy to determine exact drill depth, parent col, child col
+            const lineage = resolveSlideDrillLineage(currentSlide);
+            const parentDepth = lineage.depth;
+            const childDepth = parentDepth + 1;
+
+            // Resolve target workbook source
+            let targetWb = (currentSlide.id && sessionWorkbooksBySlide.get(currentSlide.id)) || currentImportWorkbook;
+            if (!targetWb && lineage.rootSlide && lineage.rootSlide.id) {
+                targetWb = sessionWorkbooksBySlide.get(lineage.rootSlide.id);
+            }
+            let targetSheetName = currentSlide.lastImportSheetName || currentActiveSheetName || (lineage.rootSlide && lineage.rootSlide.lastImportSheetName);
+            if (!targetWb && (currentSlide.lastImportFileName || (lineage.rootSlide && lineage.rootSlide.lastImportFileName)) && typeof sessionWorkbookLibrary !== 'undefined') {
+                const targetFname = currentSlide.lastImportFileName || lineage.rootSlide.lastImportFileName;
+                const libEntry = sessionWorkbookLibrary.get(targetFname);
+                if (libEntry && libEntry.workbook) {
+                    targetWb = libEntry.workbook;
+                    if (!targetSheetName && libEntry.sheetNames && libEntry.sheetNames.length > 0) {
+                        targetSheetName = libEntry.sheetNames[0];
+                    }
+                }
+            }
+
+            const rawData = getActiveRawDataSheetAoa(targetWb, targetSheetName);
+            const hIdx = Math.max(0, (parseInt(document.getElementById('pivotHeaderRowInput')?.value) || 1) - 1);
+
+            // 2. Accurately identify parent column for row.label (NO GUESSING)
+            let parentColIdx = -1;
+            let parentColName = '';
+
+            if (currentSlide.chartTitle && currentSlide.chartTitle.includes('• Breakdown')) {
+                const tName = currentSlide.chartTitle.split('• Breakdown')[1]?.trim();
+                if (tName) {
+                    const idx = findHeaderIdxByName(tName, rawData, hIdx);
+                    if (idx >= 0) {
+                        parentColIdx = idx;
+                        parentColName = tName;
+                    }
+                }
+            }
+            if (parentColIdx < 0 && currentSlide.pivotStateSnapshot && currentSlide.pivotStateSnapshot.row1ColIdx >= 0) {
+                const rIdx = currentSlide.pivotStateSnapshot.row1ColIdx;
+                if (isValuePresentInCol(row.label, rIdx, rawData, hIdx)) {
+                    parentColIdx = rIdx;
+                    parentColName = getColHeaderName(rIdx, rawData, hIdx);
+                }
+            }
+            if (parentColIdx < 0 && lineage.masterIndices && lineage.masterIndices[parentDepth] !== undefined) {
+                const mIdx = lineage.masterIndices[parentDepth];
+                if (isValuePresentInCol(row.label, mIdx, rawData, hIdx)) {
+                    parentColIdx = mIdx;
+                    parentColName = lineage.masterNames[parentDepth] || getColHeaderName(mIdx, rawData, hIdx);
+                }
+            }
+            if (parentColIdx < 0) {
+                const sIdx = findColumnForValueInSheet(row.label, rawData, hIdx);
+                if (sIdx >= 0) {
+                    parentColIdx = sIdx;
+                    parentColName = getColHeaderName(sIdx, rawData, hIdx);
+                } else {
+                    parentColIdx = (lineage.masterIndices && lineage.masterIndices[parentDepth] !== undefined) ? lineage.masterIndices[parentDepth] : 0;
+                    parentColName = (lineage.masterNames && lineage.masterNames[parentDepth]) ? lineage.masterNames[parentDepth] : 'Kategori';
+                }
+            }
+
+            // 3. Identify child column (NO GUESSING! User decides!)
+            let childColIdx = chosenColIdx;
+            let childColName = '';
+
+            if (childColIdx < 0) {
+                if (currentSlide.pivotStateSnapshot && currentSlide.pivotStateSnapshot.row2ColIdx >= 0) {
+                    childColIdx = currentSlide.pivotStateSnapshot.row2ColIdx;
+                } else if (lineage.masterIndices && lineage.masterIndices[childDepth] !== undefined && lineage.masterIndices[childDepth] >= 0) {
+                    childColIdx = lineage.masterIndices[childDepth];
+                }
+            }
+
+            // USER CONTROL: If childColIdx is not yet chosen, prompt the user with modal!
+            if (childColIdx < 0) {
+                closeElementPopup();
+                openBreakdownColumnPickerModal(gridIndex, row.id, parentColIdx, parentColName, row.label);
+                return;
+            }
+
+            childColName = getColHeaderName(childColIdx, rawData, hIdx);
+
+            const childDrillPath = [
+                ...lineage.path,
+                { colIdx: parentColIdx, colName: parentColName, val: row.label }
+            ];
+
+            newSlide.chartTitle = childColName ? `${row.label} • Breakdown ${childColName}` : `Breakdown: ${row.label}`;
+            newSlide.chartSubtitle = childColName
+                ? `Detail kontribusi ${childColName} pada ${row.label} (Total: ${formatChartNumber(rowVal)})`
+                : `Distribusi Sub-Kategori ${row.label} (Total Induk: ${formatChartNumber(rowVal)})`;
+
+            newSlide.drillParentId = currentSlide.id;
+            newSlide.drillParentInfo = {
+                parentSlideId: currentSlide.id,
+                parentSlideIndex: activeSlideIndex,
+                parentRowId: row.id,
+                parentLabel: row.label,
+                parentVal: rowVal
+            };
+            newSlide.drillDepth = childDepth;
+            newSlide.drillPath = childDrillPath;
+            newSlide.masterRowColIndices = [...lineage.masterIndices];
+            if (childColIdx >= 0 && !newSlide.masterRowColIndices.includes(childColIdx)) {
+                newSlide.masterRowColIndices.push(childColIdx);
+            }
+            newSlide.masterRowNames = [...lineage.masterNames];
+            if (childColName && !newSlide.masterRowNames.includes(childColName)) {
+                newSlide.masterRowNames.push(childColName);
+            }
+            newSlide.lastImportFileName = currentSlide.lastImportFileName || (lineage.rootSlide && lineage.rootSlide.lastImportFileName);
+            newSlide.lastImportSheetName = targetSheetName;
+            if (targetWb && typeof sessionWorkbooksBySlide !== 'undefined') {
+                sessionWorkbooksBySlide.set(newSlide.id, targetWb);
+            }
+
+            // Copy series from current slide
+            const pDs = currentSlide.dataSets[0] || generateDefaultDataSet(1);
+            newSlide.dataSets[0].series = pDs.series.map((s, sIdx) => ({
+                id: 's_child_' + Date.now() + '_' + sIdx,
+                name: s.name,
+                type: s.type || 'bar',
+                axis: s.axis || 'y',
+                zIndex: s.zIndex || 1
+            }));
+
+            // 4. Fetch real data
+            const palette = themes[currentSlide.theme] || themes['lime'];
+            let subRows = [];
+
+            const pSnap = currentSlide.pivotStateSnapshot || (lineage.rootSlide && lineage.rootSlide.pivotStateSnapshot);
+            const v1Idx = (pSnap?.val1ColIdx >= 0) ? pSnap.val1ColIdx : (pivotStudioState.val1ColIdx >= 0 ? pivotStudioState.val1ColIdx : 1);
+            const v1Agg = pSnap?.val1Agg || pivotStudioState.val1Agg || 'AVERAGE';
+            const v2Idx = (pSnap?.val2ColIdx >= 0) ? pSnap.val2ColIdx : (pivotStudioState.val2ColIdx >= 0 ? pivotStudioState.val2ColIdx : -1);
+            const v2Agg = pSnap?.val2Agg || pivotStudioState.val2Agg || 'SUM';
+
+            const rawDrillData = (targetWb && targetSheetName && childColIdx >= 0)
+                ? computeDrilldownDataFromRawSheet(targetWb, targetSheetName, childDrillPath, childColIdx, v1Idx, v1Agg, v2Idx, v2Agg)
+                : null;
+
+            if (rawDrillData && rawDrillData.length > 0) {
+                subRows = rawDrillData.map((item, idx) => {
+                    const rowVals = [];
+                    newSlide.dataSets[0].series.forEach((s, sIdx) => {
+                        let cVal = 0;
+                        if (sIdx === 0) cVal = item.val1 !== null ? item.val1 : 0;
+                        else if (sIdx === 1) cVal = item.val2 !== null ? item.val2 : 0;
+                        else cVal = item.val1 !== null ? item.val1 : 0;
+
+                        rowVals.push({
+                            val: cVal,
+                            val2: 0,
+                            color: palette[idx % palette.length],
+                            offset: 0,
+                            callout: false,
+                            calloutSub: ''
+                        });
+                    });
+
+                    return {
+                        id: 'r_sub_' + Date.now() + '_' + idx,
+                        label: item.key || `Sub ${idx + 1}`,
+                        icon: '',
+                        drillTarget: null,
+                        values: rowVals
+                    };
+                });
+            } else if (typeof currentComputedPivotResult !== 'undefined' && currentComputedPivotResult) {
                 const res = currentComputedPivotResult;
                 const searchList = res.rows || res.groups || [];
                 function findNodeByLabel(list) {
@@ -7251,39 +7863,27 @@
                 }
                 const foundNode = findNodeByLabel(searchList);
                 if (foundNode && foundNode.children && foundNode.children.length > 0) {
-                    realChildren = foundNode.children;
-                    const dIdx = foundNode.level ? foundNode.level : 1;
-                    if (res.rowNames && res.rowNames[dIdx]) {
-                        realSubLevelName = res.rowNames[dIdx];
-                    } else if (dIdx === 1 && res.r2Name) {
-                        realSubLevelName = res.r2Name;
-                    }
+                    subRows = foundNode.children.map((c, idx) => {
+                        const cVal = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : (typeof c.val1 === 'number' ? c.val1 : (c.total || 0));
+                        return {
+                            id: 'r_sub_' + Date.now() + '_' + idx,
+                            label: c.key || `Sub ${idx + 1}`,
+                            icon: '',
+                            drillTarget: null,
+                            values: [{
+                                val: cVal,
+                                val2: 0,
+                                color: palette[idx % palette.length],
+                                offset: 0,
+                                callout: false,
+                                calloutSub: ''
+                            }]
+                        };
+                    });
                 }
             }
 
-            const palette = themes[currentSlide.theme] || themes['lime'];
-            let subRows = [];
-
-            if (realChildren && realChildren.length > 0) {
-                newSlide.chartTitle = `${row.label} • Breakdown ${realSubLevelName}`;
-                newSlide.chartSubtitle = `Detail kontribusi ${realSubLevelName} pada ${row.label} (Total: ${formatChartNumber(rowVal)})`;
-                subRows = realChildren.map((c, idx) => {
-                    const cVal = (c.vals && c.vals[0] !== undefined) ? c.vals[0] : (typeof c.val1 === 'number' ? c.val1 : (c.total || 0));
-                    return {
-                        id: 'r_sub_' + Date.now() + '_' + idx,
-                        label: c.key || `Sub ${idx + 1}`,
-                        icon: '',
-                        drillTarget: null,
-                        values: [{
-                            val: cVal,
-                            color: palette[idx % palette.length],
-                            offset: 0,
-                            callout: false
-                        }]
-                    };
-                });
-            } else {
-                // Generate 4 intelligent contextual sub-proportions that sum cleanly to rowVal
+            if (!subRows || subRows.length === 0) {
                 const ratios = [0.42, 0.28, 0.18, 0.12];
                 const subLabels = [
                     `Sub-Zona A (${row.label})`,
@@ -7292,7 +7892,6 @@
                     `Sub-Zona D (${row.label})`
                 ];
                 const subIcons = ['🏙️', '🏢', '🏬', '📍'];
-
                 subRows = ratios.map((ratio, idx) => {
                     const val = Math.round(rowVal * ratio);
                     return {
@@ -7302,29 +7901,29 @@
                         drillTarget: null,
                         values: [{
                             val: val,
+                            val2: 0,
                             color: palette[idx % palette.length],
                             offset: 0,
-                            callout: false
+                            callout: false,
+                            calloutSub: ''
                         }]
                     };
                 });
             }
 
             newSlide.dataSets[0].rows = subRows;
-            newSlide.drillParentInfo = {
-                parentSlideId: currentSlide.id,
-                parentSlideIndex: activeSlideIndex,
-                parentRowId: row.id,
-                parentLabel: row.label,
-                parentVal: rowVal
-            };
-            newSlide.drillParentId = currentSlide.id;
-            newSlide.lastImportFileName = currentSlide.lastImportFileName;
-            newSlide.lastImportSheetName = currentSlide.lastImportSheetName;
-            newSlide.pivotStateSnapshot = currentSlide.pivotStateSnapshot;
-            if (typeof currentImportWorkbook !== 'undefined' && currentImportWorkbook && typeof sessionWorkbooksBySlide !== 'undefined') {
-                sessionWorkbooksBySlide.set(newSlide.id, currentImportWorkbook);
-            }
+
+            // 5. Child pivot snapshot tailored for this slide
+            try {
+                const childSnap = JSON.parse(JSON.stringify(pSnap || pivotStudioState, (k, v) => (v instanceof Set ? Array.from(v) : v)));
+                childSnap.drillFilters = childDrillPath;
+                if (childColIdx >= 0) {
+                    childSnap.row1ColIdx = childColIdx;
+                    childSnap.row2ColIdx = (newSlide.masterRowColIndices[childDepth + 1] !== undefined) ? newSlide.masterRowColIndices[childDepth + 1] : -1;
+                    childSnap.rowColIndices = [childColIdx, ...(childSnap.row2ColIdx >= 0 ? [childSnap.row2ColIdx] : [])];
+                }
+                newSlide.pivotStateSnapshot = childSnap;
+            } catch (e) {}
 
             row.drillTarget = newSlide.id;
             appSlides.push(newSlide);
@@ -7336,7 +7935,7 @@
             closeElementPopup();
 
             drillDownTo(newSlide.id);
-            showToast(`✨ Sub-Breakdown otomatis untuk "${row.label}" berhasil dibuat!`);
+            showToast(`✨ Sub-Breakdown untuk "${row.label}" ke "${childColName}" berhasil dibuat!`);
         }
 
         function drillDownTo(targetSlideId) {
@@ -7402,6 +8001,23 @@
             const bar = document.getElementById('canvasDrillBreadcrumbsBar');
             const list = document.getElementById('canvasDrillBreadcrumbsList');
             const btn = document.getElementById('btnDrillBack');
+
+            if (drillHistoryStack.length === 0) {
+                const lineage = (typeof resolveSlideDrillLineage === 'function') ? resolveSlideDrillLineage(getActiveSlide()) : null;
+                if (lineage && lineage.depth > 0) {
+                    const ancestors = [];
+                    let cur = getActiveSlide();
+                    while (cur && (cur.drillParentId || cur.drillParentInfo?.parentSlideId)) {
+                        const pId = cur.drillParentId || cur.drillParentInfo?.parentSlideId;
+                        const pIdx = appSlides.findIndex(s => s.id === pId);
+                        if (pIdx >= 0 && !ancestors.includes(pIdx)) ancestors.unshift(pIdx);
+                        cur = appSlides[pIdx];
+                    }
+                    if (ancestors.length > 0) {
+                        drillHistoryStack = ancestors;
+                    }
+                }
+            }
 
             if (drillHistoryStack.length === 0) {
                 if (bar) bar.classList.add('hidden');
@@ -10869,26 +11485,7 @@ ${escapeHtml(narrative)}
             const r = ds.rows.find(x => x.id === rowId);
             if (!r) return;
             if (targetVal === '__create_new__') {
-                const newSlideIdx = appSlides.length + 1;
-                const newSlide = generateDefaultSlide(newSlideIdx);
-                newSlide.chartTitle = `Breakdown: ${r.label}`;
-                newSlide.chartSubtitle = `Detail Area untuk ${r.label}`;
-                const totalParent = Number(r.values[0]?.val) || 300;
-                const p1 = Math.round(totalParent * 0.45);
-                const p2 = Math.round(totalParent * 0.35);
-                const p3 = Math.max(10, totalParent - p1 - p2);
-                newSlide.dataSets[0].rows = [
-                    { id: 'r_sub1_' + Date.now(), label: `${r.label} - Area 1`, icon: '📍', values: [{ val: p1, val2: 0, color: '#cafc03', offset: 0, callout: false, calloutSub: '' }] },
-                    { id: 'r_sub2_' + Date.now(), label: `${r.label} - Area 2`, icon: '🏢', values: [{ val: p2, val2: 0, color: '#111827', offset: 0, callout: false, calloutSub: '' }] },
-                    { id: 'r_sub3_' + Date.now(), label: `${r.label} - Area 3`, icon: '⚡', values: [{ val: p3, val2: 0, color: '#94a3b8', offset: 0, callout: false, calloutSub: '' }] }
-                ];
-                appSlides.push(newSlide);
-                r.drillTarget = newSlide.id;
-                renderSlideList();
-                renderDataInputs();
-                renderPercentageWidgets();
-                saveState();
-                showToast(`Slide "${newSlide.chartTitle}" otomatis dibuat!`);
+                createSmartSubBreakdown(activeEditGridIndex || 0, r.id);
             } else {
                 r.drillTarget = targetVal || null;
                 renderDataInputs();
@@ -13762,6 +14359,7 @@ ${escapeHtml(narrative)}
             filterSelectedValues: new Set(), // Set of active filter strings (empty = all)
             filter2ColIdx: -1,            // Column index for Secondary Filter (e.g. Program, -1 = None)
             filter2SelectedValues: new Set(), // Set of active filter 2 strings (empty = all)
+            drillFilters: [],             // Multi-level Hierarchical Drill Filters: [{ colIdx, colName, val }, ...]
             periodColIdx: -1,             // Dedicated column index for period comparison (-1 = auto)
             unselectedExportColumns: new Set(), // Columns deselected via header checkboxes from chart export
             timeGranularity: 'raw',       // 'raw' | 'daily' | 'weekly' | 'monthly' | 'yearly'
@@ -13877,6 +14475,7 @@ ${escapeHtml(narrative)}
                     filterSelectedValues: Array.from(state.filterSelectedValues || []),
                     filter2ColIdx: state.filter2ColIdx,
                     filter2SelectedValues: Array.from(state.filter2SelectedValues || []),
+                    drillFilters: Array.isArray(state.drillFilters) ? state.drillFilters : [],
                     periodColIdx: state.periodColIdx,
                     unselectedExportColumns: Array.from(state.unselectedExportColumns || []),
                     timeGranularity: state.timeGranularity || 'raw',
@@ -16033,6 +16632,21 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
         // =========================================================================
         // REOPEN PIVOT STUDIO WITH FULL STATE PERSISTENCE
         // =========================================================================
+        function removePivotDrillFilter(dfIdx) {
+            if (!pivotStudioState.drillFilters || dfIdx < 0 || dfIdx >= pivotStudioState.drillFilters.length) return;
+            const removed = pivotStudioState.drillFilters.splice(dfIdx, 1);
+            const slide = getActiveSlide();
+            if (slide) {
+                slide.drillPath = [...pivotStudioState.drillFilters];
+                if (typeof PivotStudioStorage !== 'undefined') {
+                    slide.pivotStateSnapshot = PivotStudioStorage.serializeState(pivotStudioState);
+                }
+            }
+            renderPivotBuilder();
+            renderPivotBuilderPreview();
+            showToast(`Filter "${removed[0]?.colName || 'Drill'}" berhasil dihapus.`);
+        }
+
         function reopenPivotStudio() {
             ensurePivotStudioSets();
             let slide = getActiveSlide();
@@ -16114,54 +16728,35 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             }
             ensurePivotStudioSets();
 
-            // 5. If this is a drilldown/breakdown slide (e.g. "KISS PAGI • Breakdown CATEGORY"):
-            // Ensure the pivot state is focused strictly on this item and breakdown level!
+            // 5. If this is a drilldown/breakdown slide (e.g. Slide 2, Slide 3, Slide N):
+            // Accurately resolve arbitrary-level drill lineage, breadcrumb filters & active row dimension!
             if (isDrillSlide) {
-                let parentKey = slide.drillInfo?.parentKey || slide.drillParentInfo?.parentLabel || '';
-                let childLevelName = slide.drillInfo?.childColName || '';
-                if (!parentKey && slide.chartTitle && slide.chartTitle.includes('• Breakdown')) {
-                    const parts = slide.chartTitle.split('• Breakdown');
-                    parentKey = parts[0].trim();
-                    childLevelName = parts[1].trim();
-                }
+                const lineage = (typeof resolveSlideDrillLineage === 'function') ? resolveSlideDrillLineage(slide) : null;
 
-                let parentColIdx = (slide.drillInfo && slide.drillInfo.parentColIdx >= 0) ? slide.drillInfo.parentColIdx : -1;
-                let childColIdx = (slide.drillInfo && slide.drillInfo.childColIdx >= 0) ? slide.drillInfo.childColIdx : -1;
+                if (lineage) {
+                    // A. Apply all accumulated hierarchical drill filters
+                    if (lineage.path && lineage.path.length > 0) {
+                        pivotStudioState.drillFilters = [...lineage.path];
+                        slide.drillPath = [...lineage.path];
+                        slide.drillDepth = lineage.depth;
+                        slide.masterRowColIndices = [...lineage.masterIndices];
+                        slide.masterRowNames = [...lineage.masterNames];
+                    }
 
-                if (parentSlide && parentSlide.pivotStateSnapshot) {
-                    const pSnap = parentSlide.pivotStateSnapshot;
-                    if (parentColIdx < 0 && pSnap.row1ColIdx >= 0) parentColIdx = pSnap.row1ColIdx;
-                    if (childColIdx < 0 && pSnap.row2ColIdx >= 0) childColIdx = pSnap.row2ColIdx;
-                }
+                    // B. Set active row dimension for this breakdown slide
+                    if (lineage.activeRowColIdx >= 0) {
+                        pivotStudioState.row1ColIdx = lineage.activeRowColIdx;
+                        pivotStudioState.row2ColIdx = lineage.nextRowColIdx;
+                        pivotStudioState.rowColIndices = [
+                            lineage.activeRowColIdx,
+                            ...(lineage.nextRowColIdx >= 0 ? [lineage.nextRowColIdx] : [])
+                        ];
+                    }
 
-                // If indices still not found, search in raw sheet headers
-                if ((childColIdx < 0 || parentColIdx < 0) && currentImportWorkbook && currentActiveSheetName) {
-                    try {
-                        const ws = currentImportWorkbook.Sheets[currentActiveSheetName];
-                        if (ws) {
-                            const sheetAoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-                            const hIdx = Math.max(0, (parseInt(document.getElementById('pivotHeaderRowInput')?.value) || 1) - 1);
-                            const hRow = sheetAoa[hIdx] || sheetAoa[0] || [];
-                            if (childColIdx < 0 && childLevelName) {
-                                childColIdx = hRow.findIndex(h => cleanHeaderName(h).toLowerCase() === childLevelName.toLowerCase());
-                            }
-                        }
-                    } catch (e) {}
-                }
-
-                if (childColIdx >= 0) {
-                    pivotStudioState.row1ColIdx = childColIdx;
-                    pivotStudioState.row2ColIdx = -1;
-                    pivotStudioState.rowColIndices = [childColIdx];
-                }
-
-                if (parentColIdx >= 0 && parentKey) {
-                    if (pivotStudioState.filterColIdx >= 0 && pivotStudioState.filterColIdx !== parentColIdx) {
-                        pivotStudioState.filter2ColIdx = parentColIdx;
-                        pivotStudioState.filter2SelectedValues = new Set([parentKey]);
-                    } else {
-                        pivotStudioState.filterColIdx = parentColIdx;
-                        pivotStudioState.filterSelectedValues = new Set([parentKey]);
+                    // C. Prevent stale/conflicting Filter 2 collisions
+                    if (pivotStudioState.drillFilters && pivotStudioState.drillFilters.some(df => df.colIdx === pivotStudioState.filter2ColIdx)) {
+                        pivotStudioState.filter2ColIdx = -1;
+                        pivotStudioState.filter2SelectedValues = new Set();
                     }
                 }
 
@@ -17488,7 +18083,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             renderStudioKitView();
         }
 
-        // Returns raw rows that pass the Timeline Slicer filter and Filter 2
+        // Returns raw rows that pass the Timeline Slicer filter, Multi-level Drill Filters, and Filter 2
         function getFilteredRawRows(hIdx) {
             const rows = [];
             const filterCol = pivotStudioState.filterColIdx;
@@ -17497,6 +18092,7 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
             const periodCol = (pivotStudioState.periodColIdx >= 0) ? pivotStudioState.periodColIdx : findDateColIdx(hIdx);
             const hasFilter1 = filterCol >= 0 && pivotStudioState.filterSelectedValues && pivotStudioState.filterSelectedValues.size > 0;
             const hasFilter2 = filter2Col >= 0 && pivotStudioState.filter2SelectedValues && pivotStudioState.filter2SelectedValues.size > 0;
+            const drillFilters = Array.isArray(pivotStudioState.drillFilters) ? pivotStudioState.drillFilters : [];
 
             for (let r = hIdx + 1; r < currentRawSheetData.length; r++) {
                 const row = currentRawSheetData[r];
@@ -17519,11 +18115,30 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                     }
                 }
 
-                // 3. Filter 2 check (e.g. Program / Channel)
+                // 3. Multi-level hierarchical drill filters (supports Level 1, 2, 3... N)
+                if (drillFilters.length > 0) {
+                    let match = true;
+                    for (const df of drillFilters) {
+                        if (df.colIdx >= 0 && df.val !== undefined && df.val !== null) {
+                            const rVal = (row[df.colIdx] !== undefined && row[df.colIdx] !== null) ? String(row[df.colIdx]).trim() : '';
+                            const tVal = String(df.val).trim();
+                            if (rVal !== tVal) {
+                                match = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (!match) continue;
+                }
+
+                // 4. Standalone Secondary Filter 2 (ignored if column is already constrained by drillFilters)
                 if (hasFilter2) {
-                    const f2Val = row[filter2Col];
-                    const key2 = (f2Val !== undefined && f2Val !== null && String(f2Val).trim() !== '') ? String(f2Val).trim() : '(Kosong)';
-                    if (!pivotStudioState.filter2SelectedValues.has(key2)) continue;
+                    const isCoveredByDrill = drillFilters.some(df => df.colIdx === filter2Col);
+                    if (!isCoveredByDrill) {
+                        const f2Val = row[filter2Col];
+                        const key2 = (f2Val !== undefined && f2Val !== null && String(f2Val).trim() !== '') ? String(f2Val).trim() : '(Kosong)';
+                        if (!pivotStudioState.filter2SelectedValues.has(key2)) continue;
+                    }
                 }
 
                 rows.push(row);
@@ -18501,7 +19116,20 @@ function initializePivotStudioFields(hIdx, maxColsAcrossSheet = 0) {
                             <span>Pilih ${escapeHtml(colHeader)}</span>
                             <span class="px-1.5 py-0.5 rounded-md bg-[#cafc03] text-slate-900 text-[10px] font-black">${selBadgeText}</span>
                         </button>
-                        ${pivotStudioState.filter2ColIdx >= 0 ? `
+                        ${(pivotStudioState.drillFilters || []).map((df, dfIdx) => `
+                        <div class="px-2.5 py-1 rounded-xl text-xs font-bold bg-indigo-900 text-white flex items-center gap-1.5 shadow-2xs border border-indigo-700 shrink-0"
+                            title="Drill Filter Level ${dfIdx + 1}: [${getColLetter(df.colIdx)}] ${escapeHtml(df.colName || '')} = ${escapeHtml(df.val)}">
+                            <i class="ph-bold ph-git-fork text-amber-300 text-xs"></i>
+                            <span class="text-indigo-200 text-[10px] font-semibold">${escapeHtml(df.colName || 'Level ' + (dfIdx + 1))}:</span>
+                            <span class="font-black text-amber-300">${escapeHtml(df.val)}</span>
+                            <button type="button" onclick="removePivotDrillFilter(${dfIdx})"
+                                class="w-4 h-4 ml-1 rounded-full flex items-center justify-center text-indigo-300 hover:text-white hover:bg-rose-600 transition cursor-pointer"
+                                title="Hapus filter '${escapeHtml(df.colName || '')}: ${escapeHtml(df.val)}'">
+                                <i class="ph-bold ph-x text-[9px]"></i>
+                            </button>
+                        </div>
+                        `).join('')}
+                        ${(pivotStudioState.filter2ColIdx >= 0 && !(pivotStudioState.drillFilters || []).some(df => df.colIdx === pivotStudioState.filter2ColIdx)) ? `
                         <button type="button" onclick="openBurgerFilterModal(2)"
                             class="px-3 py-1.5 rounded-xl text-xs font-black bg-indigo-700 hover:bg-indigo-800 text-white flex items-center gap-1.5 shadow-sm transition hover:scale-[1.02] cursor-pointer border border-indigo-600 shrink-0"
                             title="Filter 2: [${getColLetter(pivotStudioState.filter2ColIdx)}] ${escapeHtml(currentRawSheetData[hIdx]?.[pivotStudioState.filter2ColIdx] || 'Filter 2')}">
@@ -20354,6 +20982,17 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                             }
                         }
 
+                        const nodePath = node.path || (node.parentKey ? [node.parentKey, node.key] : [node.key]);
+                        const drillPath = nodePath.map((val, pIdx) => ({
+                            colIdx: (rowIndices && rowIndices[pIdx] !== undefined) ? rowIndices[pIdx] : -1,
+                            colName: (rowNames && rowNames[pIdx]) ? rowNames[pIdx] : '',
+                            val: val
+                        }));
+                        childSnapshot.drillFilters = drillPath;
+                        childSlide.drillPath = drillPath;
+                        childSlide.drillDepth = depthIndex;
+                        childSlide.masterRowColIndices = [...rowIndices];
+                        childSlide.masterRowNames = [...rowNames];
                         childSlide.pivotStateSnapshot = childSnapshot;
                         childSlide.drillInfo = {
                             parentSlideId: parentSlideId,
@@ -20663,6 +21302,16 @@ Berdasarkan data penayangan terkini, kategori/stasiun **${top1 ? top1.key : 'Ter
                     childSlide.colorTheme = targetSlide.colorTheme;
                     childSlide.bentoCharts = Array.isArray(targetSlide.bentoCharts) ? [...targetSlide.bentoCharts] : ['bar-vertical', 'doughnut', 'table'];
                     childSlide.drillParentId = parentSlideId;
+                    const nodePathSel = node.path || (node.parentKey ? [node.parentKey, node.key || node.label] : [node.key || node.label]);
+                    const drillPathSel = nodePathSel.map((val, pIdx) => ({
+                        colIdx: (rowIndices && rowIndices[pIdx] !== undefined) ? rowIndices[pIdx] : -1,
+                        colName: (rowNames && rowNames[pIdx]) ? rowNames[pIdx] : '',
+                        val: val
+                    }));
+                    childSlide.drillPath = drillPathSel;
+                    childSlide.drillDepth = depthIndex;
+                    childSlide.masterRowColIndices = [...rowIndices];
+                    childSlide.masterRowNames = [...rowNames];
 
                     const childDs = childSlide.dataSets[0];
                     childDs.series = ds.series.map((s, sIdx) => ({
